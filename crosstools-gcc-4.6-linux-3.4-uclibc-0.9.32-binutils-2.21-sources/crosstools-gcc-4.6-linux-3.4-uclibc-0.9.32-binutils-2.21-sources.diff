@@ -1,0 +1,369 @@
+diff -uN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/build
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build	2014-01-16 20:55:01.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/build	2016-12-25 23:07:21.489831798 +0100
+@@ -16,7 +16,7 @@
+ CHECK_ERR=
+ 
+ #target dirtory validation functin 
+-function validate_target_dir() {
++validate_target_dir() {
+    if [ -d "$1" ] && [ "$(ls -A $1)" ]; then
+        echo "$1 already has a toolchain installed.  Please delete the old toolchain before continuing."
+        CHECK_ERR=y 
+@@ -33,7 +33,7 @@
+ }
+ 
+ #build toolchain for a particular target
+-function build_toolchain() {
++build_toolchain() {
+     echo "################### Build $1 toolchain #####################"
+     cd $buildhome
+     # get the config file
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi	2009-11-05 03:42:15.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi	2016-12-26 23:02:16.000000000 +0100
+@@ -15,7 +15,7 @@
+ @c The ARG is an optional argument.  To be used for macro arguments in
+ @c their documentation (@defmac).
+ @macro ovar{varname}
+-@r{[}@var{\varname\}@r{]}@c
++@r{[}@var{\varname\}@r{]}
+ @end macro
+ 
+ @c @dvar(ARG, DEFAULT)
+@@ -23,7 +23,7 @@
+ @c The ARG is an optional argument, defaulting to DEFAULT.  To be used
+ @c for macro arguments in their documentation (@defmac).
+ @macro dvar{varname, default}
+-@r{[}@var{\varname\} = @samp{\default\}@r{]}@c
++@r{[}@var{\varname\} = @samp{\default\}@r{]}
+ @end macro
+ 
+ @c Handling the indexes with Texinfo yields several different problems.
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf	2009-04-21 21:03:23.000000000 +0200
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf	2016-12-27 18:35:58.000000000 +0100
+@@ -22,6 +22,9 @@
+ static unsigned int hash (const char *, unsigned int);
+ #ifdef __GNUC__
+ __inline
++#ifdef __GNUC_STDC_INLINE__
++__attribute__ ((__gnu_inline__))
++#endif
+ #endif
+ const char * libc_name_p (const char *, unsigned int);
+ %}
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h	2009-04-21 21:03:23.000000000 +0200
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h	2016-12-27 18:37:33.000000000 +0100
+@@ -53,6 +53,9 @@
+ static unsigned int hash (const char *, unsigned int);
+ #ifdef __GNUC__
+ __inline
++#ifdef __GNUC_STDC_INLINE__
++__attribute__ ((__gnu_inline__))
++#endif
+ #endif
+ const char * libc_name_p (const char *, unsigned int);
+ /* maximum key range = 391, duplicates = 0 */
+@@ -96,7 +99,7 @@
+       400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
+       400, 400, 400, 400, 400, 400, 400
+     };
+-  register int hval = len;
++  register int hval = (int)len;
+ 
+   switch (hval)
+     {
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c	2010-11-25 20:03:27.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c	2016-12-26 23:49:25.000000000 +0100
+@@ -3594,13 +3594,13 @@
+ 		  int has_length, struct fileloc *line, const char *if_marked,
+ 		  bool emit_pch, type_p field_type, const char *field_name)
+ {
++      struct pair newv;
+   /* If the field reference is relative to V, rather than to some
+      subcomponent of V, we can mark any subarrays with a single stride.
+      We're effectively treating the field as a global variable in its
+      own right.  */
+   if (v && type == v->type)
+     {
+-      struct pair newv;
+ 
+       newv = *v;
+       newv.type = field_type;
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h	2011-01-03 21:52:22.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h	2016-12-27 14:08:17.000000000 +0100
+@@ -1123,8 +1123,13 @@
+ ira_allocno_object_iter_cond (ira_allocno_object_iterator *i, ira_allocno_t a,
+ 			      ira_object_t *o)
+ {
+-  *o = ALLOCNO_OBJECT (a, i->n);
+-  return i->n++ < ALLOCNO_NUM_OBJECTS (a);
++   int n = i->n++;
++   if (n < ALLOCNO_NUM_OBJECTS (a))
++   {
++     *o = ALLOCNO_OBJECT (a, n);
++     return true;
++   }
++   return false;
+ }
+ 
+ /* Loop over all objects associated with allocno A.  In each
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in	2011-08-20 09:51:09.000000000 +0200
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in	2016-12-26 23:27:47.000000000 +0100
+@@ -4245,18 +4245,10 @@
+ doc/gccint.info: $(TEXI_GCCINT_FILES)
+ doc/cppinternals.info: $(TEXI_CPPINT_FILES)
+ 
+-doc/%.info: %.texi
+-	if [ x$(BUILD_INFO) = xinfo ]; then \
+-		$(MAKEINFO) $(MAKEINFOFLAGS) -I . -I $(gcc_docdir) \
+-			-I $(gcc_docdir)/include -o $@ $<; \
+-	fi
++doc/%.info: 
+ 
+ # Duplicate entry to handle renaming of gccinstall.info
+-doc/gccinstall.info: $(TEXI_GCCINSTALL_FILES)
+-	if [ x$(BUILD_INFO) = xinfo ]; then \
+-		$(MAKEINFO) $(MAKEINFOFLAGS) -I $(gcc_docdir) \
+-			-I $(gcc_docdir)/include -o $@ $<; \
+-	fi
++doc/gccinstall.info:
+ 
+ doc/cpp.dvi: $(TEXI_CPP_FILES)
+ doc/gcc.dvi: $(TEXI_GCC_FILES)
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c	2011-01-01 16:33:56.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c	2016-12-27 20:09:08.000000000 +0100
+@@ -281,11 +281,7 @@
+   build_search_tree (ar);
+ }
+ 
+-#endif /* DEFINE_NON_INLINE_P */
+-
+-#if DEFINE_INLINE_P
+-
+-SIM_ARANGE_INLINE int
++int
+ sim_addr_range_hit_p (ADDR_RANGE *ar, address_word addr)
+ {
+   ADDR_RANGE_TREE *t = ar->range_tree;
+@@ -302,4 +298,4 @@
+   return 0;
+ }
+ 
+-#endif /* DEFINE_INLINE_P */
++#endif /* DEFINE_NON_INLINE_P */
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h	2011-01-01 16:33:56.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h	2016-12-27 20:09:59.000000000 +0100
+@@ -63,7 +63,7 @@
+ 
+ /* Return non-zero if ADDR is in range AR, traversing the entire tree.
+    If no range is specified, that is defined to mean "everything".  */
+-extern INLINE int
++extern int
+ sim_addr_range_hit_p (ADDR_RANGE * /*ar*/, address_word /*addr*/);
+ #define ADDR_RANGE_HIT_P(ar, addr) \
+   ((ar)->range_tree == NULL || sim_addr_range_hit_p ((ar), (addr)))
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/m4-1.4.15/lib/stdio.in.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/m4-1.4.15/lib/stdio.in.h
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/m4-1.4.15/lib/stdio.in.h	2010-07-29 15:21:37.000000000 +0200
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/m4-1.4.15/lib/stdio.in.h	2016-12-26 22:47:44.000000000 +0100
+@@ -141,7 +141,9 @@
+    so any use of gets warrants an unconditional warning.  Assume it is
+    always declared, since it is required by C89.  */
+ #undef gets
++#if defined(__GLIBC__) && !defined(__UCLIBC__) && !__GLIBC_PREREQ(2, 16)
+ _GL_WARN_ON_USE (gets, "gets is a security hole - use fgets instead");
++#endif
+ 
+ #if @GNULIB_FOPEN@
+ # if @REPLACE_FOPEN@
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/uClibc-0.9.32/extra/locale/gen_wctype.c crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/uClibc-0.9.32/extra/locale/gen_wctype.c
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/uClibc-0.9.32/extra/locale/gen_wctype.c	2011-06-08 21:35:20.000000000 +0200
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/uClibc-0.9.32/extra/locale/gen_wctype.c	2016-12-27 12:36:37.000000000 +0100
+@@ -227,11 +227,12 @@
+ 			++verbose;
+ 			continue;
+ 		}
+-		if (!setlocale(LC_CTYPE, *argv)) {
++	/* setlocale might be just a stub */
++	/*	if (!setlocale(LC_CTYPE, *argv)) {
+ 			verbose_msg("setlocale(LC_CTYPE,%s) failed!  Skipping this locale...\n", *argv);
+ 			continue;
+ 		}
+-
++	*/
+ 		if (!(totitle = wctrans("totitle"))) {
+ 			verbose_msg("no totitle transformation.\n");
+ 		}
+@@ -306,43 +307,43 @@
+ #endif
+ #if 0
+ 				if (c < 256) {
+-					unsigned int glibc;
++					unsigned int curr_stdclib;
+ 
+-					glibc = 0;
+-					if (isalnum(c)) ++glibc; glibc <<= 1;
+-					if (isalpha(c)) ++glibc; glibc <<= 1;
+-					if (isblank(c)) ++glibc; glibc <<= 1;
+-					if (iscntrl(c)) ++glibc; glibc <<= 1;
+-					if (isdigit(c)) ++glibc; glibc <<= 1;
+-					if (isgraph(c)) ++glibc; glibc <<= 1;
+-					if (islower(c)) ++glibc; glibc <<= 1;
+-					if (isprint(c)) ++glibc; glibc <<= 1;
+-					if (ispunct(c)) ++glibc; glibc <<= 1;
+-					if (isspace(c)) ++glibc; glibc <<= 1;
+-					if (isupper(c)) ++glibc; glibc <<= 1;
+-					if (isxdigit(c)) ++glibc;
+-					verbose_msg("%#8x : ctype %#4x\n", c, glibc);
++					curr_stdclib = 0;
++					if (isalnum(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (isalpha(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (isblank(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iscntrl(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (isdigit(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (isgraph(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (islower(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (isprint(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (ispunct(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (isspace(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (isupper(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (isxdigit(c)) ++curr_stdclib;
++					verbose_msg("%#8x : ctype %#4x\n", c, curr_stdclib);
+ 				}
+ #endif
+ #if 1
+ 				/* Paranoid checking... */
+ 				{
+-					unsigned int glibc;
++					unsigned int curr_stdclib;
+ 					unsigned int mine;
+ 
+-					glibc = 0;
+-					if (iswalnum(c)) ++glibc; glibc <<= 1;
+-					if (iswalpha(c)) ++glibc; glibc <<= 1;
+-					if (iswblank(c)) ++glibc; glibc <<= 1;
+-					if (iswcntrl(c)) ++glibc; glibc <<= 1;
+-					if (iswdigit(c)) ++glibc; glibc <<= 1;
+-					if (iswgraph(c)) ++glibc; glibc <<= 1;
+-					if (iswlower(c)) ++glibc; glibc <<= 1;
+-					if (iswprint(c)) ++glibc; glibc <<= 1;
+-					if (iswpunct(c)) ++glibc; glibc <<= 1;
+-					if (iswspace(c)) ++glibc; glibc <<= 1;
+-					if (iswupper(c)) ++glibc; glibc <<= 1;
+-					if (iswxdigit(c)) ++glibc;
++					curr_stdclib = 0;
++					if (iswalnum(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iswalpha(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iswblank(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iswcntrl(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iswdigit(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iswgraph(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iswlower(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iswprint(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iswpunct(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iswspace(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iswupper(c)) ++curr_stdclib; curr_stdclib <<= 1;
++					if (iswxdigit(c)) ++curr_stdclib;
+ 
+ 					mine = 0;
+ 					if (mywalnum(d,c)) ++mine; mine <<= 1;
+@@ -358,15 +359,15 @@
+ 					if (mywupper(d,c)) ++mine; mine <<= 1;
+ 					if (mywxdigit(d,c)) ++mine;
+ 
+-					if (glibc != mine) {
+-						verbose_msg("%#8x : glibc %#4x != %#4x mine  %u\n", c, glibc, mine, d);
++					if (curr_stdclib != mine) {
++						verbose_msg("%#8x : curr_stdclib %#4x != %#4x mine  %u\n", c, curr_stdclib, mine, d);
+ 						return EXIT_FAILURE;
+ 					}
+ #if 0
+ 					if (iswctype(c,is_comb) || iswctype(c,is_comb3)) {
+ /*						if (!iswpunct(c)) { */
+ 							verbose_msg("%#8x : %d %d %#4x\n",
+-								   c, iswctype(c,is_comb),iswctype(c,is_comb3), glibc);
++								   c, iswctype(c,is_comb),iswctype(c,is_comb3), curr_stdclib);
+ /*						} */
+ 					}
+ #endif
+@@ -553,7 +554,7 @@
+ 		for (c = 0; c <= 0x10ffffUL; c++)
+ #endif
+ 		{
+-			unsigned int glibc;
++			unsigned int curr_stdclib;
+ 			unsigned int mine;
+ 			unsigned int upper, lower;
+ 
+@@ -568,19 +569,19 @@
+ 			}
+ #endif
+ #endif
+-			glibc = 0;
+-			if (iswalnum(c)) ++glibc; glibc <<= 1;
+-			if (iswalpha(c)) ++glibc; glibc <<= 1;
+-			if (iswblank(c)) ++glibc; glibc <<= 1;
+-			if (iswcntrl(c)) ++glibc; glibc <<= 1;
+-			if (iswdigit(c)) ++glibc; glibc <<= 1;
+-			if (iswgraph(c)) ++glibc; glibc <<= 1;
+-			if (iswlower(c)) ++glibc; glibc <<= 1;
+-			if (iswprint(c)) ++glibc; glibc <<= 1;
+-			if (iswpunct(c)) ++glibc; glibc <<= 1;
+-			if (iswspace(c)) ++glibc; glibc <<= 1;
+-			if (iswupper(c)) ++glibc; glibc <<= 1;
+-			if (iswxdigit(c)) ++glibc;
++			curr_stdclib = 0;
++			if (iswalnum(c)) ++curr_stdclib; curr_stdclib <<= 1;
++			if (iswalpha(c)) ++curr_stdclib; curr_stdclib <<= 1;
++			if (iswblank(c)) ++curr_stdclib; curr_stdclib <<= 1;
++			if (iswcntrl(c)) ++curr_stdclib; curr_stdclib <<= 1;
++			if (iswdigit(c)) ++curr_stdclib; curr_stdclib <<= 1;
++			if (iswgraph(c)) ++curr_stdclib; curr_stdclib <<= 1;
++			if (iswlower(c)) ++curr_stdclib; curr_stdclib <<= 1;
++			if (iswprint(c)) ++curr_stdclib; curr_stdclib <<= 1;
++			if (iswpunct(c)) ++curr_stdclib; curr_stdclib <<= 1;
++			if (iswspace(c)) ++curr_stdclib; curr_stdclib <<= 1;
++			if (iswupper(c)) ++curr_stdclib; curr_stdclib <<= 1;
++			if (iswxdigit(c)) ++curr_stdclib;
+ 
+ 			{
+ 				unsigned int u;
+@@ -630,8 +631,8 @@
+ 				if (mywupper(d,c)) ++mine; mine <<= 1;
+ 				if (mywxdigit(d,c)) ++mine;
+ 
+-				if (glibc != mine) {
+-					verbose_msg("%#8x : glibc %#4x != %#4x mine %d\n", c, glibc, mine, d);
++				if (curr_stdclib != mine) {
++					verbose_msg("%#8x : curr_stdclib %#4x != %#4x mine %d\n", c, curr_stdclib, mine, d);
+ 					if (c < 0x30000UL) {
+ 						verbose_msg("sc=%#x u=%#x n=%#x i0=%#x i1=%#x\n", sc, u, n, i0, i1);
+ 					}
+@@ -655,17 +656,17 @@
+ 				}
+ 
+ 				if (towupper(c) != upper) {
+-					verbose_msg("%#8x : towupper glibc %#4x != %#4x mine\n",
++					verbose_msg("%#8x : towupper curr_stdclib %#4x != %#4x mine\n",
+ 						   c, towupper(c), upper);
+ 				}
+ 
+ 				if (towlower(c) != lower) {
+-					verbose_msg("%#8x : towlower glibc %#4x != %#4x mine   i0 = %d\n",
++					verbose_msg("%#8x : towlower curr_stdclib %#4x != %#4x mine   i0 = %d\n",
+ 						   c, towlower(c), lower, i0);
+ 				}
+ 
+ 				if (totitle && ((tt = towctrans(c, totitle)) != upper)) {
+-					verbose_msg("%#8x : totitle glibc %#4lx != %#4x mine   i0 = %d\n",
++					verbose_msg("%#8x : totitle curr_stdclib %#4lx != %#4x mine   i0 = %d\n",
+ 						   c, tt, upper, i0);
+ 				}
+ 			}
