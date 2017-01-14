@@ -26,6 +26,7 @@ sudo apt-get install linux-headers-$(uname -r)
 sudo apt-get install bison
 sudo apt-get install flex
 sudo apt-get install perl
+sudo apt-get install gperf
 # workaround for toolchain's gawk mpfr_z_sub compile error
 # uninstall gawk & install mawk
 sudo apt-get remove --purge gawk
@@ -40,10 +41,12 @@ sudo apt-get install libncursesw5-dev:i386
 sudo apt-get install libstdc++5:i386
 sudo apt-get install liblzo2-dev
 sudo apt-get install uuid-dev
+sudo apt-get install libpam0g-dev
 #sudo apt-get install makeinfo
 sudo apt-get install texinfo
 #sudo apt-get install makedepend
 sudo apt-get install xutils-dev
+sudo apt-get install intltool
 
 # subversion/cvs support
 sudo apt-get install subversion mercurial
