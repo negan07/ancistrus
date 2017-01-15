@@ -12,15 +12,13 @@ TARTC="${TCDIR}.tar.bz2"
 # create compiled toolchain's root dir: the path cannot be modified
 sudo mkdir /opt/toolchains
 cd ..
-	if [ ! -f $ZIPFILE -a ! -d $SOURCEDIR ]; then
+	if [ ! -f $ZIPFILE ]; then
 	echo "Source files not present: downloading..."
 	wget $DLURL/$ZIPFILE
 		if [ ! -f $ZIPFILE ]; then
 		echo "Unable to download source zip file"
 		exit 1
 		fi
-	fi
-	if [ ! -d $SOURCEDIR ]; then
 	echo "Extracting sources from zip archive..."
 	unzip -qq $ZIPFILE
 	tar xjf $TARFILE
