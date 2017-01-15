@@ -1,0 +1,475 @@
+diff -urN Source/env.mak Source/env.mak
+--- Source/env.mak	2016-10-11 17:57:47.000000000 +0200
++++ Source/env.mak	2017-01-13 14:24:56.249727068 +0100
+@@ -29,6 +29,7 @@
+ export HOSTTOOLS_DIR = $(TARGET_HOME)/../Kernel/bcm963xx/hostTools
+ export MAKE_BIN_DIR = $(TOOLS_DIR)/make_bin
+ export FUNC = 00
++export ATMDIR = linux-atm-2.4.0
+ 
+ export ROOTFS = $(FS_DIR)
+ 
+diff -urN Source/Makefile Source/Makefile
+--- Source/Makefile	2016-10-11 17:57:47.000000000 +0200
++++ Source/Makefile	2017-01-14 00:22:33.678101901 +0100
+@@ -6,9 +6,6 @@
+ 
+ 
+ ifeq ($(BOOT_NAND_FLASH),1)
+-#BRCM_CHIP = 6362
+-#CFE_ROM_FILE = $(TARGET_HOME)/cfe/cfe$(BRCM_CHIP)rom.nand.bin
+-#include $(TARGET_HOME)/../Kernel/bcm963xx/make.common
+ FLASH_NAND_CFEROM_FS_IMAGE_NAME_16 = $(CHIP_VENDOR)$(PROFILE)_nand_cferom_fs_image_16
+ FLASH_NAND_FS_IMAGE_NAME_16 = $(CHIP_VENDOR)$(PROFILE)_nand_fs_image_16
+ FLASH_NAND_CFEROM_FS_IMAGE_NAME_128 = $(CHIP_VENDOR)$(PROFILE)_nand_cferom_fs_image_128
+@@ -19,7 +16,6 @@
+ ifeq ($(FLASH),128M)
+ FLASH_NAND_BLOCK_SIZE=$(FLASH_NAND_BLOCK_128KB)
+ endif
+-
+ endif
+ 
+ #TOOL_CHAIN_DIR = /opt/toolchains/uclibc-crosstools/bin
+@@ -52,16 +48,9 @@
+ 	ETCVERSION=$(ANNEX)$(VER)_$(SUB_VER)$(REGION)
+ endif
+ 
+-ifeq ($(VPN),1)
+-	IMG_NAME=$(IMAGE_DIR)/$(BOARD_ID)-$(VERSION)_VPN.img
+-	IMG_NAME_GPL=$(BOARD_ID)-$(VERSION)_VPN.img
+-	BIN_NAME=$(IMAGE_DIR)/$(BOARD_ID)-$(VERSION)_VPN.bin
+-else
+-	IMG_NAME=$(IMAGE_DIR)/$(BOARD_ID)-$(VERSION).img
+-	IMG_NAME_GPL=$(BOARD_ID)-$(VERSION).img
+-	BIN_NAME=$(IMAGE_DIR)/$(BOARD_ID)-$(VERSION).bin
+-endif
+-
++IMG_NAME=$(BOARD_ID)-$(VERSION).img
++IMG_NAME_GPL=$(BOARD_ID)-$(VERSION).img
++BIN_NAME=$(BOARD_ID)-$(VERSION).bin
+ 
+ ifeq ($(BRIDGE),1)
+ 	FUNC = 01
+@@ -77,7 +66,11 @@
+ 
+ build_test: pre_fs apps drivers prefs fs img
+ 
+-build_image: clean build_target pid build_dpf fs img bin
++build_image: clean_target build_target pid build_dpf fs img bin
++
++clean_all: clean_uclibc clean_apps clean_target clean_img
++
++clean: clean_target
+ 
+ .PHONY: prepare target apps drivers ui
+ 
+@@ -95,6 +88,7 @@
+ 	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
+ 	cd target/lib; ln -sf libscnvram.so libconfig.so
+ ifeq ($(ITUNES_SERVER),1)
++	@echo -e "\\e[35mSOURCE: make \\e[36mUCLIBC \\e[0m"
+ 	make -C uClibc-0.9.32/
+ 	cp -af uClibc-0.9.32/lib/ld-uClibc-0.9.32.so target/lib/
+ endif
+@@ -108,8 +102,6 @@
+ 	    echo "Need fakeroot support. Please install it" ; \
+ 	    echo "You can get it from image/tools/src" ; \
+ 	    exit 1;                     \
+-	else                            \
+-	    echo "fakeroot OK";         \
+ 	fi
+ 
+ apps:
+@@ -118,7 +110,7 @@
+ 	$(MAKE) -C $(APPS_DIR) install 
+ 	
+ drivers:
+-	@echo -e "\\e[35mSOURCE: make \\e[36mdrivers \\e[0m"
++	@echo -e "\\e[35mSOURCE: make \\e[36mDRIVERS \\e[0m"
+ 	cd $(PROJ_DIR_KERNEL); make sc_driver SC_BUILD=1 SC_ROOT=$(ROOT)
+ 
+ third-party:
+@@ -145,7 +137,7 @@
+ FW_INFO=$(IMAGE_DIR)/$(BOARD_ID).info
+ 
+ ifeq ($(MTCODE),1)
+-IMG_NAME=$(IMAGE_DIR)/$(BOARD_ID)-V$(VER)_$(SUB_VER)_MT.img
++IMG_NAME=$(BOARD_ID)-V$(VER)_$(SUB_VER)_MT.img
+ endif
+ 
+ prefs:
+@@ -163,7 +155,6 @@
+ 	echo "Firmware="V$(VER)_$(SUB_VER)"@netgear_region#" > $(CUR_SETTING)
+ 	echo "RegionTag="$(BOARD_ID)_"@netgear_region#" >>  $(CUR_SETTING)
+ 	echo "Region=@netgear_region#"  >> $(CUR_SETTING)
+-	#echo "Model="$(BOARD_ID)  >> $(CUR_SETTING)
+ 	echo "Model="$(BOARD_ID)  >> $(CUR_SETTING)
+ 	echo "InternetConnectionStatus=@if_wan_up#" >> $(CUR_SETTING)
+ 	if [ "$(OPENDNS)" == "1" ]; then echo "ParentalControlSupported=1" >> $(CUR_SETTING); fi
+@@ -172,12 +163,7 @@
+ 	
+ 	# Generate fw info which will bind to trx file
+ 	echo $(VERSION) > $(FW_INFO)
+-	echo $(REGION) >> $(FW_INFO)
+-	
+-ifeq ($(3G_FEATURE),1)
+-	cat $(APPS_DIR)/etc/prepare_3g >> $(TARGET_DIR)/usr/etc/rcS
+-endif
+-	
++	echo $(REGION) >> $(FW_INFO)	
+ 	
+ build_target: 
+ 	tar  xfz $(TARGET_HOME)/target.tgz 
+@@ -234,6 +220,8 @@
+ 	./gen_lang.sh ./UI/wnr2500_multi/www.multi_v2.3/langs  || exit 1
+ endif
+ 
++burn:
++	cd $(IMAGE_DIR) ; ./nand_small_page_brcm_ecc_tool $(BOARD_ID).burn.bin $(BOARD_ID).bin;
+ 
+ # Geneate filesystem image from target
+ FAKEROOT_SH=$(ROOT)/fakeroot.sh
+@@ -242,15 +230,13 @@
+ 	$(STRIP) -d target/lib/modules/*.ko
+ 	@echo -e "\\e[35mSOURCE: make \\e[36mFS \\e[0m"	
+ ifeq ($(BOOT_NAND_FLASH),1)
+-#ifeq ($(US_ONLY),0)
+-	#cp -f bcm4360_map.bin $(FS_DIR)/usr/etc/wlan/
+-#endif
+-	-./makeDevs
+-	cp -f $(TARGET_HOME)/../Kernel/bcm963xx/vmlinux.lz $(KERNEL)
+-	cp $(KERNEL) $(FS_DIR)/.
++#	-./makeDevs
++#	cp -f $(TARGET_HOME)/../Kernel/bcm963xx/vmlinux.lz $(KERNEL)
++#	cp $(KERNEL) $(FS_DIR)/.
++	cp -f $(TARGET_HOME)/$(PROJ_DIR_KERNEL)/$(PROJ_BIN_KERNEL) $(FS_DIR)/.
+ 	chmod +x $(IMAGE_DIR)/sc_crc32
+-	$(IMAGE_DIR)/sc_crc32 $(FS_DIR)/vmlinux.lz $(FS_DIR)/kernel_cksum
+-	echo -e "/vmlinux.lz" > $(TARGET_HOME)/nocomprlist
++	$(IMAGE_DIR)/sc_crc32 $(FS_DIR)/$(PROJ_BIN_KERNEL) $(FS_DIR)/kernel_cksum
++	echo -e /$(PROJ_BIN_KERNEL) > $(TARGET_HOME)/nocomprlist
+ 	echo -e "/kernel_cksum" >> $(TARGET_HOME)/nocomprlist
+ 	mkdir -p -m 777 $(FS_DIR)/config/factory
+ 	mkdir -p -m 777 $(FS_DIR)/config/nvram
+@@ -271,86 +257,39 @@
+ endif	
+ 	mkdir -p -m 777 $(FS_DIR)/config/xxx
+ 	chmod 777 $(FS_DIR)/config
+-#	chmod -w $(FS_DIR)/usr/etc/fstab
+-#	ls -l $(DPF)
+-#	cp -f $(DPF) $(FS_DIR)/.
+-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(FS_DIR) -o $(IMAGE_DIR)/rootfs.img -N $(TARGET_HOME)/nocomprlist
+-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/EMPTY -o $(IMAGE_DIR)/empty.img -N $(TARGET_HOME)/nocomprlist
+-	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/languages -o $(IMAGE_DIR)/langpkg.img -N $(TARGET_HOME)/nocomprlist
+-	rm $(TARGET_HOME)/nocomprlist
+-else
+-	-./makeDevs
+-	echo "$(HOSTTOOLS_DIR)/mksquashfs $(FS_DIR) $(FS_NAME) -noappend -be -all-root -b 65536" > $(FAKEROOT_SH)
+-	chmod +x $(FAKEROOT_SH)
+-	$(HOSTTOOLS_DIR)/fakeroot/fakeroot $(FAKEROOT_SH)
+-	cp -f $(PROJ_DIR_KERNEL)/$(PROJ_BIN_KERNEL) $(KERNEL)
+-	$(HOSTTOOLS_DIR)/bcmImageBuilder --output $(IMAGE_DIR)/bcm963xx_fs_kernel --chip $(CHIP_ID) --board "963281TAN" --blocksize $(BLOCKSIZE) --image-version 4101GW0701531 --cfefile $(LOADER) --rootfsfile $(FS_NAME) --kernelfile $(KERNEL) 
+-#	$(HOSTTOOLS_DIR)/bcmImageBuilder --output $(IMAGE_DIR)/bcm963xx_fs_kernel --chip $(CHIP_ID) --board "9$(CHIP_ID)GW" --blocksize $(BLOCKSIZE) --cfefile $(LOADER) --rootfsfile $(FS_NAME) --kernelfile  $(KERNEL)
+-#	rm -f $(FS_NAME)
++	@echo -e "\\e[35mSOURCE: \\e[36mFS created\\e[0m"
+ endif
+ 
+-
+ img:
+-	@echo -e "\\e[35mSOURCE: make \\e[36mIMG \\e[0m"	
++	@echo -e "\\e[35mSOURCE: make \\e[36mIMG \\e[0m"
+ ifeq ($(BOOT_NAND_FLASH),1)
+-#	cd $(IMAGE_DIR); \
+-#	dd if=/dev/zero of=file128k.tmp bs=1k count=128; \
+-#	cat $(CFE_ROM_FILE)  file128k.tmp | head --bytes=$(FLASH_NAND_BLOCK_SIZE) > cferom.tmp; 
+-#	cd $(IMAGE_DIR) ; cp $(BOARD_ID)_$(FLASH).par $(BOARD_ID).par; ./bb $(BOARD_ID)
++	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(FS_DIR) -o $(IMAGE_DIR)/rootfs.img -N $(TARGET_HOME)/nocomprlist
++	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/EMPTY -o $(IMAGE_DIR)/empty.img -N $(TARGET_HOME)/nocomprlist
++	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/languages -o $(IMAGE_DIR)/langpkg.img -N $(TARGET_HOME)/nocomprlist
++	rm $(TARGET_HOME)/nocomprlist
+ 	cd $(IMAGE_DIR) ; ./bb $(BOARD_ID)
+-	cd $(IMAGE_DIR) ; ./bb_dual $(BOARD_ID)_dual
+-	cd $(IMAGE_DIR) ; cp $(BOARD_ID).img $(IMG_NAME) -f
++#	cd $(IMAGE_DIR) ; ./bb_dual $(BOARD_ID)_dual
++	cd $(IMAGE_DIR) ; cp -f $(BOARD_ID).img ../../$(IMG_NAME)
+ 	@echo
+-	@echo -e "Done! Image $(BOARD_ID).img has been built in $(IMAGE_DIR)."
+-else
+-#ifeq ($(FLASH),2M)
+-#	$(FIRMWARE_DIR)/makeImage_2M  $(IMG_NAME) $(LOADER) $(IMAGE_DIR)/bcm963xx_fs_kernel $(PID)
+-#else
+-#ifeq ($(FLASH),8M)
+-#	$(FIRMWARE_DIR)/makeImage_8M  $(IMG_NAME) $(LOADER) $(IMAGE_DIR)/bcm963xx_fs_kernel $(PID) $(DPF)
+-#else
+-#ifeq ($(FLASH),16M)
+-#	$(FIRMWARE_DIR)/makeImage_16M  $(IMG_NAME) $(LOADER) $(IMAGE_DIR)/bcm963xx_fs_kernel $(PID) $(DPF)
+-#else
+-#	$(FIRMWARE_DIR)/makeImage_4M  $(IMG_NAME) $(LOADER) $(IMAGE_DIR)/bcm963xx_fs_kernel $(PID)
+-#endif
+-#endif
+-#endif
+-#	cp -af $(IMG_NAME) $(IMAGE_DIR)/$(BOARD_ID).img
+-	cp -af $(IMAGE_DIR)/bcm963xx_fs_kernel $(IMAGE_DIR)/$(BOARD_ID).img
+-# check FW size
+-#	$(TOOLS_DIR)/file_size_check.sh $(IMG_NAME) $(IMG_SIZE_MAX)
+-endif
+-ifeq ($(ZIP_3G),1)
+-	make zip3g
++	@echo -e "\\e[35mDone! Image \\e[36m$(IMG_NAME) has been built.\\e[0m"
+ endif
+ 
+ 
+-
+-ifeq ($(ZIP_3G),1)
+-ZIP3G_DIR=$(IMAGE_DIR)/zip3g
+-ZIP3GFS_DIR=$(ZIP3G_DIR)/rootfs
+-zip3g:
+-	@rm -rf $(ZIP3GFS_DIR)
+-	@mkdir -p $(ZIP3GFS_DIR)
+-	@cp $(ROOT)/target/usr/etc/dongle_mgnt	   $(ZIP3GFS_DIR)
+-	@cp $(ROOT)/target/usr/etc/dongle_monitor  $(ZIP3GFS_DIR)
+-	@cp $(ROOT)/target/lib/modules/usbserial.ko $(ZIP3GFS_DIR)
+-# create filesystem
+-	@$(HOSTTOOLS_DIR)/mkfs.jffs2 -b -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(ZIP3GFS_DIR) -o $(ZIP3G_DIR)/zip3g.img
+-#	@cd $(ZIP3G_DIR) && $(MAKESQUASHFS) $(ZIP3GFS_DIR) zip3g.img -be -noappend -b 32768
+-#	create PID bin image file.
+-	cd $(ZIP3G_DIR) && ./zip3g.sh
++clean_uclibc:
++ifeq ($(ITUNES_SERVER),1)
++	@echo -e "\\e[35mUCLIBC: make \\e[36mclean \\e[0m"
++	-$(MAKE) -C uClibc-0.9.32 clean -s
+ endif
+ 
+-burn:
+-	cd $(IMAGE_DIR) ; ./nand_small_page_brcm_ecc_tool $(BOARD_ID).burn.bin $(BOARD_ID).bin;
+-
+-
+-clean:
+-	fakeroot rm -rf $(TARGET_HOME)/target
+-
+-clean_all:
++clean_apps:
+ 	-$(MAKE) -C $(APPS_DIR) clean -s
++
++clean_target:
++	@echo -e "\\e[35mTARGET: \\e[36mclean \\e[0m"
+ 	-rm -rf $(TARGET_HOME)/target
++#	fakeroot rm -rf $(TARGET_HOME)/target
++
++clean_img:
++	@echo -e "\\e[35mIMG: \\e[36mclean \\e[0m"
++	-rm -f $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/empty.img $(IMAGE_DIR)/langpkg.img $(IMAGE_DIR)/$(BOARD_ID).info $(IMAGE_DIR)/$(BOARD_ID).zip $(IMAGE_DIR)/$(BOARD_ID).bin $(IMAGE_DIR)/$(BOARD_ID).img
+ 
+diff -urN Source/Builds/D7000.mak Source/Builds/D7000.mak
+--- Source/Builds/D7000.mak	2016-10-20 12:58:51.000000000 +0200
++++ Source/Builds/D7000.mak	2017-01-12 13:00:50.826027755 +0100
+@@ -28,7 +28,7 @@
+ #------------------------------------------------#
+ 
+ MULTI_PVC=0
+-VPN=1
++VPN=0
+ ADSL2=0
+ BRIDGE=0
+ SNMP=0
+diff -urN Source/apps/Makefile Source/apps/Makefile
+--- Source/apps/Makefile	2016-10-11 17:57:17.000000000 +0200
++++ Source/apps/Makefile	2017-01-13 20:54:43.313811768 +0100
+@@ -1,131 +1,111 @@
+ include ../Rules.mak
+ 
+ GPL             :=
+-PRIVATE         :=
+ SUBDIRS         :=
+ 
+-GPLLIB += nvram
+-GPLLIB += sc_libs
+-GPLLIB += cnapt
++GPLLIB		+= nvram
++GPLLIB		+= sc_libs
++GPLLIB		+= cnapt
+ #------------------------------------
+ ifeq ($(USB),1)
+-GPLLIB += libiconv.1.8
+-GPL += samba-3.0.22
++GPLLIB		+= libiconv.1.8
++GPL		+= samba-3.0.22
+ ifeq ($(EXT4),1)
+-GPL += e2fsprogs
++GPL		+= e2fsprogs
+ endif
+-#PRIVATE += usbapps
+-GPL += bftpd-2.3
+-#GPL += fuse.2.7.4
+-#GPL += ntfsprogs.2.0.0
+-#GPL += ntfs-3g
+-GPL += mtool
+-GPL += hd-idle
+-GPL += hdparm-9.43
+-GPL += lsof_4.82_src
++GPL		+= bftpd-2.3
++GPL		+= mtool
++GPL		+= hd-idle
++GPL		+= hdparm-9.43
++GPL		+= lsof_4.82_src
+ endif
+ ifeq ($(DLNA),1)
+-GPL += mediaserver
++GPL		+= mediaserver
+ endif
+ ifeq ($(IPV6),1)
+-GPLLIB += flex-2.5.4
+-GPL += radvd-1.1
+-GPL += dhcpv6
+-GPL += totd-1.4
++GPLLIB		+= flex-2.5.4
++GPL		+= radvd-1.1
++GPL		+= dhcpv6
++GPL		+= totd-1.4
+ endif
+ 
+-#------------------------------------
++#------------------------------------------
+ # gpl
+-GPL             += busybox
+-GPL             += dnrd-2.19/src
++GPL		+= busybox
++GPL		+= dnrd-2.19/src
+ ifeq ($(HTTPS),1)
+-GPLLIB 			+=$(OPENSSL_USE)
++GPLLIB		+=$(OPENSSL_USE)
+ else
+ ifeq ($(TR069),1)
+-GPLLIB 			+=$(OPENSSL_USE)
++GPLLIB		+=$(OPENSSL_USE)
+ endif
+ endif
+ ifeq ($(OPENVPN),1)
+-GPL			+= lzo-2.06
+-GPL			+= openvpn-2.3.2
+-GPL			+= zip30
+-endif
+-GPL              += spi_firewall_modules
+-GPL              += kernel_upgrade
+-GPLLIB           += libixml
+-GPL             += mini_httpd-1.17beta1
+-GPL             += udhcp-0.9.7
+-GPL             += utelnetd-0.1.9
+-GPL             += smtpc
+-GPL             += syslogd
+-GPL             += linux-atm-2.4.0
+-GPL             += ppp-2.4.1.pppoe4.orig
+-GPL             += rp-pppoe
+-GPL             += bridge-utils
+-GPL             += fw_modules
++GPL		+= lzo-2.06
++GPL		+= openvpn-2.3.2
++GPL		+= zip30
++endif
++GPL		+= spi_firewall_modules
++GPL		+= kernel_upgrade
++GPLLIB		+= libixml
++GPL		+= mini_httpd-1.17beta1
++GPL		+= udhcp-0.9.7
++GPL		+= utelnetd-0.1.9
++GPL		+= smtpc
++GPL		+= syslogd
++GPL		+= linux-atm-2.4.0
++GPL		+= ppp-2.4.1.pppoe4.orig
++GPL		+= rp-pppoe
++GPL		+= bridge-utils
++GPL		+= fw_modules
+ ifeq ($(IPQOS),1)
+-GPL             += bwping-1.1
++GPL		+= bwping-1.1
+ endif
+-GPL             += iptables
+-GPL             += cron
++GPL		+= iptables
++GPL		+= cron
+ ifeq ($(IP6_6RD_CE),1)
+-GPL	+= iproute2-2.6.38
++GPL		+= iproute2-2.6.38
+ else
+-GPL             += iproute-2.6.20-070313
++GPL		+= iproute-2.6.20-070313
+ endif
+-GPL             += netkit-routedv2-0.1
+-GPL             += ez-ipupdate-3.0.11b8
+-GPL             += reaim-0.8
+-GPL	         += miniupnpd-20080427
+-#GPL             += quagga_0.99.11
++GPL		+= netkit-routedv2-0.1
++GPL		+= ez-ipupdate-3.0.11b8
++GPL		+= reaim-0.8
++GPL		+= miniupnpd-20080427
+ GPL		+= zebra-0.95a
+ ifeq ($(HIDDEN_PASSWORD),1)
+-GPL             += base64
++GPL		+= base64
+ endif
+ ifeq ($(TIME_MACHINE),1)
+ GPL		+= apple
+ else
+-GPLLIB           += libdaemon-0.14
+-GPL             += avahi-0.6.30
++GPLLIB		+= libdaemon-0.14
++GPL		+= avahi-0.6.30
+ endif
+ ifeq ($(READY_SHARE_CLOUD),1)
+-GPL += proccgi
+-GPL += curl
+-endif
+-ifeq ($(VPN),1)
+-#GPL += gmp-4.2.1
++GPL		+= proccgi
++GPL		+= curl
+ endif
+-GPL             += bind-9.2.3
+-GPL             += noip-2.1.9-1
+-GPL             += tcpdump/libpcap-1.2.0
+-GPL             += tcpdump/tcpdump-4.2.0
+-#------------------------------------
+-GPL += curl
++GPL		+= bind-9.2.3
++GPL		+= noip-2.1.9-1
++GPL		+= tcpdump/libpcap-1.2.0
++GPL		+= tcpdump/tcpdump-4.2.0
++#------------------------------------------
++GPL		+= curl
+ #for mpstat
+-GPL += sysstat
+-SUBDIRS += $(GPLLIB)
+-SUBDIRS += $(PRIVATE)
+-SUBDIRS += $(GPL)
++GPL		+= sysstat
++
++SUBDIRS		+= $(GPLLIB)
++SUBDIRS		+= $(GPL)
+ 
+ $(SUBDIRS)::
+-	@for i in $(SUBDIRS) ; do echo -e "\\e[35mapps: make \\e[36m$$i \\e[0m"; $(MAKE) -C $$i || exit 1; done
+-ifeq ($(VPN),1)
+-#	$(MAKE) -C gmp-4.2.1
+-#	$(MAKE) -C gmp-4.2.1 install
+-#	$(MAKE) -C openswan-2.6.24 programs
+-endif
++	@for i in $(SUBDIRS) ; do echo -e "\\e[35mAPPS: make \\e[36m$$i \\e[0m"; $(MAKE) -C $$i || exit 1; done
++
+ all:    $(SUBDIRS)
+ 
+ clean:
+-	@for i in $(SUBDIRS) ; do echo -e "\\e[35mapps: clean \\e[36m$$i \\e[0m"; $(MAKE) -C $$i clean  || exit 1; done
+-ifeq ($(VPN),1)	
+-	$(MAKE) -C openswan-2.6.24 clean
+-endif
++	@for i in $(SUBDIRS) ; do echo -e "\\e[35mAPPS: clean \\e[36m$$i \\e[0m"; $(MAKE) -C $$i clean  || exit 1; done
+ 
+ install:
+-	@for i in $(SUBDIRS) ; do echo -e "\\e[35mapps: install \\e[36m$$i \\e[0m"; $(MAKE) -C $$i install  || exit 1; done
+-ifeq ($(VPN),1)	
+-	#rm -rf openswan-2.6.24/temp
+-	#$(MAKE) -C openswan-2.6.24 DESTDIR=$(TARGET_HOME)/apps/openswan-2.6.24/temp install
+-endif
++	@for i in $(SUBDIRS) ; do echo -e "\\e[35mAPPS: install \\e[36m$$i \\e[0m"; $(MAKE) -C $$i install  || exit 1; done
+ 

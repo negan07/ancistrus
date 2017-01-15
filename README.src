@@ -1,0 +1,21 @@
+ancistrus
+
+Netgear's Nighthawk Router Experience
+
+D7000
+
+https://github.com/negan07/ancistrus
+
+Source dir includes patch modifications needed to build up the original firmware.
+After extracting orig sources from zip/bz2 file (tchainprepare.sh) patch the src fs with:
+
+patch -p0 < ...Makefile.diff
+patch -p0 < ...Kernel.diff
+patch -p0 < ...Source.diff
+cd Source
+patch -p0 < ...uClibc-0.9.32.diff
+cd apps
+patch -p0 < ...ppp-2.4.1.pppoe4.orig.diff
+cd ../..
+sudo make kernel; sudo make source
+(20-25 min needed)

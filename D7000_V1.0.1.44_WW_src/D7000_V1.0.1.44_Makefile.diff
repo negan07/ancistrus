@@ -1,0 +1,48 @@
+--- Makefile	2016-10-11 17:57:55.000000000 +0200
++++ Makefile	2017-01-12 20:27:44.184650622 +0100
+@@ -4,6 +4,9 @@
+ #
+ #NOTE: do "make all_clean" if need change ANNEX after compiled
+ 
++ARCH_NAME="arm"
++PROFILE_NAME="963138GW"
++
+ ANNEX=A
+ #ANNEX=B
+ 
+@@ -22,24 +25,25 @@
+ prepare: creat_rules Kernel/bcm963xx 
+ 
+ kernel:
+-	@echo "PROFILE=963138GW" > Kernel/bcm963xx/PROFILE.make
+-	@echo "963138GW" > Kernel/bcm963xx/.last_profile
++	@echo -e "\\e[35mKERNEL: make \\e[36mvmlinux.lz \\e[0m"
++	@echo "PROFILE=$(PROFILE_NAME)" > Kernel/bcm963xx/PROFILE.make
++	@echo $(PROFILE_NAME) > Kernel/bcm963xx/.last_profile
+ 	@cd Kernel/bcm963xx/; make sc_kernel;
+ 
++kernel_menuconfig:
++	@cd Kernel/bcm963xx/kernel/linux-3.4rt; make ARCH=$(ARCH_NAME) menuconfig ;
++
++kernel_clean:
++	@echo -e "\\e[35mKERNEL: make \\e[36mclean \\e[0m"
++	@echo "PROFILE=$(PROFILE_NAME)" > Kernel/bcm963xx/PROFILE.make
++	@cd Kernel/bcm963xx/; make sc_clean ;
++
+ source: prepare
+-#	if [ -h /opt/toolchains/uclibc-crosstools ]; then\
+-#		rm -rf /opt/toolchains/uclibc-crosstools;\
+-#	fi
+-#	ln -sf uclibc-crosstools-gcc-4.4.2-1/usr/ /opt/toolchains/uclibc-crosstools;
+ 	make -C Source -s
+ 
+ source_clean:
+ 	make -C Source clean_all
+ 
+-kernel_clean:
+-	@echo "PROFILE=963138GW" > Kernel/bcm963xx/PROFILE.make
+-	@cd Kernel/bcm963xx/; make sc_clean ;
+-
+ all_clean: kernel_clean source_clean
+ 
+ creat_rules:
