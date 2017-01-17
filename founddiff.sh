@@ -6,7 +6,6 @@
 #
 
 LISTDIR="Kernel/bcm963xx/kernel/linux-3.4rt Kernel/bcm963xx/bcmdrivers Kernel/bcm963xx/hostTools Kernel/bcm963xx/shared Kernel/bcm963xx/targets Kernel/bcm963xx Source/apps Source/shared Source/uClibc-0.9.32 Source Makefile"
-DESTDIR=diff-${1##*/}-${2##*/}
 
 if [ $# != 2 ]; then
 echo "$0 absdir1 absdir2"
