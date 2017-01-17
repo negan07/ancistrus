@@ -15,8 +15,9 @@ cd ..
 	if [ ! -f $ZIPFILE ]; then
 	echo "Source files not present: downloading..."
 	wget $DLURL/$ZIPFILE
-		if [ ! -f $ZIPFILE ]; then
-		echo "Unable to download source zip file"
+	zip -T $ZIPFILE
+		if [ $? != 0 ]; then
+		echo "Zip file error"
 		exit 1
 		fi
 	echo "Extracting sources from zip archive..."
