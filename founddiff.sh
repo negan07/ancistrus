@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# Found diffs between 2 different firmware version source dirs
-# To be used before migrating code from old to new firmware version
-# Suppose source dir structure to be similar (if not edit this)
+# Found diffs between 2 different firmware version source dirs.
+# To be used before migrating code from old to new firmware version.
+# Suppose source dir structure to be similar (if not, edit this).
 #
 
 LISTDIR="Kernel/bcm963xx/kernel/linux-3.4rt Kernel/bcm963xx/bcmdrivers Kernel/bcm963xx/hostTools Kernel/bcm963xx/shared Kernel/bcm963xx/targets Kernel/bcm963xx Source/apps Source/shared Source/uClibc-0.9.32 Source Makefile"
