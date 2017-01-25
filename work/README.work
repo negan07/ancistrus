@@ -1,0 +1,13 @@
+ancistrus
+
+Netgear's Nighthawk Router Experience
+
+D7000
+
+https://github.com/negan07/ancistrus
+
+
+Here's the workjob
+
+ancistrus-core			The Main work tool: creates & acts all the modification injects
+nvram				Setting library routines
