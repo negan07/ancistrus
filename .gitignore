@@ -93,8 +93,3 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# ancistrus
-# https://github.com/negan07/ancistrus #
-########################################
-work/Rules.mak
-
