@@ -96,5 +96,24 @@ dkms.conf
 # ancistrus
 # https://github.com/negan07/ancistrus #
 ########################################
+D7000_V1.0.1.44_WW_src/Kernel
+#D7000_V1.0.1.44_WW_src/Source/apps
+D7000_V1.0.1.44_WW_src/Source/Builds
+D7000_V1.0.1.44_WW_src/Source/image
+D7000_V1.0.1.44_WW_src/Source/kernel
+D7000_V1.0.1.44_WW_src/Source/shared
+D7000_V1.0.1.44_WW_src/Source/target
+D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32
+D7000_V1.0.1.44_WW_src/Source/env.mak
+D7000_V1.0.1.44_WW_src/Source/Makefile
+D7000_V1.0.1.44_WW_src/Source/rules.src
+D7000_V1.0.1.44_WW_src/Source/Rules.mak
+D7000_V1.0.1.44_WW_src/Source/target.tar.bz2
+D7000_V1.0.1.44_WW_src/Makefile
+D7000_V1.0.1.44_WW_src/README
 work/Rules.mak
+vmlinux.*
+*.img
+*.bin
+*target*
 

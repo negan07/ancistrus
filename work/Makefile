@@ -47,5 +47,5 @@ creat_rules:
 	@echo "export PREFIX		:= $(PREFIX_PATH)" >> $(RULES)
 	@cd ../$(PROJECT_TARGET)*_src; echo "export SOURCE_PATH	:= `pwd`" >> $(RULES)
 	@echo "include \$$(WORK_DIR)/env.mak" >> $(RULES)
-	@echo "include \$$(WORK_DIR)/\$$(PROJECT).mak" >> $(RULES)
+	@echo "include \$$(SOURCE_PATH)/Source/Builds/\$$(PROJECT).mak" >> $(RULES)
 
