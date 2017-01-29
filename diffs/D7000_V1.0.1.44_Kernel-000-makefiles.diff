@@ -1,6 +1,6 @@
-diff -urN Kernel/bcm963xx/bcmdrivers/Makefile Kernel/bcm963xx/bcmdrivers/Makefile
---- Kernel/bcm963xx/bcmdrivers/Makefile	2016-10-11 17:52:38.000000000 +0200
-+++ Kernel/bcm963xx/bcmdrivers/Makefile	2017-01-03 14:19:41.660874198 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/bcmdrivers/Makefile D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/bcmdrivers/Makefile
+--- D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/bcmdrivers/Makefile	2016-10-11 17:52:38.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/bcmdrivers/Makefile	2017-01-03 14:19:41.660874198 +0100
 @@ -186,26 +186,26 @@
  		rm -f $$dir; \
  	done
@@ -40,9 +40,9 @@ diff -urN Kernel/bcm963xx/bcmdrivers/Makefile Kernel/bcm963xx/bcmdrivers/Makefil
  endif
  endif
 
-diff -urN Kernel/bcm963xx/hostTools/scripts/defconfig-bcm.template Kernel/bcm963xx/hostTools/scripts/defconfig-bcm.template
---- Kernel/bcm963xx/hostTools/scripts/defconfig-bcm.template	2016-10-11 17:47:55.000000000 +0200
-+++ Kernel/bcm963xx/hostTools/scripts/defconfig-bcm.template	2017-01-03 19:59:56.621028892 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/hostTools/scripts/defconfig-bcm.template D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/hostTools/scripts/defconfig-bcm.template
+--- D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/hostTools/scripts/defconfig-bcm.template	2016-10-11 17:47:55.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/hostTools/scripts/defconfig-bcm.template	2017-01-03 19:59:56.621028892 +0100
 @@ -979,7 +979,7 @@
  #
  CONFIG_PCIEPORTBUS=y
@@ -69,9 +69,9 @@ diff -urN Kernel/bcm963xx/hostTools/scripts/defconfig-bcm.template Kernel/bcm963
  # CONFIG_NETFILTER_XT_MATCH_ECN is not set
  # CONFIG_NETFILTER_XT_MATCH_NFACCT is not set
  # CONFIG_IP_NF_MATCH_RPFILTER is not set
-diff -urN Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/mm/Kconfig Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/mm/Kconfig
---- Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/mm/Kconfig	2016-10-11 17:47:58.000000000 +0200
-+++ Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/mm/Kconfig	2017-01-07 21:17:07.283396000 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/mm/Kconfig D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/mm/Kconfig
+--- D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/mm/Kconfig	2016-10-11 17:47:58.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/mm/Kconfig	2017-01-07 21:17:07.283396000 +0100
 @@ -696,7 +696,7 @@
  	  If unsure, say Y.
  
@@ -81,51 +81,9 @@ diff -urN Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/mm/Kconfig Kernel/bcm963xx
  	depends on ARCH_SUPPORTS_BIG_ENDIAN
  	help
  	  Say Y if you plan on running a kernel in big-endian mode.
-diff -urN Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/hotplug.c Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/hotplug.c
---- Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/hotplug.c	2016-10-11 17:47:55.000000000 +0200
-+++ Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/hotplug.c	2017-01-03 19:59:56.621028892 +0100
-@@ -99,7 +99,7 @@
-  *
-  * Called with IRQs disabled
-  */
--void platform_cpu_die(unsigned int cpu)
-+void __ref platform_cpu_die(unsigned int cpu)
- {
- 	int spurious = 0;
- 
-diff -urN Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/pcie-bcm63xx.c Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/pcie-bcm63xx.c
---- Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2016-10-20 12:43:45.000000000 +0200
-+++ Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2017-01-03 21:06:00.845231666 +0100
-@@ -35,7 +35,7 @@
- 
- extern unsigned long getMemorySize(void);
- static int bcm63xx_pcie_get_baraddrsize_index(void);
--static struct pci_bus *bcm63xx_pcie_scan_bus(int nr, struct pci_sys_data *sys);
-+static struct pci_bus *bcm63xx_pcie_scan_bus(int nr, struct pci_sys_data *sys) __ref;
- static int bcm63xx_pcie_map_irq(const struct pci_dev *dev, u8 slot, u8 pin);
- static int bcm63xx_pcie_setup(int nr, struct pci_sys_data *sys);
- static void bcm63xx_pcie_phy_mode_config(int index);
-@@ -643,7 +643,7 @@
- }
- 
- static struct pci_bus *
--bcm63xx_pcie_scan_bus(int nr, struct pci_sys_data *sys)
-+__ref bcm63xx_pcie_scan_bus(int nr, struct pci_sys_data *sys)
- {
- 	TRACE();	
- 	return pci_scan_root_bus(NULL, sys->busnr, &bcm63xx_pcie_ops, sys, &sys->resources);
-@@ -808,7 +808,7 @@
- }
- EXPORT_SYMBOL(bcm63xx_pcie_aloha);
- 
--static int bcm63xx_pcie_init(void)
-+static int __init bcm63xx_pcie_init(void)
- {
- 	int i;
- 	bool shutdown;
-diff -urN Kernel/bcm963xx/kernel/linux-3.4rt/kernel/timeconst.pl Kernel/bcm963xx/kernel/linux-3.4rt/kernel/timeconst.pl
---- Kernel/bcm963xx/kernel/linux-3.4rt/kernel/timeconst.pl	2016-10-11 17:47:37.000000000 +0200
-+++ Kernel/bcm963xx/kernel/linux-3.4rt/kernel/timeconst.pl	2017-01-02 23:47:03.578053521 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/kernel/timeconst.pl D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/kernel/timeconst.pl
+--- D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/kernel/timeconst.pl	2016-10-11 17:47:37.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/kernel/timeconst.pl	2017-01-02 23:47:03.578053521 +0100
 @@ -369,10 +369,8 @@
  		die "Usage: $0 HZ\n";
  	}
@@ -139,9 +97,9 @@ diff -urN Kernel/bcm963xx/kernel/linux-3.4rt/kernel/timeconst.pl Kernel/bcm963xx
  	output($hz, @val);
  }
  exit 0;
-diff -urN Kernel/bcm963xx/sc.mak Kernel/bcm963xx/sc.mak
---- Kernel/bcm963xx/sc.mak	2016-10-11 17:52:43.000000000 +0200
-+++ Kernel/bcm963xx/sc.mak	2017-01-03 18:14:59.265907320 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/sc.mak D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/sc.mak
+--- D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/sc.mak	2016-10-11 17:52:43.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/sc.mak	2017-01-03 18:14:59.265907320 +0100
 @@ -270,6 +270,7 @@
        create_install kernelbuild modbuild kernelbuildlite hosttools vmlinux.lz_gen
  
@@ -159,9 +117,9 @@ diff -urN Kernel/bcm963xx/sc.mak Kernel/bcm963xx/sc.mak
  
  sc_prepare:
  	if [ -d $(BCM_DIR) ]; then\
-diff -urN Kernel/bcm963xx/Makefile Kernel/bcm963xx/Makefile
---- Kernel/bcm963xx/Makefile	2016-10-11 17:52:44.000000000 +0200
-+++ Kernel/bcm963xx/Makefile	2017-01-07 18:14:59.265907320 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/Makefile D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/Makefile
+--- D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/Makefile	2016-10-11 17:52:44.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/Makefile	2017-01-07 18:14:59.265907320 +0100
 @@ -244,7 +244,7 @@
  	fi
  	$(GENDEFCONFIG_CMD) $(PROFILE_PATH) ${MAKEFLAGS}

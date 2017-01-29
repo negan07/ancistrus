@@ -1,6 +1,6 @@
-diff -urN nvram/nvram.c /nvram/nvram.c
---- nvram/nvram.c	2016-10-11 17:53:07.000000000 +0200
-+++ nvram/nvram.c	2017-01-23 23:31:44.988992207 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/nvram/nvram.c D7000_V1.0.1.44_WW_src/Source/apps/nvram/nvram.c
+--- D7000_V1.0.1.44_WW_src/Source/apps/nvram/nvram.c	2016-10-11 17:53:07.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/nvram/nvram.c	2017-01-23 23:31:44.988992207 +0100
 @@ -168,14 +168,12 @@
  	unsigned long crc;
  	int fd1 = -1;

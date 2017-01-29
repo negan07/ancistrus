@@ -1,6 +1,6 @@
-diff -urN ppp-2.4.1.pppoe4.orig/pppd/Makefile.linux ppp-2.4.1.pppoe4.orig/pppd/Makefile.linux
---- ppp-2.4.1.pppoe4.orig/pppd/Makefile.linux	2016-10-11 17:57:04.000000000 +0200
-+++ ppp-2.4.1.pppoe4.orig/pppd/Makefile.linux	2017-01-13 21:46:49.819090391 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/ppp-2.4.1.pppoe4.orig/pppd/Makefile.linux D7000_V1.0.1.44_WW_src/Source/apps/ppp-2.4.1.pppoe4.orig/pppd/Makefile.linux
+--- D7000_V1.0.1.44_WW_src/Source/apps/ppp-2.4.1.pppoe4.orig/pppd/Makefile.linux	2016-10-11 17:57:04.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/ppp-2.4.1.pppoe4.orig/pppd/Makefile.linux	2017-01-13 21:46:49.819090391 +0100
 @@ -31,9 +31,9 @@
  COPTS = -Os -pipe -Wall
  LIBS =

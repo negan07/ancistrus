@@ -1,6 +1,6 @@
-diff -urN Source/env.mak Source/env.mak
---- Source/env.mak	2016-10-11 17:57:47.000000000 +0200
-+++ Source/env.mak	2017-01-13 14:24:56.249727068 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Source/env.mak D7000_V1.0.1.44_WW_src/Source/env.mak
+--- D7000_V1.0.1.44_WW_src/Source/env.mak	2016-10-11 17:57:47.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/env.mak	2017-01-13 14:24:56.249727068 +0100
 @@ -29,6 +29,7 @@
  export HOSTTOOLS_DIR = $(TARGET_HOME)/../Kernel/bcm963xx/hostTools
  export MAKE_BIN_DIR = $(TOOLS_DIR)/make_bin
@@ -9,9 +9,9 @@ diff -urN Source/env.mak Source/env.mak
  
  export ROOTFS = $(FS_DIR)
  
-diff -urN Source/Makefile Source/Makefile
---- Source/Makefile	2016-10-11 17:57:47.000000000 +0200
-+++ Source/Makefile	2017-01-14 00:22:33.678101901 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/Makefile	2016-10-11 17:57:47.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/Makefile	2017-01-14 00:22:33.678101901 +0100
 @@ -6,9 +6,6 @@
  
  
@@ -260,9 +260,9 @@ diff -urN Source/Makefile Source/Makefile
 +	@echo -e "\\e[35mIMG: \\e[36mclean \\e[0m"
 +	-rm -f $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/empty.img $(IMAGE_DIR)/langpkg.img $(IMAGE_DIR)/$(BOARD_ID).info $(IMAGE_DIR)/$(BOARD_ID).zip $(IMAGE_DIR)/$(BOARD_ID).bin $(IMAGE_DIR)/$(BOARD_ID).img
  
-diff -urN Source/Builds/D7000.mak Source/Builds/D7000.mak
---- Source/Builds/D7000.mak	2016-10-20 12:58:51.000000000 +0200
-+++ Source/Builds/D7000.mak	2017-01-12 13:00:50.826027755 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Source/Builds/D7000.mak D7000_V1.0.1.44_WW_src/Source/Builds/D7000.mak
+--- D7000_V1.0.1.44_WW_src/Source/Builds/D7000.mak	2016-10-20 12:58:51.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/Builds/D7000.mak	2017-01-12 13:00:50.826027755 +0100
 @@ -28,7 +28,7 @@
  #------------------------------------------------#
  
@@ -272,9 +272,9 @@ diff -urN Source/Builds/D7000.mak Source/Builds/D7000.mak
  ADSL2=0
  BRIDGE=0
  SNMP=0
-diff -urN Source/apps/Makefile Source/apps/Makefile
---- Source/apps/Makefile	2016-10-11 17:57:17.000000000 +0200
-+++ Source/apps/Makefile	2017-01-13 20:54:43.313811768 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/Makefile D7000_V1.0.1.44_WW_src/Source/apps/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/Makefile	2016-10-11 17:57:17.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/Makefile	2017-01-13 20:54:43.313811768 +0100
 @@ -1,131 +1,111 @@
  include ../Rules.mak
  

@@ -1,6 +1,6 @@
-diff -urN uClibc-0.9.32/extra/locale/gen_collate.c uClibc-0.9.32/extra/locale/gen_collate.c
---- uClibc-0.9.32/extra/locale/gen_collate.c	2016-10-11 17:52:55.000000000 +0200
-+++ uClibc-0.9.32/extra/locale/gen_collate.c	2017-01-05 20:33:13.750207683 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_collate.c D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_collate.c
+--- D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_collate.c	2016-10-11 17:52:55.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_collate.c	2017-01-05 20:33:13.750207683 +0100
 @@ -300,8 +300,8 @@
  static int is_ucode(const char *s);
  static int sym_cmp(const void *n1, const void *n2);
@@ -306,9 +306,9 @@ diff -urN uClibc-0.9.32/extra/locale/gen_collate.c uClibc-0.9.32/extra/locale/ge
  
  static void dump_collate(FILE *fp)
  {
-diff -urN uClibc-0.9.32/extra/locale/gen_locale.c uClibc-0.9.32/extra/locale/gen_locale.c
---- uClibc-0.9.32/extra/locale/gen_locale.c	2016-10-11 17:52:55.000000000 +0200
-+++ uClibc-0.9.32/extra/locale/gen_locale.c	2017-01-05 18:31:12.399508532 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_locale.c D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_locale.c
+--- D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_locale.c	2016-10-11 17:52:55.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_locale.c	2017-01-05 18:31:12.399508532 +0100
 @@ -200,9 +200,9 @@
  				p += 1 + (unsigned char) *p;
  			}
@@ -362,9 +362,9 @@ diff -urN uClibc-0.9.32/extra/locale/gen_locale.c uClibc-0.9.32/extra/locale/gen
  
  	c_buf[1] = 0;
  	c_buf[0] = *nl_langinfo(X);
-diff -urN uClibc-0.9.32/extra/locale/gen_wc8bit.c uClibc-0.9.32/extra/locale/gen_wc8bit.c
---- uClibc-0.9.32/extra/locale/gen_wc8bit.c	2016-10-11 17:52:55.000000000 +0200
-+++ uClibc-0.9.32/extra/locale/gen_wc8bit.c	2017-01-05 13:42:03.891366478 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_wc8bit.c D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_wc8bit.c
+--- D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_wc8bit.c	2016-10-11 17:52:55.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_wc8bit.c	2017-01-05 13:42:03.891366478 +0100
 @@ -99,31 +99,29 @@
  	int total_size = 0;
  
@@ -410,9 +410,9 @@ diff -urN uClibc-0.9.32/extra/locale/gen_wc8bit.c uClibc-0.9.32/extra/locale/gen
  		pclose(fp);
  	}
  
-diff -urN uClibc-0.9.32/extra/locale/gen_wctype.c uClibc-0.9.32/extra/locale/gen_wctype.c
---- uClibc-0.9.32/extra/locale/gen_wctype.c	2016-10-11 17:52:55.000000000 +0200
-+++ uClibc-0.9.32/extra/locale/gen_wctype.c	2017-01-05 18:34:25.926098706 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_wctype.c D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_wctype.c
+--- D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_wctype.c	2016-10-11 17:52:55.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/uClibc-0.9.32/extra/locale/gen_wctype.c	2017-01-05 18:34:25.926098706 +0100
 @@ -227,11 +227,12 @@
  			++verbose;
  			continue;

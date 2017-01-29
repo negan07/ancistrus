@@ -1,5 +1,6 @@
---- Makefile	2016-10-11 17:57:55.000000000 +0200
-+++ Makefile	2017-01-12 20:27:44.184650622 +0100
+diff -urN D7000_V1.0.1.44_WW_src/Makefile diff -urN D7000_V1.0.1.44_WW_src/Makefile
+--- D7000_V1.0.1.44_WW_src/Makefile	2016-10-11 17:57:55.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Makefile	2017-01-12 20:27:44.184650622 +0100
 @@ -4,6 +4,9 @@
  #
  #NOTE: do "make all_clean" if need change ANNEX after compiled

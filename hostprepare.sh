@@ -1,6 +1,8 @@
 #!/bin/sh
+#
 # host system: ubuntu yakkety x86/64
 # prepare the host system for developing
+#
 
 # ubuntu has dash posix compliant only default shell, faster than bash but with tiny command set
 # e.g. += support is missing creating problem on making and many more

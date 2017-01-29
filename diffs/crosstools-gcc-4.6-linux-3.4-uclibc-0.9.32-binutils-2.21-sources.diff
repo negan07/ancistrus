@@ -1,6 +1,6 @@
-diff -uN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/build
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build
 --- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build	2014-01-16 20:55:01.000000000 +0100
-+++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/build	2016-12-25 23:07:21.489831798 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build	2016-12-25 23:07:21.489831798 +0100
 @@ -16,7 +16,7 @@
  CHECK_ERR=
  
@@ -19,9 +19,9 @@ diff -uN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/bu
      echo "################### Build $1 toolchain #####################"
      cd $buildhome
      # get the config file
-diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi
 --- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi	2009-11-05 03:42:15.000000000 +0100
-+++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi	2016-12-26 23:02:16.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi	2016-12-26 23:02:16.000000000 +0100
 @@ -15,7 +15,7 @@
  @c The ARG is an optional argument.  To be used for macro arguments in
  @c their documentation (@defmac).
@@ -40,9 +40,9 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/b
  @end macro
  
  @c Handling the indexes with Texinfo yields several different problems.
-diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf
 --- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf	2009-04-21 21:03:23.000000000 +0200
-+++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf	2016-12-27 18:35:58.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf	2016-12-27 18:35:58.000000000 +0100
 @@ -22,6 +22,9 @@
  static unsigned int hash (const char *, unsigned int);
  #ifdef __GNUC__
@@ -53,9 +53,9 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/b
  #endif
  const char * libc_name_p (const char *, unsigned int);
  %}
-diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h
 --- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h	2009-04-21 21:03:23.000000000 +0200
-+++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h	2016-12-27 18:37:33.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h	2016-12-27 18:37:33.000000000 +0100
 @@ -53,6 +53,9 @@
  static unsigned int hash (const char *, unsigned int);
  #ifdef __GNUC__
@@ -75,9 +75,9 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/b
  
    switch (hval)
      {
-diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c
 --- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c	2010-11-25 20:03:27.000000000 +0100
-+++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c	2016-12-26 23:49:25.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c	2016-12-26 23:49:25.000000000 +0100
 @@ -3594,13 +3594,13 @@
  		  int has_length, struct fileloc *line, const char *if_marked,
  		  bool emit_pch, type_p field_type, const char *field_name)
@@ -93,9 +93,9 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/b
  
        newv = *v;
        newv.type = field_type;
-diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h
 --- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h	2011-01-03 21:52:22.000000000 +0100
-+++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h	2016-12-27 14:08:17.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h	2016-12-27 14:08:17.000000000 +0100
 @@ -1123,8 +1123,13 @@
  ira_allocno_object_iter_cond (ira_allocno_object_iterator *i, ira_allocno_t a,
  			      ira_object_t *o)
@@ -112,9 +112,9 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/b
  }
  
  /* Loop over all objects associated with allocno A.  In each
-diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in
 --- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in	2011-08-20 09:51:09.000000000 +0200
-+++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in	2016-12-26 23:27:47.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in	2016-12-26 23:27:47.000000000 +0100
 @@ -4245,18 +4245,10 @@
  doc/gccint.info: $(TEXI_GCCINT_FILES)
  doc/cppinternals.info: $(TEXI_CPPINT_FILES)
@@ -136,9 +136,9 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/b
  
  doc/cpp.dvi: $(TEXI_CPP_FILES)
  doc/gcc.dvi: $(TEXI_GCC_FILES)
-diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c
 --- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c	2011-01-01 16:33:56.000000000 +0100
-+++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c	2016-12-27 20:09:08.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c	2016-12-27 20:09:08.000000000 +0100
 @@ -281,11 +281,7 @@
    build_search_tree (ar);
  }
@@ -158,9 +158,9 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/b
  
 -#endif /* DEFINE_INLINE_P */
 +#endif /* DEFINE_NON_INLINE_P */
-diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h
 --- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h	2011-01-01 16:33:56.000000000 +0100
-+++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h	2016-12-27 20:09:59.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h	2016-12-27 20:09:59.000000000 +0100
 @@ -63,7 +63,7 @@
  
  /* Return non-zero if ADDR is in range AR, traversing the entire tree.
@@ -170,9 +170,9 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/b
  sim_addr_range_hit_p (ADDR_RANGE * /*ar*/, address_word /*addr*/);
  #define ADDR_RANGE_HIT_P(ar, addr) \
    ((ar)->range_tree == NULL || sim_addr_range_hit_p ((ar), (addr)))
-diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/m4-1.4.15/lib/stdio.in.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/m4-1.4.15/lib/stdio.in.h
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/m4-1.4.15/lib/stdio.in.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/m4-1.4.15/lib/stdio.in.h
 --- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/m4-1.4.15/lib/stdio.in.h	2010-07-29 15:21:37.000000000 +0200
-+++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/m4-1.4.15/lib/stdio.in.h	2016-12-26 22:47:44.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/m4-1.4.15/lib/stdio.in.h	2016-12-26 22:47:44.000000000 +0100
 @@ -141,7 +141,9 @@
     so any use of gets warrants an unconditional warning.  Assume it is
     always declared, since it is required by C89.  */
@@ -183,9 +183,9 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/b
  
  #if @GNULIB_FOPEN@
  # if @REPLACE_FOPEN@
-diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/uClibc-0.9.32/extra/locale/gen_wctype.c crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/uClibc-0.9.32/extra/locale/gen_wctype.c
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/uClibc-0.9.32/extra/locale/gen_wctype.c crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/uClibc-0.9.32/extra/locale/gen_wctype.c
 --- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/uClibc-0.9.32/extra/locale/gen_wctype.c	2011-06-08 21:35:20.000000000 +0200
-+++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sourcesOK/src/buildroot-2011.11/dl/uClibc-0.9.32/extra/locale/gen_wctype.c	2016-12-27 12:36:37.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/uClibc-0.9.32/extra/locale/gen_wctype.c	2016-12-27 12:36:37.000000000 +0100
 @@ -227,11 +227,12 @@
  			++verbose;
  			continue;
