@@ -1,5 +1,7 @@
 include ../Rules.mak
 
+LIBS = libscnvram.so
+
 DEFS +=
 CFLAGS += -W -Wall -Werror
 
@@ -22,9 +24,7 @@ DEFS += -DTEST
 CFLAGS += -g
 endif
 
-BINS = libscnvram.so
-
-all: $(BINS)
+all: $(LIBS)
 
 libscnvram.so: nvram.o nvram_lock.o
 	$(CC) $(CFLAGS) $(DEFS) -shared -Wl,-soname,$@ $^ -o $@ 
@@ -39,8 +39,8 @@ nvram_lock.o: nvram_lock.c
 	$(STRIP) $(STRIPFLAGS) $@
 
 install:
-	cp -f $(BINS) $(LIBDIR)
+	cp -f $(LIBS) $(LIBDIR)
 
 clean:
-	rm -rf *~ *.o *.so $(BINS)
+	rm -rf *~ *.o *.so $(LIBS)
 

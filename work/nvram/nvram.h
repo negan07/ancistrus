@@ -18,9 +18,10 @@
 #define NVRAM_PATH   "/config/nvram/nvram"        /* ex:  /dev/mtd/nvram */
 
 #define NVRAM_TMP_PATH "/tmp/nvram"		  /* ex:  /tmp/nvram     */
-#define NVRAM_BCM_PATH "/tmp/nvram.bcm"		  /* ex:  /tmp/nvram     */
+#define NVRAM_BCM_PATH "/tmp/nvram.bcm"
 #define NVRAM_DEFAULT  "/etc/default"             /* ex:  /etc/default   */
 
+/* local host debug purpose */
 #ifdef LOCAL
 #undef NVRAM_PATH
 #define NVRAM_PATH	LROOT "/config/nvram/nvram"
@@ -37,17 +38,20 @@
 #define DIVISION_SYMBOL	    0x01		  
 #define SEPARATION_SYMBOL   0x02		  	
 
-/* NVRAM_HEADER MAGIC*/ 
+/* NVRAM_HEADER MAGIC */ 
 #define NVRAM_MAGIC 		    0x004E4F52		 /* RON */
 
 /* used 12bytes, 28bytes reserved */
 #define NVRAM_HEADER_SIZE   40       		 
 
-/* max size in flash*/
+/* max size in flash */
 #define NVRAM_SIZE          4194303		  /* nvram size 4M bytes*/
 
-/* each line max size*/
+/* each line max size */
 #define NVRAM_BUFF_SIZE           4096		 
+
+/* each key buff size */
+#define KEY_BUFF_SIZE           256
 
 /* errorno */
 #define NVRAM_SUCCESS       	    0
@@ -87,16 +91,22 @@ int nvram_load(void);
 int nvram_commit(void);
 
 /*
- * Get the value of an NVRAM variable
+ * Get the value of an NVRAM variable: value is traced, value must not be free
  * @param	name	name of variable to get
  * @return	value of variable or NULL if undefined
  */
 char* nvram_get_func(const char *name,char *path);
 #define nvram_get_def(name) nvram_get_func(name,NVRAM_DEFAULT)
 #define nvram_bcm_get(name) nvram_get_func(name,NVRAM_BCM_PATH)
+char* nvram_get(const char *name);
 #define nvram_safe_get(msg) (nvram_get(msg)?:"")
 #define nvram_bcm_safe_get(msg) (nvram_bcm_get(msg)?:"")
-char* nvram_get(const char *name);
+
+/*
+ * Get the reentrant value of an NVRAM variable: value is not traced, the caller must free the value manually
+ * @param	name	name of variable to get
+ * @return	value of variable or NULL if undefined
+ */
 char* nvram_get_func_r(const char *name,char *path);
 char* nvram_get_r(const char *name);
 #define nvram_safe_get_r(name) (nvram_get_r(name)?:strdup(""))
@@ -178,24 +188,23 @@ int nvram_delete(const char* name,const char* value);					/*TODO*/
 int nvram_append(const char* name,const char* value);					/*TODO*/
 
 /*
- * Insert the (sub)value of an NVRAM variable in a specific position ( name=foo1\1foo2\1foo3\0 --> name=foo1\1foo2\1value\1foo3\0)
+ * Insert the (sub)value of an NVRAM variable at the beginning ( name=foo1\1foo2\1foo3\0 --> name=value\1foo1\1foo2\1foo3\0)
  * @param	name	name of variable to set
  * @param	value	subvalue of variable
- * @param	index	position number (if index > subvarnumber append only)
  * @return	0 on success and errorno on failure
  * NOTE: use nvram_commit to commit this change to flash.
  */
-int nvram_insert(const char* name,const char* value,const int index);			/*TODO*/
+int nvram_insert(const char* name,const char* value);					/*TODO*/
 
 /*
- * Change the (sub)value of an NVRAM variable in a specific position ( name=foo1\1foo2\1old\1foo3\0 --> name=foo1\1foo2\1new\1foo3\0 )
+ * Change the old (sub)value of an NVRAM variable with a new (sub)value ( name=foo1\1foo2\1old\1foo3\0 --> name=foo1\1foo2\1new\1foo3\0 )
  * @param	name	name of variable to set
- * @param	value	new subvalue to set
- * @param	del	old subvalue to delete
+ * @param	oldval  old subvalue to delete
+ * @param	newcal	new subvalue to add
  * @return	0 on success and errorno on failure
  * NOTE: use nvram_commit to commit this change to flash.
  */
-int nvram_change(const char* name,const char* value,const char* del);			/*TODO*/
+int nvram_change(const char* name,const char* oldval,const char* newval);		/*TODO*/
 
 /*
 	get or set the value of a key

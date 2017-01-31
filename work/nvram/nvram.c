@@ -143,10 +143,10 @@ void writeFileBin(char *path, char *data, int len) {
 static unsigned long crc32(char *data, int length)
 {
 	unsigned long crc, poly;
-	long crcTable[256];
+	long crcTable[KEY_BUFF_SIZE];
 	int i, j;
 	poly = 0xEDB88320L;
-	for (i=0; i<256; i++) {
+	for (i=0; i<KEY_BUFF_SIZE; i++) {
 		crc = i;
 		for (j=8; j>0; j--) {
 			if (crc&1) {
@@ -540,8 +540,7 @@ int nvram_show(char* path)
 		while(*(p++));
 		}
 	free(data);
-	printf(
-	"\n"
+	if(!strcmp(path, NVRAM_TMP_PATH)) printf("\n"
 	"Nvram settings file:\t\t%s\n"
 	"Nvram total size:\t\t%d Kb\n"
 	"Nvram occupied size:\t\t%d Kb (%d bytes)\n"
@@ -564,14 +563,14 @@ int nvram_append(const char* name,const char* value)				/*TODO*/
 printf("%s TODO %s\n", name, value);
 	return NVRAM_SUCCESS;	
 }
-int nvram_insert(const char* name,const char* value,const int index)		/*TODO*/
+int nvram_insert(const char* name,const char* value)				/*TODO*/
 {
-printf("%s TODO %s TODO %d\n", name, value, index);
+printf("%s TODO %s\n", name, value);
 	return NVRAM_SUCCESS;	
 }
-int nvram_change(const char* name,const char* value,const char* del)		/*TODO*/
+int nvram_change(const char* name,const char* oldval,const char* newval)	/*TODO*/
 {
-printf("%s TODO %s TODO %s\n", name, value, del);
+printf("%s TODO %s TODO %s\n", name, oldval, newval);
 	return NVRAM_SUCCESS;	
 }
 /*
@@ -579,11 +578,11 @@ printf("%s TODO %s TODO %s\n", name, value, del);
 */
 int nv_set(const char* category, const char* key, int key_idx, const char* value)
 {
-	char name[256];
-	char path[256];
+	char name[KEY_BUFF_SIZE];
+	char path[KEY_BUFF_SIZE];
 
-	snprintf( name, 256, "%s%d", key, key_idx);
-	snprintf( path, 256, "%s%s", BASE_PATH, category);
+	snprintf( name, KEY_BUFF_SIZE, "%s%d", key, key_idx);
+	snprintf( path, KEY_BUFF_SIZE, "%s%s", BASE_PATH, category);
 
 	return nvram_set_func( name, value, path);
 }
@@ -591,17 +590,17 @@ int nv_set(const char* category, const char* key, int key_idx, const char* value
 
 int nv_setFX(const char* category, const char* key, int key_idx, const char *value_format, ...)
 {
-	char name[256];
-	char path[256];
-	char value[4096];
+	char name[KEY_BUFF_SIZE];
+	char path[KEY_BUFF_SIZE];
+	char value[NVRAM_BUFF_SIZE];
 	va_list arg;
 	
-	snprintf( name, 256, "%s%d", key, key_idx);
-	snprintf( path, 256, "%s%s", BASE_PATH, category);
+	snprintf( name, KEY_BUFF_SIZE, "%s%d", key, key_idx);
+	snprintf( path, KEY_BUFF_SIZE, "%s%s", BASE_PATH, category);
 
 	value[0]=0;
 	va_start(arg, value_format);
-	vsnprintf(value,4096, value_format, arg);
+	vsnprintf(value,NVRAM_BUFF_SIZE, value_format, arg);
 	va_end(arg);
 	
 
@@ -611,9 +610,9 @@ int nv_setFX(const char* category, const char* key, int key_idx, const char *val
 
 int nv_set_int(const char* category, const char* key, int key_idx, int value)
 {
-	char value_str[256];
+	char value_str[KEY_BUFF_SIZE];
 	
-	snprintf( value_str, 256, "%d", value);
+	snprintf( value_str, KEY_BUFF_SIZE, "%d", value);
 
 	return nv_set(category, key, key_idx, value_str);
 }
@@ -622,11 +621,11 @@ int nv_set_int(const char* category, const char* key, int key_idx, int value)
 char* nv_get(const char* category, const char* key, int key_idx)
 {
     char *pt;
-	char name[256];
-	char path[256];
+	char name[KEY_BUFF_SIZE];
+	char path[KEY_BUFF_SIZE];
 
-	snprintf( name, 256, "%s%d", key, key_idx);
-	snprintf( path, 256, "%s%s", BASE_PATH, category);
+	snprintf( name, KEY_BUFF_SIZE, "%s%d", key, key_idx);
+	snprintf( path, KEY_BUFF_SIZE, "%s%s", BASE_PATH, category);
 
 	if((pt=__nvram_get_func(name, path, 1))==NULL)
 		return NULL;
@@ -646,11 +645,11 @@ char* nv_get(const char* category, const char* key, int key_idx)
 char* nv_get_r(const char* category, const char* key, int key_idx)
 {
     char *pt;
-	char name[256];
-	char path[256];
+	char name[KEY_BUFF_SIZE];
+	char path[KEY_BUFF_SIZE];
 
-	snprintf( name, 256, "%s%d", key, key_idx);
-	snprintf( path, 256, "%s%s", BASE_PATH, category);
+	snprintf( name, KEY_BUFF_SIZE, "%s%d", key, key_idx);
+	snprintf( path, KEY_BUFF_SIZE, "%s%s", BASE_PATH, category);
 
 	if((pt=__nvram_get_func(name, path, 0))==NULL)
 		return NULL;
