@@ -180,12 +180,13 @@ int nvram_delete(const char* name,const char* value);					/*TODO*/
 
 /*
  * Append the (sub)value of an NVRAM variable at the end ( name=foo1\1foo2\1foo3\0 --> name=foo1\1foo2\1foo3\1value\0)
+ * The same behaviour of "/usr/sbin/nvram add" with initialization of variable in case of void value or variable not present.
  * @param	name	name of variable to set
  * @param	value	subvalue of variable
  * @return	0 on success and errorno on failure
  * NOTE: use nvram_commit to commit this change to flash.
  */
-int nvram_append(const char* name,const char* value);					/*TODO*/
+int nvram_append(const char* name,const char* value);
 
 /*
  * Insert the (sub)value of an NVRAM variable at the beginning ( name=foo1\1foo2\1foo3\0 --> name=value\1foo1\1foo2\1foo3\0)

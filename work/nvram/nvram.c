@@ -560,8 +560,25 @@ printf("%s TODO %s\n", name, value);
 }
 int nvram_append(const char* name,const char* value)				/*TODO*/
 {
-printf("%s TODO %s\n", name, value);
-	return NVRAM_SUCCESS;	
+	int size, err;
+	char *old, *new;
+
+	old=nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
+	if(!strcmp(old, "")) 
+		err = nvram_set(name,value);
+	else {
+		size=sizeof(char)*(strlen(old) +strlen(value) +2);		/* old+\1+value+\0 */
+		if((new = (char*)malloc(size)) == NULL) 
+			err = NVRAM_SHADOW_ERR;
+		else {
+			snprintf(new, size, "%s%c%s", old, DIVISION_SYMBOL, value);
+			err = nvram_set(name, new);
+			free(new);
+		}
+	}
+	if(old) free(old);
+
+	return err;
 }
 int nvram_insert(const char* name,const char* value)				/*TODO*/
 {
