@@ -6,6 +6,14 @@ RULES			:= $(CUR_PATH)/Rules.mak
 export NUMTHREAD	:= $(shell expr `getconf _NPROCESSORS_ONLN` + 1)
 #export NUMTHREAD	:= $(shell expr `cat /proc/cpuinfo | grep 'cpu cores' | head -n 1 | sed "s/cpu cores\t: //"` + 1)
 
+ifdef LOCAL
+export LOCAL
+endif
+
+ifdef DEBUG
+export DEBUG
+endif
+
 ifndef PREFIX_NAME
 PREFIX_NAME		:= $(PROJECT_NAME)_target
 endif
@@ -14,10 +22,10 @@ ifndef DEBUG_DIR
 DEBUG_DIR		:= /home/ftp
 endif
 
-ifndef LOCAL
-PREFIX_PATH		:= $(CUR_PATH)/../$(PREFIX_NAME)
-else
+ifneq "$(or $(LOCAL),$(DEBUG))" ""
 PREFIX_PATH		:= $(DEBUG_DIR)
+else
+PREFIX_PATH		:= $(CUR_PATH)/../$(PREFIX_NAME)
 endif
 
 GPLLIB			:=

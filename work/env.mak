@@ -1,17 +1,28 @@
 ifndef LOCAL
 PROFILE_ARCH	:= arm
+export TMPDIR	:= /tmp
+ifndef DEBUG
 export ETCDIR	:= $(PREFIX)/usr/etc
+export BINDIR	:= $(PREFIX)/usr/sbin
+export LIBDIR	:= $(PREFIX)/lib
+export MODDIR	:= $(LIBDIR)/modules
+export WWWDIR	:= $(PREFIX)/www.eng
+else
+export ETCDIR	:= $(PREFIX)
+export BINDIR	:= $(PREFIX)
+export LIBDIR	:= $(PREFIX)
+export MODDIR	:= $(PREFIX)
+export WWWDIR	:= $(PREFIX)
+endif
 else
 PROFILE_ARCH	:= i386
 export TMPDIR	:= $(PREFIX)/tmp
-export ETCDIR	:= $(PREFIX)/tmp/etc
-export LOCAL
-endif
-
+export ETCDIR	:= $(TMPDIR)/etc
 export BINDIR	:= $(PREFIX)/usr/sbin
 export LIBDIR	:= $(PREFIX)/lib
-export MODDIR	:= $(PREFIX)/lib/modules
+export MODDIR	:= $(LIBDIR)/modules
 export WWWDIR	:= $(PREFIX)/www.eng
+endif
 
 export SHARED_DIR := $(SOURCE_PATH)/Source/shared
 export KERNEL_DIR := $(SOURCE_PATH)/Source/kernel
