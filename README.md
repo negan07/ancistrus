@@ -13,5 +13,7 @@ The working approach is mainly didactic and exploratory, and it is open to every
 
 *** TODO JOBLIST ***
 
-ancistrus_core - negan07
-nvram: delete append insert change - *UNASSIGNED*
+ancistrus_core - @negan07
+
+nvram: delete() insert() change() - *UNASSIGNED*
+

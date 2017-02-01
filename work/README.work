@@ -9,5 +9,15 @@ https://github.com/negan07/ancistrus
 
 Here's the workjob
 
-ancistrus-core			The Main work tool: creates & acts all the modification injects
-nvram				Setting library routines
+builtinlib					Modified built-in shared libraries.
+	nvram						Setting library routines.
+
+builtin						Modified built-in apps.
+	utelnetd					The console telnet daemon.
+
+thirdpartylib					Additional shared libraries not included into the original firmware.
+	
+
+thirdparty					Additional apps not included into the original firmware.
+	ancistrus-core					The Main work tool: creates & acts all the modification injects.
+

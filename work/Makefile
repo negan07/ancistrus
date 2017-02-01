@@ -28,14 +28,20 @@ else
 PREFIX_PATH		:= $(CUR_PATH)/../$(PREFIX_NAME)
 endif
 
-GPLLIB			:=
-GPL			:=
+BUILTINLIB		:=
+BUILTIN			:=
+THIRDPARTYLIB		:=
+THIRDPARTY		:=
 SUBDIRS			:=
 
-GPLLIB 			+= nvram
-GPL			+= $(PROJECT_NAME)_core-0.0.0
-SUBDIRS			+= $(GPLLIB)
-SUBDIRS			+= $(GPL)
+BUILTINLIB 		+= nvram
+THIRDPARTY		+= $(PROJECT_NAME)_core-0.0.0
+BUILTIN			+= utelnetd-0.1.9
+
+SUBDIRS			+= $(BUILTINLIB)
+SUBDIRS			+= $(THIRDPARTYLIB)
+SUBDIRS			+= $(BUILTIN)
+SUBDIRS			+= $(THIRDPARTY)
 
 
 all:    creat_rules
