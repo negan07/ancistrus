@@ -11,6 +11,7 @@
 #include "nvram.h"
 #include <stdarg.h>
 #include "nvram_lock.h"
+#include <syslog.h>
 #ifndef LOCAL
 #define BASE_PATH "/tmp/nv/"
 #else
@@ -231,7 +232,15 @@ static int nvram_commit_unlock(void)
 	nvram_header_t header;
 	
 	if((len=readFileBin_unlock(NVRAM_TMP_PATH, &data))<=0) {
-	if(data) {free(data);} if(fd1 >= 0) {close(fd1);} return NVRAM_SHADOW_ERR;
+		if(data) {free(data);} 
+		return NVRAM_SHADOW_ERR;
+	}
+
+// add nvram overflow prevention
+	if(len >= (NVRAM_SIZE-NVRAM_HEADER_SIZE)) {
+		if(data) {free(data);}
+		system("touch /tmp/NVRAM_MAX_SIZE_REACHED");
+		return NVRAM_LEN_ERR;
 	}
 
 	header.magic=NVRAM_MAGIC;
@@ -239,7 +248,9 @@ static int nvram_commit_unlock(void)
 	header.len=len;
 
 	if((fd1=open(NVRAM_PATH,O_WRONLY | O_CREAT))<0) {
-	if(data) {free(data);} if(fd1 >= 0) {close(fd1);} return NVRAM_FLASH_ERR;
+		if(data) {free(data);} 
+		if(fd1 >= 0) {close(fd1);} 
+		return NVRAM_FLASH_ERR;
 	}
 	write(fd1, &header,sizeof(nvram_header_t));
 	lseek(fd1,NVRAM_HEADER_SIZE,0);
@@ -249,7 +260,9 @@ static int nvram_commit_unlock(void)
 	lseek(fd1,NVRAM_HEADER_SIZE,0);
 	read(fd1, data,len);
 	if(header.crc!=crc32(data, len)){
-	if(data) {free(data);} if(fd1 >= 0) {close(fd1);} return NVRAM_FLASH_ERR;
+		if(data) {free(data);} 
+		if(fd1 >= 0) {close(fd1);} 
+		return NVRAM_FLASH_ERR;
 	}			
 
 	close(fd1);
@@ -558,7 +571,7 @@ int nvram_delete(const char* name,const char* value)				/*TODO*/
 printf("%s TODO %s\n", name, value);
 	return NVRAM_SUCCESS;	
 }
-int nvram_append(const char* name,const char* value)				/*TODO*/
+int nvram_append(const char* name,const char* value)
 {
 	int size, err;
 	char *old, *new;

@@ -15,56 +15,56 @@
  */	
 
 /* nvram path */
-#define NVRAM_PATH   "/config/nvram/nvram"        /* ex:  /dev/mtd/nvram */
+#define NVRAM_PATH		"/config/nvram/nvram"		/* ex:  /dev/mtd/nvram */
 
-#define NVRAM_TMP_PATH "/tmp/nvram"		  /* ex:  /tmp/nvram     */
-#define NVRAM_BCM_PATH "/tmp/nvram.bcm"
-#define NVRAM_DEFAULT  "/etc/default"             /* ex:  /etc/default   */
+#define NVRAM_TMP_PATH		"/tmp/nvram"			/* ex:  /tmp/nvram     */
+#define NVRAM_BCM_PATH		"/tmp/nvram.bcm"
+#define NVRAM_DEFAULT		"/etc/default"			/* ex:  /etc/default   */
 
 /* local host debug purpose */
 #ifdef LOCAL
 #undef NVRAM_PATH
-#define NVRAM_PATH	LROOT "/config/nvram/nvram"
+#define NVRAM_PATH		LROOT "/config/nvram/nvram"
 #undef NVRAM_TMP_PATH
-#define NVRAM_TMP_PATH	LROOT "/tmp/nvram"
+#define NVRAM_TMP_PATH		LROOT "/tmp/nvram"
 #undef NVRAM_BCM_PATH
-#define NVRAM_BCM_PATH	LROOT "/tmp/nvram.bcm"
+#define NVRAM_BCM_PATH		LROOT "/tmp/nvram.bcm"
 #undef NVRAM_DEFAULT
-#define NVRAM_DEFAULT	LROOT "/etc/default"
+#define NVRAM_DEFAULT		LROOT "/etc/default"
 #endif
 
 
-#define END_SYMBOL	    0x00		  	
-#define DIVISION_SYMBOL	    0x01		  
-#define SEPARATION_SYMBOL   0x02		  	
+#define END_SYMBOL		0x00		  	
+#define DIVISION_SYMBOL		0x01		  
+#define SEPARATION_SYMBOL	0x02		  	
 
 /* NVRAM_HEADER MAGIC */ 
-#define NVRAM_MAGIC 		    0x004E4F52		 /* RON */
+#define NVRAM_MAGIC		0x004E4F52			/* RON */
 
 /* used 12bytes, 28bytes reserved */
-#define NVRAM_HEADER_SIZE   40       		 
+#define NVRAM_HEADER_SIZE	40       		 
 
 /* max size in flash */
-#define NVRAM_SIZE          4194303		  /* nvram size 4M bytes*/
+#define NVRAM_SIZE		4194303				/* nvram size 4M bytes*/
 
 /* each line max size */
-#define NVRAM_BUFF_SIZE           4096		 
+#define NVRAM_BUFF_SIZE		4096
 
 /* each key buff size */
-#define KEY_BUFF_SIZE           256
+#define KEY_BUFF_SIZE		256
 
 /* errorno */
-#define NVRAM_SUCCESS       	    0
-#define NVRAM_FLASH_ERR           1 
-#define NVRAM_MAGIC_ERR	    2
-#define NVRAM_LEN_ERR	    3
-#define NVRAM_CRC_ERR	    4
-#define NVRAM_SHADOW_ERR	    5
+#define NVRAM_SUCCESS		0
+#define NVRAM_FLASH_ERR		1 
+#define NVRAM_MAGIC_ERR		2
+#define NVRAM_LEN_ERR		3
+#define NVRAM_CRC_ERR		4
+#define NVRAM_SHADOW_ERR	5
 
 /*
  * nvram header struct 		            
  * magic    = 0x004E4F52 (RON)             
- * len      = 0~65495                      
+ * len      = 0~NVRAM_SIZE                      
  * crc      = use crc-32                    
  * reserved = reserved 	                    
  */
