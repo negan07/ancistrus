@@ -1,0 +1,90 @@
+#!/bin/sh
+#
+# receive script: prepare debug environment on running router
+# an HTTP or FTP server must be run on local i386 host
+# on local host i386 machine it must be placed into HTTP or FTP root server dir $DEBUG_DIR
+# on router it must be placed into ramfs $RDIR routerdir
+#
+# telnet the router:
+# cd $RDIR
+# wget -q http://${URL}/$THISONE
+# chmod 755 $THISONE
+# export LD_LIBRARY_PATH=$DBGDIR
+# files are located in $DBGDIR
+#
+
+NAME=ancistrus
+THISONE=receive
+SERVER=HTTP								# kind of server: HTTP or FTP
+URL=192.168.0.51							# local host ip (development pc machine i386)
+RDIR=/tmp/etc								# this script location
+DBGDIR=$RDIR/ancdbg							# debug dir
+LANGDIR=www.eng								# www dir
+CGI=$NAME.cgi								# actual cgi name
+LIST="libscnvram.so $NAME"						# list of files got by CORE()
+
+
+GET() {									# www get a file from the $URL webserver
+rm -f $1
+	if [ $SERVER = HTTP ]; then
+	wget -q http://${URL}/${1} > /dev/null 2>&1
+	else
+	ftpget $URL $1 $1
+	fi
+	if [ $? != 0 ]; then
+	echo "$1 not found"
+	else
+	chmod 755 $1 > /dev/null 2>&1
+	fi
+}
+
+CORE() {								# www get to $DBGDIR dir $LIST files from the $URL webserver
+mkdir -p -m 0755 $DBGDIR > /dev/null 2>&1
+cd $DBGDIR
+	for I in $LIST
+	do
+	GET $I
+	done
+ln -sf $RDIR/$THISONE $DBGDIR/$THISONE > /dev/null 2>&1
+}
+
+export LD_LIBRARY_PATH=$DBGDIR
+
+	if [ $# != "1" ]; then
+	echo "Usage: $0 core web del *anyfiledir*"
+	exit 1
+	fi
+
+	case $1 in
+	core)
+	CORE
+	;;
+	web)
+	mkdir -p -m 0755 $DBGDIR > /dev/null 2>&1
+	cd $DBGDIR
+	rm -rf $DBGDIR/$LANGDIR
+	GET $LANGDIR.zip
+	unzip $LANGDIR.zip
+	rm -f $LANGDIR.zip
+	chmod -R 755 $LANGDIR
+	ln -sf $DBGDIR/$CGI $RDIR/$CGI > /dev/null 2>&1
+	CORE
+	;;
+	del)
+	cd $RDIR
+	rm -rf $DBGDIR
+	rm -f $RDIR/$CGI
+	;;
+	*)
+	mkdir -p -m 0755 $DBGDIR > /dev/null 2>&1
+	cd $DBGDIR
+	GET $1
+	FILEABS=`echo "$1" | grep ".zip"`
+		if [ "${FILEABS}" = "$1" ]; then
+		unzip $1
+		rm -f $1
+		chmod -R 755 $FILEABS > /dev/null 2>&1
+		fi
+	;;
+	esac
+

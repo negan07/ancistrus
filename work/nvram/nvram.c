@@ -11,7 +11,6 @@
 #include "nvram.h"
 #include <stdarg.h>
 #include "nvram_lock.h"
-#include <syslog.h>
 #ifndef LOCAL
 #define BASE_PATH "/tmp/nv/"
 #else
