@@ -565,11 +565,6 @@ int nvram_show(char* path)
 
 	return err;
 }
-int nvram_delete(const char* name,const char* value)				/*TODO*/
-{
-printf("%s TODO %s\n", name, value);
-	return NVRAM_SUCCESS;	
-}
 int nvram_append(const char* name,const char* value)
 {
 	int size, err;
@@ -579,13 +574,33 @@ int nvram_append(const char* name,const char* value)
 	if(!strcmp(old, "")) 
 		err = nvram_set(name,value);
 	else {
-		size=sizeof(char)*(strlen(old) +strlen(value) +2);		/* old+\1+value+\0 */
+		size=sizeof(char)*(strlen(old) +strlen(value) +2);		/* old + \1 + value + \0 */
 		if((new = (char*)malloc(size)) == NULL) 
 			err = NVRAM_SHADOW_ERR;
 		else {
 			snprintf(new, size, "%s%c%s", old, DIVISION_SYMBOL, value);
 			err = nvram_set(name, new);
 			free(new);
+		}
+	}
+	if(old) free(old);
+
+	return err;
+}
+int nvram_delete(const char* name,const char* value)
+{
+	int err;
+	char *old, *p;
+	const char tag[]={DIVISION_SYMBOL};
+
+	old=nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
+	if(!strcmp(old, "")) 
+		err = NVRAM_DELETE_ERR;
+	else {
+		err = nvram_set(name, "");					/* clear name var settings content */
+		for(p=(char*)strtok(old, tag);p != NULL;p=(char*)strtok(NULL, tag)) {  /* tokenize old var string */
+			if(strcmp(p, value)) 
+				err = nvram_append(name, p);
 		}
 	}
 	if(old) free(old);

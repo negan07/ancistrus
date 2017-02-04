@@ -60,6 +60,7 @@
 #define NVRAM_LEN_ERR		3
 #define NVRAM_CRC_ERR		4
 #define NVRAM_SHADOW_ERR	5
+#define NVRAM_DELETE_ERR	6
 
 /*
  * nvram header struct 		            
@@ -170,16 +171,8 @@ int nvram_show(char* path);
 #define nvram_bcm_show() nvram_show(NVRAM_BCM_PATH)
 
 /*
- * Delete the (sub)value of an NVRAM variable ( name=foo1\1foo2\1value\1foo3\0 --> name=foo1\1foo2\1foo3\0 )
- * @param	name	name of variable to set
- * @param	value	subvalue of variable
- * @return	0 on success and errorno on failure
- * NOTE: use nvram_commit to commit this change to flash.
- */
-int nvram_delete(const char* name,const char* value);					/*TODO*/
-
-/*
  * Append the (sub)value of an NVRAM variable at the end ( name=foo1\1foo2\1foo3\0 --> name=foo1\1foo2\1foo3\1value\0)
+ * Act as nvram_set if no previous variables are present
  * The same behaviour of "/usr/sbin/nvram add" with initialization of variable in case of void value or variable not present.
  * @param	name	name of variable to set
  * @param	value	subvalue of variable
@@ -187,6 +180,16 @@ int nvram_delete(const char* name,const char* value);					/*TODO*/
  * NOTE: use nvram_commit to commit this change to flash.
  */
 int nvram_append(const char* name,const char* value);
+
+/*
+ * Delete the (sub)value of an NVRAM variable ( name=foo1\1foo2\1value\1foo3\0 --> name=foo1\1foo2\1foo3\0 )
+ * Act as nvram_set of void variable if only one (sub)value is present
+ * @param	name	name of variable to set
+ * @param	value	subvalue of variable
+ * @return	0 on success and errorno on failure
+ * NOTE: use nvram_commit to commit this change to flash.
+ */
+int nvram_delete(const char* name,const char* value);
 
 /*
  * Insert the (sub)value of an NVRAM variable at the beginning ( name=foo1\1foo2\1foo3\0 --> name=value\1foo1\1foo2\1foo3\0)
@@ -201,7 +204,7 @@ int nvram_insert(const char* name,const char* value);					/*TODO*/
  * Change the old (sub)value of an NVRAM variable with a new (sub)value ( name=foo1\1foo2\1old\1foo3\0 --> name=foo1\1foo2\1new\1foo3\0 )
  * @param	name	name of variable to set
  * @param	oldval  old subvalue to delete
- * @param	newcal	new subvalue to add
+ * @param	newval	new subvalue to add
  * @return	0 on success and errorno on failure
  * NOTE: use nvram_commit to commit this change to flash.
  */
