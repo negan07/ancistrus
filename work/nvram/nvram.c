@@ -176,7 +176,9 @@ static int nvram_load_unlock(void)
 
 	fd1=open(NVRAM_PATH,O_RDONLY);
 	if(fd1<0) {
-	if(data) {free(data);} if(fd1 >= 0) {close(fd1);} return NVRAM_FLASH_ERR;
+		if(data) {free(data);} 
+		if(fd1 >= 0) {close(fd1);} 
+		return NVRAM_FLASH_ERR;
 	}
 	read(fd1, &header,sizeof(nvram_header_t));
 
@@ -184,7 +186,9 @@ static int nvram_load_unlock(void)
 	lseek(fd1,NVRAM_HEADER_SIZE,0);
 	if(header.magic!=NVRAM_MAGIC)
 	{
-	if(data) {free(data);} if(fd1 >= 0) {close(fd1);} return NVRAM_MAGIC_ERR;
+		if(data) {free(data);} 
+		if(fd1 >= 0) {close(fd1);} 
+		return NVRAM_MAGIC_ERR;
 	}
 
 	data=malloc(header.len+1);
@@ -197,7 +201,9 @@ static int nvram_load_unlock(void)
 		printf("CRC Error!!\n");
 		printf("header.crc=%lx\tcrc=%lx\n",header.crc,crc);
 #endif	
-	if(data) {free(data);} if(fd1 >= 0) {close(fd1);} return NVRAM_CRC_ERR;
+		if(data) {free(data);} 
+		if(fd1 >= 0) {close(fd1);} 
+		return NVRAM_CRC_ERR;
 	}
 
 	writeFileBin_unlock(NVRAM_TMP_PATH, data, header.len);
@@ -367,6 +373,24 @@ char* nvram_get_r(const char *name)
 		else
 			return NULL;
 	}
+
+	// [bcm_nvram] s
+	if ( pt && !strncmp( pt, "*DEL*", 5 ) ) // check if this is the deleted var
+	{
+		free(pt);
+		pt = NULL;
+	}
+	// [bcm_nvram] e
+	
+	return pt;
+}
+
+/* reentrant version. caller is responsable to free the return buffer. */
+char* nvram_bcm_get_r(const char *name)
+{	
+	char *pt;
+	if((pt=__nvram_get_func(name,NVRAM_BCM_PATH,0))==NULL)
+			return NULL;
 
 	// [bcm_nvram] s
 	if ( pt && !strncmp( pt, "*DEL*", 5 ) ) // check if this is the deleted var
@@ -552,7 +576,7 @@ int nvram_show(char* path)
 		while(*(p++));
 		}
 	free(data);
-	if(!strcmp(path, NVRAM_TMP_PATH)) printf("\n"
+	if(!strcmp(path, NVRAM_TMP_PATH)) fprintf(stderr, "\n"
 	"Nvram settings file:\t\t%s\n"
 	"Nvram total size:\t\t%d Kb\n"
 	"Nvram occupied size:\t\t%d Kb (%d bytes)\n"
@@ -607,10 +631,22 @@ int nvram_delete(const char* name,const char* value)
 
 	return err;
 }
-int nvram_insert(const char* name,const char* value)				/*TODO*/
+int nvram_insert(const char* name,const char* value)
 {
-printf("%s TODO %s\n", name, value);
-	return NVRAM_SUCCESS;	
+	int err;
+	char *old, *p;
+	const char tag[]={DIVISION_SYMBOL};
+
+	old=nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
+	err = nvram_set(name, "");						/* clear name var settings content */
+	err = nvram_set(name, value);						/* insert value as first */
+
+	for(p=(char*)strtok(old, tag);p != NULL;p=(char*)strtok(NULL, tag))	/* tokenize old var string */
+		err = nvram_append(name, p);
+
+	if(old) free(old);
+	
+	return err;
 }
 int nvram_change(const char* name,const char* oldval,const char* newval)	/*TODO*/
 {

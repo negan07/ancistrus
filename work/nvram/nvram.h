@@ -110,7 +110,9 @@ char* nvram_get(const char *name);
  */
 char* nvram_get_func_r(const char *name,char *path);
 char* nvram_get_r(const char *name);
+char* nvram_bcm_get_r(const char *name);
 #define nvram_safe_get_r(name) (nvram_get_r(name)?:strdup(""))
+#define nvram_bcm_safe_get_r(name) (nvram_bcm_get_r(name)?:strdup(""))
 
 /*
  * Match an NVRAM variable
@@ -193,12 +195,13 @@ int nvram_delete(const char* name,const char* value);
 
 /*
  * Insert the (sub)value of an NVRAM variable at the beginning ( name=foo1\1foo2\1foo3\0 --> name=value\1foo1\1foo2\1foo3\0)
+ * Act as nvram_set if no previous variables are present
  * @param	name	name of variable to set
  * @param	value	subvalue of variable
  * @return	0 on success and errorno on failure
  * NOTE: use nvram_commit to commit this change to flash.
  */
-int nvram_insert(const char* name,const char* value);					/*TODO*/
+int nvram_insert(const char* name,const char* value);
 
 /*
  * Change the old (sub)value of an NVRAM variable with a new (sub)value ( name=foo1\1foo2\1old\1foo3\0 --> name=foo1\1foo2\1new\1foo3\0 )
