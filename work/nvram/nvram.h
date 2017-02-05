@@ -33,10 +33,10 @@
 #define NVRAM_DEFAULT		LROOT "/etc/default"
 #endif
 
-
-#define END_SYMBOL		0x00		  	
-#define DIVISION_SYMBOL		0x01		  
-#define SEPARATION_SYMBOL	0x02		  	
+/* used token tags */
+#define END_SYMBOL		0x00
+#define DIVISION_SYMBOL		0x01
+#define SEPARATION_SYMBOL	0x02
 
 /* NVRAM_HEADER MAGIC */ 
 #define NVRAM_MAGIC		0x004E4F52			/* RON */
@@ -60,7 +60,7 @@
 #define NVRAM_LEN_ERR		3
 #define NVRAM_CRC_ERR		4
 #define NVRAM_SHADOW_ERR	5
-#define NVRAM_DELETE_ERR	6
+#define NVRAM_DATA_ERR		6
 
 /*
  * nvram header struct 		            
@@ -173,9 +173,18 @@ int nvram_show(char* path);
 #define nvram_bcm_show() nvram_show(NVRAM_BCM_PATH)
 
 /*
- * Append the (sub)value of an NVRAM variable at the end ( name=foo1\1foo2\1foo3\0 --> name=foo1\1foo2\1foo3\1value\0)
- * Act as nvram_set if no previous variables are present
- * The same behaviour of "/usr/sbin/nvram add" with initialization of variable in case of void value or variable not present.
+ * Find an NVRAM (sub)variable
+ * @param	name	name of variable containing (sub)vars
+ * @param	match	(sub)value to compare against (sub)values of variable
+ * @return	TRUE if variable is defined and one of its (sub)values is string equal to find or FALSE otherwise
+ */
+int nvram_sub_find(const char *name, const char *find);
+
+/*
+ * Append the (sub)value of an NVRAM variable at the end ( name=foo1\1foo2\1foo3\0 --> name=foo1\1foo2\1foo3\1value\0 )
+ * The same behaviour of "/usr/sbin/nvram add" with safe initialization of variable in case of void value/not present and duplicate check.
+ * Act as nvram_set if no previous variables are present.
+ * If (sub)value to be appended is already present move it as last.
  * @param	name	name of variable to set
  * @param	value	subvalue of variable
  * @return	0 on success and errorno on failure
@@ -185,7 +194,7 @@ int nvram_append(const char* name,const char* value);
 
 /*
  * Delete the (sub)value of an NVRAM variable ( name=foo1\1foo2\1value\1foo3\0 --> name=foo1\1foo2\1foo3\0 )
- * Act as nvram_set of void variable if only one (sub)value is present
+ * Act as nvram_set of void variable if only one (sub)value is present.
  * @param	name	name of variable to set
  * @param	value	subvalue of variable
  * @return	0 on success and errorno on failure
@@ -194,8 +203,9 @@ int nvram_append(const char* name,const char* value);
 int nvram_delete(const char* name,const char* value);
 
 /*
- * Insert the (sub)value of an NVRAM variable at the beginning ( name=foo1\1foo2\1foo3\0 --> name=value\1foo1\1foo2\1foo3\0)
- * Act as nvram_set if no previous variables are present
+ * Insert the (sub)value of an NVRAM variable at the beginning ( name=foo1\1foo2\1foo3\0 --> name=value\1foo1\1foo2\1foo3\0 )
+ * Act as nvram_set if no previous variables are present.
+ * If (sub)value to be inserted is already present move as first.
  * @param	name	name of variable to set
  * @param	value	subvalue of variable
  * @return	0 on success and errorno on failure
@@ -205,13 +215,16 @@ int nvram_insert(const char* name,const char* value);
 
 /*
  * Change the old (sub)value of an NVRAM variable with a new (sub)value ( name=foo1\1foo2\1old\1foo3\0 --> name=foo1\1foo2\1new\1foo3\0 )
+ * If oldval and newval (sub)values are equal leave variable content unchanged.
+ * If oldval (sub)value to be changed is missed leave variable content unchanged.
+ * If newval (sub)value is already present change will be done as expected and the other newval duplicate removed.
  * @param	name	name of variable to set
  * @param	oldval  old subvalue to delete
  * @param	newval	new subvalue to add
  * @return	0 on success and errorno on failure
  * NOTE: use nvram_commit to commit this change to flash.
  */
-int nvram_change(const char* name,const char* oldval,const char* newval);		/*TODO*/
+int nvram_change(const char* name,const char* oldval,const char* newval);
 
 /*
 	get or set the value of a key

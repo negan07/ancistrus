@@ -534,6 +534,7 @@ int nvram_bcm_unset(const char* name)
 {
 	return nvram_unset_func(name,NVRAM_BCM_PATH);
 }
+
 int nvram_reset(void)
 {
 	int tmp_lock = -1, def_lock = -1;
@@ -544,13 +545,13 @@ int nvram_reset(void)
 	def_lock = nvram_lock(NVRAM_DEFAULT);
 
 	if((len=readFileBin_unlock(NVRAM_DEFAULT, &data))<=0) {
-	if(data) {free(data);}
-	err = NVRAM_SHADOW_ERR;
+		if(data) {free(data);}
+		err = NVRAM_SHADOW_ERR;
 	}
 	else {
-	writeFileBin_unlock(NVRAM_TMP_PATH, data, len);
-	free(data);
-	err = NVRAM_SUCCESS;
+		writeFileBin_unlock(NVRAM_TMP_PATH, data, len);
+		free(data);
+		err = NVRAM_SUCCESS;
 	}
 
 	nvram_unlock(def_lock);
@@ -558,22 +559,23 @@ int nvram_reset(void)
 
 	return err;
 }
+
 int nvram_show(char* path)
 {
 	int path_lock = -1;
-	char *data = NULL, *p;
+	char *data = NULL, *s;
 	int len, err;
 
 	path_lock = nvram_lock(path);
 
 	if((len=readFileBin_unlock(path, &data))<=0) {
-	if(data) {free(data);}
-	err = NVRAM_SHADOW_ERR;
+		if(data) {free(data);}
+		err = NVRAM_SHADOW_ERR;
 	}
 	else {
-		for(p=data;*p;) {
-		puts(p);
-		while(*(p++));
+		for(s=data;*s;) {
+		puts(s);
+		while(*(s++));
 		}
 	free(data);
 	if(!strcmp(path, NVRAM_TMP_PATH)) fprintf(stderr, "\n"
@@ -589,70 +591,123 @@ int nvram_show(char* path)
 
 	return err;
 }
+
+int nvram_sub_find(const char *name, const char *find)
+{
+	int err = 0;
+	char *value, *s;
+
+	if(!(value=nvram_get_r(name))) 
+		err = 0;
+	else 
+		for(s=value;*s;s++)						/* search for exact string-to-find match */
+			if(!strncmp(s, find, strlen(find)) 							/* string content presence */
+			&& ((strlen(s)==strlen(value)) || (*(s-1)==DIVISION_SYMBOL))				/* left string delimiter */
+			&& ((*(s+strlen(find))==DIVISION_SYMBOL) || (*(s+strlen(find))==END_SYMBOL))) {		/* right string delimiter */
+				err = 1;
+				break;
+			}
+	if(value) 
+		free(value);
+
+	return err;
+}
+
 int nvram_append(const char* name,const char* value)
 {
-	int size, err;
+	int err, size;
 	char *old, *new;
 
-	old=nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
+	if(nvram_sub_find(name, value))						/* assure no identical (sub)values are stored */
+		err = nvram_delete(name, value);
+
+	old = nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
 	if(!strcmp(old, "")) 
 		err = nvram_set(name,value);
 	else {
-		size=sizeof(char)*(strlen(old) +strlen(value) +2);		/* old + \1 + value + \0 */
-		if((new = (char*)malloc(size)) == NULL) 
+		size = sizeof(char)*(strlen(old) +strlen(value) +2);		/* old + \1 + value + \0 */
+		if((new = (char*)malloc(size)) == NULL)
 			err = NVRAM_SHADOW_ERR;
 		else {
-			snprintf(new, size, "%s%c%s", old, DIVISION_SYMBOL, value);
-			err = nvram_set(name, new);
+			snprintf(new, size, "%s%c%s", old, DIVISION_SYMBOL, value);	/* append the new (sub)value */
+			err = nvram_set(name, new);				/* set new string */
 			free(new);
 		}
 	}
-	if(old) free(old);
+	if(old) 
+		free(old);
 
 	return err;
 }
+
 int nvram_delete(const char* name,const char* value)
 {
 	int err;
-	char *old, *p;
-	const char tag[]={DIVISION_SYMBOL};
+	char *old, *s;
+	const char tag[] = {DIVISION_SYMBOL};
 
-	old=nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
+	old = nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
 	if(!strcmp(old, "")) 
-		err = NVRAM_DELETE_ERR;
+		err = NVRAM_DATA_ERR;
 	else {
 		err = nvram_set(name, "");					/* clear name var settings content */
-		for(p=(char*)strtok(old, tag);p != NULL;p=(char*)strtok(NULL, tag)) {  /* tokenize old var string */
-			if(strcmp(p, value)) 
-				err = nvram_append(name, p);
+		for(s=(char*)strtok(old, tag);s != NULL;s=(char*)strtok(NULL, tag)) {  /* tokenize old var string */
+			if(strcmp(s, value)) 
+				err = nvram_append(name, s);
 		}
 	}
-	if(old) free(old);
+	if(old) 
+		free(old);
 
 	return err;
 }
+
 int nvram_insert(const char* name,const char* value)
 {
 	int err;
-	char *old, *p;
-	const char tag[]={DIVISION_SYMBOL};
+	char *old, *s;
+	const char tag[] = {DIVISION_SYMBOL};
 
-	old=nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
+	old = nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
 	err = nvram_set(name, "");						/* clear name var settings content */
 	err = nvram_set(name, value);						/* insert value as first */
 
-	for(p=(char*)strtok(old, tag);p != NULL;p=(char*)strtok(NULL, tag))	/* tokenize old var string */
-		err = nvram_append(name, p);
+	for(s=(char*)strtok(old, tag);s != NULL;s=(char*)strtok(NULL, tag))	/* tokenize old var string */
+		if(strcmp(s, value))						/* assure no identical (sub)values are stored */
+			err = nvram_append(name, s);
 
-	if(old) free(old);
-	
+	if(old) 
+		free(old);
+
 	return err;
 }
-int nvram_change(const char* name,const char* oldval,const char* newval)	/*TODO*/
+
+int nvram_change(const char* name,const char* oldval,const char* newval)
 {
-printf("%s TODO %s TODO %s\n", name, oldval, newval);
-	return NVRAM_SUCCESS;	
+	int err;
+	char *old, *s;
+	const char tag[] = {DIVISION_SYMBOL};
+
+	if(!strcmp(oldval, newval) || !nvram_sub_find(name, oldval))		/* if old & new are equal or old missed no change */
+		err = NVRAM_DATA_ERR;
+	else {
+		old = nvram_safe_get_r(name);					/* safe reentrant version: no NULL and return must be free */
+		err = nvram_set(name, "");					/* clear name var settings content */
+		for(s=(char*)strtok(old, tag);s != NULL;s=(char*)strtok(NULL, tag)) {	/* tokenize old var string */
+			if(!strcmp(s, newval))					/* assure no identical (sub)values are stored */
+				continue;
+			else if(!strcmp(s, oldval)) 
+				err = nvram_append(name, newval);
+			else
+				err = nvram_append(name, s);
+		}
+		if(old) 
+			free(old);
+	}
+
+	return err;
 }
+
 /*
 	get or set the value of a key
 */
