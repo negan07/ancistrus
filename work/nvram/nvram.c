@@ -675,7 +675,6 @@ int nvram_insert(const char* name,const char* value)
 	for(s=(char*)strtok(old, tag);s != NULL;s=(char*)strtok(NULL, tag))	/* tokenize old var string */
 		if(strcmp(s, value))						/* assure no identical (sub)values are stored */
 			err = nvram_append(name, s);
-
 	if(old) 
 		free(old);
 
