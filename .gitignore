@@ -102,5 +102,6 @@ work/Rules.mak
 vmlinux.*
 *.img
 *.bin
+*.bz2
 *target*
 

@@ -11,7 +11,7 @@
 # Revised & adapted:
 # ancistrus
 #
-# Netgear's Nighthawk Router Experience
+# Netgear's Nighthawk Router Experience Distributed Project
 #
 # https://github.com/negan07/ancistrus
 

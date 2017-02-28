@@ -1,17 +1,28 @@
 ancistrus
 
-Netgear's Nighthawk Router Experience
+Netgear's Nighthawk Router Experience Distributed Project
 
 D7000
 
 https://github.com/negan07/ancistrus
 
-./hostprepare.sh			host tune-up script to prepare & install packets needed to develop: this can be omitted if not needed
+
+-------------------------------------------------------------------------------------------------------------
+./hostprepare.sh			host tune-up script to prepare & install packets needed to develop
+-------------------------------------------------------------------------------------------------------------
 ./dl_sources.sh				download sources from Netgear mirror
 ./tchainprepare.sh			extract and patch crosstools and make it ready to compile toolchains
-./apply_patch.sh			patch sources
 cd crosstools*sources			cd to crosstools dir
 sudo make				(60 min or more needed)
-cd ../D7000*_src			cd to src dir
+-------------------------------------------------------------------------------------------------------------
+cd ..					cd to root gitdir
+./apply_patch.sh all			patch original sources
+cd D7000*_src				cd to src dir
 sudo make kernel && sudo make source	(20-25 min needed)
-
+-------------------------------------------------------------------------------------------------------------
+cd ..					cd to root gitdir
+./apply_patch.sh work			patch work dir
+cd work					cd to work dir
+make
+...
+-------------------------------------------------------------------------------------------------------------
