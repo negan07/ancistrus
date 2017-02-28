@@ -1,0 +1,19 @@
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/package/Makefile.in crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/package/Makefile.in
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/package/Makefile.in	2011-12-01 00:08:44.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/package/Makefile.in	2017-02-25 00:05:33.879984585 +0100
+@@ -6,8 +6,14 @@
+ endif
+ HOSTMAKE :=$(shell which $(HOSTMAKE) || type -p $(HOSTMAKE) || echo make)
+ 
++ifeq ($(BR2_JLEVEL),2)
++PARALLEL_JOBS:=$(shell echo $$((2 * `getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1`)))
++else
++PARALLEL_JOBS:=$(BR2_JLEVEL)
++endif
++
+ MAKE1:=$(HOSTMAKE) -j1
+-MAKE:=$(HOSTMAKE) -j$(BR2_JLEVEL)
++MAKE:=$(HOSTMAKE) -j$(PARALLEL_JOBS)
+ 
+ # Compute GNU_TARGET_NAME and REAL_GNU_TARGET_NAME
+ GNU_TARGET_NAME=$(ARCH)-linux

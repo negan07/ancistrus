@@ -1,0 +1,192 @@
+diff -urN D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/sc.mak D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/sc.mak
+--- D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/sc.mak	2017-02-27 20:33:25.998891029 +0100
++++ D7000_V1.0.1.44_WW_src/Kernel/bcm963xx/sc.mak	2017-02-27 20:43:32.021156543 +0100
+@@ -117,9 +117,6 @@
+ endif
+ 	cp -af $(BCM_DIR)/adsldd.ko $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/bcm_enet.ko $(FS_DIR)/lib/modules/
+-	#cp -af $(BCM_DIR)/bcm_ingqos.ko $(FS_DIR)/lib/modules/
+-	#cp -af $(BCM_DIR)/bcm_bpm.ko $(FS_DIR)/lib/modules/
+-	#cp -af $(BCM_DIR)/bcmarl.ko $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/rdpa_cmd_tm.ko  $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/rdpa_cmd_spdsvc.ko  $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/rdpa_cmd_drv.ko  $(FS_DIR)/lib/modules/
+@@ -131,7 +128,6 @@
+ 	cp -af $(BCM_DIR)/pktrunner.ko  $(FS_DIR)/lib/modules/      
+ 	cp -af $(BCM_DIR)/pwrmngtd.ko $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/chipinfo.ko $(FS_DIR)/lib/modules/
+-	#cp -af $(BCM_DIR)/p8021ag.ko $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/nciTMSkmod.ko $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/ohci-hcd.ko  $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/ehci-hcd.ko  $(FS_DIR)/lib/modules/
+@@ -144,25 +140,12 @@
+ 	cp -af $(BCM_DIR)/bcm63xx_sata.ko  $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/bcm63xx_usb.ko  $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/tun.ko  $(FS_DIR)/lib/modules/	
+-
+-#	cp -af $(BCM_DIR)/wlctl $(FS_DIR)/usr/sbin/
+-#	ln -sf wlctl $(FS_DIR)/usr/sbin/wl
+-#	cp -af $(BCM_DIR)/nas $(FS_DIR)/usr/sbin/nas
+-#	cp -af $(BCM_DIR)/acsd $(FS_DIR)/usr/sbin/acsd
+-#	cp -af $(BCM_DIR)/acs_cli $(FS_DIR)/usr/sbin/acs_cli
+ 	$(STRIP) -g  $(BCM_DIR)/wl.ko 
+-#	$(STRIP) -g  $(BCM_DIR)/wl.ko $(BCM_DIR)/libwlbcmcrypto.so $(BCM_DIR)/libwlctl.so $(BCM_DIR)/libwps.so
+-#	$(STRIP) -g  $(BCM_DIR)/wps_monitor
+ 	cp -af $(BCM_DIR)/wl.ko $(FS_DIR)/lib/modules/
+-#	cp -af $(BCM_DIR)/libwlctl.so $(FS_DIR)/lib/
+ 	cp -af $(BCM_DIR)/wfd.ko $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/wlemf.ko $(FS_DIR)/lib/modules/
+ 	cp -af $(BCM_DIR)/wlcsm.ko $(FS_DIR)/lib/modules/
+ 
+-#	cp -af $(BCM_DIR)/libwlbcmcrypto.so $(FS_DIR)/lib/
+-#	cp -af $(BCM_DIR)/libwlbcmshared.so $(FS_DIR)/lib/
+-#	cp -af $(BCM_DIR)/sc_priority.ko $(FS_DIR)/lib/modules/
+-
+ 	@if [ -e $(BCM_DIR)/libwlbcmcrypto.so ]; then\
+ 		echo "copy libwlbcmcrypto.so from $(BCM_DIR) to $(FS_DIR)";\
+ 		cp -af $(BCM_DIR)/libwlbcmcrypto.so $(FS_DIR)/lib/;\
+@@ -171,16 +154,9 @@
+ 		echo "copy libwlbcmshared.so from $(BCM_DIR) to $(FS_DIR)";\
+ 		cp -af $(BCM_DIR)/libwlbcmshared.so $(FS_DIR)/lib/;\
+ 	fi
+-#	@if [ -e $(FS_DIR)/usr/etc/wlan ]; then\
+-#		rm -rf $(FS_DIR)/usr/etc/wlan ;\
+-#	fi
+-#	@if [ -e $(BCM_DIR)/wsc_config_1a_ap.txt ]; then\
+-		cp -af $(BCM_DIR)/wsc_config_1a_ap.txt $(FS_DIR)/usr/etc ;\
+-	fi
+ 	@if [ -e $(BCM_DIR)/wps_monitor	]; then\
+ 		cp -af $(BCM_DIR)/wps_monitor  $(FS_DIR)/usr/sbin ;\
+ 	fi
+-
+ 	@if [ -e $(BCM_DIR)/libwps.so ]; then\
+ 		echo "copy libwps.so from $(BCM_DIR) to $(FS_DIR)";\
+ 		cp -af $(BCM_DIR)/libwps.so $(FS_DIR)/lib/libwps.so;\
+@@ -206,64 +182,11 @@
+ 		cp -af $(BCM_DIR)/lld2d $(FS_DIR)/usr/sbin/lld2;\
+ 	fi
+ 
+-#	mkdir -p $(FS_DIR)/usr/etc/wlan/;\
+-#	cp -af $(BCM_DIR)/wlan_map/bcm*_map.bin $(FS_DIR)/usr/etc/wlan/
+-
+ 	cp -af $(BCM_DIR)/netfilter/*.ko $(FS_DIR)/lib/modules/
+-#	cp -af $(BCM_DIR)/ts_bm.ko $(FS_DIR)/lib/modules/
+-
+-#	cp -af $(BCM_DIR)/libcms_msg.so $(FS_DIR)/lib
+-#	cp -af $(BCM_DIR)/libcms_util.so $(FS_DIR)/lib
+-#	cp -af $(BCM_DIR)/libcms_boardctl.so $(FS_DIR)/lib
+-#
+-#	mkdir -p $(FS_DIR)/usr/etc/adsl/
+-#	cp -af $(BCM_DIR)/adsl_phy.bin $(FS_DIR)/usr/etc/adsl/
+-#	cp -af $(BCM_DIR)/xdslctl $(FS_DIR)/bin/
+-#	cp -af $(BCM_DIR)/adslctl $(FS_DIR)/bin/
+-#	cp -af $(BCM_DIR)/libxdslctl.so $(FS_DIR)/lib/
+-#	cp -af $(BCM_DIR)/xtmctl $(FS_DIR)/bin/
+-#	cp -af $(BCM_DIR)/xtm $(FS_DIR)/bin/
+-#	cp -af $(BCM_DIR)/libatmctl.so $(FS_DIR)/lib
+-#	cp -af $(BCM_DIR)/ethctl $(FS_DIR)/bin/
+-#	cp -af $(BCM_DIR)/ethswctl $(FS_DIR)/bin/
+-#	cp -af $(BCM_DIR)/libwlcsm.so $(FS_DIR)/lib	
+-
+-#	cp $(BCM_DIR)/br_qos.ko $(FS_DIR)/lib/modules/
+-
+ 	cp -af $(BCM_DIR)/bcmvlan.ko $(FS_DIR)/lib/modules/
+-#	cp -af $(BCM_DIR)/vlanctl $(FS_DIR)/bin/
+-#	cp -af $(BCM_DIR)/libvlanctl.so $(FS_DIR)/lib/
+-#	cp -af $(BCM_DIR)/libethswctl.so $(FS_DIR)/lib/
+-#	cp -af $(BCM_DIR)/libtmctl.so $(FS_DIR)/lib/
+-#	cp -af $(BCM_DIR)/librdpactl.so $(FS_DIR)/lib/
+-ifneq ($(strip $(BUILD_SWMDK)),)
+-#	cp -af $(BCM_DIR)/swmdk $(FS_DIR)/usr/sbin
+-endif
+-#	cp -af $(BCM_DIR)/spuctl $(FS_DIR)/bin/
+-#	cp -af $(BCM_DIR)/libspuctl.so $(FS_DIR)/lib/
+-
+-#	cp -af $(BCM_DIR)/{fc,fcctl} $(FS_DIR)/bin
+-#	cp -af $(BCM_DIR)/libfcctl.so $(FS_DIR)/lib
+-
+-#	cp -af $(BCM_DIR)/fapctl $(FS_DIR)/bin
+-#	cp -af $(BCM_DIR)/libfapctl.so $(FS_DIR)/lib
+-
+-#ifneq ($(strip $(BUILD_VODSL)),)
+-#	cp -af $(BCM_DIR)/endpointdd.ko $(FS_DIR)/lib/modules
+-##	cp -af $(BCM_DIR)/dspdd.ko $(FS_DIR)/lib/modules
+-#ifneq ($(strip $(BRCM_VODSL_DECT)),)
+-##	cp -af $(BCM_DIR)/dect.ko $(FS_DIR)/lib/modules
+-#endif
+-#	cp -af $(BCM_DIR)/vodsl $(FS_DIR)/usr/sbin
+-#	cp -af $(BCM_DIR)/voctl $(FS_DIR)/usr/sbin
+-#endif
+-
+-#3g support modules
+-	#cp -af $(BCM_DIR)/usbserial.ko $(FS_DIR)/lib/modules
+-	#cp -af $(BCM_DIR)/option.ko $(FS_DIR)/lib/modules
+-	#cp -af $(BCM_DIR)/usbserial_filter.ko $(FS_DIR)/lib/modules
+-#readyshare remote modules	
+-	#cp -af $(BCM_DIR)/tun.ko $(FS_DIR)/lib/modules
++	cp -af $(BCM_DIR)/act_ipt.ko $(FS_DIR)/lib/modules/
++	cp -af $(BCM_DIR)/cls_flow.ko $(FS_DIR)/lib/modules/
++	cp -af $(BCM_DIR)/*_codel.ko $(FS_DIR)/lib/modules/
+ 	@echo -e "\\e[36m -- sc_driver --\e[0m"	
+ 
+ vmlinux.lz_only : prebuild_checks profile_saved_check sanity_check \
+@@ -318,12 +241,8 @@
+ 	cp -af $(BRCMDRIVERS_DIR)/broadcom/net/wl/bcm9$(BRCM_CHIP)/wlcsm.ko $(BCM_DIR)
+ 	cp -af $(BRCMDRIVERS_DIR)/broadcom/net/wl/bcm9$(BRCM_CHIP)/wlemf.ko $(BCM_DIR)
+ 	cp -af $(BRCMDRIVERS_DIR)/opensource/net/wfd/bcm9$(BRCM_CHIP)/wfd.ko $(BCM_DIR)
+-	#cp -af $(BRCMDRIVERS_DIR)/broadcom/char/ingqos/bcm9$(BRCM_CHIP)/bcm_ingqos.ko $(BCM_DIR)
+-	#cp -af $(BRCMDRIVERS_DIR)/broadcom/char/bpm/bcm9$(BRCM_CHIP)/bcm_bpm.ko $(BCM_DIR)
+-	#cp -af $(BRCMDRIVERS_DIR)/broadcom/char/arl/bcm9$(BRCM_CHIP)/bcmarl.ko $(BCM_DIR)
+ 	cp -af $(BRCMDRIVERS_DIR)/broadcom/char/pwrmngt/bcm9$(BRCM_CHIP)/pwrmngtd.ko $(BCM_DIR)
+ 	cp -af $(BRCMDRIVERS_DIR)/broadcom/char/chipinfo/impl1/chipinfo.ko $(BCM_DIR)
+-	#cp -af $(BRCMDRIVERS_DIR)/broadcom/char/p8021ag/impl1/p8021ag.ko $(BCM_DIR)
+ 	cp -af $(BRCMDRIVERS_DIR)/broadcom/char/tms/impl1/nciTMSkmod.ko $(BCM_DIR)
+ 	cp -af $(KERNEL_DIR)/drivers/usb/host/ohci-hcd.ko  $(BCM_DIR)
+ 	cp -af $(KERNEL_DIR)/drivers/usb/host/ehci-hcd.ko  $(BCM_DIR)
+@@ -353,37 +272,24 @@
+ 	cp -af $(KERNEL_DIR)/net/netfilter/*.ko $(BCM_DIR)/netfilter;\
+ 	cp -af $(KERNEL_DIR)/net/ipv4/netfilter/*.ko $(BCM_DIR)/netfilter;\
+ 	cp -af $(KERNEL_DIR)/net/ipv6/netfilter/*.ko $(BCM_DIR)/netfilter;\
+-#	cp -af $(KERNEL_DIR)/lib/ts_bm.ko $(BCM_DIR)
+ # qos
+-#	cp -af $(BRCMDRIVERS_DIR)/broadcom/sc_priority/sc_priority.ko $(BCM_DIR)
+-#	cp -af $(KERNEL_DIR)/net/bridge/br_qos.ko $(BCM_DIR)
++	cp -af $(KERNEL_DIR)/net/sched/*.ko $(BCM_DIR)
+ # voice
+ ifneq ($(strip $(BUILD_VODSL)),)
+-#	cp -af $(BRCMDRIVERS_DIR)/broadcom/char/dspapp/bcm9$(BRCM_CHIP)/dspdd.ko $(BCM_DIR)
+ 	cp -af $(BRCMDRIVERS_DIR)/broadcom/char/endpoint/bcm9$(BRCM_CHIP)/endpointdd.ko $(BCM_DIR)
+ 	cp -af $(BRCMDRIVERS_DIR)/broadcom/char/endpoint/bcm9$(BRCM_CHIP)/endptdrv/endptdrv.ko $(BCM_DIR)
+ 	cp -af $(BRCMDRIVERS_DIR)/broadcom/char/endpoint/bcm9$(BRCM_CHIP)/haushost/haushost.ko $(BCM_DIR)
+ 	cp -af $(BRCMDRIVERS_DIR)/broadcom/char/endpoint/bcm9$(BRCM_CHIP)/gwcommon/gwcommon.ko $(BCM_DIR)
+-ifneq ($(strip $(BRCM_VODSL_DECT)),)
+-#	cp -af $(BRCMDRIVERS_DIR)/broadcom/char/dect/bcm9$(BRCM_CHIP)/dect.ko $(BCM_DIR)
+-endif
+ endif
+-#3G support
+-	#cp -af $(KERNEL_DIR)/drivers/usb/serial/*.ko $(BCM_DIR)
+-#readyshare remote 
+-	#cp -af $(KERNEL_DIR)/drivers/net/tun.ko $(BCM_DIR)
+ 	echo "Stripping kernel modules..."
+ # Modules that need parameters cannot be stripped
+ 	eval "find $(BCM_DIR) -name '*.ko' ! -name 'ip*.ko' |xargs $(STRIP) --strip-unneeded"
+-# However do strip debug symbols, in case debug symbols are included
+-#	eval "find $(BCM_DIR) -name 'ip*.ko' |xargs $(STRIP) --strip-debug"
+ 
+ show:
+ 	@echo Profile=$(PROFILE)  
+ 	@echo WL=$(WL)  
+ 
+ sc_help:
+-#	@more Readme_allen.txt
+ 	@echo
+ 	@echo "-----------------------------------------------------------"
+ 	@echo "make sc_adsl: display usage to change ATM driver/ adsl phy"
+@@ -407,7 +313,6 @@
+     
+ sc_adsl_1: sc_adsl_rm_link
+ 	@echo " ... link to 4.02L.01 original code ... "
+-#	ln -sf impl1_org bcmdrivers/broadcom/char/adsl/impl1
+ 	ln -sf impl1_20k_rc2 bcmdrivers/broadcom/char/adsl/impl1
+ 	ln -sf bcm963xx_org bcmdrivers/broadcom/include/bcm963xx
+ 	ln -sf xdslctl_org userspace/private/apps/xdslctl

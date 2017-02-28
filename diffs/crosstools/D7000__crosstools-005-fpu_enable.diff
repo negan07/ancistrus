@@ -1,0 +1,39 @@
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/arm.uClibc-0.9.32.brcm.config crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/arm.uClibc-0.9.32.brcm.config
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/arm.uClibc-0.9.32.brcm.config	2014-01-16 20:54:24.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/arm.uClibc-0.9.32.brcm.config	2017-02-20 22:17:11.544753557 +0100
+@@ -77,8 +77,7 @@
+ ARCH_HAS_MMU=y
+ ARCH_USE_MMU=y
+ UCLIBC_HAS_FLOATS=y
+-# UCLIBC_HAS_FPU is not set
+-UCLIBC_HAS_SOFT_FLOAT=y
++UCLIBC_HAS_FPU=y
+ DO_C99_MATH=y
+ # DO_XSI_MATH is not set
+ # UCLIBC_HAS_FENV is not set
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mipsel.uClibc-0.9.32.brcm.config crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mipsel.uClibc-0.9.32.brcm.config
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mipsel.uClibc-0.9.32.brcm.config	2014-01-16 20:54:24.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mipsel.uClibc-0.9.32.brcm.config	2017-02-20 22:17:09.000765998 +0100
+@@ -57,8 +57,7 @@
+ ARCH_HAS_MMU=y
+ ARCH_USE_MMU=y
+ UCLIBC_HAS_FLOATS=y
+-# UCLIBC_HAS_FPU is not set
+-UCLIBC_HAS_SOFT_FLOAT=y
++UCLIBC_HAS_FPU=y
+ DO_C99_MATH=y
+ # DO_XSI_MATH is not set
+ # UCLIBC_HAS_FENV is not set
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mips.uClibc-0.9.32.brcm.config crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mips.uClibc-0.9.32.brcm.config
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mips.uClibc-0.9.32.brcm.config	2014-01-16 20:54:24.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mips.uClibc-0.9.32.brcm.config	2017-02-20 22:17:10.164760304 +0100
+@@ -57,8 +57,7 @@
+ ARCH_HAS_MMU=y
+ ARCH_USE_MMU=y
+ UCLIBC_HAS_FLOATS=y
+-# UCLIBC_HAS_FPU is not set
+-UCLIBC_HAS_SOFT_FLOAT=y
++UCLIBC_HAS_FPU=y
+ DO_C99_MATH=y
+ # DO_XSI_MATH is not set
+ # UCLIBC_HAS_FENV is not set
