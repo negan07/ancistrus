@@ -93,11 +93,12 @@ export STRIPFLAGS := -x -R .note -R .comment -R .version --strip-unneeded
 #export STRIPFLAGS := -x -R .note -R .comment
 
 ifeq ($(ARCH),mips)
-export CFLAGS := -march=mips32 -mtune=mips32 -mips32 -pipe -funit-at-a-time -fomit-frame-pointer -fno-strict-aliasing -mabi=32 -G 0 -msoft-float -Wa,-mips32 -fno-common -mno-shared
+export CFLAGS := -mips32 -march=mips32 -mtune=mips32 -Wa,-mips32 -G 0 -pipe -funit-at-a-time -fomit-frame-pointer -fno-strict-aliasing -fno-common -mno-shared -mabi=32 -msoft-float
 endif
 
 ifeq ($(ARCH),arm)
-export CFLAGS := -march=armv7-a -mtune=cortex-a9 -mcpu=cortex-a9 -marm -pipe -funit-at-a-time -fomit-frame-pointer -mno-thumb-interwork -mabi=aapcs-linux -ffixed-r8 -mfloat-abi=softfp -mfpu=neon-fp16 -fno-common
+export CFLAGS := -marm -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon-fp16 -pipe -funit-at-a-time -fomit-frame-pointer -ffixed-r8 -fno-common -mno-thumb-interwork -mabi=aapcs-linux -mfloat-abi=soft
+#CFLAGS += -mfloat-abi=softfp
 endif
 
 ifeq ($(ARCH),i386)
