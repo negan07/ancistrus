@@ -6,9 +6,12 @@
 SOURCEDIR="D7000_V1.0.1.44_WW_src"
 TCDIR="crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources"
 TARTC="../${SOURCEDIR}/Source/${TCDIR}.tar.bz2"
+INSTDIR="/opt/toolchains"
+BRDLDIR="src/buildroot-2011.11/dl"
 
 # create compiled toolchain's root dir: the path cannot be modified
-sudo mkdir /opt/toolchains
+sudo mkdir -p -m 0755 $INSTDIR
+# searching for source dir: if not found dl it
 	if [ ! -d $SOURCEDIR ]; then
 	./dl_sources.sh
 		if [ $? != 0 ]; then
@@ -22,8 +25,9 @@ cd $TCDIR
 echo "Extracting crosstools from tar.bz2 archive..."
 tar xjf $TARTC
 chmod 755 src/build
-# extract archives src/buildroot-2011.11/dl
-cd src/buildroot-2011.11/dl
+chmod 644 src/*.brcm.config
+# extract archives on dl dir
+cd $BRDLDIR
 echo "Extracting crosstools before patching..."
 tar xjf autoconf-2.65.tar.bz2
 tar xjf gcc-4.6.2.tar.bz2
@@ -33,10 +37,10 @@ tar xjf uClibc-0.9.32.tar.bz2
 # remove old archives
 rm -f autoconf-2.65.tar.bz2 gcc-4.6.2.tar.bz2 gdb-7.3.1.tar.bz2 m4-1.4.15.tar.bz2 uClibc-0.9.32.tar.bz2
 cd ../../../..
-# apply patch
-patch -p0 < diffs/crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources.diff
+# apply patches
+./apply_patch.sh crosstools
 # repack them all
-cd $TCDIR/src/buildroot-2011.11/dl
+cd $TCDIR/$BRDLDIR
 echo "Repacking crosstools after patching..."
 tar cjf autoconf-2.65.tar.bz2 autoconf-2.65
 tar cjf gcc-4.6.2.tar.bz2 gcc-4.6.2

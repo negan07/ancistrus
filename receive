@@ -21,8 +21,18 @@ RDIR=/tmp/etc								# this script location
 DBGDIR=$RDIR/ancdbg							# debug dir
 LANGDIR=www.eng								# www dir
 CGI=$NAME.cgi								# actual cgi name
-LIST="libscnvram.so $NAME"						# list of files got by CORE()
+BINLIST="libscnvram.so $NAME"						# main binary files
+KOLIST="sch_fq_codel.ko act_ipt.ko cls_flow.ko"				# kernel modules
+QOSLIST="defaults.sh functions.sh qos.conf rc_qos simple.qos"		# qos scripts and configs
 
+
+DIRMAKE() {								# create the work bindir
+mkdir -p -m 0755 $DBGDIR > /dev/null 2>&1
+}
+
+THISLNK() {								# create a symlink to this
+ln -sf $RDIR/$THISONE $DBGDIR/$THISONE > /dev/null 2>&1
+}
 
 GET() {									# www get a file from the $URL webserver
 rm -f $1
@@ -38,29 +48,35 @@ rm -f $1
 	fi
 }
 
-CORE() {								# www get to $DBGDIR dir $LIST files from the $URL webserver
-mkdir -p -m 0755 $DBGDIR > /dev/null 2>&1
+GETLIST() {								# www get list of files from the $URL webserver to $DBGDIR dir
+DIRMAKE
 cd $DBGDIR
-	for I in $LIST
+	for I in $*
 	do
 	GET $I
 	done
-ln -sf $RDIR/$THISONE $DBGDIR/$THISONE > /dev/null 2>&1
+THISLNK
 }
 
 export LD_LIBRARY_PATH=$DBGDIR
 
 	if [ $# != "1" ]; then
-	echo "Usage: $0 core web del *anyfiledir*"
+	echo "Usage: $0 core ko qos web del *anyfiledir*"
 	exit 1
 	fi
 
 	case $1 in
 	core)
-	CORE
+	GETLIST $BINLIST
+	;;
+	ko)
+	GETLIST $KOLIST
+	;;
+	qos)
+	GETLIST $QOSLIST
 	;;
 	web)
-	mkdir -p -m 0755 $DBGDIR > /dev/null 2>&1
+	DIRMAKE
 	cd $DBGDIR
 	rm -rf $DBGDIR/$LANGDIR
 	GET $LANGDIR.zip
@@ -68,7 +84,7 @@ export LD_LIBRARY_PATH=$DBGDIR
 	rm -f $LANGDIR.zip
 	chmod -R 755 $LANGDIR
 	ln -sf $DBGDIR/$CGI $RDIR/$CGI > /dev/null 2>&1
-	CORE
+	GETLIST $BINLIST
 	;;
 	del)
 	cd $RDIR
@@ -76,7 +92,7 @@ export LD_LIBRARY_PATH=$DBGDIR
 	rm -f $RDIR/$CGI
 	;;
 	*)
-	mkdir -p -m 0755 $DBGDIR > /dev/null 2>&1
+	DIRMAKE
 	cd $DBGDIR
 	GET $1
 	FILEABS=`echo "$1" | grep ".zip"`
@@ -85,6 +101,7 @@ export LD_LIBRARY_PATH=$DBGDIR
 		rm -f $1
 		chmod -R 755 $FILEABS > /dev/null 2>&1
 		fi
+	THISLNK
 	;;
 	esac
 
