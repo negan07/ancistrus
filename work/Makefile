@@ -3,8 +3,8 @@ PROJECT_NAME		:= ancistrus
 
 CUR_PATH		:= $(shell pwd)
 RULES			:= $(CUR_PATH)/Rules.mak
-export NUMTHREAD	:= $(shell expr `getconf _NPROCESSORS_ONLN` + 1)
-#export NUMTHREAD	:= $(shell expr `cat /proc/cpuinfo | grep 'cpu cores' | head -n 1 | sed "s/cpu cores\t: //"` + 1)
+export NUMTHREAD	:= $$((2 * `getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1`))
+#export NUMTHREAD	:= $$((2 * `grep processor /proc/cpuinfo | wc -l`))
 
 ifdef LOCAL
 export LOCAL
@@ -34,9 +34,13 @@ THIRDPARTYLIB		:=
 THIRDPARTY		:=
 SUBDIRS			:=
 
-BUILTINLIB 		+= nvram
-THIRDPARTY		+= $(PROJECT_NAME)_core-0.0.0
-BUILTIN			+= utelnetd-0.1.9
+#BUILTINLIB 		+= nvram
+#THIRDPARTY		+= $(PROJECT_NAME)_core-0.0.0
+ifndef LOCAL
+#BUILTIN			+= utelnetd-0.1.9
+BUILTIN			+= iproute2-4.10.0
+THIRDPARTY		+= qos-0.0.0
+endif
 
 SUBDIRS			+= $(BUILTINLIB)
 SUBDIRS			+= $(THIRDPARTYLIB)
