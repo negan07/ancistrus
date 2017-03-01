@@ -14,12 +14,12 @@ builtinlib			Modified built-in shared libraries.
 
 builtin				Modified built-in apps.
 	utelnetd			The console telnet daemon including little modifications.
-	iproute2			Updated network usage tool: esfq/codel/fq_codel AQM qos sched support.
-	qos				Quality Of Service setup tool in substitution of weak builtin.
+	iproute2			Updated network tool: esfq/(fq_)codel AQM qos sched support.
+	qos				Quality Of Service tool in substitution of weak builtin.
 
 thirdpartylib			Additional shared libraries not included into the original firmware.
 	
 
 thirdparty			Additional apps not included into the original firmware.
-	ancistrus-core			The Main work tool: creates & acts all the modification injects.
+	ancistrus-core			The Main work tool: creates & acts all the injects.
 
