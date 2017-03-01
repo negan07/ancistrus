@@ -14,10 +14,10 @@ builtinlib			Modified built-in shared libraries.
 
 builtin				Modified built-in apps.
 	utelnetd			The console telnet daemon including little modifications.
-	iproute2			Updated network tool: esfq/(fq_)codel AQM qos sched support.
+	iproute2			Updated net tool: esfq/(fq_)codel AQM qos sched support.
 	qos				Quality Of Service tool in substitution of weak builtin.
 
-thirdpartylib			Additional shared libraries not included into the original firmware.
+thirdpartylib			Additional .so libs not included into the original firmware.
 	
 
 thirdparty			Additional apps not included into the original firmware.
