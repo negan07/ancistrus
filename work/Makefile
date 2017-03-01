@@ -38,8 +38,8 @@ SUBDIRS			:=
 #THIRDPARTY		+= $(PROJECT_NAME)_core-0.0.0
 ifndef LOCAL
 #BUILTIN			+= utelnetd-0.1.9
-BUILTIN			+= iproute2-4.10.0
-THIRDPARTY		+= qos-0.0.0
+#BUILTIN			+= iproute2-4.10.0
+BUILTIN			+= qos-0.0.0
 endif
 
 SUBDIRS			+= $(BUILTINLIB)
