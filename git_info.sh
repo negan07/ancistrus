@@ -1,5 +1,5 @@
-#!/bin/bash
-
+#!/bin/sh
+#
 # author: Duane Johnson
 # email: duane.johnson@gmail.com
 # date: 2008 Jun 12
@@ -13,7 +13,10 @@
 #
 # Netgear's Nighthawk Router Experience Distributed Project
 #
+# D7000
+#
 # https://github.com/negan07/ancistrus
+#
 
 pushd . >/dev/null
 

@@ -1,5 +1,14 @@
 #!/bin/sh
 #
+# ancistrus
+#
+# Netgear's Nighthawk Router Experience Distributed Project
+#
+# D7000
+#
+# https://github.com/negan07/ancistrus
+#
+#
 # receive script: prepare debug environment on running router
 # an HTTP or FTP server must be run on local i386 host
 # on local host i386 machine it must be placed into HTTP or FTP root server dir $DEBUG_DIR

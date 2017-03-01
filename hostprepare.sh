@@ -1,5 +1,14 @@
 #!/bin/sh
 #
+# ancistrus
+#
+# Netgear's Nighthawk Router Experience Distributed Project
+#
+# D7000
+#
+# https://github.com/negan07/ancistrus
+#
+#
 # host system: ubuntu yakkety x86/64
 # prepare the host system for developing
 #

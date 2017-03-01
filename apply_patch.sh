@@ -1,5 +1,14 @@
 #!/bin/sh
 #
+# ancistrus
+#
+# Netgear's Nighthawk Router Experience Distributed Project
+#
+# D7000
+#
+# https://github.com/negan07/ancistrus
+#
+#
 # D7000 source modifications.
 # This script must be located in the root source dir.
 # It must be invoked from the root source dir.
