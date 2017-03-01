@@ -96,8 +96,8 @@ dkms.conf
 # ancistrus
 # https://github.com/negan07/ancistrus #
 ########################################
-crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources
-D7000_V1.0.1.44_WW_src
+crosstools-*
+D7000_*_src
 work/Rules.mak
 vmlinux.*
 *.img

@@ -9,17 +9,17 @@ https://github.com/negan07/ancistrus
 
 Workjob is divided in 4 main segments:
 
-builtinlib					Modified built-in shared libraries.
-	nvram						Setting library routines.
+builtinlib				Modified built-in shared libraries.
+	nvram					Setting library routines.
 
-builtin						Modified built-in apps.
-	utelnetd					The console telnet daemon including little modifications.
-	iproute2					Updated network usage tool: esfq/codel/fq_codel AQM qos sched support.
-	qos						Quality Of Service setup tool in substitution of weak builtin.
+builtin					Modified built-in apps.
+	utelnetd				The console telnet daemon including little modifications.
+	iproute2				Updated network usage tool: esfq/codel/fq_codel AQM qos sched support.
+	qos					Quality Of Service setup tool in substitution of weak builtin.
 
-thirdpartylib					Additional shared libraries not included into the original firmware.
+thirdpartylib				Additional shared libraries not included into the original firmware.
 	
 
-thirdparty					Additional apps not included into the original firmware.
-	ancistrus-core					The Main work tool: creates & acts all the modification injects.
+thirdparty				Additional apps not included into the original firmware.
+	ancistrus-core				The Main work tool: creates & acts all the modification injects.
 
