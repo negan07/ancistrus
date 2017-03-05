@@ -1,0 +1,278 @@
+diff -urN work/utelnetd-0.1.11/Makefile work/utelnetd-0.1.11/Makefile
+--- work/utelnetd-0.1.11/Makefile	2008-08-11 11:44:01.000000000 +0200
++++ work/utelnetd-0.1.11/Makefile	2017-03-04 14:43:44.182317642 +0100
+@@ -1,63 +1,42 @@
+-# Makefile for utelnetd
+-# 
+-# Configure this with the following environment variables:
+-#
++include ../Rules.mak
+ 
+-# where to install
+-INSTDIR		:= /usr/local/bin/
++BINS	:= utelnetd
++OBJS	:= $(BINS).o
++LDFLAGS	:=
++LDLIBS	:=
+ 
+ # where to find login program
+-ifneq ("", "$(BSD)")
+-LOGIN		:= /usr/bin/login
+-else
+-LOGIN		:= /bin/login
+-endif
+-
+-ifneq ("", "$(BSD)")
+-CORE		:= utelnetd.core
+-else
+-CORE		:= core
+-endif
+-
+-# nothing to configure below this line... ---8<---8<---8<---
++LOGIN	:= /usr/sbin/login
++CORE	:= core
+ 
+-PROGS     = utelnetd
++CFLAGS	+= -Os -I. -pipe -DSHELLPATH=\"$(LOGIN)\" -Wall
+ 
+-INSTMODE  = 0755
+-INSTOWNER = root
+-INSTGROUP = root
+-
+-OBJS      = utelnetd.o
+-
+-CC        = $(CROSS_COMPILE)gcc
+-INSTALL   = install
+-
+-CFLAGS	 += -I. -pipe -DSHELLPATH=\"$(LOGIN)\" -Wall
++ifndef LOCAL
++CFLAGS	+= -Werror -Wno-unused-but-set-variable
++endif
+ 
+-ifneq ("","$(DEBUG)")
+-CFLAGS   += -DDEBUG -g -Os
+-STRIP	  = \#
++ifdef DEBUG
++CFLAGS	+= -DDEBUG -g
+ else
+-CFLAGS	 += -fomit-frame-pointer
+-STRIP	  = $(CROSS_COMPILE)strip 
++CFLAGS	+= -fomit-frame-pointer
+ endif
+ 
+ ifeq ("1", "$(BSD)")
+-CFLAGS   += -DBSD
++CFLAGS	+= -DBSD
+ endif
+ 
+ 
+-all: $(PROGS)
++all: $(BINS)
+ 
+-$(PROGS): $(OBJS)
+-	$(CC) $(LDFLAGS) $(CFLAGS) $^ $(LDLIBS) -o $@
+-	$(STRIP) --remove-section=.comment --remove-section=.note $@
++$(BINS): $(OBJS)
++	$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) $^ -o $@
++	$(SSTRIP) $@
+ 
+ .PHONY: install
+-install: $(PROGS)
+-	$(INSTALL) -d $(DESTDIR)$(INSTDIR)
+-	$(INSTALL) -m $(INSTMODE) -o $(INSTOWNER) -g $(INSTGROUP) $(PROGS) $(DESTDIR)$(INSTDIR)
++install: $(BINS)
++	cp -f $(BINS) $(BINDIR)
+ 
+ .PHONY: clean
+ clean:
+-	rm -f $(PROGS) *.o $(CORE)
++	rm -f *.o $(BINS) $(CORE)
++
+diff -urN work/utelnetd-0.1.11/utelnetd.c work/utelnetd-0.1.11/utelnetd.c
+--- work/utelnetd-0.1.11/utelnetd.c	2003-08-06 17:02:27.000000000 +0200
++++ work/utelnetd-0.1.11/utelnetd.c	2017-02-02 11:20:47.151442713 +0100
+@@ -38,7 +38,7 @@
+ 
+ /* configuration - we'll separate this out later */
+ #define USE_SYSLOG 	1
+-#define USE_ISSUE	1
++#define USE_ISSUE	0
+ 
+ 
+ #include <sys/time.h>
+@@ -141,7 +141,7 @@
+  * So we have to define some helper functions which are originally 
+  * available in busybox...
+  */  
+-
++#ifdef DEBUG
+ void show_usage(void)
+ {
+ 	printf("Usage: telnetd [-p port] [-i interface] [-l loginprogram] [-d]\n");
+@@ -154,7 +154,7 @@
+ 	printf("\n");         
+ 	exit(1);
+ }
+-
++#endif
+ void perror_msg_and_die(char *text)
+ {
+ 	fprintf(stderr,text);
+@@ -193,7 +193,13 @@
+     unsigned char *end = bf + len;
+    
+     while (ptr < end) {
+-	if (*ptr != IAC) {
++	if (*ptr == '\r' && (ptr+1) < end &&
++                                (*(ptr+1) == '\n' || *(ptr+1) == '\0') )
++        {  //Windows telnet eol char workaround
++	    *totty++ = *ptr++;
++            ptr += 1;
++        }
++	else if (*ptr != IAC) {
+ 	    *totty++ = *ptr++;
+ 	}
+ 	else {
+@@ -406,14 +412,14 @@
+ 	int daemonize = 0;
+ 	char *interface_name = NULL;
+ 	struct ifreq interface;
+-
++/*
+ #ifdef USE_SYSLOG
+ 	char *appname;
+ 	appname = strrchr (argv [0], '/');
+ 	if (!appname) appname = argv [0];
+ 	    else appname++;
+ #endif
+-
++*/
+ 	/* check if user supplied a port number */
+ 
+ 	for (;;) {
+@@ -434,7 +440,9 @@
+ 				break;
+ 			case 'h': 
+ 			default:
++#ifdef DEBUG
+ 				show_usage();
++#endif
+ 				exit(1);
+ 		}
+ 	}
+@@ -450,11 +458,11 @@
+ 		fprintf(stderr,"\"%s\"",loginpath);
+ 		perror_msg_and_die(" is no valid executable!\n");
+ 	}
+-
++#ifdef DEBUG
+ 	printf("telnetd: starting\n");
+ 	printf("  port: %i; interface: %s; login program: %s\n",
+ 		portnbr, (interface_name)?interface_name:"any", loginpath);
+-
++#endif
+ 	argv_init[0] = loginpath;
+ 	sessions = 0;
+ 
+@@ -481,7 +489,7 @@
+ 
+ 		/* use ioctl() here as BSD does not have setsockopt() */
+ 		if (ioctl(master_fd, SIOCGIFADDR, &interface) < 0) {
+-			printf("Please check the NIC you specified with -i option\n");
++			//printf("Please check the NIC you specified with -i option\n");
+ 			perror("ioctl SIOCGFADDR");
+ 			return 1;
+ 		}
+@@ -505,14 +513,14 @@
+ 		DEBUG_OUT("  daemonizing\n");
+ 		if (daemon(0, 1) < 0) perror_msg_and_die("daemon");
+ 	}
+-
++/*
+ #ifdef USE_SYSLOG
+ 	openlog(appname , LOG_NDELAY | LOG_PID, LOG_DAEMON);	
+ 	syslog(LOG_INFO, "%s (port: %i, ifname: %s, login: %s) startup succeeded\n"\
+ 	    , appname, portnbr, (interface_name)?interface_name:"any", loginpath);
+ 	closelog();
+ #endif
+-
++*/
+ 	maxfd = master_fd;
+ 
+ 	do {
+@@ -554,29 +562,52 @@
+ 
+ 		/* First check for and accept new sessions.  */
+ 		if (FD_ISSET(master_fd, &rdfdset)) {
+-			int fd, salen;
++			unsigned int fd, salen;
+ 
+ 			salen = sizeof(sa);	
+-			if ((fd = accept(master_fd, (struct sockaddr *)&sa,
+-					 &salen)) < 0) {
++			if ((fd = accept(master_fd, (struct sockaddr *)&sa, &salen)) < 0) {
+ 				continue;
+ 			} else {
+ 				/* Create a new session and link it into our active list. */
+-				struct tsession *new_ts;
++				struct tsession *new_ts, *p;
++				int session_num = 0;
+ #ifdef USE_SYSLOG
+-				openlog(appname , LOG_NDELAY, LOG_DAEMON);	
+-				syslog(LOG_INFO, "connection from: %s\n", inet_ntoa(sa.sin_addr));
++				openlog( "auth", 0 , LOG_AUTH );
++				syslog(LOG_INFO,"[admin utelnetd login] from source: %s",inet_ntoa(sa.sin_addr));
+ 				closelog();
+ #endif
+-				new_ts = make_new_session(fd);
+-				if (new_ts) {
+-					new_ts->next = sessions;
+-					sessions = new_ts;
+-					if (fd > maxfd)
+-						maxfd = fd;
+-				} else {
+-					close(fd);
++                /*  Router should support & allow only 2 sessions for Telnet
++                 *  at one time. (for the case that users close or 
++                 *  abnormally disconnect the telnet session, it will allow 
++                 *  users to connect to the 2nd session)
++                */
++				if(sessions)
++				{				   
++				   p = sessions;
++				   while(p->next&&p->next!=sessions)
++				   {
++				      p=p->next;
++				      session_num++;    
++				   }
++				}
++				
++				if(session_num >= 1)
++				{
++				   close(fd);
++				   continue;
+ 				}
++				else
++				{
++    				new_ts = make_new_session(fd);
++    				if (new_ts) {
++    					new_ts->next = sessions;
++    					sessions = new_ts;
++    					if (fd > maxfd)
++    						maxfd = fd;
++    				} else {
++    					close(fd);
++    				}
++    			}
+ 			}
+ 		}
+ 
+@@ -594,7 +625,7 @@
+ 				
+ 				maxlen = MIN(BUFSIZE - ts->wridx1,
+ 					     ts->size1);
+-				ptr = remove_iacs(ts->buf1 + ts->wridx1, maxlen, 
++				ptr = remove_iacs((unsigned char*)(ts->buf1 + ts->wridx1), maxlen, 
+ 					&processed, &num_totty);
+ 		
+ 				/* the difference between processed and num_totty

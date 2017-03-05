@@ -20,9 +20,7 @@ cd ..					cd to root gitdir
 cd D7000*_src				cd to src dir
 sudo make kernel && sudo make source	(20-25 min needed)
 -------------------------------------------------------------------------------------------------------------
-cd ..					cd to root gitdir
-./apply_patch.sh work			patch work dir
-cd work					cd to work dir
-make
+cd ../work				cd to work dir
+make					download/copy patch compile workspace apps
 ...
 -------------------------------------------------------------------------------------------------------------

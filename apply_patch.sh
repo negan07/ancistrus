@@ -10,30 +10,32 @@
 #
 #
 # D7000 source modifications.
+#
+# Usage: $0 <diffdircontainer>
+#
 # This script must be located in the root source dir.
 # It must be invoked from the root source dir.
 # .diff patches must be located in $DIFFDIR dir.
+# Destination dir must be present
 #
 
 PROJECT=D7000
 FWVER=V1.0.1.44
 DIFFDIR=diffs
 ALL="misc kernel uclibc"
-
-if [ $# -lt 1 ]; then
-echo -n "$0 <all "
-echo -n `ls ${DIFFDIR}`
-echo " >"
-exit 1
-fi
+ERR=0
 
 DIRPATCH() {							#patch into a single dir/subdir
 TAG=`echo $1 | sed s/'\/'/_/`
-	for F in `ls ${DIFFDIR}/${1}`
+[ -d ${DIFFDIR}/${1} ] && FLIST=`ls ${DIFFDIR}/${1}`		#recursive Makefile compatibility
+[ -z "$FLIST" ] && return
+echo "Applying patch on $1 ..."
+	for F in $FLIST
 	do
 		case $F in
 		${PROJECT}_${FWVER}_${TAG}-*-*.diff)
 		patch -p0 < ${DIFFDIR}/${1}/${F}
+		[ $? -ne 0 ] && ERR=1 && return			#set error flag on patch error only
 		;;
 		*)
 		;;
@@ -42,11 +44,22 @@ TAG=`echo $1 | sed s/'\/'/_/`
 }
 
 TREEPATCH() {							#patch into a tree dir
-	for D in `ls ${DIFFDIR}/${1}`
+[ -d ${DIFFDIR}/${1} ] && DLIST=`ls ${DIFFDIR}/${1}`		#recursive Makefile compatibility
+[ -z "$DLIST" ] && return
+echo "Applying patch on $1 ..."
+	for D in $DLIST
 	do
 	DIRPATCH $1/$D
+	[ $ERR -eq 1 ] && return				#abandon loop in case of patch error
 	done
 }
+
+if [ $# -lt 1 ]; then
+echo -n "Usage: $0 <all "
+echo -n `ls ${DIFFDIR}`
+echo " >"
+exit 1
+fi
 
 case $1 in
 crosstools)							#toolchain patch
@@ -55,15 +68,15 @@ FWVER=""
 DIRPATCH $1
 FWVER=$OLDFWVER
 ;;
-all)								#sources patch
+all)								#original sources patch
 	for D in $ALL
 	do
 	DIRPATCH $D
 	done
 TREEPATCH apps
 ;;
-apps|work)							#apps or single app patch
-	if [ -z $2 ]; then
+apps|work)							#apps/work all or single app/work patch
+	if [ -z "$2" ]; then
 	TREEPATCH $1
 	else
 	DIRPATCH ${1}/${2}
@@ -73,4 +86,4 @@ apps|work)							#apps or single app patch
 DIRPATCH $1
 ;;
 esac
-
+exit $ERR
