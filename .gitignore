@@ -98,10 +98,13 @@ dkms.conf
 ########################################
 crosstools-*
 D7000_*_src
-work/Rules.mak
 vmlinux.*
 *.img
 *.bin
 *.bz2
 *target*
+work/Rules.mak
+work/nvram/
+work/utelnetd*/
+work/iproute2*/
 
