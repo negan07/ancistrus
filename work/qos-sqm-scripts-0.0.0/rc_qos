@@ -100,12 +100,16 @@ local INGR=$( ifb_name ${IFACE} )
         $TC_BINARY $S $I show dev ${INGR}
         }
     done
+echo
+echo "--- MANGLE ---"
+ipt -t mangle -nL -v
 
 return 0
 }
 
 # DEBUG
 [ "$2" = "debug" ] && export SQM_DEBUG=1
+[ "$3" = "verbose" ] && export SQM_VERBOSITY_MAX=8
 
 . qos.conf
 . defaults.sh
@@ -127,7 +131,7 @@ return 0
     show_sqm stats
     ;;
     *)
-    echo "Usage: $0 start|restart|stop|show|stats (debug)"
+    echo "Usage: $0 start|restart|stop|show|stats (debug) (verbose)"
     exit 1
     ;;
     esac
