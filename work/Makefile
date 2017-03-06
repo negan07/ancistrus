@@ -6,8 +6,8 @@ PROJECT_NAME		:= ancistrus
 CUR_PATH		:= $(shell pwd)
 CUR_REL_PATH		:= $(notdir $(CUR_PATH))
 RULES			:= $(CUR_PATH)/Rules.mak
-export NUMTHREAD	:= $$((2 * `getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1`))
-#export NUMTHREAD	:= $$((2 * `grep processor /proc/cpuinfo | wc -l`))
+NUMTHREAD		:= $$((2 * `getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1`))
+#NUMTHREAD		:= $$((2 * `grep processor /proc/cpuinfo | wc -l`))
 
 ifdef LOCAL
 export LOCAL
@@ -16,6 +16,13 @@ endif
 ifdef DEBUG
 export DEBUG
 endif
+
+ifndef
+SOURCE_DIR_WCNAME	:= *_src
+endif
+
+SOURCE_PATH_NAME	:= $(shell cd ../$(SOURCE_DIR_WCNAME); pwd;)
+SOURCE_REL_PATH_NAME	:= $(shell echo ../$(SOURCE_DIR_WCNAME))
 
 ifndef PREFIX_NAME
 PREFIX_NAME		:= $(PROJECT_NAME)_target
@@ -28,7 +35,8 @@ endif
 ifneq "$(or $(LOCAL),$(DEBUG))" ""
 PREFIX_PATH		:= $(DEBUG_DIR)
 else
-PREFIX_PATH		:= $(CUR_PATH)/../$(PREFIX_NAME)
+#PREFIX_PATH		:= $(CUR_PATH)/../$(PREFIX_NAME)
+PREFIX_PATH		:= $(SOURCE_PATH_NAME)/Source/target
 endif
 
 BUILTINLIB		:=
@@ -69,7 +77,7 @@ creat_rules:
 	@echo "export GIT_NAME		:= $(PROJECT_NAME)" >> $(RULES)
 	@echo "export WORK_DIR		:= $(CUR_PATH)" >> $(RULES)
 	@echo "export PREFIX		:= $(PREFIX_PATH)" >> $(RULES)
-	@cd ../$(PROJECT_TARGET)*_src; echo "export SOURCE_PATH	:= `pwd`" >> $(RULES)
+	@echo "export SOURCE_PATH 	:= $(SOURCE_PATH_NAME)" >> $(RULES)
 	@echo "include \$$(WORK_DIR)/env.mak" >> $(RULES)
 	@echo "include \$$(SOURCE_PATH)/Source/Builds/\$$(PROJECT).mak" >> $(RULES)
 

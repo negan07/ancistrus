@@ -3,7 +3,7 @@ UTELNETD		:= utelnetd-0.1.11
 IPROUTE2		:= iproute2-4.10.0
 QOS			:= qos-0.0.0
 
-DL_$(NVRAM)		:= $(shell echo ../$(PROJECT_TARGET)*_src)/Source/apps
+DL_$(NVRAM)		:= $(shell echo ../*_src)/Source/apps
 TAR_$(NVRAM)		:= nvram
 
 DL_$(UTELNETD)		:= http://public.pengutronix.de/software/utelnetd

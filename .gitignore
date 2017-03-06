@@ -103,6 +103,8 @@ vmlinux.*
 *.bin
 *.bz2
 *target*
+.patched
+.compiled
 work/Rules.mak
 work/nvram/
 work/utelnetd*/
