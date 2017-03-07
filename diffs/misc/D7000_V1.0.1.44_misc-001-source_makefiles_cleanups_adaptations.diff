@@ -1,6 +1,15 @@
 diff -urN D7000_V1.0.1.44_WW_src/Source/env.mak D7000_V1.0.1.44_WW_src/Source/env.mak
 --- D7000_V1.0.1.44_WW_src/Source/env.mak	2016-10-11 17:57:47.000000000 +0200
 +++ D7000_V1.0.1.44_WW_src/Source/env.mak	2017-01-13 14:24:56.249727068 +0100
+@@ -18,7 +18,7 @@
+ export IMAGE_DIR=$(ROOT)/image
+ export TARGET_DIR=$(ROOT)/target
+ export SC_LIBS_DIR=$(APPS_DIR)/sc_libs
+-export THIRD_PARTY_DIR=$(ROOT)/third_party
++export THIRD_PARTY_DIR=$(ROOT)/../../work
+ export LOADER_DIR = $(TARGET_HOME)/cfe
+ export CFERAM_DIR = $(TARGET_HOME)/cferam
+ export DPF_DIR = $(TARGET_HOME)/dpf
 @@ -29,6 +29,7 @@
  export HOSTTOOLS_DIR = $(TARGET_HOME)/../Kernel/bcm963xx/hostTools
  export MAKE_BIN_DIR = $(TOOLS_DIR)/make_bin
@@ -50,28 +59,35 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  
  ifeq ($(BRIDGE),1)
  	FUNC = 01
-@@ -77,7 +66,11 @@
+@@ -75,9 +64,13 @@
  
- build_test: pre_fs apps drivers prefs fs img
+ all: build_test
+ 
+-build_test: pre_fs apps drivers prefs fs img
++build_test: clean_img clean_target pre_fs apps third-party drivers prefs fs img
++
++build_image: clean_target build_target pid build_dpf fs img bin
  
 -build_image: clean build_target pid build_dpf fs img bin
-+build_image: clean_target build_target pid build_dpf fs img bin
-+
-+clean_all: clean_uclibc clean_apps clean_target clean_img
++clean_all: clean_uclibc clean_apps clean_third-party clean_target clean_img
 +
 +clean: clean_target
  
  .PHONY: prepare target apps drivers ui
  
-@@ -95,6 +88,7 @@
+@@ -94,10 +87,9 @@
+ 	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
  	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
  	cd target/lib; ln -sf libscnvram.so libconfig.so
- ifeq ($(ITUNES_SERVER),1)
+-ifeq ($(ITUNES_SERVER),1)
 +	@echo -e "\\e[35mSOURCE: make \\e[36mUCLIBC \\e[0m"
  	make -C uClibc-0.9.32/
  	cp -af uClibc-0.9.32/lib/ld-uClibc-0.9.32.so target/lib/
- endif
-@@ -108,8 +102,6 @@
+-endif
+ 
+ prepare:
+ 	# tools
+@@ -108,8 +100,6 @@
  	    echo "Need fakeroot support. Please install it" ; \
  	    echo "You can get it from image/tools/src" ; \
  	    exit 1;                     \
@@ -80,7 +96,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	fi
  
  apps:
-@@ -118,7 +110,7 @@
+@@ -118,15 +108,14 @@
  	$(MAKE) -C $(APPS_DIR) install 
  	
  drivers:
@@ -89,7 +105,16 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	cd $(PROJ_DIR_KERNEL); make sc_driver SC_BUILD=1 SC_ROOT=$(ROOT)
  
  third-party:
-@@ -145,7 +137,7 @@
+ 	@echo -e "\\e[35mSOURCE: make \\e[36mTHIRD PARTY \\e[0m"
+ 	$(MAKE) -C $(THIRD_PARTY_DIR)
+-	$(MAKE) -C $(THIRD_PARTY_DIR)	install
++	$(MAKE) -C $(THIRD_PARTY_DIR) install
+ 
+-	
+ ui:
+ 	@echo -e "\\e[35mSOURCE: make \\e[36mUI \\e[0m"	
+ 	$(MAKE) -C $(UI_DIR) -s	
+@@ -145,7 +134,7 @@
  FW_INFO=$(IMAGE_DIR)/$(BOARD_ID).info
  
  ifeq ($(MTCODE),1)
@@ -98,7 +123,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  endif
  
  prefs:
-@@ -163,7 +155,6 @@
+@@ -163,7 +152,6 @@
  	echo "Firmware="V$(VER)_$(SUB_VER)"@netgear_region#" > $(CUR_SETTING)
  	echo "RegionTag="$(BOARD_ID)_"@netgear_region#" >>  $(CUR_SETTING)
  	echo "Region=@netgear_region#"  >> $(CUR_SETTING)
@@ -106,7 +131,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	echo "Model="$(BOARD_ID)  >> $(CUR_SETTING)
  	echo "InternetConnectionStatus=@if_wan_up#" >> $(CUR_SETTING)
  	if [ "$(OPENDNS)" == "1" ]; then echo "ParentalControlSupported=1" >> $(CUR_SETTING); fi
-@@ -172,12 +163,7 @@
+@@ -172,12 +160,7 @@
  	
  	# Generate fw info which will bind to trx file
  	echo $(VERSION) > $(FW_INFO)
@@ -120,7 +145,16 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	
  build_target: 
  	tar  xfz $(TARGET_HOME)/target.tgz 
-@@ -234,6 +220,8 @@
+@@ -220,7 +203,7 @@
+ 	echo "InternetConnectionStatus=Up" >> $(FS_DIR)/www.eng/currentsetting.htm
+ 
+ lang_pid:
+-    # Generate language pid
++# Generate language pid. 
+ 	$(MAKE_PID) $(HW_ID) $(ANNEX)$(GUI_VER) $(PRODUCT_ID) $(LANG_PID)
+ 	
+ langpkg: lang_pid
+@@ -234,6 +217,8 @@
  	./gen_lang.sh ./UI/wnr2500_multi/www.multi_v2.3/langs  || exit 1
  endif
  
@@ -129,7 +163,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  
  # Geneate filesystem image from target
  FAKEROOT_SH=$(ROOT)/fakeroot.sh
-@@ -242,15 +230,13 @@
+@@ -242,15 +227,13 @@
  	$(STRIP) -d target/lib/modules/*.ko
  	@echo -e "\\e[35mSOURCE: make \\e[36mFS \\e[0m"	
  ifeq ($(BOOT_NAND_FLASH),1)
@@ -151,7 +185,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	echo -e "/kernel_cksum" >> $(TARGET_HOME)/nocomprlist
  	mkdir -p -m 777 $(FS_DIR)/config/factory
  	mkdir -p -m 777 $(FS_DIR)/config/nvram
-@@ -271,86 +257,39 @@
+@@ -271,86 +254,42 @@
  endif	
  	mkdir -p -m 777 $(FS_DIR)/config/xxx
  	chmod 777 $(FS_DIR)/config
@@ -191,7 +225,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -	cd $(IMAGE_DIR) ; ./bb_dual $(BOARD_ID)_dual
 -	cd $(IMAGE_DIR) ; cp $(BOARD_ID).img $(IMG_NAME) -f
 +#	cd $(IMAGE_DIR) ; ./bb_dual $(BOARD_ID)_dual
-+	cd $(IMAGE_DIR) ; cp -f $(BOARD_ID).img ../../$(IMG_NAME)
++	cd $(IMAGE_DIR) ; cp -f $(BOARD_ID).img ../../../$(IMG_NAME)
  	@echo
 -	@echo -e "Done! Image $(BOARD_ID).img has been built in $(IMAGE_DIR)."
 -else
@@ -219,7 +253,10 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  endif
  
  
--
++clean_uclibc:
++	@echo -e "\\e[35mUCLIBC: make \\e[36mclean \\e[0m"
++	-$(MAKE) -C uClibc-0.9.32 clean -s
+ 
 -ifeq ($(ZIP_3G),1)
 -ZIP3G_DIR=$(IMAGE_DIR)/zip3g
 -ZIP3GFS_DIR=$(ZIP3G_DIR)/rootfs
@@ -234,23 +271,23 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -#	@cd $(ZIP3G_DIR) && $(MAKESQUASHFS) $(ZIP3GFS_DIR) zip3g.img -be -noappend -b 32768
 -#	create PID bin image file.
 -	cd $(ZIP3G_DIR) && ./zip3g.sh
-+clean_uclibc:
-+ifeq ($(ITUNES_SERVER),1)
-+	@echo -e "\\e[35mUCLIBC: make \\e[36mclean \\e[0m"
-+	-$(MAKE) -C uClibc-0.9.32 clean -s
- endif
- 
+-endif
+-
 -burn:
 -	cd $(IMAGE_DIR) ; ./nand_small_page_brcm_ecc_tool $(BOARD_ID).burn.bin $(BOARD_ID).bin;
 -
--
++clean_apps:
++	@echo -e "\\e[35mAPPS: make \\e[36mclean \\e[0m"
++	-$(MAKE) -C $(APPS_DIR) clean -s
+ 
 -clean:
 -	fakeroot rm -rf $(TARGET_HOME)/target
--
++clean_third-party:
++	@echo -e "\\e[35mTHIRD-PARTY: make \\e[36mclean \\e[0m"
++	-$(MAKE) -C $(THIRD_PARTY_DIR) clean -s
+ 
 -clean_all:
-+clean_apps:
- 	-$(MAKE) -C $(APPS_DIR) clean -s
-+
+-	-$(MAKE) -C $(APPS_DIR) clean -s
 +clean_target:
 +	@echo -e "\\e[35mTARGET: \\e[36mclean \\e[0m"
  	-rm -rf $(TARGET_HOME)/target
@@ -259,217 +296,4 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 +clean_img:
 +	@echo -e "\\e[35mIMG: \\e[36mclean \\e[0m"
 +	-rm -f $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/empty.img $(IMAGE_DIR)/langpkg.img $(IMAGE_DIR)/$(BOARD_ID).info $(IMAGE_DIR)/$(BOARD_ID).zip $(IMAGE_DIR)/$(BOARD_ID).bin $(IMAGE_DIR)/$(BOARD_ID).img
- 
-diff -urN D7000_V1.0.1.44_WW_src/Source/Builds/D7000.mak D7000_V1.0.1.44_WW_src/Source/Builds/D7000.mak
---- D7000_V1.0.1.44_WW_src/Source/Builds/D7000.mak	2016-10-20 12:58:51.000000000 +0200
-+++ D7000_V1.0.1.44_WW_src/Source/Builds/D7000.mak	2017-01-12 13:00:50.826027755 +0100
-@@ -28,7 +28,7 @@
- #------------------------------------------------#
- 
- MULTI_PVC=0
--VPN=1
-+VPN=0
- ADSL2=0
- BRIDGE=0
- SNMP=0
-diff -urN D7000_V1.0.1.44_WW_src/Source/apps/Makefile D7000_V1.0.1.44_WW_src/Source/apps/Makefile
---- D7000_V1.0.1.44_WW_src/Source/apps/Makefile	2016-10-11 17:57:17.000000000 +0200
-+++ D7000_V1.0.1.44_WW_src/Source/apps/Makefile	2017-01-13 20:54:43.313811768 +0100
-@@ -1,131 +1,111 @@
- include ../Rules.mak
- 
- GPL             :=
--PRIVATE         :=
- SUBDIRS         :=
- 
--GPLLIB += nvram
--GPLLIB += sc_libs
--GPLLIB += cnapt
-+GPLLIB		+= nvram
-+GPLLIB		+= sc_libs
-+GPLLIB		+= cnapt
- #------------------------------------
- ifeq ($(USB),1)
--GPLLIB += libiconv.1.8
--GPL += samba-3.0.22
-+GPLLIB		+= libiconv.1.8
-+GPL		+= samba-3.0.22
- ifeq ($(EXT4),1)
--GPL += e2fsprogs
-+GPL		+= e2fsprogs
- endif
--#PRIVATE += usbapps
--GPL += bftpd-2.3
--#GPL += fuse.2.7.4
--#GPL += ntfsprogs.2.0.0
--#GPL += ntfs-3g
--GPL += mtool
--GPL += hd-idle
--GPL += hdparm-9.43
--GPL += lsof_4.82_src
-+GPL		+= bftpd-2.3
-+GPL		+= mtool
-+GPL		+= hd-idle
-+GPL		+= hdparm-9.43
-+GPL		+= lsof_4.82_src
- endif
- ifeq ($(DLNA),1)
--GPL += mediaserver
-+GPL		+= mediaserver
- endif
- ifeq ($(IPV6),1)
--GPLLIB += flex-2.5.4
--GPL += radvd-1.1
--GPL += dhcpv6
--GPL += totd-1.4
-+GPLLIB		+= flex-2.5.4
-+GPL		+= radvd-1.1
-+GPL		+= dhcpv6
-+GPL		+= totd-1.4
- endif
- 
--#------------------------------------
-+#------------------------------------------
- # gpl
--GPL             += busybox
--GPL             += dnrd-2.19/src
-+GPL		+= busybox
-+GPL		+= dnrd-2.19/src
- ifeq ($(HTTPS),1)
--GPLLIB 			+=$(OPENSSL_USE)
-+GPLLIB		+=$(OPENSSL_USE)
- else
- ifeq ($(TR069),1)
--GPLLIB 			+=$(OPENSSL_USE)
-+GPLLIB		+=$(OPENSSL_USE)
- endif
- endif
- ifeq ($(OPENVPN),1)
--GPL			+= lzo-2.06
--GPL			+= openvpn-2.3.2
--GPL			+= zip30
--endif
--GPL              += spi_firewall_modules
--GPL              += kernel_upgrade
--GPLLIB           += libixml
--GPL             += mini_httpd-1.17beta1
--GPL             += udhcp-0.9.7
--GPL             += utelnetd-0.1.9
--GPL             += smtpc
--GPL             += syslogd
--GPL             += linux-atm-2.4.0
--GPL             += ppp-2.4.1.pppoe4.orig
--GPL             += rp-pppoe
--GPL             += bridge-utils
--GPL             += fw_modules
-+GPL		+= lzo-2.06
-+GPL		+= openvpn-2.3.2
-+GPL		+= zip30
-+endif
-+GPL		+= spi_firewall_modules
-+GPL		+= kernel_upgrade
-+GPLLIB		+= libixml
-+GPL		+= mini_httpd-1.17beta1
-+GPL		+= udhcp-0.9.7
-+GPL		+= utelnetd-0.1.9
-+GPL		+= smtpc
-+GPL		+= syslogd
-+GPL		+= linux-atm-2.4.0
-+GPL		+= ppp-2.4.1.pppoe4.orig
-+GPL		+= rp-pppoe
-+GPL		+= bridge-utils
-+GPL		+= fw_modules
- ifeq ($(IPQOS),1)
--GPL             += bwping-1.1
-+GPL		+= bwping-1.1
- endif
--GPL             += iptables
--GPL             += cron
-+GPL		+= iptables
-+GPL		+= cron
- ifeq ($(IP6_6RD_CE),1)
--GPL	+= iproute2-2.6.38
-+GPL		+= iproute2-2.6.38
- else
--GPL             += iproute-2.6.20-070313
-+GPL		+= iproute-2.6.20-070313
- endif
--GPL             += netkit-routedv2-0.1
--GPL             += ez-ipupdate-3.0.11b8
--GPL             += reaim-0.8
--GPL	         += miniupnpd-20080427
--#GPL             += quagga_0.99.11
-+GPL		+= netkit-routedv2-0.1
-+GPL		+= ez-ipupdate-3.0.11b8
-+GPL		+= reaim-0.8
-+GPL		+= miniupnpd-20080427
- GPL		+= zebra-0.95a
- ifeq ($(HIDDEN_PASSWORD),1)
--GPL             += base64
-+GPL		+= base64
- endif
- ifeq ($(TIME_MACHINE),1)
- GPL		+= apple
- else
--GPLLIB           += libdaemon-0.14
--GPL             += avahi-0.6.30
-+GPLLIB		+= libdaemon-0.14
-+GPL		+= avahi-0.6.30
- endif
- ifeq ($(READY_SHARE_CLOUD),1)
--GPL += proccgi
--GPL += curl
--endif
--ifeq ($(VPN),1)
--#GPL += gmp-4.2.1
-+GPL		+= proccgi
-+GPL		+= curl
- endif
--GPL             += bind-9.2.3
--GPL             += noip-2.1.9-1
--GPL             += tcpdump/libpcap-1.2.0
--GPL             += tcpdump/tcpdump-4.2.0
--#------------------------------------
--GPL += curl
-+GPL		+= bind-9.2.3
-+GPL		+= noip-2.1.9-1
-+GPL		+= tcpdump/libpcap-1.2.0
-+GPL		+= tcpdump/tcpdump-4.2.0
-+#------------------------------------------
-+GPL		+= curl
- #for mpstat
--GPL += sysstat
--SUBDIRS += $(GPLLIB)
--SUBDIRS += $(PRIVATE)
--SUBDIRS += $(GPL)
-+GPL		+= sysstat
-+
-+SUBDIRS		+= $(GPLLIB)
-+SUBDIRS		+= $(GPL)
- 
- $(SUBDIRS)::
--	@for i in $(SUBDIRS) ; do echo -e "\\e[35mapps: make \\e[36m$$i \\e[0m"; $(MAKE) -C $$i || exit 1; done
--ifeq ($(VPN),1)
--#	$(MAKE) -C gmp-4.2.1
--#	$(MAKE) -C gmp-4.2.1 install
--#	$(MAKE) -C openswan-2.6.24 programs
--endif
-+	@for i in $(SUBDIRS) ; do echo -e "\\e[35mAPPS: make \\e[36m$$i \\e[0m"; $(MAKE) -C $$i || exit 1; done
-+
- all:    $(SUBDIRS)
- 
- clean:
--	@for i in $(SUBDIRS) ; do echo -e "\\e[35mapps: clean \\e[36m$$i \\e[0m"; $(MAKE) -C $$i clean  || exit 1; done
--ifeq ($(VPN),1)	
--	$(MAKE) -C openswan-2.6.24 clean
--endif
-+	@for i in $(SUBDIRS) ; do echo -e "\\e[35mAPPS: clean \\e[36m$$i \\e[0m"; $(MAKE) -C $$i clean  || exit 1; done
- 
- install:
--	@for i in $(SUBDIRS) ; do echo -e "\\e[35mapps: install \\e[36m$$i \\e[0m"; $(MAKE) -C $$i install  || exit 1; done
--ifeq ($(VPN),1)	
--	#rm -rf openswan-2.6.24/temp
--	#$(MAKE) -C openswan-2.6.24 DESTDIR=$(TARGET_HOME)/apps/openswan-2.6.24/temp install
--endif
-+	@for i in $(SUBDIRS) ; do echo -e "\\e[35mAPPS: install \\e[36m$$i \\e[0m"; $(MAKE) -C $$i install  || exit 1; done
  
