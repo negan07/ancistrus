@@ -10,14 +10,18 @@
 #
 #
 # Found diffs between 2 different firmware version source dirs.
+#
+# Usage: $0 <absdir1> <absdir2>
+#
 # To be used before migrating code from old to new firmware version.
+# Parameters must be absolute dirs.
 # Suppose source dir structure to be similar (if not, edit this).
 #
 
 LISTDIR="Kernel/bcm963xx/kernel/linux-3.4rt Kernel/bcm963xx/bcmdrivers Kernel/bcm963xx/hostTools Kernel/bcm963xx/shared Kernel/bcm963xx/targets Kernel/bcm963xx Source/apps Source/Builds Source/image Source/shared Source/uClibc-0.9.32 Source Makefile"
 
 if [ $# != 2 ]; then
-echo "$0 absdir1 absdir2"
+echo "Usage: $0 <absdir1> <absdir2>"
 exit 1
 fi
 

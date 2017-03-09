@@ -15,11 +15,12 @@ builtinlib			Modified built-in shared libraries.
 builtin				Modified built-in apps.
 	utelnetd			The console telnet daemon including little modifications.
 	iproute2			Updated net tool: esfq/(fq_)codel AQM qos sched support.
-	qos				Quality Of Service tool in substitution of weak builtin.
 
 thirdpartylib			Additional .so libs not included into the original firmware.
 	
 
 thirdparty			Additional apps not included into the original firmware.
 	ancistrus-core			The Main work tool: creates & acts all the injects.
+	qos-sqm-scripts			Quality Of Service tool in substitution of weak builtin.
+	qos-netgear-36_42n		Quality Of Service tool taken from Netgear firmware .36_42n
 

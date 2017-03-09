@@ -9,7 +9,7 @@
 # https://github.com/negan07/ancistrus
 #
 #
-# D7000 workdir sources download & extract.
+# Original & work-thirdparty sources download & extract.
 #
 # Usage: $0 <destination_dir> <remote_www_url> <(arch)filename>
 #
@@ -17,7 +17,6 @@
 # if $DSTDIR not existing search for $SRCFILE
 # if $SRCFILE existing extract it
 # if $SRCFILE not existing download it then extract it
-# if no/few/too parameters passed extract Netgear original sources as default
 #
 
 ERR=0
@@ -45,12 +44,7 @@ tar xjf $1 -O > /dev/null 2>&1 && echo "Extracting: $1 ..." && tar xjf $1
 ERR=$?
 }
 
-	case $# in									#Makefile & Download.mak param check compatibility
-	0)										#default usage: download original sources
-	DSTDIR="D7000_V1.0.1.44_WW_src"
-	URL="http://www.downloads.netgear.com/files/GPL"
-	SRCFILE="D7000_WW_SRC.TAR_V1.0.1.44.zip"
-	;;
+	case $# in									#Makefile param check compatibility
 	1|2)										#no download needed
 	DSTDIR="$1"
 	URL="void"

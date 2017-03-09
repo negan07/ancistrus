@@ -9,14 +9,17 @@
 # https://github.com/negan07/ancistrus
 #
 #
-# receive script: prepare debug environment on running router
-# an HTTP or FTP server must be run on local i386 host
-# on local host i386 machine it must be placed into HTTP or FTP root server dir $DEBUG_DIR
-# on router it must be placed into ramfs $RDIR routerdir
+# Receive script: prepare debug environment on running router.
+#
+# Usage: $0 <core> <ko> <qos> <web> <del> <*anyfiledir*>
+#
+# An HTTP or FTP server must be run on local i386 host.
+# On local host i386 machine it must be placed into HTTP or FTP root server dir $DEBUG_DIR.
+# On router it must be placed into ramfs $RDIR routerdir.
 #
 # telnet the router:
 # cd $RDIR
-# wget -q http://${URL}/$THISONE
+# wget -q http://${URL}/${THISONE}
 # chmod 755 $THISONE
 # export LD_LIBRARY_PATH=$DBGDIR
 # files are located in $DBGDIR
@@ -70,7 +73,7 @@ THISLNK
 export LD_LIBRARY_PATH=$DBGDIR
 
 	if [ $# != "1" ]; then
-	echo "Usage: $0 core ko qos web del *anyfiledir*"
+	echo "Usage: $0 <core> <ko> <qos> <web> <del> <*anyfiledir*>"
 	exit 1
 	fi
 
@@ -87,18 +90,18 @@ export LD_LIBRARY_PATH=$DBGDIR
 	web)
 	DIRMAKE
 	cd $DBGDIR
-	rm -rf $DBGDIR/$LANGDIR
-	GET $LANGDIR.zip
-	unzip $LANGDIR.zip
-	rm -f $LANGDIR.zip
+	rm -rf ${DBGDIR}/${LANGDIR}
+	GET ${LANGDIR}.zip
+	unzip ${LANGDIR}.zip
+	rm -f ${LANGDIR}.zip
 	chmod -R 755 $LANGDIR
-	ln -sf $DBGDIR/$CGI $RDIR/$CGI > /dev/null 2>&1
+	ln -sf ${DBGDIR}/${CGI} ${RDIR}/${CGI} > /dev/null 2>&1
 	GETLIST $BINLIST
 	;;
 	del)
 	cd $RDIR
 	rm -rf $DBGDIR
-	rm -f $RDIR/$CGI
+	rm -f ${RDIR}/${CGI}
 	;;
 	*)
 	DIRMAKE

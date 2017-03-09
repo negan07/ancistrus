@@ -9,32 +9,37 @@
 # https://github.com/negan07/ancistrus
 #
 #
-# D7000 toolchain.
+# Toolchain crosstools extract & patch.
+#
+# Usage: $0 <prj_name> <fw_ver> <diff_dir> <source_dir> <crosstools_dir> <crosstools_tar> <inst_dir> <src_buildroot_dl_dir>
 #
 
-SOURCEDIR="D7000_V1.0.1.44_WW_src"
-TCDIR="crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources"
-TARTC="../${SOURCEDIR}/Source/${TCDIR}.tar.bz2"
-INSTDIR="/opt/toolchains"
-BRDLDIR="src/buildroot-2011.11/dl"
-
+# parameters check
+[ $# -ne 8 ] \
+&& echo "Usage: $0 <prj_name> <fw_ver> <diff_dir> <source_dir> <crosstools_dir> <crosstools_tar> <inst_dir> <src_buildroot_dl_dir>" \
+&& exit 1
+# var assignements
+PROJECT="$1"
+FWVER="$2"
+DIFFDIR="$3"
+SOURCEDIR="$4"
+TCDIR="$5"
+TARTC="$6"
+INSTDIR="$7"
+BRDLDIR="$8"
 # create compiled toolchain's root dir: the path cannot be modified
 sudo mkdir -p -m 0755 $INSTDIR
-# searching for source dir: if not found dl it
-	if [ ! -d $SOURCEDIR ]; then
-	./dl_sources.sh
-		if [ $? != 0 ]; then
-		echo "$0: script aborted"
-		exit 1
-		fi
-	fi
+# searching for source dir...
+[ ! -d $SOURCEDIR ] && echo "Can't find ${SOURCEDIR} . Type: make download_sources to download sources" && exit 2
+# avoid applying patch again...
+[ -d $TCDIR ] && exit 0
 # source dir includes the tar.bz2 toolchain to be built...
 mkdir -p -m 0755 $TCDIR
 cd $TCDIR
 echo "Extracting crosstools from tar.bz2 archive..."
-tar xjf $TARTC
-chmod 755 src/build
-chmod 644 src/*.brcm.config
+tar xjf ../${TARTC}
+chmod -f 755 src/build
+chmod -f 644 src/*.brcm.config
 # extract archives on dl dir
 cd $BRDLDIR
 echo "Extracting crosstools before patching..."
@@ -47,9 +52,9 @@ tar xjf uClibc-0.9.32.tar.bz2
 rm -f autoconf-2.65.tar.bz2 gcc-4.6.2.tar.bz2 gdb-7.3.1.tar.bz2 m4-1.4.15.tar.bz2 uClibc-0.9.32.tar.bz2
 cd ../../../..
 # apply patches
-./apply_patch.sh crosstools
+./apply_patch.sh $PROJECT $FWVER $DIFFDIR crosstools
 # repack them all
-cd $TCDIR/$BRDLDIR
+cd ${TCDIR}/${BRDLDIR}
 echo "Repacking crosstools after patching..."
 tar cjf autoconf-2.65.tar.bz2 autoconf-2.65
 tar cjf gcc-4.6.2.tar.bz2 gcc-4.6.2

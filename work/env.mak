@@ -1,5 +1,5 @@
 ifndef LOCAL
-PROFILE_ARCH	:= arm
+PROFILE_ARCH	:= $(CPU_ARCH)
 export TMPDIR	:= /tmp
 ifndef DEBUG
 export ETCDIR	:= $(PREFIX)/usr/etc
@@ -15,7 +15,7 @@ export MODDIR	:= $(PREFIX)
 export WWWDIR	:= $(PREFIX)
 endif
 else
-PROFILE_ARCH	:= i386
+PROFILE_ARCH	:= I386
 export TMPDIR	:= $(PREFIX)/tmp
 export ETCDIR	:= $(TMPDIR)/etc
 export BINDIR	:= $(PREFIX)/usr/sbin
@@ -29,43 +29,38 @@ export KERNEL_DIR := $(SOURCE_PATH)/Source/kernel
 export KERNEL_INC := $(KERNEL_DIR)/include
 export KERNEL_SRC := $(KERNEL_DIR)
 
-TOOLCHAIN_USRBIN_PATH_MIPS   := /opt/toolchains/crosstools-mips-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21/usr/bin
-TOOLCHAIN_USRBIN_PATH_ARM    := /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin
-TOOLCHAIN_USRBIN_PATH_MIPSEL := /opt/toolchains/crosstools-mipsel-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21/usr/bin
-TOOLCHAIN_USRBIN_PATH_I386   := /usr/bin/
-
 PREFIX_MIPS	:= mips-unknown-linux-uclibc-
 PREFIX_ARM	:= arm-unknown-linux-uclibcgnueabi-
 PREFIX_MIPSEL	:= mipsel-unknown-linux-uclibc-
 PREFIX_I386	:= 
 
-ifeq ($(PROFILE_ARCH),mips)
+ifeq ($(PROFILE_ARCH),MIPS)
 export ARCH		:= mips
 export ARCH_ENDIAN	:= big
 export ENDIAN_FLAGS	:= -b
-export TOOLCHAIN	:= $(TOOLCHAIN_USRBIN_PATH_MIPS)
+export TOOLCHAIN	:= $(TCHAIN_MIPS_DIR)
 export CROSS		:= $(PREFIX_MIPS)
 endif
 
-ifeq ($(PROFILE_ARCH),arm)
+ifeq ($(PROFILE_ARCH),ARM)
 export ARCH		:= arm
 export ARCH_ENDIAN	:= little
 export ENDIAN_FLAGS	:= -l
-export TOOLCHAIN	:= $(TOOLCHAIN_USRBIN_PATH_ARM)
+export TOOLCHAIN	:= $(TCHAIN_ARM_DIR)
 export CROSS		:= $(PREFIX_ARM)
 endif
 
-ifeq ($(PROFILE_ARCH),mipsel)
+ifeq ($(PROFILE_ARCH),MIPSEL)
 export ARCH		:= mips
 export ARCH_ENDIAN	:= little
 export ENDIAN_FLAGS	:= -l
-export TOOLCHAIN	:= $(TOOLCHAIN_USRBIN_PATH_MIPSEL)
+export TOOLCHAIN	:= $(TCHAIN_MIPSEL_DIR)
 export CROSS		:= $(PREFIX_MIPSEL)
 endif
 
-ifeq ($(PROFILE_ARCH),i386)
+ifeq ($(PROFILE_ARCH),I386)
 export ARCH		:= i386
-export TOOLCHAIN	:= $(TOOLCHAIN_USRBIN_PATH_I386)
+export TOOLCHAIN	:= $(TCHAIN_I386_DIR)
 export CROSS		:= $(PREFIX_I386)
 endif
 
