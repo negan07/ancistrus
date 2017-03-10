@@ -9,6 +9,10 @@ THIRDPARTYLIB		:=
 THIRDPARTY		:=
 SUBDIRS			:=
 
+$(PROJECT_NAME)		:= $(PROJECT_NAME)_core-0.0.0
+DL_$(PROJECT_NAME)	:= void
+TAR_$(PROJECT_NAME)	:= void
+
 NVRAM			:= nvram
 DL_$(NVRAM)		:= $(SRC_APPS_REL_DIR)
 TAR_$(NVRAM)		:= nvram
@@ -35,7 +39,7 @@ DL_$(QOS_NG_36_42N)	:= void
 TAR_$(QOS_NG_36_42N)	:= void
 
 BUILTINLIB 		+= $(NVRAM)
-#THIRDPARTY		+= $(PROJECT_NAME)_core-0.0.0
+#THIRDPARTY		+= $($(PROJECT_NAME))
 ifndef LOCAL
 BUILTIN			+= $(UTELNETD)
 BUILTIN			+= $(IPROUTE2)
