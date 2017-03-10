@@ -3,6 +3,8 @@ include Settings.mak
 
 all: toolchain sources
 
+download: download_work 
+
 clean: clean_toolchain clean_sources
 
 dist_clean: dist_clean_sources dist_clean_work
@@ -43,6 +45,11 @@ work: download_sources
 prepare_work: download_sources
 	@if [ -d  $(WORK_SRC_DIR) ]; then \
 	cd $(WORK_SRC_DIR); $(MAKE) prepare; \
+	fi
+
+download_work: download_sources
+	@if [ -d  $(WORK_SRC_DIR) ]; then \
+	cd $(WORK_SRC_DIR); $(MAKE) download; \
 	fi
 
 clean_toolchain:
@@ -90,6 +97,7 @@ info:
 
 help: info
 	@echo "make			- download sources, compile & install toolchain, compile sources, compile work-thirdparty create img"
+	@echo "make download		- download & extract sources, download/copy & extract work-thirdparty apps without patching"
 	@echo "make clean		- cleanup toolchain sources, kernel & app sources (included work-thirdparty apps), target, img"
 	@echo "make dist_clean		- delete toolchain source dir, delete source dir, cleanup work & delete previously downloaded dirs"
 	@echo "make prepare_host	- tune-up host & install packets needed to make & develop (optional)"
@@ -100,6 +108,7 @@ help: info
 	@echo "make patch_sources	- download sources, extract & patch sources without compiling"
 	@echo "make work		- download sources, download/copy, patch & compile work-thirdparty apps"
 	@echo "make prepare_work	- download sources, download/copy & patch work-thirdparty apps without compiling"
+	@echo "make download_work	- download & extract sources, download/copy & extract work-thirdparty apps without patching"
 	@echo "make clean_toolchain	- delete toolchain sources dir"
 	@echo "make dist_clean_toolchain- delete toolchain sources dir & delete all built toolchains"
 	@echo "make clean_sources	- cleanup kernel & app sources (included work-thirdparty apps), target, img"
