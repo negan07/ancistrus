@@ -1,0 +1,18 @@
+ancistrus
+
+Netgear's Nighthawk Router Experience Distributed Project
+
+D7000
+
+https://github.com/negan07/ancistrus
+
+
+Patch diffs dir:
+
+apps				Built-in apps modifications.
+crosstools			Toolchain modifications adaptations fixes.
+kernel				Kernel source additions & adaptations.
+misc				Source makefiles & environmental vars adaptations & modifications.
+uclibc				Uclibc libs fixes, tunings, adaptations.
+work				Work-thirdparty dir fixes, tunings, adaptations, modifications.
+
