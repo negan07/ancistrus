@@ -41,14 +41,15 @@ if [ -d .git ]; then
   echo
 
   echo "== Most Recent Commit"
-  git log --max-count=1
+# git log --max-count=1
+  git log --max-count=1 --pretty='format:%Cblue%<(10)%h%Cred%<(10)%an%Cgreen%<(20)%ad%Creset%<(20)%s' --date=format:'%d/%m/%Y %H:%M'
   echo
 
   echo -n "Build Revision Number: "
-  printf "%04u" `git rev-list --count HEAD`
+  printf "%u" `git rev-list --count HEAD`
   echo
 
-#  echo "Type 'git log' for more commits, or 'git show' for full commit details."
+# echo "Type 'git log' for more commits, or 'git show' for full commit details."
 else
   echo "Not a git repository."
 fi
