@@ -20,23 +20,16 @@
 
 LISTDIR="Kernel/bcm963xx/kernel/linux-3.4rt Kernel/bcm963xx/bcmdrivers Kernel/bcm963xx/hostTools Kernel/bcm963xx/shared Kernel/bcm963xx/targets Kernel/bcm963xx Source/apps Source/Builds Source/image Source/shared Source/uClibc-0.9.32 Source Makefile"
 
-if [ $# != 2 ]; then
-echo "Usage: $0 <absdir1> <absdir2>"
-exit 1
-fi
+[ $# -ne 2 ] && echo "Usage: $0 <absdir1> <absdir2>" && exit 1
 
 for DIR in $*
 do
 	case $DIR in
 	/*)
-		if [ ! -d $DIR ]
-		then echo "$DIR not a dir"
-		exit 2
-		fi
+	[ ! -d $DIR ] && echo "$DIR not a dir" && exit 2
 	;;
 	*)
-	echo "$DIR not an absdir"
-	exit 3
+	echo "$DIR not an absdir" && exit 3
 	;;
 	esac
 done

@@ -7,12 +7,16 @@ D7000
 https://github.com/negan07/ancistrus
 
 
-Patch diffs dir:
+Patch files must have .diff extension.
+Files must be named: projectname_fwversion_dirname-patchordernum(3dgt)-patchcontent(title).diff .
+Each patch file is assumed to be applied from git root with -p0 option.
 
-apps				Built-in apps modifications.
+Patch dirs:
+
+apps				Built-in apps modifications: it contains subdirs.
 crosstools			Toolchain modifications adaptations fixes.
 kernel				Kernel source additions & adaptations.
 misc				Source makefiles & environmental vars adaptations & modifications.
 uclibc				Uclibc libs fixes, tunings, adaptations.
-work				Work-thirdparty dir fixes, tunings, adaptations, modifications.
+work				Work-thirdparty dir fixes, tunings, ...: it contains subdirs.
 

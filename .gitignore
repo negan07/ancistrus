@@ -106,7 +106,7 @@ vmlinux.*
 .patched
 .compiled
 work/Rules.mak
-work/nvram/
+work/nvram*/
 work/utelnetd*/
 work/iproute2*/
 

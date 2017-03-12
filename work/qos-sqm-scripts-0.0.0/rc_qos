@@ -1,5 +1,5 @@
 #!/bin/sh
-
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
@@ -7,6 +7,7 @@
 #       Copyright (C) 2012-4 Michael D. Taht, Toke Høiland-Jørgensen, Sebastian Moeller
 #
 # Revised & adapted:
+#
 # ancistrus
 #
 # Netgear's Nighthawk Router Experience Distributed Project
@@ -15,13 +16,14 @@
 #
 # https://github.com/negan07/ancistrus
 #
+#
 
 STATE_FILE=/tmp/qos.state
 
 stop_sqm() {
 
 if [ -z "${SCRIPT}" ] ; then
-    sqm_error "SCRIPT value is not defined in qos.conf"
+    sqm_error "SCRIPT value not defined."
     sqm_error "Please check your configuration and try again."
     exit 1
 fi
@@ -33,12 +35,12 @@ sqm_log "Stopping SQM on ${IFACE}"
 CUR_IFB=$( get_ifb_associated_with_if ${IFACE} )
 [ -z "$CUR_IFB" ] && CUR_IFB=$( ifb_name ${IFACE} )
 
-if [ ! -f "./$SCRIPT" ]; then
+if [ ! -f "${SCRIPTSDIR}/${SCRIPT}" ]; then
     sqm_error "SQM script ${SCRIPT} not found!"
     exit 1
 fi
 
-. $SCRIPT
+. ${SCRIPTSDIR}/${SCRIPT}
 
 sqm_stop
 
@@ -50,7 +52,7 @@ return 0
 start_sqm() {
 
 if [ -z "${SCRIPT}" ] ; then
-    sqm_error "SCRIPT value is not defined in qos.conf"
+    sqm_error "SCRIPT value not defined."
     sqm_error "Please check your configuration and try again."
     exit 1
 fi
@@ -66,17 +68,12 @@ if [ ! -d /sys/class/net/${IFACE} ] ; then
     exit 1
 fi
 
-if [ "${ENABLED:-1}" -ne "1" ]; then
-    sqm_log "SQM config disabled on ${IFACE}."
-    exit 0
-fi
-
-if [ ! -f "./$SCRIPT" ]; then
+if [ ! -f "${SCRIPTSDIR}/${SCRIPT}" ]; then
     sqm_error "SQM script ${SCRIPT} not found!"
     exit 1
 fi
 
-. $SCRIPT
+. ${SCRIPTSDIR}/${SCRIPT}
 
 sqm_trace; sqm_trace "$(date): Starting." # Add some space and a date stamp to verbose log output and log files to separate runs
 sqm_log "Starting SQM script: ${SCRIPT} on ${IFACE}, in: ${DOWNLINK} Kbps, out: ${UPLINK} Kbps"
@@ -118,7 +115,6 @@ return 0
     case $1 in
     start|restart)
     stop_sqm
-    [ $ENABLED -eq 1 ] || exit 1
     start_sqm
     ;;
     stop)
@@ -131,8 +127,7 @@ return 0
     show_sqm stats
     ;;
     *)
-    echo "Usage: $0 start|restart|stop|show|stats (debug) (verbose)"
-    exit 1
+    echo "Usage: $0 start|restart|stop|show|stats (debug) (verbose)" && exit 1
     ;;
     esac
 

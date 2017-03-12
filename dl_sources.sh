@@ -21,7 +21,7 @@
 
 ERR=0
 
-UNZIP() {										#check integrity and unzip: return error exit code
+UNZIP() {										#check integrity and unzip: set error exit code
 zip -T $2 && echo "Extracting: $2 ..." && unzip -qq $2
 ERR=$?
 	if [ -f "${1}.tar.gz" ]; then							#.zip archive may include another
@@ -34,12 +34,12 @@ ERR=$?
 	fi
 }
 
-UNTARGZ() {										#check integrity and untar gz: return tar exit code
+UNTARGZ() {										#check integrity and untar gz: set error exit code
 tar xzf $1 -O > /dev/null 2>&1 && echo "Extracting: $1 ..." && tar xzf $1
 ERR=$?
 }
 
-UNTARBZ2() {										#check integrity and untar bz2: return tar exit code
+UNTARBZ2() {										#check integrity and untar bz2: set error exit code
 tar xjf $1 -O > /dev/null 2>&1 && echo "Extracting: $1 ..." && tar xjf $1
 ERR=$?
 }
@@ -62,9 +62,9 @@ ERR=$?
 	;;
 	esac
 	if [ ! -d $DSTDIR ]; then
-	echo "Dir: $DSTDIR not present"
+	echo "$DSTDIR not present"
 		if [ ! -f $SRCFILE ]; then						#avoid dir ovewritings
-		echo "File: $SRCFILE not present"
+		echo "$SRCFILE not present"
 			case $URL in
 			http*)								#download from web
 			echo "Downloading: ${URL}/${SRCFILE} ..."
@@ -75,8 +75,8 @@ ERR=$?
 			;;
 			*)								#local copy (typically from orig sources)
 			echo "Copying local: ${URL}/${SRCFILE} ..."
-			cp -rf ${URL}/${SRCFILE} .					#set error flag on copy error
-			ERR=$?
+			cp -rf ${URL}/${SRCFILE} ./${DSTDIR}
+			ERR=$?								#set error flag on copy error
 			;;
 			esac
 		fi

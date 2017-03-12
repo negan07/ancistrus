@@ -13,7 +13,7 @@ $(PROJECT_NAME)		:= $(PROJECT_NAME)_core-0.0.0
 DL_$(PROJECT_NAME)	:= void
 TAR_$(PROJECT_NAME)	:= void
 
-NVRAM			:= nvram
+NVRAM			:= nvram-0.1.0-anc
 DL_$(NVRAM)		:= $(SRC_APPS_REL_DIR)
 TAR_$(NVRAM)		:= nvram
 DIRLIST			+= $(NVRAM)

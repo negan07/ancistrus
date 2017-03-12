@@ -1,6 +1,6 @@
-diff -urN work/nvram/Makefile work/nvram/Makefile
---- work/nvram/Makefile	2016-10-11 17:53:07.000000000 +0200
-+++ work/nvram/Makefile	2017-01-30 23:40:16.498598559 +0100
+diff -urN work/nvram-0.1.0-anc/Makefile work/nvram-0.1.0-anc/Makefile
+--- work/nvram-0.1.0-anc/Makefile	2016-10-11 17:53:07.000000000 +0200
++++ work/nvram-0.1.0-anc/Makefile	2017-01-30 23:40:16.498598559 +0100
 @@ -1,37 +1,46 @@
 -include ../../Rules.mak
 -CC=$(CROSS)gcc
@@ -70,9 +70,9 @@ diff -urN work/nvram/Makefile work/nvram/Makefile
 -
 +	rm -rf *~ *.o *.so $(LIBS)
  
-diff -urN work/nvram/nvram.c work/nvram/nvram.c
---- work/nvram/nvram.c	2016-10-11 17:53:07.000000000 +0200
-+++ work/nvram/nvram.c	2017-02-05 21:24:36.082726345 +0100
+diff -urN work/nvram-0.1.0-anc/nvram.c work/nvram-0.1.0-anc/nvram.c
+--- work/nvram-0.1.0-anc/nvram.c	2016-10-11 17:53:07.000000000 +0200
++++ work/nvram-0.1.0-anc/nvram.c	2017-02-05 21:24:36.082726345 +0100
 @@ -7,12 +7,15 @@
  #include <unistd.h>
  #include <sys/ioctl.h>
@@ -519,9 +519,9 @@ diff -urN work/nvram/nvram.c work/nvram/nvram.c
  
  	if((pt=__nvram_get_func(name, path, 0))==NULL)
  		return NULL;
-diff -urN work/nvram/nvram.h work/nvram/nvram.h
---- work/nvram/nvram.h	2016-10-11 17:53:07.000000000 +0200
-+++ work/nvram/nvram.h	2017-02-05 18:35:43.645563433 +0100
+diff -urN work/nvram-0.1.0-anc/nvram.h work/nvram-0.1.0-anc/nvram.h
+--- work/nvram-0.1.0-anc/nvram.h	2016-10-11 17:53:07.000000000 +0200
++++ work/nvram-0.1.0-anc/nvram.h	2017-02-05 18:35:43.645563433 +0100
 @@ -10,48 +10,62 @@
  
  /* line terminator by 0x00 
@@ -732,9 +732,9 @@ diff -urN work/nvram/nvram.h work/nvram/nvram.h
  	get or set the value of a key
  */
  int nv_set(const char* category, const char* key, int key_idx, const char* value);
-diff -urN work/nvram/nvram_lock.c work/nvram/nvram_lock.c
---- work/nvram/nvram_lock.c	2016-10-11 17:53:07.000000000 +0200
-+++ work/nvram/nvram_lock.c	2017-01-26 22:29:06.100722779 +0100
+diff -urN work/nvram-0.1.0-anc/nvram_lock.c work/nvram-0.1.0-anc/nvram_lock.c
+--- work/nvram-0.1.0-anc/nvram_lock.c	2016-10-11 17:53:07.000000000 +0200
++++ work/nvram-0.1.0-anc/nvram_lock.c	2017-01-26 22:29:06.100722779 +0100
 @@ -13,9 +13,13 @@
  	char lock_path[PATH_MAX];
  	char *p;

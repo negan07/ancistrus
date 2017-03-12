@@ -22,6 +22,7 @@
 ################################################################################
 #
 # Revised & adapted:
+#
 # ancistrus
 #
 # Netgear's Nighthawk Router Experience Distributed Project
@@ -29,6 +30,7 @@
 # D7000
 #
 # https://github.com/negan07/ancistrus
+#
 #
 
 
@@ -306,8 +308,10 @@ htb_quantum_linear() {
 
     # Because $BANDWIDTH is in kbps, bytes/1ms is simply factor-8
     # Stop at some huge quantum, and don't start until 2 MTU
-    BANDWIDTH_L=$(( ${HTB_MTU} *  2 * 8 ))
-    BANDWIDTH_H=$(( ${HTB_MTU} * 64 * 8 ))
+#    BANDWIDTH_L=$(( ${HTB_MTU} *  2 * 8 ))
+#    BANDWIDTH_H=$(( ${HTB_MTU} * 64 * 8 ))
+    BANDWIDTH_L=$(( ${HTB_MTU} *  16 ))
+    BANDWIDTH_H=$(( ${HTB_MTU} * 512 ))
 
     if [ ${BANDWIDTH} -gt ${BANDWIDTH_H} ] ; then
         HTB_QUANTUM=$(( ${HTB_MTU} * 64 ))
@@ -368,8 +372,10 @@ get_burst() {
     # 10 MTU burst can itself create delay under CPU load.
     # It will need to all wait for a hardware commit.
     # Note the lean mixture at high bandwidths for upper limit.
-    BANDWIDTH_L=$(( ${MTU} *  2 * 8 ))
-    BANDWIDTH_H=$(( ${MTU} * 18 * 8 ))
+#    BANDWIDTH_L=$(( ${MTU} *  2 * 8 ))
+#    BANDWIDTH_H=$(( ${MTU} * 18 * 8 ))
+    BANDWIDTH_L=$(( ${MTU} * 16 ))
+    BANDWIDTH_H=$(( ${MTU} * 144 ))
 
 
     if [ ${BANDWIDTH} -gt ${BANDWIDTH_H} ] ; then
@@ -558,6 +564,7 @@ adapt_interval_to_slow_link() {
         pie)
             ## not sure if pie needs this, probably not
             #TUPDATE=$(( (30 - 20) * 1000 + ${TARGET} ))
+            #TUPDATE=$(( 10000 + ${TARGET} ))
             #echo "tupdate ${TUPDATE}us"
             ;;
     esac
