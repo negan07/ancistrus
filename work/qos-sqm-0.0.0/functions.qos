@@ -1,5 +1,6 @@
+#!/bin/sh
 ################################################################################
-# (sqm) functions.sh
+# (sqm) functions.qos (orig: functions.sh)
 #
 # These are all helper functions for various parts of SQM scripts. If you want
 # to play around with your own shaper-qdisc-filter configuration look here for
@@ -64,32 +65,36 @@ ipt() {
     [ "$d" != "$*" ] && {
         sqm_trace "iptables ${d}"
         iptables $d >> ${OUTPUT_TARGET} 2>&1
-        sqm_trace "ip6tables ${d}"
-        ip6tables $d >> ${OUTPUT_TARGET} 2>&1
+            [ "$IP6MODE" != "disable" ] && {
+            sqm_trace "ip6tables ${d}"
+            ip6tables $d >> ${OUTPUT_TARGET} 2>&1
+            }
     }
     d=$(echo $* | sed s/-I/-D/g)
     [ "$d" != "$*" ] && {
         sqm_trace "iptables ${d}"
         iptables $d >> ${OUTPUT_TARGET} 2>&1
-        sqm_trace "ip6tables ${d}"
-        ip6tables $d >> ${OUTPUT_TARGET} 2>&1
+            [ "$IP6MODE" != "disable" ] && {
+            sqm_trace "ip6tables ${d}"
+            ip6tables $d >> ${OUTPUT_TARGET} 2>&1
+            }
     }
     sqm_trace "iptables $*"
     iptables $* >> ${OUTPUT_TARGET} 2>&1
-    sqm_trace "ip6tables $*"
-    ip6tables $* >> ${OUTPUT_TARGET} 2>&1
+        [ "$IP6MODE" != "disable" ] && {
+        sqm_trace "ip6tables $*"
+        ip6tables $* >> ${OUTPUT_TARGET} 2>&1
+        }
 }
 
 # wrapper to call tc to allow debug logging
 tc_wrapper() {
-    tc_args=$*
     sqm_trace "${TC_BINARY} $*"
     ${TC_BINARY} $* >> ${OUTPUT_TARGET} 2>&1
 }
 
 # wrapper to call tc to allow debug logging
 ip_wrapper() {
-    ip_args=$*
     sqm_trace "${IP_BINARY} $*"
     ${IP_BINARY} $* >> ${OUTPUT_TARGET} 2>&1
 }
@@ -122,10 +127,10 @@ write_state_file() {
 # find the ifb device associated with a specific interface, return nothing of no
 # ifb is associated with IF
 get_ifb_associated_with_if() {
-    local CUR_IF=$1
+   local CUR_IF=$1
   #local CUR_IFB=$( $TC_BINARY -p filter show parent ffff: dev ${CUR_IF} | grep -o -E ifb'[^)\ ]+' )
    local CUR_IFB=$( $TC_BINARY -p filter show parent ffff: dev ${CUR_IF} | grep ifb | sed s/'${TC_BINARY} -p filter show parent ffff: dev '// )
-    sqm_debug "ifb associated with interface ${CUR_IF}: ${CUR_IFB}"
+   sqm_debug "ifb associated with interface ${CUR_IF}: ${CUR_IFB}"
 
     # we could not detect an associated IFB for CUR_IF
     if [ -z "${CUR_IFB}" ]; then
@@ -563,7 +568,7 @@ adapt_interval_to_slow_link() {
             ;;
         pie)
             ## not sure if pie needs this, probably not
-            #TUPDATE=$(( (30 - 20) * 1000 + ${TARGET} ))
+            ##TUPDATE=$(( (30 - 20) * 1000 + ${TARGET} ))
             #TUPDATE=$(( 10000 + ${TARGET} ))
             #echo "tupdate ${TUPDATE}us"
             ;;
@@ -658,13 +663,14 @@ diffserv() {
         esac
     $TC filter add dev $interface protocol ip parent 1:0 prio $prio u32 match ip tos 0x${HEX} 0xfc classid 1:1${ID}
     prio=$(($prio + 1))
-    $TC filter add dev $interface protocol ipv6 parent 1:0 prio $prio u32 match ip6 priority 0x${HEX} 0xfc classid 1:1${ID}
-    prio=$(($prio + 1))
+        [ "$IP6MODE" != "disable" ] && {
+        $TC filter add dev $interface protocol ipv6 parent 1:0 prio $prio u32 match ip6 priority 0x${HEX} 0xfc classid 1:1${ID}
+        prio=$(($prio + 1))
+        }
     done
 
     # Arp traffic
     $TC filter add dev $interface protocol arp parent 1:0 prio $prio handle 500 fw flowid 1:11
-
     prio=$(($prio + 1))
 }
 

@@ -4,12 +4,16 @@ export TMPDIR	:= /tmp
 ifndef DEBUG
 export ETCDIR	:= $(PREFIX)/usr/etc
 export BINDIR	:= $(PREFIX)/usr/sbin
+export APPDIR	:= $(BINDIR)/rc_app
+export SCRDIR	:= $(BINDIR)/scripts
 export LIBDIR	:= $(PREFIX)/lib
 export MODDIR	:= $(LIBDIR)/modules
 export WWWDIR	:= $(PREFIX)/www.eng
 else
 export ETCDIR	:= $(PREFIX)
 export BINDIR	:= $(PREFIX)
+export APPDIR	:= $(PREFIX)
+export SCRDIR	:= $(PREFIX)
 export LIBDIR	:= $(PREFIX)
 export MODDIR	:= $(PREFIX)
 export WWWDIR	:= $(PREFIX)
@@ -19,6 +23,8 @@ PROFILE_ARCH	:= I386
 export TMPDIR	:= $(PREFIX)/tmp
 export ETCDIR	:= $(TMPDIR)/etc
 export BINDIR	:= $(PREFIX)/usr/sbin
+export APPDIR	:= $(BINDIR)/rc_app
+export SCRDIR	:= $(BINDIR)/scripts
 export LIBDIR	:= $(PREFIX)/lib
 export MODDIR	:= $(LIBDIR)/modules
 export WWWDIR	:= $(PREFIX)/www.eng
