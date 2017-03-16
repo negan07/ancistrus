@@ -99,6 +99,7 @@ dkms.conf
 crosstools-*
 D7000_*_src
 vmlinux.*
+anc
 *.img
 *.bin
 *.bz2

@@ -9,14 +9,14 @@ THIRDPARTYLIB		:=
 THIRDPARTY		:=
 SUBDIRS			:=
 
-$(PROJECT_NAME)		:= $(PROJECT_NAME)_core-0.0.0
-DL_$(PROJECT_NAME)	:= void
-TAR_$(PROJECT_NAME)	:= void
-
-NVRAM			:= nvram-0.1.0-anc
+export NVRAM		:= nvram-0.1.0-anc
 DL_$(NVRAM)		:= $(SRC_APPS_REL_DIR)
 TAR_$(NVRAM)		:= nvram
 DIRLIST			+= $(NVRAM)
+
+$(PROJECT_NAME)		:= $(PROJECT_NAME)_core-0.0.0
+DL_$(PROJECT_NAME)	:= void
+TAR_$(PROJECT_NAME)	:= void
 
 UTELNETD		:= utelnetd-0.1.11
 DL_$(UTELNETD)		:= http://public.pengutronix.de/software/utelnetd
@@ -30,7 +30,7 @@ TAR_$(IPROUTE2)		:= iproute2-4.10.0.tar.gz
 DIRLIST			+= $(IPROUTE2)
 TARLIST			+= $(TAR_$(IPROUTE2))
 
-QOS_SQM			:= qos-sqm-scripts-0.0.0
+QOS_SQM			:= qos-sqm-0.0.0
 DL_$(QOS_SQM)		:= void
 TAR_$(QOS_SQM)		:= void
 
@@ -39,7 +39,7 @@ DL_$(QOS_NG_36_42N)	:= void
 TAR_$(QOS_NG_36_42N)	:= void
 
 BUILTINLIB 		+= $(NVRAM)
-#THIRDPARTY		+= $($(PROJECT_NAME))
+THIRDPARTY		+= $($(PROJECT_NAME))
 ifndef LOCAL
 BUILTIN			+= $(UTELNETD)
 BUILTIN			+= $(IPROUTE2)
