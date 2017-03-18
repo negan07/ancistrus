@@ -34,6 +34,10 @@ TAR_$(NETPERF)		:= netperf-2.7.0.tar.gz
 DIRLIST			+= $(NETPERF)
 TARLIST			+= $(TAR_$(NETPERF))
 
+NETWORKTEST		:= network-test-0.1.0
+DL_$(NETWORKTEST)	:= void
+TAR_$(NETWORKTEST)	:= void
+
 QOS_SQM			:= qos-sqm-0.0.0
 DL_$(QOS_SQM)		:= void
 TAR_$(QOS_SQM)		:= void
@@ -48,6 +52,7 @@ ifndef LOCAL
 BUILTIN			+= $(UTELNETD)
 BUILTIN			+= $(IPROUTE2)
 #THIRDPARTY		+= $(NETPERF)
+#THIRDPARTY		+= $(NETWORKTEST)
 THIRDPARTY		+= $(QOS_SQM)
 #THIRDPARTY		+= $(QOS_NG_36_42N)
 endif

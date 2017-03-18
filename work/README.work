@@ -21,6 +21,8 @@ thirdpartylib			Additional .so libs not included into the original firmware.
 
 thirdparty			Additional apps not included into the original firmware.
 	ancistrus-core			The Main work tool: creates & acts all the injects.
-	qos-sqm-scripts			Quality Of Service tool in substitution of weak builtin.
+	qos-sqm				Quality Of Service tool in substitution of weak builtin.
 	qos-netgear-36_42n		Quality Of Service tool from Netgear firmware .36_42n.
+	netperf				Network performance measurement tool.
+	network-test			Enhanced cmdline network speedtest & performance scripts.
 
