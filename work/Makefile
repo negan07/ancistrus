@@ -1,3 +1,4 @@
+include ../Settings.mak
 include dirs.mak
 
 GIT_ROOT		:= $(shell cd ..; pwd;)
@@ -59,6 +60,7 @@ creat_rules:
 	@echo "export SOURCE_PATH 	:= $(SRC_PATH_NAME)" >> $(RULES)
 	@echo "export PREFIX		:= $(PREFIX_PATH)" >> $(RULES)
 	@echo "include \$$(GIT_ROOT_DIR)/Settings.mak" >> $(RULES)
+	@echo "include \$$(WORK_DIR)/dirs.mak" >> $(RULES)
 	@echo "include \$$(WORK_DIR)/env.mak" >> $(RULES)
 	@echo "include \$$(SOURCE_PATH)/$(SRC_BUILDS_REL_DIR)/\$$(PROJECT).mak" >> $(RULES)
 

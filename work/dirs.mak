@@ -1,5 +1,3 @@
-include ../Settings.mak
-
 DIRLIST			:=
 TARLIST			:=
 
@@ -9,7 +7,7 @@ THIRDPARTYLIB		:=
 THIRDPARTY		:=
 SUBDIRS			:=
 
-export NVRAM		:= nvram-0.1.0-anc
+NVRAM			:= nvram-0.1.0-anc
 DL_$(NVRAM)		:= $(SRC_APPS_REL_DIR)
 TAR_$(NVRAM)		:= nvram
 DIRLIST			+= $(NVRAM)
@@ -30,6 +28,12 @@ TAR_$(IPROUTE2)		:= iproute2-4.10.0.tar.gz
 DIRLIST			+= $(IPROUTE2)
 TARLIST			+= $(TAR_$(IPROUTE2))
 
+NETPERF			:= netperf-2.7.0
+DL_$(NETPERF)		:= ftp://ftp.netperf.org/netperf
+TAR_$(NETPERF)		:= netperf-2.7.0.tar.gz
+DIRLIST			+= $(NETPERF)
+TARLIST			+= $(TAR_$(NETPERF))
+
 QOS_SQM			:= qos-sqm-0.0.0
 DL_$(QOS_SQM)		:= void
 TAR_$(QOS_SQM)		:= void
@@ -43,6 +47,7 @@ THIRDPARTY		+= $($(PROJECT_NAME))
 ifndef LOCAL
 BUILTIN			+= $(UTELNETD)
 BUILTIN			+= $(IPROUTE2)
+#THIRDPARTY		+= $(NETPERF)
 THIRDPARTY		+= $(QOS_SQM)
 #THIRDPARTY		+= $(QOS_NG_36_42N)
 endif
