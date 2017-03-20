@@ -1,7 +1,9 @@
 include ../Rules.mak
 
 GIT_EXEC	:= $(shell echo $(GIT_NAME) | head -c 3)
+
 BINS		:= $(GIT_EXEC)
+OBJS		:= $(GIT_NAME).o
 
 CFLAGS		+= -W -Wall -Werror -Wbad-function-cast -Wcast-align -Wcast-qual -Wmissing-prototypes -Wstrict-prototypes -Wnested-externs -Wpointer-arith -Wredundant-decls -Wshadow -Winline
 LDFLAGS		:= -L../$(NVRAM) -lscnvram
@@ -25,13 +27,17 @@ endif
 
 all: $(BINS)
 
-$(GIT_EXEC): $(GIT_NAME).c
-	$(CC) $(GIT_NAME).c $(CFLAGS) $(LDFLAGS) $(INCLUDES) $(DEFS) -o $@
-	$(SSTRIP) $@
+$(BINS): $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) $(DEFS) $^ -o $@
 
-install: 
-	cp -f $(BINS) $(BINDIR)
+%.o : %.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) $(DEFS) -c $< -o $@
 
-clean: 
+install:
+	$(SSTRIP) $(BINS)
+	install -m 0755 -d $(BINDIR)
+	install -m 0755 $(BINS) $(BINDIR)
+
+clean:
 	rm -f *~ *.o *.so $(BINS)
 
