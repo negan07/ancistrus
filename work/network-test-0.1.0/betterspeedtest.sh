@@ -18,6 +18,18 @@
 
 # Copyright (c) 2014 - Rich Brown rich.brown@blueberryhillsoftware.com
 # GPLv2
+#
+# Revised & adapted:
+#
+# ancistrus
+#
+# Netgear's Nighthawk Router Experience Distributed Project
+#
+# D7000
+#
+# https://github.com/negan07/ancistrus
+#
+#
 
 # Summarize the contents of the ping's output file to show min, avg, median, max, etc.
 # 	input parameter ($1) file contains the output of the ping command
@@ -148,14 +160,14 @@ measure_direction() {
 
 	# Print TCP Download speed
 	echo ""
-	echo " $1: " `awk '{s+=$1} END {print s}' $SPEEDFILE` Mbps
+	echo " $1: " `awk '{s+=$1} END {print s * 1024}' $SPEEDFILE` Kbps
 
 	# When netperf completes, stop the dots and the pings
 	kill_pings
 #	kill_dots
 
 	# Summarize the ping data
-	summarize_pings $PINGFILE
+#	summarize_pings $PINGFILE
 
 	rm -f $PINGFILE $SPEEDFILE
 }

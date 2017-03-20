@@ -25,6 +25,18 @@
 
 # Copyright (c) 2014 - Rich Brown rich.brown@blueberryhillsoftware.com
 # GPLv2
+#
+# Revised & adapted:
+#
+# ancistrus
+#
+# Netgear's Nighthawk Router Experience Distributed Project
+#
+# D7000
+#
+# https://github.com/negan07/ancistrus
+#
+#
 
 # Summarize the contents of the ping's output file to show min, avg, median, max, etc.
 # 	input parameter ($1) file contains the output of the ping command
@@ -211,9 +223,9 @@ wait $ping_pid 2>/dev/null
 
 # sum up all the values (one line per netperf test) from $DLFILE and $ULFILE
 # then summarize the ping stat's
-echo " Download: " `awk '{s+=$1} END {print s}' $DLFILE` Mbps
-echo "   Upload: " `awk '{s+=$1} END {print s}' $ULFILE` Mbps
-summarize_pings $PINGFILE
+echo " Download: " `awk '{s+=$1} END {print s * 1024}' $DLFILE` Kbps
+echo "   Upload: " `awk '{s+=$1} END {print s * 1024}' $ULFILE` Kbps
+#summarize_pings $PINGFILE
 
 # Clean up
 rm -f $PINGFILE $DLFILE $ULFILE
