@@ -30,10 +30,10 @@ path_binaries() {
 [ -z "$SCRIPTSDIR" ] && SCRIPTSDIR=${BINDIR}/scripts
 
 # Debug purpose
-LIBDIR=
-ETCDIR=
-BINDIR=.
-SCRIPTSDIR=
+#LIBDIR=
+#ETCDIR=
+#BINDIR=
+#SCRIPTSDIR=
 
 [ -z "$INSMOD" ] && INSMOD=insmod
 [ -z "$RMMOD" ] && RMMOD=rmmod
@@ -49,20 +49,31 @@ get_settings() {
 # CONF
 . ${ETCDIR}/qos-sqm.conf
 
-eval `${BINDIR}/anc nvram get ${VAR[@]}`
-
-local I=0
+# NVRAM
+eval `${BINDIR}/anc nvram get ${VAR}`
+set -- ${VAR}
 for SET in $SQM_VARS
 do
-VAL=$(eval echo '$'${VAR[$I]})
-[ -z "$VAL" ] && VAL=${DEF[$I]}
+VAL=$(eval echo '$'${1})
 eval "$SET=$VAL"
-I=$(( $I + 1 ))
+shift
+done
+
+# DEFAULTS
+set -- ${DEF}
+for SET in $SQM_VARS
+do
+VAL=$(eval echo '$'${SET})
+	if [ -z "$VAL" ]; then
+	VAL=${1}
+	[ "${VAL}" = "void" ] && VAL=""
+	eval "$SET=$VAL"
+	fi
+shift
 done
 
 # These are the modules that do_modules() will attempt to load
 #ALL_MODULES="act_ipt sch_$QDISC sch_ingress act_mirred cls_fw cls_flow cls_u32 sch_htb sch_hfsc"
-#[ -z "$ALL_MODULES" ] && ALL_MODULES="sc_priority sc_track_ftp act_ipt sch_$QDISC cls_flow"
 [ -z "$ALL_MODULES" ] && ALL_MODULES="act_ipt sch_$QDISC cls_flow"
 
 [ "$SQM_DEBUG" = "1" ] && echo UPLINK=$UPLINK DOWNLINK=$DOWNLINK SCRIPT=$SCRIPT IFACE=$IFACE QDISC=$QDISC IP6MODE=$IP6MODE LLAM=$LLAM LINKLAYER=$LINKLAYER OVERHEAD=$OVERHEAD STAB_MTU=$STAB_MTU STAB_MPU=$STAB_MPU STAB_TSIZE=$STAB_TSIZE AUTOFLOW=$AUTOFLOW LIMIT=$LIMIT ILIMIT=$ILIMIT ELIMIT=$ELIMIT ITARGET=$ITARGET ETARGET=$ETARGET IECN=$IECN EECN=$EECN ZERO_DSCP_INGRESS=$ZERO_DSCP_INGRESS IGNORE_DSCP_INGRESS=$IGNORE_DSCP_INGRESS IQDISC_OPTS=$IQDISC_OPTS EQDISC_OPTS=$EQDISC_OPTS TARGET=$TARGET IPT_MASK=$IPT_MASK SHAPER_BURST=$SHAPER_BURST HTB_QUANTUM_FUNCTION=$HTB_QUANTUM_FUNCTION ALL_MODULES=$ALL_MODULES
@@ -116,6 +127,8 @@ sqm_stop
 
 rm -f "${STATE_FILE}"
 
+sleep 5
+
 return 0
 }
 
@@ -154,24 +167,26 @@ return 0
 
 show_sqm() {
 local INGR=$( ifb_name ${IFACE} )
+local INGRLNK=`$IP_BINARY link | grep ${INGR}`
 [ -z "$1" ] || S="-s"
 
     for I in qdisc class filter
     do
     echo
     echo "---- $I ----"
-        [ ${UPLINK} -eq 0 ] || {
+        [ "${UPLINK}" -eq 0 ] || {
         echo "--- EGRESS ---"
         $TC_BINARY $S $I show dev ${IFACE}
 	}
-        [ -z "${INGR}" ] || {
+        [ "${DOWNLINK}" -eq 0 ] || [ -z "${INGRLNK}" ] || {
         echo "--- INGRESS ---"
         $TC_BINARY $S $I show dev ${INGR}
         }
     done
 echo
 echo "--- MANGLE ---"
-ipt -t mangle -nL -v
+iptables -t mangle -nL -v
+[ "$IP6MODE" != "disable" ] && ip6tables -t mangle -nL -v
 
 return 0
 }
@@ -227,7 +242,7 @@ cat << _EOF_
 # https://github.com/negan07/ancistrus
 #
 #
-# qos-sqm - preliminary version: 0.0.0
+# qos-sqm - version: 0.1.0
 _EOF_
     ;;
     *)

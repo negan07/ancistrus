@@ -12,7 +12,7 @@ DL_$(NVRAM)		:= $(SRC_APPS_REL_DIR)
 TAR_$(NVRAM)		:= nvram
 DIRLIST			+= $(NVRAM)
 
-$(PROJECT_NAME)		:= $(PROJECT_NAME)_core-0.0.0
+$(PROJECT_NAME)		:= $(PROJECT_NAME)_core-0.1.0
 DL_$(PROJECT_NAME)	:= void
 TAR_$(PROJECT_NAME)	:= void
 
@@ -29,7 +29,8 @@ DIRLIST			+= $(IPROUTE2)
 TARLIST			+= $(TAR_$(IPROUTE2))
 
 NETPERF			:= netperf-2.7.0
-DL_$(NETPERF)		:= ftp://ftp.netperf.org/netperf
+DL_$(NETPERF)		:= https://fossies.org/linux/misc
+#DL_$(NETPERF)		:= ftp://ftp.netperf.org/netperf
 TAR_$(NETPERF)		:= netperf-2.7.0.tar.gz
 DIRLIST			+= $(NETPERF)
 TARLIST			+= $(TAR_$(NETPERF))
@@ -38,7 +39,7 @@ NETWORKTEST		:= network-test-0.1.0
 DL_$(NETWORKTEST)	:= void
 TAR_$(NETWORKTEST)	:= void
 
-QOS_SQM			:= qos-sqm-0.0.0
+QOS_SQM			:= qos-sqm-0.1.0
 DL_$(QOS_SQM)		:= void
 TAR_$(QOS_SQM)		:= void
 
