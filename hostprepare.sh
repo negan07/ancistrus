@@ -59,6 +59,10 @@ sudo apt-get install texinfo
 sudo apt-get install xutils-dev
 sudo apt-get install intltool
 
+# opkg compile support
+sudo apt-get install libarchive-dev
+sudo apt-get install libassuan-dev libgpg-error-dev libgpgme11-dev
+
 # subversion/cvs support
 sudo apt-get install subversion mercurial
 sudo apt-get install cvs

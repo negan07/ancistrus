@@ -21,6 +21,7 @@ WORK_SRC_DIR		?= work
 DEBUG_DIR		?= /home/ftp
 
 SRC_DIR			?= $(PROJECT_TARGET)_$(FWVER)_WW_src
+SRC_APPS_DIR		?= $(SRC_DIR)/Source/apps
 SRC_REL_DIR		?= ../$(SRC_DIR)
 SRC_APPS_REL_DIR	?= $(SRC_REL_DIR)/Source/apps
 SRC_BUILDS_REL_DIR	?= Source/Builds

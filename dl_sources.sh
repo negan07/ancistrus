@@ -80,7 +80,7 @@ ERR=$?
 			;;
 			esac
 		fi
-		case $SRCFILE in							#extract archive/copy file
+		case $SRCFILE in							#extract archive
 		*.zip)
 		UNZIP $DSTDIR $SRCFILE
 		;;
@@ -90,7 +90,7 @@ ERR=$?
 		*.tar.bz2)
 		UNTARBZ2 $SRCFILE
 		;;
-		*.sh)									#script only
+		*.sh)									#move script only
 		mv -f $SRCFILE $DSTDIR
 		ERR=$?
 		;;
