@@ -6,8 +6,9 @@ BINS		:= $(GIT_EXEC)
 OBJS		:= $(GIT_NAME).o
 
 CFLAGS		+= -W -Wall -Werror -Wbad-function-cast -Wcast-align -Wcast-qual -Wmissing-prototypes -Wstrict-prototypes -Wnested-externs -Wpointer-arith -Wredundant-decls -Wshadow -Winline
-LDFLAGS		:= -L../$(NVRAM) -lscnvram
-INCLUDES	:= -I../$(NVRAM)
+LDFLAGS		:= -L../$(NVRAM)
+LIBS		:= -lscnvram
+CPPFLAGS	:= -I../$(NVRAM)
 DEFS		:= -DPROJFOUNDER=\"$(PROJECT_FOUNDER)\" -DPROJNAME=\"$(PROJECT_NAME)\" -DPROJPLOT=\"$(PROJECT_PLOT)\" \
 -DPROJTARGET=\"$(PROJECT_TARGET)\" -DHOMEPAGE=\"$(GITHUB_DIR)\"
 
@@ -28,10 +29,10 @@ endif
 all: $(BINS)
 
 $(BINS): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) $(DEFS) $^ -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(CPPFLAGS) $(DEFS) $^ -o $@
 
 %.o : %.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) $(DEFS) -c $< -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(CPPFLAGS) $(DEFS) -c $< -o $@
 
 install:
 	$(SSTRIP) $(BINS)
