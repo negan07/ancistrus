@@ -1,0 +1,22 @@
+diff -urN work/opkg-0.3.4/opkg-0.3.4/Makefile.in work/opkg-0.3.4/opkg-0.3.4/Makefile.in
+--- work/opkg-0.3.4/opkg-0.3.4/Makefile.in	2016-12-22 18:39:20.000000000 +0100
++++ work/opkg-0.3.4/opkg-0.3.4/Makefile.in	2017-03-23 21:24:19.232029164 +0100
+@@ -198,7 +198,8 @@
+ 	$(top_srcdir)/conf/install-sh $(top_srcdir)/conf/ltmain.sh \
+ 	$(top_srcdir)/conf/missing AUTHORS COPYING ChangeLog INSTALL \
+ 	NEWS README TODO conf/compile conf/config.guess \
+-	conf/config.sub conf/install-sh conf/ltmain.sh conf/missing
++	conf/config.sub conf/depcomp conf/install-sh conf/ltmain.sh \
++	conf/missing
+ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ distdir = $(PACKAGE)-$(VERSION)
+ top_distdir = $(distdir)
+@@ -379,7 +380,7 @@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ ACLOCAL_AMFLAGS = -I m4
+-SUBDIRS = libopkg src utils man
++SUBDIRS = libopkg src #utils man
+ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = libopkg.pc
+ interceptdir = $(datadir)/opkg/intercept

@@ -1,0 +1,32 @@
+diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
+--- work/opkg-0.3.4/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/opkg-0.3.4/Makefile	2017-03-23 20:35:42.745736890 +0100
+@@ -0,0 +1,28 @@
++include ../Rules.mak
++
++all: config
++	$(MAKE) -C $(OPKG)
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(OPKG) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -lssl -lcrypto" CURL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -lcurl" LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-lssl -lcrypto -lcurl -larchive" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include -I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/include -I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --enable-openssl --disable-gpg --disable-shared --with-static-libopkg --prefix=/usr --exec-prefix=/usr/sbin
++
++install:
++	$(SSTRIP) $(OPKG)/src/opkg
++	install -m 0755 -d $(ETCDIR)
++	install -m 0755 -d $(BINDIR)
++	install -m 0644 $(OPKG)/src/utils/opkg.conf $(ETCDIR)
++	install -m 0755 $(OPKG)/src/opkg $(BINDIR)
++
++clean:
++	$(MAKE) -C $(OPKG) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(OPKG) distclean
++

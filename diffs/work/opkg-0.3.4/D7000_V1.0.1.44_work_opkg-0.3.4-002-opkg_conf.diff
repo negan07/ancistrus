@@ -1,0 +1,9 @@
+diff -urN work/opkg-0.3.4/opkg-0.3.4/utils/opkg.conf work/opkg-0.3.4/opkg-0.3.4/utils/opkg.conf
+--- work/opkg-0.3.4/opkg-0.3.4/utils/opkg.conf	1970-01-01 01:00:00.000000000 +0100
++++ work/opkg-0.3.4/opkg-0.3.4/utils/opkg.conf	2017-03-23 13:30:14.381800000 +0100
+@@ -0,0 +1,5 @@
++dest root /
++dest ram /tmp
++lists_dir ext /tmp/var/opkg-lists
++option overlay_root /overlay
++
