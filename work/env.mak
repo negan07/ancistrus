@@ -1,50 +1,58 @@
 ifndef LOCAL
-PROFILE_ARCH	:= $(CPU_ARCH)
-export TMPDIR	:= /tmp
+PROFILE_ARCH		:= $(CPU_ARCH)
+export TMPDIR		:= /tmp
 ifndef DEBUG
-export ETCDIR	:= $(PREFIX)/usr/etc
-export BINDIR	:= $(PREFIX)/usr/sbin
-export APPDIR	:= $(BINDIR)/rc_app
-export SCRDIR	:= $(BINDIR)/scripts
-export LIBDIR	:= $(PREFIX)/lib
-export MODDIR	:= $(LIBDIR)/modules
-export WWWDIR	:= $(PREFIX)/www.eng
+export ETCDIR		:= $(PREFIX)/usr/etc
+export BINDIR		:= $(PREFIX)/usr/sbin
+export APPDIR		:= $(BINDIR)/rc_app
+export SCRDIR		:= $(BINDIR)/scripts
+export LIBDIR		:= $(PREFIX)/lib
+export MODDIR		:= $(LIBDIR)/modules
+export WWWDIR		:= $(PREFIX)/www.eng
 else
-export ETCDIR	:= $(PREFIX)
-export BINDIR	:= $(PREFIX)
-export APPDIR	:= $(PREFIX)
-export SCRDIR	:= $(PREFIX)
-export LIBDIR	:= $(PREFIX)
-export MODDIR	:= $(PREFIX)
-export WWWDIR	:= $(PREFIX)
+export ETCDIR		:= $(PREFIX)
+export BINDIR		:= $(PREFIX)
+export APPDIR		:= $(PREFIX)
+export SCRDIR		:= $(PREFIX)
+export LIBDIR		:= $(PREFIX)
+export MODDIR		:= $(PREFIX)
+export WWWDIR		:= $(PREFIX)
 endif
 else
-PROFILE_ARCH	:= I386
-export TMPDIR	:= $(PREFIX)/tmp
-export ETCDIR	:= $(TMPDIR)/etc
-export BINDIR	:= $(PREFIX)/usr/sbin
-export APPDIR	:= $(BINDIR)/rc_app
-export SCRDIR	:= $(BINDIR)/scripts
-export LIBDIR	:= $(PREFIX)/lib
-export MODDIR	:= $(LIBDIR)/modules
-export WWWDIR	:= $(PREFIX)/www.eng
+PROFILE_ARCH		:= I386
+export TMPDIR		:= $(PREFIX)/tmp
+export ETCDIR		:= $(TMPDIR)/etc
+export BINDIR		:= $(PREFIX)/usr/sbin
+export APPDIR		:= $(BINDIR)/rc_app
+export SCRDIR		:= $(BINDIR)/scripts
+export LIBDIR		:= $(PREFIX)/lib
+export MODDIR		:= $(LIBDIR)/modules
+export WWWDIR		:= $(PREFIX)/www.eng
 endif
 
-export SHARED_DIR := $(SOURCE_PATH)/Source/shared
-export KERNEL_DIR := $(SOURCE_PATH)/Source/kernel
-export KERNEL_INC := $(KERNEL_DIR)/include
-export KERNEL_SRC := $(KERNEL_DIR)
+export SHARED_DIR 	:= $(SOURCE_PATH)/Source/shared
+export KERNEL_DIR 	:= $(SOURCE_PATH)/Source/kernel
+export KERNEL_INC 	:= $(KERNEL_DIR)/include
+export KERNEL_SRC 	:= $(KERNEL_DIR)
 
-PREFIX_MIPS	:= mips-unknown-linux-uclibc-
-PREFIX_ARM	:= arm-unknown-linux-uclibcgnueabi-
-PREFIX_MIPSEL	:= mipsel-unknown-linux-uclibc-
-PREFIX_I386	:= 
+export BUILD_HOST	:= x86_64-unknown-linux-gnu
+
+TARGET_MIPS		:= mips-unknown-linux-uclibc
+TARGET_ARM		:= arm-unknown-linux-uclibcgnueabi
+TARGET_MIPSEL		:= mipsel-unknown-linux-uclibc
+TARGET_I386		:= 
+
+PREFIX_MIPS		:= $(TARGET_MIPS)-
+PREFIX_ARM		:= $(TARGET_ARM)-
+PREFIX_MIPSEL		:= $(TARGET_MIPSEL)-
+PREFIX_I386		:= 
 
 ifeq ($(PROFILE_ARCH),MIPS)
 export ARCH		:= mips
 export ARCH_ENDIAN	:= big
 export ENDIAN_FLAGS	:= -b
 export TOOLCHAIN	:= $(TCHAIN_MIPS_DIR)
+export TARGET_NAME	:= $(TARGET_MIPS)
 export CROSS		:= $(PREFIX_MIPS)
 endif
 
@@ -53,6 +61,7 @@ export ARCH		:= arm
 export ARCH_ENDIAN	:= little
 export ENDIAN_FLAGS	:= -l
 export TOOLCHAIN	:= $(TCHAIN_ARM_DIR)
+export TARGET_NAME	:= $(TARGET_ARM)
 export CROSS		:= $(PREFIX_ARM)
 endif
 
@@ -61,16 +70,20 @@ export ARCH		:= mips
 export ARCH_ENDIAN	:= little
 export ENDIAN_FLAGS	:= -l
 export TOOLCHAIN	:= $(TCHAIN_MIPSEL_DIR)
+export TARGET_NAME	:= $(TARGET_MIPSEL)
 export CROSS		:= $(PREFIX_MIPSEL)
 endif
 
 ifeq ($(PROFILE_ARCH),I386)
 export ARCH		:= i386
+export ARCH_ENDIAN	:= little
+export ENDIAN_FLAGS	:= -l
 export TOOLCHAIN	:= $(TCHAIN_I386_DIR)
+export TARGET_NAME	:= $(TARGET_I386)
 export CROSS		:= $(PREFIX_I386)
 endif
 
-export PATH := $(PATH):$(TOOLCHAIN)
+export PATH 		:= $(PATH):$(TOOLCHAIN)
 
 export CROSS_COMPILE	:= $(CROSS)
 export AR		:= $(CROSS)ar
@@ -90,19 +103,19 @@ else
 export SSTRIP		:= $(STRIP)
 endif
 
-export STRIPFLAGS := -x -R .note -R .comment -R .version --strip-unneeded
-#export STRIPFLAGS := -x -R .note -R .comment
+export STRIPFLAGS 	:= -x -R .note -R .comment -R .version --strip-unneeded
+#export STRIPFLAGS 	:= -x -R .note -R .comment
 
 ifeq ($(ARCH),mips)
-export CFLAGS := -mips32 -march=mips32 -mtune=mips32 -Wa,-mips32 -G 0 -pipe -funit-at-a-time -fomit-frame-pointer -fno-strict-aliasing -fno-common -mno-shared -mabi=32 -msoft-float
+export CFLAGS 		:= -mips32 -march=mips32 -mtune=mips32 -Wa,-mips32 -G 0 -pipe -funit-at-a-time -fomit-frame-pointer -fno-strict-aliasing -fno-common -mno-shared -mabi=32 -msoft-float
 endif
 
 ifeq ($(ARCH),arm)
-export CFLAGS := -marm -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon-fp16 -pipe -funit-at-a-time -fomit-frame-pointer -ffixed-r8 -fno-common -mno-thumb-interwork -mabi=aapcs-linux -mfloat-abi=soft
-#CFLAGS += -mfloat-abi=softfp
+export CFLAGS 		:= -marm -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon-fp16 -pipe -funit-at-a-time -fomit-frame-pointer -ffixed-r8 -fno-common -mno-thumb-interwork -mabi=aapcs-linux -mfloat-abi=soft
+#CFLAGS 		+= -mfloat-abi=softfp
 endif
 
 ifeq ($(ARCH),i386)
-export CFLAGS := -fomit-frame-pointer
+export CFLAGS 		:= -fomit-frame-pointer
 endif
 

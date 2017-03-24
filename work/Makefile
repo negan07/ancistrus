@@ -27,7 +27,12 @@ install:
 
 download:
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): download & extract \\e[36m$D \\e[0m"; \
-	[ -d $D ] || ../dl_sources.sh $D $(DL_$D) $(TAR_$D) || exit 1;)
+	[ -d $D ] || ../dl_sources.sh $D $(DL_$D) $(TAR_$D) || exit 1; \
+	if [ ! -d $(D)/$(D) ] && [ -f $(D)/configure.ac ]; then \
+	FLIST=$$(ls -A $D); \
+	mkdir -p -m 0755 $(D)/$(D) || exit 1; \
+	cd $D; mv -f $${FLIST} $D || exit 1; cd ..; \
+	fi;)
 
 patch:
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): patch \\e[36m$D \\e[0m"; \
