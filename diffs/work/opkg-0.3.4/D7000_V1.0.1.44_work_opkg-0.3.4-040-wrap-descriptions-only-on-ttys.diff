@@ -1,0 +1,32 @@
+diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg_parse.c work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg_parse.c
+--- work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg_parse.c	2016-12-22 18:38:14.000000000 +0100
++++ work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg_parse.c	2017-03-24 22:30:50.254489817 +0100
+@@ -21,6 +21,7 @@
+ 
+ #include <stdio.h>
+ #include <ctype.h>
++#include <unistd.h>
+ #include <malloc.h>
+ #include <string.h>
+ #include <stdlib.h>
+@@ -246,10 +247,16 @@
+ 
+     case ' ':
+         if ((mask & PFM_DESCRIPTION) && reading_description) {
+-            pkg->description =
+-                xrealloc(pkg->description, strlen(pkg->description)
+-                         + 1 + strlen(line) + 1);
+-            strcat(pkg->description, "\n");
++			if (isatty(1)) {
++				pkg->description = xrealloc(pkg->description,
++							strlen(pkg->description)
++							+ 1 + strlen(line) + 1);
++				strcat(pkg->description, "\n");
++			} else {
++				pkg->description = xrealloc(pkg->description,
++							strlen(pkg->description)
++							+ 1 + strlen(line));
++			}
+             strcat(pkg->description, (line));
+             goto dont_reset_flags;
+         } else if ((mask & PFM_CONFFILES) && reading_conffiles) {
