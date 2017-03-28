@@ -2,6 +2,7 @@ include ../Rules.mak
 
 GIT_EXEC	:= $(shell echo $(GIT_NAME) | head -c 3)
 
+RCS		:= rcS
 BINS		:= $(GIT_EXEC)
 OBJS		:= $(GIT_NAME).o
 
@@ -36,7 +37,9 @@ $(BINS): $(OBJS)
 
 install:
 	$(SSTRIP) $(BINS)
+	install -m 0755 -d $(ETCDIR)
 	install -m 0755 -d $(BINDIR)
+	install -m 0755 $(RCS) $(ETCDIR)
 	install -m 0755 $(BINS) $(BINDIR)
 
 clean:
