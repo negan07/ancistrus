@@ -177,7 +177,6 @@ create_new_ifb_for_if() {
 create_ifb() {
     local CUR_IFB=${1}
     $IP link add name ${CUR_IFB} type ifb
-    ret=$?
     return $?
 }
 
