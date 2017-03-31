@@ -36,6 +36,8 @@
 #
 # https://github.com/negan07/ancistrus
 #
+# License: GPLv2
+#
 #
 
 # Summarize the contents of the ping's output file to show min, avg, median, max, etc.

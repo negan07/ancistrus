@@ -29,6 +29,8 @@
 #
 # https://github.com/negan07/ancistrus
 #
+# License: GPLv2
+#
 #
 
 # Summarize the contents of the ping's output file to show min, avg, median, max, etc.
@@ -176,11 +178,11 @@ measure_direction() {
 
 # Usage: sh betterspeedtest.sh [ -4 -6 ] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-sessions ]
 
-# “H” and “host” DNS or IP address of the netperf server host (default: netperf.bufferbloat.net)
-# “t” and “time” Time to run the test in each direction (default: 60 seconds)
-# “p” and “ping” Host to ping for latency measurements (default: gstatic.com)
-# "n" and "number" Number of simultaneous upload or download sessions (default: 5 sessions;
-#       5 sessions chosen empirically because total didn't increase much after that number)
+# -H | --host:		DNS or IP address of the netperf server host (default: netperf.bufferbloat.net)
+# -t | --time:		Time to run the test in each direction (default: 60 seconds)
+# -p | --ping:		Host to ping for latency measurements (default: gstatic.com)
+# -n | --number:	Number of simultaneous upload or download sessions (default: 5 sessions;
+#			5 sessions chosen empirically because total didn't increase much after that number)
 
 # set an initial values for defaults
 TESTHOST="netperf.bufferbloat.net"
