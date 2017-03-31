@@ -1,0 +1,73 @@
+diff -urN work/nvram-0.1.0/Makefile work/nvram-0.1.0/Makefile
+--- work/nvram-0.1.0/Makefile	2016-10-11 17:53:07.000000000 +0200
++++ work/nvram-0.1.0/Makefile	2017-01-30 23:40:16.498598559 +0100
+@@ -1,37 +1,46 @@
+-include ../../Rules.mak
+-CC=$(CROSS)gcc
++include ../Rules.mak
+ 
+-CFLAGS  = -Os -s -Wall
+-CFLAGS += -Werror
+-CFLAGS += -DTEST
++LIBS = libscnvram.so
++
++DEFS +=
++CFLAGS += -W -Wall -Werror
+ 
+ ifeq ($(BOOT_NAND_FLASH),1)
+-CFLAGS += -DBOOT_NAND_FLASH
++DEFS += -DBOOT_NAND_FLASH
+ endif
+ 
+-DESTLIB = ../../target/lib
+-DESTBIN = ../../target/usr/sbin
++ifeq ($(TR069),1)
++DEFS += -DTR069
++endif
+ 
+-BINS = libscnvram.so 
++ifeq ($(LOCAL),1)
++DEFS += -DLOCAL=1 -DLROOT=\"$(PREFIX)\"
++else
++CFLAGS += -Os -s
++endif
+ 
+-#all: libnvram.so nvram_static
+-all: $(BINS)
++ifeq ($(DEBUG),1)
++DEFS += -DTEST
++endif
+ 
+-libscnvram.so : nvram.o nvram_lock.o
+-	$(CC) $(CFLAGS) -Os -s -shared -Wl,-soname,libscnvram.so -o libscnvram.so $^ 
++all: $(LIBS)
+ 
+-nvram.o : nvram.c
+-	$(CC) $(CFLAGS) -Os -s -Wall -Werror -fPIC -g -c $^ -o $@
++libscnvram.so: nvram.o nvram_lock.o
++	$(CC) $(CFLAGS) $(DEFS) -shared -Wl,-soname,$@ $^ -o $@ 
++	$(STRIP) $@
++
++nvram.o: nvram.c
++	$(CC) $(CFLAGS) $(DEFS) -c -fPIC $^ -o $@
++	$(STRIP) $(STRIPFLAGS) $@
+ 
+ nvram_lock.o: nvram_lock.c
+-	$(CC) $(CFLAGS) -Os -s -g -Wall -fPIC -c $^ -o $@
++	$(CC) $(CFLAGS) $(DEFS) -c -fPIC $^ -o $@
++	$(STRIP) $(STRIPFLAGS) $@
+ 
+-install :
+-	cp -f libscnvram.so $(DESTLIB)
++install:
++	install -m 0755 -d $(LIBDIR)
++	cp -f $(LIBS) $(LIBDIR)
+ 
+ clean:
+-	rm -rf *~ *.o *.so nvram $(BINS)
+-	-rm -rf $(DESTLIB)/libscnvram.so
+-
+-
++	rm -rf *~ *.o *.so $(LIBS)
+ 
+
