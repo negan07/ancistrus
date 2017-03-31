@@ -6,6 +6,8 @@ D7000
 
 https://github.com/negan07/ancistrus
 
+License: GPLv2
+
 
 Patch files must have .diff extension.
 Files must be named: projectname_fwversion_dirname-patchordernum(3dgt)-patchcontent(title).diff .
