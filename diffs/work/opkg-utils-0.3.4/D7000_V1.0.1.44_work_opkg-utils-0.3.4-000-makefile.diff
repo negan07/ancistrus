@@ -1,0 +1,52 @@
+diff -urN work/opkg-utils-0.3.4/Makefile work/opkg-utils-0.3.4/Makefile
+--- work/opkg-utils-0.3.4/Makefile	2016-10-07 18:29:53.000000000 +0200
++++ work/opkg-utils-0.3.4/Makefile	2017-03-30 13:45:35.456313977 +0200
+@@ -1,29 +1,25 @@
++include ../Rules.mak
++
+ UTILS = opkg-build opkg-unbuild opkg-make-index opkg.py opkg-list-fields \
+ 	arfile.py opkg-buildpackage opkg-diff opkg-extract-file opkg-show-deps \
+ 	opkg-compare-indexes update-alternatives
+ 
+-MANPAGES = opkg-build.1
++DESTDIR = ../../$(SCRIPTS_DIR)/$(OPKG_UTILS)
++
++all:
++	@if [ ! -f .installed ]; then \
++	$(MAKE) prepare || exit 1; \
++	touch .installed; \
++	fi
++
++install:
++	@echo "Nothing to install"
++
++prepare:
++	install -m 0755 -d $(DESTDIR)
++	install -m 755 $(UTILS) $(DESTDIR)
+ 
+-DESTDIR=
+-PREFIX=/usr/local
+-bindir=$(PREFIX)/bin
+-mandir=$(PREFIX)/man
+-
+-.SUFFIXES: .1
+-
+-%.1: %
+-	pod2man -r "" -c "opkg-utils Documentation" $< $@
+-
+-all: $(UTILS) $(MANPAGES)
+-
+-install: all
+-	install -d $(DESTDIR)$(bindir)
+-	install -m 755 $(UTILS) $(DESTDIR)$(bindir)
+-	install -d $(DESTDIR)$(mandir)
+-	for m in $(MANPAGES); \
+-	do \
+-		install -d $(DESTDIR)$(mandir)/man$${m##*.}; \
+-		install -m 644 $(MANPAGES) $(DESTDIR)$(mandir)/man$${m##*.}; \
+-	done
++clean:
++	@echo "Nothing to clean"
+ 
+-.PHONY: install all
++.PHONY: clean prepare install all
