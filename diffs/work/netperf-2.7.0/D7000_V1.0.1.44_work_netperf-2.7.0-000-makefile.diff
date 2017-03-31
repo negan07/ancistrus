@@ -17,9 +17,9 @@ diff -urN work/netperf-2.7.0/Makefile work/netperf-2.7.0/Makefile
 +	cd $(NETPERF) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --target=$(TARGET_NAME) CFLAGS="$(CFLAGS) -fcommon -Os" --disable-sctp --enable-omni
 +
 +install:
-+	$(SSTRIP) src/netperf
++	$(SSTRIP) $(NETPERF)/src/netperf
 +	install -m 0755 -d $(BINDIR)
-+	install -m 0755 src/netperf $(BINDIR)
++	install -m 0755 $(NETPERF)/src/netperf $(BINDIR)
 +
 +clean:
 +	$(MAKE) -C $(NETPERF) clean
