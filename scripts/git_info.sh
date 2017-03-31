@@ -18,6 +18,8 @@
 #
 # https://github.com/negan07/ancistrus
 #
+# License: GPLv2
+#
 #
 
 pushd . >/dev/null

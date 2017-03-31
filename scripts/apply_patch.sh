@@ -8,15 +8,17 @@
 #
 # https://github.com/negan07/ancistrus
 #
+# License: GPLv2
+#
 #
 # Source code modifications.
 #
 # Usage: $0 <prj_name> <fw_ver> <diff_dir> <diffdircontainer>
 #
-# This script must be located in the root source dir.
-# It must be invoked from the root source dir.
+# This script starts working from the git root source dir.
+# It must be invoked from the script source dir.
 # .diff patches must be located in $DIFFDIR dir.
-# Destination dir must be present
+# Destination dir must be present.
 #
 
 ALL="misc kernel uclibc"
@@ -55,6 +57,7 @@ PROJECT=$1								#save params
 FWVER=$2
 DIFFDIR=$3
 [ -z "$DIFFDIR" ] && DIFFDIR=diffs
+cd ..
 [ $# -lt 4 ] && echo "Usage: $0 <prj_name> <fw_ver> <diff_dir> all" `ls -A ${DIFFDIR}` && exit 1
 shift;shift;shift;							#throw first 3 params
 

@@ -8,10 +8,15 @@
 #
 # https://github.com/negan07/ancistrus
 #
+# License: GPLv2
+#
 #
 # Toolchain crosstools extract & patch.
 #
 # Usage: $0 <prj_name> <fw_ver> <diff_dir> <source_dir> <crosstools_dir> <crosstools_tar> <inst_dir> <src_buildroot_dl_dir>
+#
+# This script starts working from the git root source dir.
+# It must be invoked from the script source dir.
 #
 
 # parameters check
@@ -37,30 +42,30 @@ sudo mkdir -p -m 0755 $INSTDIR
 mkdir -p -m 0755 $TCDIR
 cd $TCDIR
 echo "Extracting crosstools from tar.bz2 archive..."
-tar xjf ../${TARTC}
+tar xjf ../${TARTC} || exit 3
 chmod -f 755 src/build
 chmod -f 644 src/*.brcm.config
 # extract archives on dl dir
 cd $BRDLDIR
 echo "Extracting crosstools before patching..."
-tar xjf autoconf-2.65.tar.bz2
-tar xjf gcc-4.6.2.tar.bz2
-tar xjf gdb-7.3.1.tar.bz2
-tar xjf m4-1.4.15.tar.bz2
-tar xjf uClibc-0.9.32.tar.bz2
+tar xjf autoconf-2.65.tar.bz2 || exit 3
+tar xjf gcc-4.6.2.tar.bz2 || exit 3
+tar xjf gdb-7.3.1.tar.bz2 || exit 3
+tar xjf m4-1.4.15.tar.bz2 || exit 3
+tar xjf uClibc-0.9.32.tar.bz2 || exit 3
 # remove old archives
 rm -f autoconf-2.65.tar.bz2 gcc-4.6.2.tar.bz2 gdb-7.3.1.tar.bz2 m4-1.4.15.tar.bz2 uClibc-0.9.32.tar.bz2
-cd ../../../..
+cd ../../../../scripts
 # apply patches
 ./apply_patch.sh $PROJECT $FWVER $DIFFDIR crosstools
 # repack them all
-cd ${TCDIR}/${BRDLDIR}
+cd ../${TCDIR}/${BRDLDIR}
 echo "Repacking crosstools after patching..."
-tar cjf autoconf-2.65.tar.bz2 autoconf-2.65
-tar cjf gcc-4.6.2.tar.bz2 gcc-4.6.2
-tar cjf gdb-7.3.1.tar.bz2 gdb-7.3.1
-tar cjf m4-1.4.15.tar.bz2 m4-1.4.15
-tar cjf uClibc-0.9.32.tar.bz2 uClibc-0.9.32
+tar cjf autoconf-2.65.tar.bz2 autoconf-2.65 || exit 3
+tar cjf gcc-4.6.2.tar.bz2 gcc-4.6.2 || exit 3
+tar cjf gdb-7.3.1.tar.bz2 gdb-7.3.1 || exit 3
+tar cjf m4-1.4.15.tar.bz2 m4-1.4.15 || exit 3
+tar cjf uClibc-0.9.32.tar.bz2 uClibc-0.9.32 || exit 3
 # dir cleanup
 rm -Rf autoconf-2.65 gcc-4.6.2 gdb-7.3.1 m4-1.4.15 uClibc-0.9.32
 cd ../../../..

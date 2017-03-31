@@ -8,6 +8,8 @@
 #
 # https://github.com/negan07/ancistrus
 #
+# License: GPLv2
+#
 #
 # Original & work-thirdparty sources download & extract.
 #

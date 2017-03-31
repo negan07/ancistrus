@@ -8,6 +8,8 @@
 #
 # https://github.com/negan07/ancistrus
 #
+# License: GPLv2
+#
 #
 # host system: ubuntu yakkety x86/64
 # prepare the host system for developing
