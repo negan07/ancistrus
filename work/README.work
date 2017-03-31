@@ -12,20 +12,10 @@ License: GPLv2
 Workjob is divided in 4 main segments:
 
 builtinlib			Modified built-in shared libraries.
-	nvram				Setting library routines.
 
 builtin				Modified built-in apps.
-	utelnetd			The console telnet daemon including little modifications.
-	iproute2			Updated net tool: esfq/(fq_)codel AQM qos sched support.
 
 thirdpartylib			Additional .so libs not included into the original firmware.
-	libarchive		Archive xz support for opkg.
 
 thirdparty			Additional apps not included into the original firmware.
-	ancistrus_core			The Main work tool: creates & acts all the injects.
-	qos-sqm				Quality Of Service tool in substitution of weak builtin.
-	qos-netgear-36_42n		Quality Of Service tool from Netgear firmware .36_42n.
-	netperf				Network performance measurement tool.
-	network-test			Enhanced cmdline network speedtest & performance scripts.
-	opkg				Tiny package manager.
 
