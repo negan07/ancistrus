@@ -10,46 +10,52 @@ clean: clean_toolchain clean_sources
 dist_clean: dist_clean_sources dist_clean_work
 
 prepare_host:
-	@./hostprepare.sh
+	@./$(SCRIPTS_DIR)/hostprepare.sh
 	@echo "close and open a new shell terminal now, or reboot the machine"
 
 toolchain: prepare_toolchain
 	@if [ ! -d $(TCHAIN_DIR) ]; then \
-	cd $(TCHAIN_SRC_DIR); sudo $(MAKE); \
+	sudo $(MAKE) -C $(TCHAIN_SRC_DIR); \
 	fi
 
 prepare_toolchain: download_sources
 	@if [ ! -d $(TCHAIN_DIR) ]; then \
-	./tchainprepare.sh $(PROJECT_TARGET) $(FWVER) $(DIFFS_DIR) \
-	$(SRC_DIR) $(TCHAIN_SRC_DIR) $(TCHAIN_TAR) $(TCHAIN_INST_DIR) $(TCHAIN_BROOT_DL_DIR); \
+	./$(SCRIPTS_DIR)/tchainprepare.sh $(PROJECT_TARGET) $(FWVER) $(DIFFS_DIR) $(SRC_DIR) \
+	$(TCHAIN_SRC_DIR) $(TCHAIN_TAR) $(TCHAIN_INST_DIR) $(TCHAIN_BROOT_DL_DIR); \
 	fi
 
 sources: patch_sources
 	@cd $(SRC_DIR); sudo $(MAKE) kernel && sudo $(MAKE) source;
 
 download_sources:
-	@./dl_sources.sh $(SRC_DIR) $(SRC_URL) $(SRC_FILE)
+	@./$(SCRIPTS_DIR)/dl_sources.sh $(SRC_DIR) $(SRC_URL) $(SRC_FILE)
 
 patch_sources: download_sources
 	@if [ ! -f $(SRC_DIR)/.patched ]; then \
-	$(foreach D, "misc" "kernel" "uclibc" "apps", \
-	./apply_patch.sh $(PROJECT_TARGET) $(FWVER) $(DIFFS_DIR) $D || exit 1;) \
+	cd $(SCRIPTS_DIR); \
+	$(foreach D, "misc" "kernel" "uclibc" "apps", ./apply_patch.sh $(PROJECT_TARGET) $(FWVER) $(DIFFS_DIR) $D || exit 1;) \
+	cd ..; \
 	touch $(SRC_DIR)/.patched; \
 	fi
 
 work: download_sources
-	@if [ -d  $(WORK_SRC_DIR) ]; then \
-	cd $(WORK_SRC_DIR); $(MAKE); \
+	@if [ -d $(WORK_SRC_DIR) ]; then \
+	$(MAKE) -C $(WORK_SRC_DIR); \
 	fi
 
 prepare_work: download_sources
-	@if [ -d  $(WORK_SRC_DIR) ]; then \
-	cd $(WORK_SRC_DIR); $(MAKE) prepare; \
+	@if [ -d $(WORK_SRC_DIR) ]; then \
+	$(MAKE) -C $(WORK_SRC_DIR) prepare; \
 	fi
 
 download_work: download_sources
-	@if [ -d  $(WORK_SRC_DIR) ]; then \
-	cd $(WORK_SRC_DIR); $(MAKE) download; \
+	@if [ -d $(WORK_SRC_DIR) ]; then \
+	$(MAKE) -C $(WORK_SRC_DIR) download; \
+	fi
+
+build_work: work
+	@if [ -d $(WORK_SRC_DIR) ]; then \
+	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) build; \
 	fi
 
 clean_toolchain:
@@ -61,8 +67,8 @@ dist_clean_toolchain: clean_toolchain
 	@sudo rm -rf $(TCHAIN_INST_DIR)
 
 clean_sources:
-	@if [ -d  $(SRC_DIR) ]; then \
-	cd $(SRC_DIR); sudo $(MAKE) all_clean ; \
+	@if [ -d $(SRC_DIR) ]; then \
+	sudo $(MAKE) -C $(SRC_DIR) all_clean; \
 	fi
 
 dist_clean_sources:
@@ -70,18 +76,28 @@ dist_clean_sources:
 	@sudo rm -rf $(SRC_DIR)
 
 clean_work:
-	@if [ -d  $(WORK_SRC_DIR) ]; then \
-	cd $(WORK_SRC_DIR); $(MAKE) clean; \
+	@if [ -d $(WORK_SRC_DIR) ]; then \
+	$(MAKE) -C $(WORK_SRC_DIR) clean; \
 	fi
 
 clean_tars_work:
-	@if [ -d  $(WORK_SRC_DIR) ]; then \
-	cd $(WORK_SRC_DIR); $(MAKE) clean_tars; \
+	@if [ -d $(WORK_SRC_DIR) ]; then \
+	$(MAKE) -C $(WORK_SRC_DIR) clean_tars; \
+	fi
+
+clean_build_work:
+	@if [ -d $(WORK_SRC_DIR) ]; then \
+	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) clean_build; \
 	fi
 
 dist_clean_work:
-	@if [ -d  $(WORK_SRC_DIR) ]; then \
-	cd $(WORK_SRC_DIR); $(MAKE) dist_clean; \
+	@if [ -d $(WORK_SRC_DIR) ]; then \
+	$(MAKE) -C $(WORK_SRC_DIR) dist_clean; \
+	fi
+
+dist_clean_build:
+	@if [ -d $(WORK_SRC_DIR) ]; then \
+	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) dist_clean_build; \
 	fi
 
 info:
@@ -93,10 +109,12 @@ info:
 	@echo ""
 	@echo $(GITHUB_DIR)
 	@echo ""
+	@echo $(PROJECT_LICENSE)
+	@echo ""
 	@echo ""
 
 help: info
-	@echo "make			- download sources, compile & install toolchain, compile sources, compile work-thirdparty create img"
+	@echo "make			- download sources, compile & install toolchain, compile sources, compile work-thirdparty, create img"
 	@echo "make download		- download & extract sources, download/copy & extract work-thirdparty apps without patching"
 	@echo "make clean		- cleanup toolchain sources, kernel & app sources (included work-thirdparty apps), target, img"
 	@echo "make dist_clean		- delete toolchain source dir, delete source dir, cleanup work & delete previously downloaded dirs"
@@ -109,13 +127,16 @@ help: info
 	@echo "make work		- download sources, download/copy, config, patch, compile work-thirdparty apps"
 	@echo "make prepare_work	- download sources, download/copy, config, patch work-thirdparty apps without compiling"
 	@echo "make download_work	- download & extract sources, download/copy, extract, config work-thirdparty apps only"
+	@echo "make build_work		- download sources, download/copy, config, patch, compile work-thirdparty apps, build opkg packets"
 	@echo "make clean_toolchain	- delete toolchain sources dir"
 	@echo "make dist_clean_toolchain- delete toolchain sources dir & delete all built toolchains"
 	@echo "make clean_sources	- cleanup kernel & app sources (included work-thirdparty apps), target, img"
 	@echo "make dist_clean_sources	- delete sources dir"
 	@echo "make clean_work		- cleanup work-thirdparty apps"
 	@echo "make clean_tars_work	- delete all previously downloaded work-thirdparty archives"
+	@echo "make clean_build_work	- cleanup work-thirdparty opkg packet dirs"
 	@echo "make dist_clean_work	- cleanup work-thirdparty apps & delete all previously downloaded work-thirdparty app dirs"
+	@echo "make dist_clean_build	- cleanup work-thirdparty opkg packets build dir"
 	@echo "make info		- show project info"
 	@echo "make help		- show project info and this help"
 

@@ -35,18 +35,6 @@ export KERNEL_DIR 	:= $(SOURCE_PATH)/Source/kernel
 export KERNEL_INC 	:= $(KERNEL_DIR)/include
 export KERNEL_SRC 	:= $(KERNEL_DIR)
 
-export BUILD_HOST	:= x86_64-unknown-linux-gnu
-
-TARGET_MIPS		:= mips-unknown-linux-uclibc
-TARGET_ARM		:= arm-unknown-linux-uclibcgnueabi
-TARGET_MIPSEL		:= mipsel-unknown-linux-uclibc
-TARGET_I386		:= 
-
-PREFIX_MIPS		:= $(TARGET_MIPS)-
-PREFIX_ARM		:= $(TARGET_ARM)-
-PREFIX_MIPSEL		:= $(TARGET_MIPSEL)-
-PREFIX_I386		:= 
-
 ifeq ($(PROFILE_ARCH),MIPS)
 export ARCH		:= mips
 export ARCH_ENDIAN	:= big
@@ -84,6 +72,7 @@ export CROSS		:= $(PREFIX_I386)
 endif
 
 export PATH 		:= $(PATH):$(TOOLCHAIN)
+export BUILD_HOST	:= x86_64-unknown-linux-gnu
 
 export CROSS_COMPILE	:= $(CROSS)
 export AR		:= $(CROSS)ar
@@ -104,7 +93,6 @@ export SSTRIP		:= $(STRIP)
 endif
 
 export STRIPFLAGS 	:= -x -R .note -R .comment -R .version --strip-unneeded
-#export STRIPFLAGS 	:= -x -R .note -R .comment
 
 ifeq ($(ARCH),mips)
 export CFLAGS 		:= -mips32 -march=mips32 -mtune=mips32 -Wa,-mips32 -G 0 -pipe -funit-at-a-time -fomit-frame-pointer -fno-strict-aliasing -fno-common -mno-shared -mabi=32 -msoft-float

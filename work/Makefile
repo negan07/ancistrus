@@ -6,14 +6,22 @@ CUR_PATH		:= $(shell pwd)
 CUR_REL_PATH		:= $(notdir $(CUR_PATH))
 SRC_PATH_NAME		:= $(shell cd ../$(SRC_DIR); pwd;)
 RULES			:= $(CUR_PATH)/Rules.mak
+ARCH_LCASE		:= $(shell echo $(CPU_ARCH_NAME) | tr A-Z a-z)
 NUMTHREAD		:= $$((2 * `getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1`))
 #NUMTHREAD		:= $$((2 * `grep processor /proc/cpuinfo | wc -l`))
+CONTROL_FILES		:= preinst postinst prerm postrm
 
 ifneq "$(or $(LOCAL),$(DEBUG))" ""
 PREFIX_PATH		:= $(DEBUG_DIR)
 else
-#PREFIX_PATH		:= $(CUR_PATH)/../$(PREFIX_NAME)
+ifdef BUILD
+BUILD_DIR_PATH		:= $(GIT_ROOT)/$(OPKG_PKG_DIR)
+PREFIX_PATH		:= $(BUILD_DIR_PATH)/tmp
+CTRL_DIR_PATH		:= $(PREFIX_PATH)/CONTROL
+CTRL_PATH		:= $(CTRL_DIR_PATH)/control
+else
 PREFIX_PATH		:= $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)
+endif
 endif
 
 
@@ -23,11 +31,41 @@ all:    creat_rules prepare
 
 install:
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): install \\e[36m$D \\e[0m"; \
-	[ ! -d $D ] || $(MAKE) -j$(NUMTHREAD) -C $D install || exit 1;)
+	$(MAKE) -j$(NUMTHREAD) -C $D install || exit 1;)
+
+ifdef BUILD
+build:	creat_rules
+	@[ -d $(BUILD_DIR_PATH) ] || mkdir -p -m 0755 $(BUILD_DIR_PATH) || exit 1;
+	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): build package \\e[36m$D \\e[0m"; \
+	rm -rf $(BUILD_DIR_PATH)/$(D) $(PREFIX_PATH) || exit 1; \
+	mkdir -p -m 0755 $(PREFIX_PATH) || exit 1; \
+	mkdir -p -m 0755 $(CTRL_DIR_PATH) || exit 1; \
+	echo "Package: $(NAME_$(D))"				> $(CTRL_PATH); \
+	echo "Version: $(VER_$(D))"				>> $(CTRL_PATH); \
+	echo "Architecture: $(ARCH_LCASE)$(PROJECT_TARGET)"	>> $(CTRL_PATH); \
+	echo "Installed-Size: $(SIZE_$(D))"			>> $(CTRL_PATH); \
+	echo "Section: $(SEC_$(D))"				>> $(CTRL_PATH); \
+	echo "Priority: $(PRIO_$(D))"				>> $(CTRL_PATH); \
+	echo "Depends: $(DEP_$(D))"				>> $(CTRL_PATH); \
+	echo "Maintainer: $(GITHUB_DIR)"			>> $(CTRL_PATH); \
+	echo "Source: $(GITHUB_DIR)"				>> $(CTRL_PATH); \
+	echo "Description: $(DESC_$(D))"			>> $(CTRL_PATH); \
+	$(MAKE) -j$(NUMTHREAD) -C $D install || exit 1; \
+	mv -f $(PREFIX_PATH) $(BUILD_DIR_PATH)/$(D); \
+	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build \
+	-Z xz -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1;)
+
+clean_build:
+	@$(foreach D, $(DIRLIST), echo -e "\\e[35m$(CUR_REL_PATH): clean build dir \\e[36m$D \\e[0m"; rm -rf $(BUILD_DIR_PATH)/$(D);)
+
+dist_clean_build:
+	@rm -rf $(BUILD_DIR_PATH)
+	@rm -rf ../$(SCRIPTS_DIR)/$(OPKG_UTILS)
+endif
 
 download:
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): download & extract \\e[36m$D \\e[0m"; \
-	[ -d $D ] || ../dl_sources.sh $D $(DL_$D) $(TAR_$D) || exit 1; \
+	[ -d $D ] || ../$(SCRIPTS_DIR)/dl_sources.sh $D $(DL_$D) $(TAR_$D) || exit 1; \
 	if [ ! -d $(D)/$(D) ] && [ -f $(D)/configure.ac ]; then \
 	FLIST=$$(ls -A $D); \
 	mkdir -p -m 0755 $(D)/$(D) || exit 1; \
@@ -36,9 +74,9 @@ download:
 
 patch:
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): patch \\e[36m$D \\e[0m"; \
-	cd ..; [ ! -d $(CUR_REL_PATH)/$(D) ] || [ -f $(CUR_REL_PATH)/$(D)/.patched ] || \
+	cd ../$(SCRIPTS_DIR); [ ! -d ../$(CUR_REL_PATH)/$(D) ] || [ -f ../$(CUR_REL_PATH)/$(D)/.patched ] || \
 	./apply_patch.sh $(PROJECT_TARGET) $(FWVER) $(DIFFS_DIR) $(CUR_REL_PATH) $D || exit 1; \
-	cd $(CUR_REL_PATH); [ ! -d $D ] || [ -f $(D)/.patched ] || touch $(D)/.patched;)
+	cd ../$(CUR_REL_PATH); [ ! -d $D ] || [ -f $(D)/.patched ] || touch $(D)/.patched;)
 
 prepare: download patch
 
@@ -52,7 +90,7 @@ clean_dirs:
 clean_tars:
 	@$(foreach Z, $(TARLIST), echo -e "\\e[35m$(CUR_REL_PATH): clean archive \\e[36m$Z \\e[0m"; rm -f $Z;)
 
-dist_clean: clean clean_dirs
+dist_clean: clean_dirs clean
 	@rm -f $(RULES)
 
 creat_rules:
