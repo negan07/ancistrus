@@ -16,6 +16,8 @@
 #
 # https://github.com/negan07/ancistrus
 #
+# License: GPLv2
+#
 #
 # Startup rc for qos-sqm-scripts
 #
@@ -240,6 +242,8 @@ cat << _EOF_
 # D7000
 #
 # https://github.com/negan07/ancistrus
+#
+# License: GPLv2
 #
 #
 # qos-sqm - version: 0.1.0
