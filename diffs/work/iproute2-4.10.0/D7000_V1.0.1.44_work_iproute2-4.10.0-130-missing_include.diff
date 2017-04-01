@@ -1,0 +1,33 @@
+diff -urN work/iproute2-4.10.0/include/linux/in6.h work/iproute2-4.10.0/include/linux/in6.h
+--- work/iproute2-4.10.0/include/linux/in6.h	2017-02-20 17:47:52.000000000 +0100
++++ work/iproute2-4.10.0/include/linux/in6.h	2017-04-01 14:08:58.598122439 +0200
+@@ -17,7 +17,7 @@
+  *      as published by the Free Software Foundation; either version
+  *      2 of the License, or (at your option) any later version.
+  */
+-
++#ifndef _NETINET_IN_H
+ #ifndef _LINUX_IN6_H
+ #define _LINUX_IN6_H
+ 
+@@ -294,3 +294,4 @@
+  * MRT6_MAX
+  */
+ #endif /* _LINUX_IN6_H */
++#endif /* _NETINET_IN_H */
+diff -urN work/iproute2-4.10.0/include/linux/in.h ../test/work/iproute2-4.10.0/include/linux/in.h
+--- work/iproute2-4.10.0/include/linux/in.h	2017-02-20 17:47:52.000000000 +0100
++++ ../test/work/iproute2-4.10.0/include/linux/in.h	2017-04-01 14:08:57.806126306 +0200
+@@ -15,6 +15,7 @@
+  *		as published by the Free Software Foundation; either version
+  *		2 of the License, or (at your option) any later version.
+  */
++#ifndef _NETINET_IN_H
+ #ifndef _LINUX_IN_H
+ #define _LINUX_IN_H
+ 
+@@ -298,3 +299,4 @@
+ 
+ 
+ #endif /* _LINUX_IN_H */
++#endif /* _NETINET_IN_H */

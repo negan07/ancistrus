@@ -1,0 +1,95 @@
+diff -urN work/iproute2-4.10.0/ip/ipxfrm.c work/iproute2-4.10.0/ip/ipxfrm.c
+--- work/iproute2-4.10.0/ip/ipxfrm.c	2017-04-01 11:58:48.573591158 +0200
++++ work/iproute2-4.10.0/ip/ipxfrm.c	2017-04-01 12:32:47.215846907 +0200
+@@ -465,7 +465,6 @@
+ 	switch (sel->proto) {
+ 	case IPPROTO_TCP:
+ 	case IPPROTO_UDP:
+-	case IPPROTO_SCTP:
+ 	case IPPROTO_DCCP:
+ 	default: /* XXX */
+ 		if (sel->sport_mask)
+@@ -1322,7 +1321,6 @@
+ 		switch (sel->proto) {
+ 		case IPPROTO_TCP:
+ 		case IPPROTO_UDP:
+-		case IPPROTO_SCTP:
+ 		case IPPROTO_DCCP:
+ 		case IPPROTO_IP: /* to allow shared SA for different protocols */
+ 			break;
+diff -urN work/iproute2-4.10.0/ip/xfrm.h work/iproute2-4.10.0/ip/xfrm.h
+--- work/iproute2-4.10.0/ip/xfrm.h	2017-02-20 17:47:52.000000000 +0100
++++ work/iproute2-4.10.0/ip/xfrm.h	2017-04-01 12:32:45.667862338 +0200
+@@ -28,9 +28,6 @@
+ #include <sys/socket.h>
+ #include <linux/xfrm.h>
+ 
+-#ifndef IPPROTO_SCTP
+-# define IPPROTO_SCTP	132
+-#endif
+ #ifndef IPPROTO_DCCP
+ # define IPPROTO_DCCP	33
+ #endif
+diff -urN work/iproute2-4.10.0/ip/xfrm_policy.c work/iproute2-4.10.0/ip/xfrm_policy.c
+--- work/iproute2-4.10.0/ip/xfrm_policy.c	2017-02-20 17:47:52.000000000 +0100
++++ work/iproute2-4.10.0/ip/xfrm_policy.c	2017-04-01 12:32:44.123877743 +0200
+@@ -68,7 +68,6 @@
+ 	fprintf(stderr, "UPSPEC := proto { { ");
+ 	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_TCP));
+ 	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_UDP));
+-	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_SCTP));
+ 	fprintf(stderr, "%s", strxf_proto(IPPROTO_DCCP));
+ 	fprintf(stderr, " } [ sport PORT ] [ dport PORT ] |\n");
+ 	fprintf(stderr, "                  { ");
+diff -urN work/iproute2-4.10.0/ip/xfrm_state.c work/iproute2-4.10.0/ip/xfrm_state.c
+--- work/iproute2-4.10.0/ip/xfrm_state.c	2017-02-20 17:47:52.000000000 +0100
++++ work/iproute2-4.10.0/ip/xfrm_state.c	2017-04-01 12:32:42.955889406 +0200
+@@ -94,7 +94,6 @@
+ 	fprintf(stderr, "UPSPEC := proto { { ");
+ 	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_TCP));
+ 	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_UDP));
+-	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_SCTP));
+ 	fprintf(stderr, "%s", strxf_proto(IPPROTO_DCCP));
+ 	fprintf(stderr, " } [ sport PORT ] [ dport PORT ] |\n");
+ 	fprintf(stderr, "                  { ");
+diff -urN work/iproute2-4.10.0/tc/f_flower.c work/iproute2-4.10.0/tc/f_flower.c
+--- work/iproute2-4.10.0/tc/f_flower.c	2017-02-20 17:47:52.000000000 +0100
++++ work/iproute2-4.10.0/tc/f_flower.c	2017-04-01 12:35:06.990504667 +0200
+@@ -47,7 +47,7 @@
+ 		"                       vlan_ethtype [ ipv4 | ipv6 | ETH-TYPE ] |\n"
+ 		"                       dst_mac MAC-ADDR |\n"
+ 		"                       src_mac MAC-ADDR |\n"
+-		"                       ip_proto [tcp | udp | sctp | icmp | icmpv6 | IP-PROTO ] |\n"
++		"                       ip_proto [tcp | udp | icmp | icmpv6 | IP-PROTO ] |\n"
+ 		"                       dst_ip [ IPV4-ADDR | IPV6-ADDR ] |\n"
+ 		"                       src_ip [ IPV4-ADDR | IPV6-ADDR ] |\n"
+ 		"                       dst_port PORT-NUMBER |\n"
+@@ -113,8 +113,6 @@
+ 		ip_proto = IPPROTO_TCP;
+ 	} else if (matches(str, "udp") == 0) {
+ 		ip_proto = IPPROTO_UDP;
+-	} else if (matches(str, "sctp") == 0) {
+-		ip_proto = IPPROTO_SCTP;
+ 	} else if (matches(str, "icmp") == 0) {
+ 		if (eth_type != htons(ETH_P_IP))
+ 			goto err;
+@@ -235,10 +233,6 @@
+ 		return endpoint == FLOWER_ENDPOINT_SRC ?
+ 			TCA_FLOWER_KEY_UDP_SRC :
+ 			TCA_FLOWER_KEY_UDP_DST;
+-	else if (ip_proto == IPPROTO_SCTP)
+-		return endpoint == FLOWER_ENDPOINT_SRC ?
+-			TCA_FLOWER_KEY_SCTP_SRC :
+-			TCA_FLOWER_KEY_SCTP_DST;
+ 	else
+ 		return -1;
+ }
+@@ -617,8 +611,6 @@
+ 		fprintf(f, "tcp");
+ 	else if (ip_proto == IPPROTO_UDP)
+ 		fprintf(f, "udp");
+-	else if (ip_proto == IPPROTO_SCTP)
+-		fprintf(f, "sctp");
+ 	else if (ip_proto == IPPROTO_ICMP)
+ 		fprintf(f, "icmp");
+ 	else if (ip_proto == IPPROTO_ICMPV6)
