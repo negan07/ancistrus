@@ -33,6 +33,7 @@ endif
 export SHARED_DIR 	:= $(SOURCE_PATH)/Source/shared
 export KERNEL_DIR 	:= $(SOURCE_PATH)/Source/kernel
 export KERNEL_INC 	:= $(KERNEL_DIR)/include
+export KERNEL_BIN	:= $(KERNEL_DIR)/../../bin
 export KERNEL_SRC 	:= $(KERNEL_DIR)
 
 ifeq ($(PROFILE_ARCH),MIPS)

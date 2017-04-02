@@ -60,6 +60,7 @@ clean_build:
 dist_clean_build:
 	@rm -rf $(BUILD_DIR_PATH)
 	@rm -rf ../$(SCRIPTS_DIR)/$(OPKG_UTILS)
+	@rm -f $(OPKG_UTILS)/.installed
 endif
 
 download:
