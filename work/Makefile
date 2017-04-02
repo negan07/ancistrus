@@ -52,8 +52,7 @@ build:	creat_rules
 	echo "Description: $(DESC_$(D))"			>> $(CTRL_PATH); \
 	$(MAKE) -j$(NUMTHREAD) -C $D install || exit 1; \
 	mv -f $(PREFIX_PATH) $(BUILD_DIR_PATH)/$(D); \
-	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build \
-	-Z xz -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1;)
+	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -Z xz -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1;)
 
 clean_build:
 	@$(foreach D, $(DIRLIST), echo -e "\\e[35m$(CUR_REL_PATH): clean build dir \\e[36m$D \\e[0m"; rm -rf $(BUILD_DIR_PATH)/$(D);)

@@ -30,6 +30,10 @@ ERR=$?
 	UNTARGZ "${1}.tar.gz"
 	rm -f "${1}.tar.gz"								#remove temporary one
 	fi
+	if [ -f "${1}.tgz" ]; then
+	UNTARGZ "${1}.tgz"
+	rm -f "${1}.tgz"
+	fi
 	if [ -f "${1}.tar.bz2" ]; then
 	UNTARBZ2 "${1}.tar.bz2"
 	rm -f "${1}.tar.bz2"
@@ -86,7 +90,7 @@ ERR=$?
 		*.zip)
 		UNZIP $DSTDIR $SRCFILE
 		;;
-		*.tar.gz)
+		*.tar.gz|*.tgz)
 		UNTARGZ $SRCFILE
 		;;
 		*.tar.bz2)

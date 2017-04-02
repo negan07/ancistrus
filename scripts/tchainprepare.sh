@@ -71,6 +71,5 @@ rm -Rf autoconf-2.65 gcc-4.6.2 gdb-7.3.1 m4-1.4.15 uClibc-0.9.32
 cd ../../../..
 echo
 echo "Ready to start:"
-echo "cd $TCDIR"
-echo "type e.g.: sudo make"
+echo "type e.g.: sudo make toolchain"
 echo
