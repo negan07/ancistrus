@@ -32,10 +32,10 @@ path_binaries() {
 [ -z "$SCRIPTSDIR" ] && SCRIPTSDIR=${BINDIR}/scripts
 
 # Debug purpose
-#LIBDIR=
-#ETCDIR=
-#BINDIR=
-#SCRIPTSDIR=
+#LIBDIR=/tmp/etc/ancdbg
+#ETCDIR=/tmp/etc/ancdbg
+#BINDIR=/tmp/etc/ancdbg
+#SCRIPTSDIR=/tmp/etc/ancdbg
 
 [ -z "$INSMOD" ] && INSMOD=insmod
 [ -z "$RMMOD" ] && RMMOD=rmmod
