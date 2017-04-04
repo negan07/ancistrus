@@ -7,7 +7,7 @@
 /*
  * NVRAM
  * Use the nvram shared obj lib routines: useful on bash scripts.
- * Act as /usr/sbin/nvram with some differences & all the enhancement modifications made on nvram-x.x.x-anc scnvram lib.
+ * Act as /usr/sbin/nvram with some differences & all the enhancement modifications made on scnvram lib.
  */
 void nvram(MAINARGS);
 

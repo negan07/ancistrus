@@ -30,10 +30,10 @@ endif
 all: $(BINS)
 
 $(BINS): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(CPPFLAGS) $(DEFS) $^ -o $@
+	$(CC) $^ $(CFLAGS) $(LDFLAGS) $(LIBS) $(CPPFLAGS) $(DEFS) -o $@
 
 %.o : %.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(CPPFLAGS) $(DEFS) -c $< -o $@
+	$(CC) -c $< $(CFLAGS) $(LDFLAGS) $(LIBS) $(CPPFLAGS) $(DEFS) -o $@
 
 install:
 	$(SSTRIP) $(BINS)
