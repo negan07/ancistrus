@@ -4,6 +4,8 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 @@ -0,0 +1,31 @@
 +include ../Rules.mak
 +
++CONF_FILE := $(OPKG)/utils/opkg.conf
++
 +all: config
 +	$(MAKE) -C $(OPKG)
 +
@@ -16,15 +18,28 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +configure:
 +	cd $(OPKG) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -lssl -lcrypto" CURL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -lcurl" LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-lssl -lcrypto -lcurl -larchive" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include -I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/include -I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --enable-openssl --disable-gpg --disable-shared --with-static-libopkg --prefix=/usr --exec-prefix=/usr/sbin
 +
-+install:
++install: conf_file
 +	$(SSTRIP) $(OPKG)/src/opkg
 +	install -m 0755 -d $(ETCDIR)
 +	install -m 0755 -d $(BINDIR)
-+	install -m 0644 $(OPKG)/utils/opkg.conf $(ETCDIR)
++	install -m 0644 $(CONF_FILE) $(ETCDIR)
 +	install -m 0755 $(OPKG)/src/opkg $(BINDIR)
 +
++conf_file:
++	@echo "src/gz local file:///mnt/shares/U/local" > $(CONF_FILE)
++	@echo "src/gz $(PROJECT_NAME)-$(ARCH)-$(PROJECT_TARGET) $(GITHUB_DIR)" >> $(CONF_FILE)
++	@echo "arch $(ARCH)$(PROJECT_TARGET) 1" >> $(CONF_FILE)
++	@echo "arch $(ARCH) 6" >> $(CONF_FILE)
++	@echo "arch all 11" >> $(CONF_FILE)
++	@echo "arch any 16" >> $(CONF_FILE)
++	@echo "arch noarch 21" >> $(CONF_FILE)
++	@echo "dest root /" >> $(CONF_FILE)
++	@echo "dest ram $(TMPDIR)" >> $(CONF_FILE)
++	@echo "option lists_dir /tmp/var/opkg-lists" >> $(CONF_FILE)
++	@echo "" >> $(CONF_FILE)
++
 +man-install:
-+	cd $(OPKG)/man && make install
++	cd $(OPKG)/man && $(MAKE) install
 +
 +clean:
 +	$(MAKE) -C $(OPKG) clean
