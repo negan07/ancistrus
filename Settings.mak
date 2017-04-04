@@ -8,7 +8,6 @@ endif
 
 ifdef BUILD
 override undefine LOCAL
-override undefine DEBUG
 export BUILD
 endif
 
@@ -28,6 +27,7 @@ DIFFS_DIR		?= diffs
 SCRIPTS_DIR		?= scripts
 WORK_SRC_DIR		?= work
 DEBUG_DIR		?= /home/ftp
+RECEIVE_DIR		?= tmp/etc/ancdbg
 
 SRC_DIR			?= $(PROJECT_TARGET)_$(FWVER)_WW_src
 SRC_APPS_DIR		?= $(SRC_DIR)/Source/apps
@@ -56,7 +56,7 @@ TARGET_I386		?=
 PREFIX_MIPS		?= $(TARGET_MIPS)-
 PREFIX_ARM		?= $(TARGET_ARM)-
 PREFIX_MIPSEL		?= $(TARGET_MIPSEL)-
-PREFIX_I386		?= 
+PREFIX_I386		?= $(TARGET_I386)
 
 TCHAIN_DIR		?= $(TCHAIN_$(CPU_ARCH_NAME)_DIR)
 TCHAIN_PREFIX		?= $(PREFIX_$(CPU_ARCH_NAME))

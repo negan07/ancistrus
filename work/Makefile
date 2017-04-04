@@ -14,13 +14,18 @@ CONTROL_FILES		:= preinst postinst prerm postrm
 ifneq "$(or $(LOCAL),$(DEBUG))" ""
 PREFIX_PATH		:= $(DEBUG_DIR)
 else
+PREFIX_PATH		:= $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)
+endif
+
 ifdef BUILD
 BUILD_DIR_PATH		:= $(GIT_ROOT)/$(OPKG_PKG_DIR)
-PREFIX_PATH		:= $(BUILD_DIR_PATH)/tmp
-CTRL_DIR_PATH		:= $(PREFIX_PATH)/CONTROL
+BUILD_TMP		:= $(BUILD_DIR_PATH)/tmp
+CTRL_DIR_PATH		:= $(BUILD_TMP)/CONTROL
 CTRL_PATH		:= $(CTRL_DIR_PATH)/control
+ifndef DEBUG
+PREFIX_PATH		:= $(BUILD_TMP)
 else
-PREFIX_PATH		:= $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)
+PREFIX_PATH		:= $(BUILD_TMP)/$(RECEIVE_DIR)
 endif
 endif
 
@@ -34,32 +39,46 @@ install:
 	$(MAKE) -j$(NUMTHREAD) -C $D install || exit 1;)
 
 ifdef BUILD
-build:	creat_rules
+build: prepare_package build_package build_index
+
+prepare_package: creat_rules
 	@[ -d $(BUILD_DIR_PATH) ] || mkdir -p -m 0755 $(BUILD_DIR_PATH) || exit 1;
-	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): build package \\e[36m$D \\e[0m"; \
-	rm -rf $(BUILD_DIR_PATH)/$(D) $(PREFIX_PATH) || exit 1; \
-	mkdir -p -m 0755 $(PREFIX_PATH) || exit 1; \
+	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): prepare package \\e[36m$D \\e[0m"; \
+	rm -rf $(BUILD_DIR_PATH)/$(D) $(BUILD_TMP); \
+	mkdir -p -m 0755 $(BUILD_TMP) || exit 1; \
 	mkdir -p -m 0755 $(CTRL_DIR_PATH) || exit 1; \
 	echo "Package: $(NAME_$(D))"				> $(CTRL_PATH); \
 	echo "Version: $(VER_$(D))"				>> $(CTRL_PATH); \
-	echo "Architecture: $(ARCH_LCASE)$(PROJECT_TARGET)"	>> $(CTRL_PATH); \
-	echo "Installed-Size: $(SIZE_$(D))"			>> $(CTRL_PATH); \
-	echo "Section: $(SEC_$(D))"				>> $(CTRL_PATH); \
-	echo "Priority: $(PRIO_$(D))"				>> $(CTRL_PATH); \
 	echo "Depends: $(DEP_$(D))"				>> $(CTRL_PATH); \
+	echo "Section: $(SEC_$(D))"				>> $(CTRL_PATH); \
+	echo "Architecture: $(ARCH_LCASE)$(PROJECT_TARGET)"	>> $(CTRL_PATH); \
 	echo "Maintainer: $(GITHUB_DIR)"			>> $(CTRL_PATH); \
 	echo "Source: $(GITHUB_DIR)"				>> $(CTRL_PATH); \
 	echo "Description: $(DESC_$(D))"			>> $(CTRL_PATH); \
+	echo "OE: $(NAME_$(D))"					>> $(CTRL_PATH); \
+	echo "Homepage: $(DL_$(D))"				>> $(CTRL_PATH); \
+	echo "$(PROJECT_LICENSE)"				>> $(CTRL_PATH); \
+	echo "Priority: $(PRIO_$(D))"				>> $(CTRL_PATH); \
 	$(MAKE) -j$(NUMTHREAD) -C $D install || exit 1; \
-	mv -f $(PREFIX_PATH) $(BUILD_DIR_PATH)/$(D); \
-	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -Z xz -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1;)
+	mv -f $(BUILD_TMP) $(BUILD_DIR_PATH)/$(D);)
+
+build_package:
+	@[ -d $(BUILD_DIR_PATH) ] && [ -x ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build ]
+	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): build package \\e[36m$D \\e[0m"; \
+	[ -d $(BUILD_DIR_PATH)/$(D) ] || exit 1; \
+	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1;)
+
+build_index:
+	@[ -d $(BUILD_DIR_PATH) ] && [ -x ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-make-index ]
+	@echo -e "\\e[35m$(CUR_REL_PATH): build index \\e[36mPackages \\e[0m"
+	@cd $(BUILD_DIR_PATH); ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-make-index $(BUILD_DIR_PATH) > Packages || exit 1; \
+	gzip -f Packages || exit 1;
 
 clean_build:
 	@$(foreach D, $(DIRLIST), echo -e "\\e[35m$(CUR_REL_PATH): clean build dir \\e[36m$D \\e[0m"; rm -rf $(BUILD_DIR_PATH)/$(D);)
 
 dist_clean_build:
 	@rm -rf $(BUILD_DIR_PATH)
-	@rm -rf ../$(SCRIPTS_DIR)/$(OPKG_UTILS)
 	@rm -f $(OPKG_UTILS)/.installed
 endif
 

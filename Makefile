@@ -53,9 +53,21 @@ download_work: download_sources
 	$(MAKE) -C $(WORK_SRC_DIR) download; \
 	fi
 
-build_work: work
+ipk: prepare_ipk build_ipk index_ipk
+
+prepare_ipk: work
 	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) build; \
+	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) prepare_package; \
+	fi
+
+build_ipk:
+	@if [ -d $(WORK_SRC_DIR) ]; then \
+	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) build_package; \
+	fi
+
+index_ipk:
+	@if [ -d $(WORK_SRC_DIR) ]; then \
+	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) build_index; \
 	fi
 
 clean_toolchain:
@@ -85,7 +97,7 @@ clean_tars_work:
 	$(MAKE) -C $(WORK_SRC_DIR) clean_tars; \
 	fi
 
-clean_build_work:
+clean_ipk:
 	@if [ -d $(WORK_SRC_DIR) ]; then \
 	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) clean_build; \
 	fi
@@ -95,7 +107,7 @@ dist_clean_work:
 	$(MAKE) -C $(WORK_SRC_DIR) dist_clean; \
 	fi
 
-dist_clean_build:
+dist_clean_ipk:
 	@if [ -d $(WORK_SRC_DIR) ]; then \
 	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) dist_clean_build; \
 	fi
@@ -127,16 +139,19 @@ help: info
 	@echo "make work		- download sources, download/copy, config, patch, compile work-thirdparty apps"
 	@echo "make prepare_work	- download sources, download/copy, config, patch work-thirdparty apps without compiling"
 	@echo "make download_work	- download & extract sources, download/copy, extract, config work-thirdparty apps only"
-	@echo "make build_work		- download sources, download/copy, config, patch, compile work-thirdparty apps, build opkg packets"
+	@echo "make  ipk		- download sources, download/copy, config, patch, compile work-thirdparty apps, build packets & index"
+	@echo "make  prepare_ipk	- download sources, download/copy, config, patch, compile work-thirdparty apps, prepare ipk packets"
+	@echo "make build_ipk		- build already prepared ipk packages"
+	@echo "make index_ipk		- build already prepared ipk packages index"
 	@echo "make clean_toolchain	- delete toolchain sources dir"
 	@echo "make dist_clean_toolchain- delete toolchain sources dir & delete all built toolchains"
 	@echo "make clean_sources	- cleanup kernel & app sources (included work-thirdparty apps), target, img"
 	@echo "make dist_clean_sources	- delete sources dir"
 	@echo "make clean_work		- cleanup work-thirdparty apps"
 	@echo "make clean_tars_work	- delete all previously downloaded work-thirdparty archives"
-	@echo "make clean_build_work	- cleanup work-thirdparty opkg packet dirs"
+	@echo "make clean_ipk		- cleanup work-thirdparty ipk packet dirs"
 	@echo "make dist_clean_work	- cleanup work-thirdparty apps & delete all previously downloaded work-thirdparty app dirs"
-	@echo "make dist_clean_build	- cleanup work-thirdparty opkg packets build dir"
+	@echo "make dist_clean_ipk	- cleanup work-thirdparty ipk packets build dir"
 	@echo "make info		- show project info"
 	@echo "make help		- show project info and this help"
 
