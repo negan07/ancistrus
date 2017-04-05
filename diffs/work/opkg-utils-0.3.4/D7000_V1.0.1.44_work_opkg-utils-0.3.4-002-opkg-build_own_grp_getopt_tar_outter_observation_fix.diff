@@ -1,0 +1,33 @@
+diff -urN work/opkg-utils-0.3.4/opkg-build work/opkg-utils-0.3.4/opkg-build
+--- work/opkg-utils-0.3.4/opkg-build	2017-04-04 23:21:46.566819127 +0200
++++ work/opkg-utils-0.3.4/opkg-build	2017-04-05 21:21:17.549018779 +0200
+@@ -241,12 +241,20 @@
+ while getopts "cCg:ho:vOZ:T:" opt; do
+     case $opt in
+ 	o ) owner=$OPTARG
++	    if [ "$ogargs" = "" ]; then
+ 	    ogargs="--owner=$owner"
++	    else
++	    ogargs="$ogargs --owner=$owner"
++	    fi
+ 	    ;;
+ 	O ) opkext=1
+ 	    ;;
+ 	g ) group=$OPTARG
++	    if [ "$ogargs" = "" ]; then
++	    ogargs="--group=$group"	    
++	    else
+ 	    ogargs="$ogargs --group=$group"
++	    fi
+ 	    ;;
+ 	c ) outer=tar
+ 	    ;;
+@@ -331,7 +339,7 @@
+ rm -f $pkg_file
+ case $outer in
+ tar)
+-opts="-cz ${tarformat} -f"
++opts="${ogargs} -cz ${tarformat} -f"
+ ;;
+ *)
+ opts="-crf"
