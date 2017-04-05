@@ -5,6 +5,8 @@ all: toolchain sources
 
 download: download_work 
 
+ipk: prepare_ipk build_ipk index_ipk
+
 clean: clean_toolchain clean_sources
 
 dist_clean: dist_clean_sources dist_clean_work
@@ -52,8 +54,6 @@ download_work: download_sources
 	@if [ -d $(WORK_SRC_DIR) ]; then \
 	$(MAKE) -C $(WORK_SRC_DIR) download; \
 	fi
-
-ipk: prepare_ipk build_ipk index_ipk
 
 prepare_ipk: work
 	@if [ -d $(WORK_SRC_DIR) ]; then \
@@ -128,6 +128,7 @@ info:
 help: info
 	@echo "make			- download sources, compile & install toolchain, compile sources, compile work-thirdparty, create img"
 	@echo "make download		- download & extract sources, download/copy & extract work-thirdparty apps without patching"
+	@echo "make  ipk		- download sources, download/copy, config, patch, compile work-thirdparty apps, build packets & index"
 	@echo "make clean		- cleanup toolchain sources, kernel & app sources (included work-thirdparty apps), target, img"
 	@echo "make dist_clean		- delete toolchain source dir, delete source dir, cleanup work & delete previously downloaded dirs"
 	@echo "make prepare_host	- tune-up host & install packets needed to make & develop (optional)"
@@ -139,7 +140,6 @@ help: info
 	@echo "make work		- download sources, download/copy, config, patch, compile work-thirdparty apps"
 	@echo "make prepare_work	- download sources, download/copy, config, patch work-thirdparty apps without compiling"
 	@echo "make download_work	- download & extract sources, download/copy, extract, config work-thirdparty apps only"
-	@echo "make  ipk		- download sources, download/copy, config, patch, compile work-thirdparty apps, build packets & index"
 	@echo "make  prepare_ipk	- download sources, download/copy, config, patch, compile work-thirdparty apps, prepare ipk packets"
 	@echo "make build_ipk		- build already prepared ipk packages"
 	@echo "make index_ipk		- build already prepared ipk packages index"
