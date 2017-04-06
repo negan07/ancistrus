@@ -1,10 +1,15 @@
 diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 --- work/opkg-0.3.4/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/opkg-0.3.4/Makefile	2017-03-23 20:35:42.745736890 +0100
-@@ -0,0 +1,31 @@
+@@ -0,0 +1,55 @@
 +include ../Rules.mak
 +
 +CONF_FILE := $(OPKG)/utils/opkg.conf
++ifdef DEBUG
++PREFIX_STATE_DIR := $(TMPDIR)
++else
++PREFIX_STATE_DIR := /usr
++endif
 +
 +all: config
 +	$(MAKE) -C $(OPKG)
@@ -16,7 +21,7 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +	fi
 +
 +configure:
-+	cd $(OPKG) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -lssl -lcrypto" CURL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -lcurl" LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-lssl -lcrypto -lcurl -larchive" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include -I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/include -I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --enable-openssl --disable-gpg --disable-shared --with-static-libopkg --prefix=/usr --exec-prefix=/usr/sbin
++	cd $(OPKG) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -lssl -lcrypto" CURL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -lcurl" LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-lssl -lcrypto -lcurl -larchive" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include -I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/include -I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --enable-openssl --disable-gpg --disable-shared --with-static-libopkg --prefix=$(PREFIX_STATE_DIR) --localstatedir=$(PREFIX_STATE_DIR)/opkg
 +
 +install: conf_file
 +	$(SSTRIP) $(OPKG)/src/opkg
@@ -35,7 +40,11 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +	@echo "arch noarch 21" >> $(CONF_FILE)
 +	@echo "dest root /" >> $(CONF_FILE)
 +	@echo "dest ram $(TMPDIR)" >> $(CONF_FILE)
-+	@echo "option lists_dir /tmp/var/opkg-lists" >> $(CONF_FILE)
++	@echo "option autoremove 1" >> $(CONF_FILE)
++	@echo "option volatile_cache 1" >> $(CONF_FILE)
++	@echo "option cache_local_files 1" >> $(CONF_FILE)
++	@echo "option cache_dir $(TMPDIR)/opkg/cache" >> $(CONF_FILE)
++	@echo "option lists_dir $(TMPDIR)/opkg/lists" >> $(CONF_FILE)
 +	@echo "" >> $(CONF_FILE)
 +
 +man-install:

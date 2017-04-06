@@ -16,7 +16,8 @@ PROJECT_NAME		?= ancistrus
 PROJECT_PLOT		?= "Netgear's Nighthawk Router Experience Distributed Project"
 PROJECT_TARGET		?= D7000
 GITHUB_DIR		?= https://github.com/$(PROJECT_FOUNDER)/$(PROJECT_NAME)
-PROJECT_LICENSE		?= "License: GPLv2"
+LICENSE_NAME		?= GPLv2
+PROJECT_LICENSE		?= "License: $(LICENSE_NAME)"
 
 FWVER			?= V1.0.1.44
 CPU_ARCH_NAME		?= ARM
@@ -27,7 +28,7 @@ DIFFS_DIR		?= diffs
 SCRIPTS_DIR		?= scripts
 WORK_SRC_DIR		?= work
 DEBUG_DIR		?= /home/ftp
-RECEIVE_DIR		?= tmp/etc/ancdbg
+RECEIVE_DIR		?= /tmp/etc/ancdbg
 
 SRC_DIR			?= $(PROJECT_TARGET)_$(FWVER)_WW_src
 SRC_APPS_DIR		?= $(SRC_DIR)/Source/apps
