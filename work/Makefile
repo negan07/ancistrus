@@ -9,7 +9,7 @@ RULES			:= $(CUR_PATH)/Rules.mak
 ARCH_LCASE		:= $(shell echo $(CPU_ARCH_NAME) | tr A-Z a-z)
 NUMTHREAD		:= $$((2 * `getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1`))
 #NUMTHREAD		:= $$((2 * `grep processor /proc/cpuinfo | wc -l`))
-CONTROL_FILES		:= preinst postinst prerm postrm
+CONTROL_FILES		:= preinst postinst prerm postrm conffiles
 
 ifneq "$(or $(LOCAL),$(DEBUG))" ""
 PREFIX_PATH		:= $(DEBUG_DIR)
@@ -25,7 +25,7 @@ CTRL_PATH		:= $(CTRL_DIR_PATH)/control
 ifndef DEBUG
 PREFIX_PATH		:= $(BUILD_TMP)
 else
-PREFIX_PATH		:= $(BUILD_TMP)/$(RECEIVE_DIR)
+PREFIX_PATH		:= $(BUILD_TMP)$(RECEIVE_DIR)
 endif
 endif
 
@@ -56,8 +56,8 @@ prepare_package: creat_rules
 	echo "Source: $(GITHUB_DIR)"				>> $(CTRL_PATH); \
 	echo "Description: $(DESC_$(D))"			>> $(CTRL_PATH); \
 	echo "OE: $(NAME_$(D))"					>> $(CTRL_PATH); \
-	echo "Homepage: $(DL_$(D))"				>> $(CTRL_PATH); \
-	echo "$(PROJECT_LICENSE)"				>> $(CTRL_PATH); \
+	echo "Homepage: $(HOME_$(D))"				>> $(CTRL_PATH); \
+	echo "License: $(LIC_$(D))"				>> $(CTRL_PATH); \
 	echo "Priority: $(PRIO_$(D))"				>> $(CTRL_PATH); \
 	$(MAKE) -j$(NUMTHREAD) -C $D install || exit 1; \
 	mv -f $(BUILD_TMP) $(BUILD_DIR_PATH)/$(D);)
@@ -66,13 +66,14 @@ build_package:
 	@[ -d $(BUILD_DIR_PATH) ] && [ -x ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build ]
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): build package \\e[36m$D \\e[0m"; \
 	[ -d $(BUILD_DIR_PATH)/$(D) ] || exit 1; \
+	[ "$(D)" = "$(LIBARCHIVE)" ] || [ "$(D)" = "$(OPKG_UTILS)" ] || [ "$(D)" = "$(ZLIB)" ] || \
 	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1;)
 
 build_index:
 	@[ -d $(BUILD_DIR_PATH) ] && [ -x ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-make-index ]
 	@echo -e "\\e[35m$(CUR_REL_PATH): build index \\e[36mPackages \\e[0m"
 	@cd $(BUILD_DIR_PATH); ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-make-index $(BUILD_DIR_PATH) > Packages || exit 1; \
-	gzip -f Packages || exit 1;
+	gzip -qf Packages || exit 1; gzip -qt Packages.gz || exit 1;
 
 clean_build:
 	@$(foreach D, $(DIRLIST), echo -e "\\e[35m$(CUR_REL_PATH): clean build dir \\e[36m$D \\e[0m"; rm -rf $(BUILD_DIR_PATH)/$(D);)
@@ -85,7 +86,7 @@ endif
 download:
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): download & extract \\e[36m$D \\e[0m"; \
 	[ -d $D ] || ../$(SCRIPTS_DIR)/dl_sources.sh $D $(DL_$D) $(TAR_$D) || exit 1; \
-	if [ ! -d $(D)/$(D) ] && [ -f $(D)/configure.ac ]; then \
+	if [ ! -d $(D)/$(D) ] && [ -f $(D)/Makefile.in ]; then \
 	FLIST=$$(ls -A $D); \
 	mkdir -p -m 0755 $(D)/$(D) || exit 1; \
 	cd $D; mv -f $${FLIST} $D || exit 1; cd ..; \
