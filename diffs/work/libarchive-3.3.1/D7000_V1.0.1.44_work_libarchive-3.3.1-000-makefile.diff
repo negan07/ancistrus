@@ -6,7 +6,7 @@ diff -urN work/libarchive-3.3.1/Makefile work/libarchive-3.3.1/Makefile
 +
 +all: config
 +	$(MAKE) -C $(LIBARCHIVE)
-+	$(STRIP) $(LIBARCHIVE)/.libs/*.so.*
++#	$(STRIP) $(LIBARCHIVE)/.libs/*.so.*
 +	$(STRIP) $(STRIPFLAGS) $(LIBARCHIVE)/.libs/*.a
 +
 +config:
@@ -16,7 +16,7 @@ diff -urN work/libarchive-3.3.1/Makefile work/libarchive-3.3.1/Makefile
 +	fi
 +
 +configure:
-+	cd $(LIBARCHIVE) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --disable-bsdtar --disable-bsdcat --disable-bsdcpio CFLAGS="$(CFLAGS) -Os -s"
++	cd $(LIBARCHIVE) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-shared LDFLAGS=-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) LIBS=-lz CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS=-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)
 +
 +install:
 +	@echo "Nothing to install..."
