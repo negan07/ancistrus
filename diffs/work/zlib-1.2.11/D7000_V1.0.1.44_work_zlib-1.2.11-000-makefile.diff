@@ -1,0 +1,29 @@
+diff -urN work/zlib-1.2.11/Makefile work/zlib-1.2.11/Makefile
+--- work/zlib-1.2.11/Makefile	2017-04-06 18:00:46.662292000 +0200
++++ work/zlib-1.2.11/Makefile	2017-04-06 18:01:08.566300143 +0200
+@@ -0,0 +1,25 @@
++include ../Rules.mak
++
++all: config
++	$(MAKE) -C $(ZLIB)
++	$(STRIP) $(STRIPFLAGS) $(ZLIB)/*.a
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(ZLIB) && CHOST=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" ./configure --static
++
++install:
++	@echo "Nothing to install..."
++
++clean:
++	$(MAKE) -C $(ZLIB) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(ZLIB) distclean
++
