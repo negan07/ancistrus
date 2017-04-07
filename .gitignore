@@ -116,6 +116,7 @@ work/nvram-*/
 work/utelnetd-*/
 work/iproute2-*/
 work/netperf-*/
+work/zlib-*/
 work/libarchive-*/
 work/opkg-*/
 
