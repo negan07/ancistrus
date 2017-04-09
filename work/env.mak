@@ -1,7 +1,9 @@
 ifndef LOCAL
 PROFILE_ARCH		:= $(CPU_ARCH)
 export TMPDIR		:= /tmp
+export TMPETC		:= /etc
 ifndef DEBUG
+export USRETC		:= /usr/etc
 export ETCDIR		:= $(PREFIX)/usr/etc
 export BINDIR		:= $(PREFIX)/usr/sbin
 export APPDIR		:= $(BINDIR)/rc_app
@@ -10,6 +12,7 @@ export LIBDIR		:= $(PREFIX)/lib
 export MODDIR		:= $(LIBDIR)/modules
 export WWWDIR		:= $(PREFIX)/www.eng
 else
+export USRETC		:= $(RECEIVE_DIR)
 export ETCDIR		:= $(PREFIX)
 export BINDIR		:= $(PREFIX)
 export APPDIR		:= $(PREFIX)
@@ -21,6 +24,8 @@ endif
 else
 PROFILE_ARCH		:= I386
 export TMPDIR		:= $(PREFIX)/tmp
+export TMPETC		:= $(TMPDIR)/etc
+export USRETC		:= $(PREFIX)/usr/etc
 export ETCDIR		:= $(TMPDIR)/etc
 export BINDIR		:= $(PREFIX)/usr/sbin
 export APPDIR		:= $(BINDIR)/rc_app

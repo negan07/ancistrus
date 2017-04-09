@@ -1,14 +1,25 @@
 diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 --- work/opkg-0.3.4/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/opkg-0.3.4/Makefile	2017-03-23 20:35:42.745736890 +0100
-@@ -0,0 +1,55 @@
+@@ -0,0 +1,101 @@
 +include ../Rules.mak
 +
-+CONF_FILE := $(OPKG)/utils/opkg.conf
++OPKG_CONF_PATH := $(OPKG)/utils
++OPKG_CONF_NAME := opkg.conf
++OPKG_CONF := $(OPKG_CONF_PATH)/$(OPKG_CONF_NAME)
++
 +ifdef DEBUG
 +PREFIX_STATE_DIR := $(TMPDIR)
 +else
-+PREFIX_STATE_DIR := /usr
++PREFIX_STATE_DIR := /usr/local
++endif
++
++ifdef BUILD
++CONFFILES := $(CTRL_DIR)/conffiles
++PREINST := $(CTRL_DIR)/preinst
++POSTINST := $(CTRL_DIR)/postinst
++PRERM := $(CTRL_DIR)/prerm
++POSTRM := $(CTRL_DIR)/postrm
 +endif
 +
 +all: config
@@ -21,31 +32,66 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +	fi
 +
 +configure:
-+	cd $(OPKG) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -lssl -lcrypto" CURL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -lcurl" LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-lssl -lcrypto -lcurl -larchive" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include -I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/include -I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --enable-openssl --disable-gpg --disable-shared --with-static-libopkg --prefix=$(PREFIX_STATE_DIR) --localstatedir=$(PREFIX_STATE_DIR)/opkg
++	cd $(OPKG) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -lssl -lcrypto" CURL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -lcurl" LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-lssl -lcrypto -lcurl -larchive" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include -I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/include -I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --disable-gpg --disable-shared --with-static-libopkg --prefix=$(PREFIX_STATE_DIR) --localstatedir=$(PREFIX_STATE_DIR)/opkg
 +
-+install: conf_file
++install: opkg_conf control
 +	$(SSTRIP) $(OPKG)/src/opkg
 +	install -m 0755 -d $(ETCDIR)
 +	install -m 0755 -d $(BINDIR)
-+	install -m 0644 $(CONF_FILE) $(ETCDIR)
++	install -m 0644 $(OPKG_CONF) $(ETCDIR)
 +	install -m 0755 $(OPKG)/src/opkg $(BINDIR)
 +
-+conf_file:
-+	@echo "src/gz local file:///mnt/shares/U/local" > $(CONF_FILE)
-+	@echo "src/gz $(PROJECT_NAME)-$(ARCH)-$(PROJECT_TARGET) $(GITHUB_DIR)" >> $(CONF_FILE)
-+	@echo "arch $(ARCH)$(PROJECT_TARGET) 1" >> $(CONF_FILE)
-+	@echo "arch $(ARCH) 6" >> $(CONF_FILE)
-+	@echo "arch all 11" >> $(CONF_FILE)
-+	@echo "arch any 16" >> $(CONF_FILE)
-+	@echo "arch noarch 21" >> $(CONF_FILE)
-+	@echo "dest root /" >> $(CONF_FILE)
-+	@echo "dest ram $(TMPDIR)" >> $(CONF_FILE)
-+	@echo "option autoremove 1" >> $(CONF_FILE)
-+	@echo "option volatile_cache 1" >> $(CONF_FILE)
-+	@echo "option cache_local_files 1" >> $(CONF_FILE)
-+	@echo "option cache_dir $(TMPDIR)/opkg/cache" >> $(CONF_FILE)
-+	@echo "option lists_dir $(TMPDIR)/opkg/lists" >> $(CONF_FILE)
-+	@echo "" >> $(CONF_FILE)
++opkg_conf:
++	@echo "src/gz $(PROJECT_NAME)-$(ARCH)-$(PROJECT_TARGET) $(PROJECT_REPOSITORY)" > $(OPKG_CONF)
++	@echo "#src/gz local file:///mnt/shares/U/local" >> $(OPKG_CONF)
++	@echo "#src/gz debug https://192.168.0.51/debug" >> $(OPKG_CONF)
++	@echo "arch $(ARCH)$(PROJECT_TARGET) 1" >> $(OPKG_CONF)
++	@echo "arch $(ARCH) 6" >> $(OPKG_CONF)
++	@echo "arch all 11" >> $(OPKG_CONF)
++	@echo "arch any 16" >> $(OPKG_CONF)
++	@echo "arch noarch 21" >> $(OPKG_CONF)
++	@echo "dest root /" >> $(OPKG_CONF)
++	@echo "dest ram $(TMPDIR)" >> $(OPKG_CONF)
++	@echo "option autoremove 1" >> $(OPKG_CONF)
++	@echo "option cache_dir $(TMPDIR)/opkg/cache" >> $(OPKG_CONF)
++	@echo "option lists_dir $(TMPDIR)/opkg/lists" >> $(OPKG_CONF)
++	@echo "" >> $(OPKG_CONF)
++
++ifndef BUILD
++control:
++else
++control: conffiles preinst postinst prerm postrm
++
++conffiles:
++	@echo "$(USRETC)/$(OPKG_CONF_NAME)" > $(CONFFILES)
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "echo \"Making sure opkg not running before installing/upgrading...\"" >> $(PREINST)
++	@echo "while ps axg | grep -vw grep | grep -w opkg > /dev/null; do sleep 1; done" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "echo \"Configuring $(OPKG)...\"" >> $(POSTINST)
++	@echo "cp -f $(USRETC)/$(OPKG_CONF_NAME) $(TMPETC)" >> $(POSTINST)
++	@echo "echo" >> $(POSTINST)
++	@echo "echo \"$(OPKG) configuration on: $(TMPETC)/$(OPKG_CONF_NAME)\"" >> $(POSTINST)
++	@echo "echo" >> $(POSTINST)
++	@echo "echo \"Type: 'opkg update' to update packages list\"" >> $(POSTINST)
++	@echo "echo \"Type: 'opkg help' to see the options\"" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "killall -9 opkg > /dev/null 2>&1" >> $(PRERM)
++	@echo "exit 0" >> $(PRERM)
++
++postrm:
++	@echo "#!/bin/sh" > $(POSTRM)
++	@echo "rm -rf $(TMPDIR)/opkg/cache $(TMPDIR)/opkg/lists" >> $(POSTRM)
++	@echo "exit 0" >> $(POSTRM)
++endif
 +
 +man-install:
 +	cd $(OPKG)/man && $(MAKE) install

@@ -9,7 +9,6 @@ RULES			:= $(CUR_PATH)/Rules.mak
 ARCH_LCASE		:= $(shell echo $(CPU_ARCH_NAME) | tr A-Z a-z)
 NUMTHREAD		:= $$((2 * `getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1`))
 #NUMTHREAD		:= $$((2 * `grep processor /proc/cpuinfo | wc -l`))
-CONTROL_FILES		:= preinst postinst prerm postrm conffiles
 
 ifneq "$(or $(LOCAL),$(DEBUG))" ""
 PREFIX_PATH		:= $(DEBUG_DIR)
@@ -21,7 +20,8 @@ ifdef BUILD
 BUILD_DIR_PATH		:= $(GIT_ROOT)/$(OPKG_PKG_DIR)
 BUILD_TMP		:= $(BUILD_DIR_PATH)/tmp
 CTRL_DIR_PATH		:= $(BUILD_TMP)/CONTROL
-CTRL_PATH		:= $(CTRL_DIR_PATH)/control
+CTRL			:= $(CTRL_DIR_PATH)/control
+CTRL_SCRIPTS		:= preinst postinst prerm postrm
 ifndef DEBUG
 PREFIX_PATH		:= $(BUILD_TMP)
 else
@@ -47,19 +47,20 @@ prepare_package: creat_rules
 	rm -rf $(BUILD_DIR_PATH)/$(D) $(BUILD_TMP); \
 	mkdir -p -m 0755 $(BUILD_TMP) || exit 1; \
 	mkdir -p -m 0755 $(CTRL_DIR_PATH) || exit 1; \
-	echo "Package: $(NAME_$(D))"				> $(CTRL_PATH); \
-	echo "Version: $(VER_$(D))"				>> $(CTRL_PATH); \
-	echo "Depends: $(DEP_$(D))"				>> $(CTRL_PATH); \
-	echo "Section: $(SEC_$(D))"				>> $(CTRL_PATH); \
-	echo "Architecture: $(ARCH_LCASE)$(PROJECT_TARGET)"	>> $(CTRL_PATH); \
-	echo "Maintainer: $(GITHUB_DIR)"			>> $(CTRL_PATH); \
-	echo "Source: $(GITHUB_DIR)"				>> $(CTRL_PATH); \
-	echo "Description: $(DESC_$(D))"			>> $(CTRL_PATH); \
-	echo "OE: $(NAME_$(D))"					>> $(CTRL_PATH); \
-	echo "Homepage: $(HOME_$(D))"				>> $(CTRL_PATH); \
-	echo "License: $(LIC_$(D))"				>> $(CTRL_PATH); \
-	echo "Priority: $(PRIO_$(D))"				>> $(CTRL_PATH); \
+	echo "Package: $(NAME_$(D))"				> $(CTRL); \
+	echo "Version: $(VER_$(D))"				>> $(CTRL); \
+	echo "Depends: $(DEP_$(D))"				>> $(CTRL); \
+	echo "Section: $(SEC_$(D))"				>> $(CTRL); \
+	echo "Architecture: $(ARCH_LCASE)$(PROJECT_TARGET)"	>> $(CTRL); \
+	echo "Maintainer: $(GITHUB_DIR)"			>> $(CTRL); \
+	echo "Source: $(GITHUB_DIR)"				>> $(CTRL); \
+	echo "Description: $(DESC_$(D))"			>> $(CTRL); \
+	echo "OE: $(NAME_$(D))"					>> $(CTRL); \
+	echo "Homepage: $(HOME_$(D))"				>> $(CTRL); \
+	echo "License: $(LIC_$(D))"				>> $(CTRL); \
+	echo "Priority: $(PRIO_$(D))"				>> $(CTRL); \
 	$(MAKE) -j$(NUMTHREAD) -C $D install || exit 1; \
+	$(foreach S, $(CTRL_SCRIPTS), chmod -f 755 $(CTRL_DIR_PATH)/$(S);) \
 	mv -f $(BUILD_TMP) $(BUILD_DIR_PATH)/$(D);)
 
 build_package:
@@ -122,6 +123,9 @@ creat_rules:
 	@echo "export WORK_DIR		:= $(CUR_PATH)" >> $(RULES)
 	@echo "export SOURCE_PATH 	:= $(SRC_PATH_NAME)" >> $(RULES)
 	@echo "export PREFIX		:= $(PREFIX_PATH)" >> $(RULES)
+ifdef BUILD
+	@echo "export CTRL_DIR		:= $(CTRL_DIR_PATH)" >> $(RULES)
+endif
 	@echo "include \$$(GIT_ROOT_DIR)/Settings.mak" >> $(RULES)
 	@echo "include \$$(WORK_DIR)/dirs.mak" >> $(RULES)
 	@echo "include \$$(WORK_DIR)/env.mak" >> $(RULES)
