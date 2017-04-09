@@ -1,0 +1,11 @@
+diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_download_curl.c work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_download_curl.c
+--- work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_download_curl.c	1970-01-01 01:00:00.000000000 +0100
++++ work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_download_curl.c	2017-03-23 20:35:42.745736890 +0100
+@@ -231,6 +231,7 @@
+     char *etag = NULL;
+     double src_size = -1;
+ 
++    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &dummy_write);
+     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_write);
+     curl_easy_setopt(curl, CURLOPT_WRITEHEADER, &etag);
