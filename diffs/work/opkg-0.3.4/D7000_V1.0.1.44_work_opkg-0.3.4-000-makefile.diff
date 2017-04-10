@@ -1,7 +1,7 @@
 diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 --- work/opkg-0.3.4/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/opkg-0.3.4/Makefile	2017-03-23 20:35:42.745736890 +0100
-@@ -0,0 +1,99 @@
+@@ -0,0 +1,94 @@
 +include ../Rules.mak
 +
 +OPKG_CONF_PATH		:= $(OPKG)/utils
@@ -74,14 +74,9 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +	@echo "$(USRETC)/$(OPKG_CONF_NAME)" > $(CONFFILES)
 +
 +preinst:
-+	@echo "#!/bin/sh" > $(PREINST)
-+	@echo "echo \"Making sure opkg not running before installing/upgrading...\"" >> $(PREINST)
-+	@echo "while ps axg | grep -vw grep | grep -w opkg > /dev/null; do sleep 1; done" >> $(PREINST)
-+	@echo "exit 0" >> $(PREINST)
 +
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
-+	@echo "echo \"Configuring $(OPKG)...\"" >> $(POSTINST)
 +	@echo "cp -f $(USRETC)/$(OPKG_CONF_NAME) $(TMPETC)" >> $(POSTINST)
 +	@echo "echo" >> $(POSTINST)
 +	@echo "echo \"$(OPKG) configuration on: $(TMPETC)/$(OPKG_CONF_NAME)\"" >> $(POSTINST)
