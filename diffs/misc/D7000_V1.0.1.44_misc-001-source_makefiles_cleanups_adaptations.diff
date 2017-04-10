@@ -21,7 +21,12 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/env.mak D7000_V1.0.1.44_WW_src/Source/en
 diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/Makefile
 --- D7000_V1.0.1.44_WW_src/Source/Makefile	2016-10-11 17:57:47.000000000 +0200
 +++ D7000_V1.0.1.44_WW_src/Source/Makefile	2017-01-14 00:22:33.678101901 +0100
-@@ -6,9 +6,6 @@
+@@ -1,14 +1,7 @@
+-#
+-#	<MODULE> serial product makefile 
+-#	Usage:  make [TARGET] [ANNEX] [VER] [MODULE] [HW_ID] [UR2]
+-#
+ include Rules.mak
  
  
  ifeq ($(BOOT_NAND_FLASH),1)
@@ -31,15 +36,35 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  FLASH_NAND_CFEROM_FS_IMAGE_NAME_16 = $(CHIP_VENDOR)$(PROFILE)_nand_cferom_fs_image_16
  FLASH_NAND_FS_IMAGE_NAME_16 = $(CHIP_VENDOR)$(PROFILE)_nand_fs_image_16
  FLASH_NAND_CFEROM_FS_IMAGE_NAME_128 = $(CHIP_VENDOR)$(PROFILE)_nand_cferom_fs_image_128
-@@ -19,7 +16,6 @@
+@@ -19,11 +12,8 @@
  ifeq ($(FLASH),128M)
  FLASH_NAND_BLOCK_SIZE=$(FLASH_NAND_BLOCK_128KB)
  endif
 -
  endif
  
- #TOOL_CHAIN_DIR = /opt/toolchains/uclibc-crosstools/bin
-@@ -52,16 +48,9 @@
+-#TOOL_CHAIN_DIR = /opt/toolchains/uclibc-crosstools/bin
+-#TOOL_CHAIN_DIR = /$(TARGET_HOME)/tools/mips-linux-uclibc/bin
+ TOOL_CHAIN_DIR = /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin
+  
+ export TARGET_HOME 
+@@ -34,15 +24,6 @@
+ PROJ_DIR_KERNEL_SRC=../Kernel/bcm963xx/kernel/linux-3.4rt
+ PROJ_BIN_KERNEL=vmlinux.lz
+ 
+-PROJ_DIR_LOADER=../BootCode/bcm963xx_cfe
+-
+-PROJ_BIN_LOADER=cfe$(CHIP_ID)_$(HW_ID).bin
+-DPF_BIN=dpf.cfg
+-
+-LOADER = $(LOADER_DIR)/$(PROJ_BIN_LOADER)
+-KERNEL=$(KERNEL_DIR)/$(PROJ_BIN_KERNEL)
+-DPF = $(DPF_DIR)/$(DPF_BIN)
+-
+ #need not add WW in version for WW release
+ ifeq ($(REGION),WW)
+ 	VERSION=V$(VER)_$(SUB_VER)
+@@ -52,34 +33,21 @@
  	ETCVERSION=$(ANNEX)$(VER)_$(SUB_VER)$(REGION)
  endif
  
@@ -52,51 +77,62 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -	IMG_NAME_GPL=$(BOARD_ID)-$(VERSION).img
 -	BIN_NAME=$(IMAGE_DIR)/$(BOARD_ID)-$(VERSION).bin
 -endif
--
 +IMG_NAME=$(BOARD_ID)-$(VERSION).img
 +IMG_NAME_GPL=$(BOARD_ID)-$(VERSION).img
 +BIN_NAME=$(BOARD_ID)-$(VERSION).bin
  
- ifeq ($(BRIDGE),1)
- 	FUNC = 01
-@@ -75,9 +64,13 @@
++all: work
  
- all: build_test
+-ifeq ($(BRIDGE),1)
+-	FUNC = 01
+-endif
+-
+-ifeq ($(MULTI_PVC),1)
+-	FUNC = 03
+-endif
+-
+-PID=$(FIRMWARE_DIR)/PID_$(VERSION)
++orig: clean_img clean_target pre_fs apps drivers prefs fs img
+ 
+-all: build_test
++work: clean_img clean_target pre_fs apps third-party drivers prefs_work prefs fs img
  
 -build_test: pre_fs apps drivers prefs fs img
-+build_test: clean_img clean_target pre_fs apps third-party drivers prefs fs img
-+
-+build_image: clean_target build_target pid build_dpf fs img bin
++clean_all: clean_uclibc clean_apps clean_third-party clean_target clean_img
  
 -build_image: clean build_target pid build_dpf fs img bin
-+clean_all: clean_uclibc clean_apps clean_third-party clean_target clean_img
-+
 +clean: clean_target
  
- .PHONY: prepare target apps drivers ui
+-.PHONY: prepare target apps drivers ui
++.PHONY: apps drivers
  
-@@ -94,10 +87,9 @@
- 	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
+ pre_fs:
+ 	rm -rf target
+@@ -95,59 +63,57 @@
  	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
  	cd target/lib; ln -sf libscnvram.so libconfig.so
--ifeq ($(ITUNES_SERVER),1)
+ ifeq ($(ITUNES_SERVER),1)
 +	@echo -e "\\e[35mSOURCE: make \\e[36mUCLIBC \\e[0m"
  	make -C uClibc-0.9.32/
  	cp -af uClibc-0.9.32/lib/ld-uClibc-0.9.32.so target/lib/
--endif
+ endif
  
- prepare:
- 	# tools
-@@ -108,8 +100,6 @@
- 	    echo "Need fakeroot support. Please install it" ; \
- 	    echo "You can get it from image/tools/src" ; \
- 	    exit 1;                     \
+-prepare:
+-	# tools
+-	make -C $(HOSTTOOLS_DIR)
+-	make -C $(IMAGE_DIR)/tools
+-	# check fakeroot exist or not?
+-	@if [ $(firstword $(shell fakeroot -v) xxx) != "fakeroot" ]; then      \
+-	    echo "Need fakeroot support. Please install it" ; \
+-	    echo "You can get it from image/tools/src" ; \
+-	    exit 1;                     \
 -	else                            \
 -	    echo "fakeroot OK";         \
- 	fi
- 
+-	fi
+-
  apps:
-@@ -118,15 +108,14 @@
+ 	@echo -e "\\e[35mSOURCE: make \\e[36mAPPS \\e[0m"		
+ 	$(MAKE) -C $(APPS_DIR) 
  	$(MAKE) -C $(APPS_DIR) install 
  	
  drivers:
@@ -108,13 +144,26 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	@echo -e "\\e[35mSOURCE: make \\e[36mTHIRD PARTY \\e[0m"
  	$(MAKE) -C $(THIRD_PARTY_DIR)
 -	$(MAKE) -C $(THIRD_PARTY_DIR)	install
-+	$(MAKE) -C $(THIRD_PARTY_DIR) install
- 
+-
 -	
- ui:
- 	@echo -e "\\e[35mSOURCE: make \\e[36mUI \\e[0m"	
- 	$(MAKE) -C $(UI_DIR) -s	
-@@ -145,7 +134,7 @@
+-ui:
+-	@echo -e "\\e[35mSOURCE: make \\e[36mUI \\e[0m"	
+-	$(MAKE) -C $(UI_DIR) -s	
+-
++	$(MAKE) -C $(THIRD_PARTY_DIR) install
+ 	
+ #
+-# Generate files in target/ before make squash image
++# Generate files in target/ before making img
+ # Currently we generate these files:
+-# svn.info/version/md5/currentsetting.htm/pid
++# svn.info/version/md5/currentsetting.htm
+ #
+ SVN_INFO=$(FS_DIR)/usr/etc/svn.info
+ CUR_SETTING=$(FS_DIR)/www.eng/currentsetting.htm
+-PID=$(IMAGE_DIR)/$(BOARD_ID).pid
+-LANG_PID=$(IMAGE_DIR)/$(BOARD_ID)_lang.pid
+-MAKE_PID=$(IMAGE_DIR)/tools/src/make_PID/make_PID
  FW_INFO=$(IMAGE_DIR)/$(BOARD_ID).info
  
  ifeq ($(MTCODE),1)
@@ -122,8 +171,29 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 +IMG_NAME=$(BOARD_ID)-V$(VER)_$(SUB_VER)_MT.img
  endif
  
++WORK_PROJECT=$(shell cd ../..; basename -s .git `git config --get remote.origin.url`;)
++WORK_WWW=$(shell cd ../..; git config --get remote.origin.url;)
++WORK_AUTHOR=$(shell cd ../..; git log --max-count=1 --pretty='format:%an';)
++WORK_AUTHOR_EMAIL=$(shell cd ../..; git log --max-count=1 --pretty='format:%ae';)
++WORK_VER=$(shell cd ../..; git rev-list --count HEAD;)
++GIT_INFO=$(FS_DIR)/usr/etc/$(WORK_PROJECT)_git.info
++
++ifneq ($(ORIG),1)
++IMG_NAME=$(BOARD_ID)-$(VERSION)-$(WORK_PROJECT)_$(WORK_AUTHOR)-build-$(WORK_VER).img
++endif
++
++prefs_work:
++	echo Project Name: $(WORK_PROJECT) > $(GIT_INFO)
++	echo Homepage: $(WORK_WWW) >> $(GIT_INFO)
++	echo Revision Author: $(WORK_AUTHOR) - $(WORK_AUTHOR_EMAIL) >> $(GIT_INFO)
++	echo Build Revision Author Number: $(WORK_VER) >> $(GIT_INFO)
++	echo Model: $(BOARD_ID) >> $(GIT_INFO)
++	echo Firmware: V$(VER)_$(SUB_VER) >> $(GIT_INFO)
++
  prefs:
-@@ -163,7 +152,6 @@
+ 	# Generate version
+ 	echo $(ETCVERSION) > $(FS_DIR)/usr/etc/version	
+@@ -163,7 +129,6 @@
  	echo "Firmware="V$(VER)_$(SUB_VER)"@netgear_region#" > $(CUR_SETTING)
  	echo "RegionTag="$(BOARD_ID)_"@netgear_region#" >>  $(CUR_SETTING)
  	echo "Region=@netgear_region#"  >> $(CUR_SETTING)
@@ -131,39 +201,76 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	echo "Model="$(BOARD_ID)  >> $(CUR_SETTING)
  	echo "InternetConnectionStatus=@if_wan_up#" >> $(CUR_SETTING)
  	if [ "$(OPENDNS)" == "1" ]; then echo "ParentalControlSupported=1" >> $(CUR_SETTING); fi
-@@ -172,12 +160,7 @@
- 	
+@@ -173,84 +138,15 @@
  	# Generate fw info which will bind to trx file
  	echo $(VERSION) > $(FW_INFO)
--	echo $(REGION) >> $(FW_INFO)
+ 	echo $(REGION) >> $(FW_INFO)
 -	
 -ifeq ($(3G_FEATURE),1)
 -	cat $(APPS_DIR)/etc/prepare_3g >> $(TARGET_DIR)/usr/etc/rcS
 -endif
 -	
-+	echo $(REGION) >> $(FW_INFO)	
- 	
- build_target: 
- 	tar  xfz $(TARGET_HOME)/target.tgz 
-@@ -220,7 +203,7 @@
- 	echo "InternetConnectionStatus=Up" >> $(FS_DIR)/www.eng/currentsetting.htm
- 
- lang_pid:
+-	
+-build_target: 
+-	tar  xfz $(TARGET_HOME)/target.tgz 
+-
+-	svn info > $(TARGET_HOME)/target/usr/etc/svn.info
+-
+-	@echo -e "\\e[35mSOURCE: make \\e[36mTOOL_CHAINS \\e[0m"
+-#	$(MAKE) -C $(TOOLS_DIR) 
+-
+-# start svn info
+-	@export LANG=en_US.UTF-8; svn info > $(FS_DIR)/usr/etc/svn.info
+-	@echo "VER:" $(VERSION) >> $(FS_DIR)/usr/etc/svn.info
+-	@echo "Build from:" $(shell hostname) `pwd` >> $(FS_DIR)/usr/etc/svn.info
+-	@export LANG=en_US.UTF-8; echo DATE: `date`  >> $(FS_DIR)/usr/etc/svn.info
+-	@echo "BOARD_ID:" $(BOARD_ID) >> $(FS_DIR)/usr/etc/svn.info
+-	@echo "Boot Loader CFE version 1.0.37-12.1 for BCM9$(CHIP_ID) (32bit,SP,BE)" >> $(TARGET_HOME)/target/usr/etc/svn.info
+-# end svn info
+-
+-	cp -a $(APPS_DIR)/etc/* $(TARGET_HOME)/target/usr/etc
+-
+-	@echo -e "\\e[35mSOURCE: make \\e[36mAPPS \\e[0m"		
+-	$(MAKE) -C $(APPS_DIR) -s
+-	$(MAKE) -C $(APPS_DIR) install 
+-	@echo -e "\\e[35mSOURCE: make \\e[36mdrivers \\e[0m"
+-	cd $(PROJ_DIR_KERNEL); make sc_driver SC_BUILD=1 SC_ROOT=$(ROOT)
+-
+-	@echo -e "\\e[35mSOURCE: make \\e[36mUI \\e[0m"	
+-	$(MAKE) -C $(UI_DIR) -s	
+-	echo $(ETCVERSION) > $(FS_DIR)/usr/etc/version	
+-
+-	cd ${FS_DIR};\
+-	echo Firmware version: $(VERSION) > www.eng/md5;\
+-	find -type f -exec md5sum {} >> www.eng/md5 \;;\
+-	cd -;
+-
+-	echo "Firmware="$(VERSION) > $(FS_DIR)/www.eng/currentsetting.htm
+-	echo "RegionTag=$(BOARD_ID)_WW" >>  $(FS_DIR)/www.eng/currentsetting.htm
+-	echo "Region=ww"  >> $(FS_DIR)/www.eng/currentsetting.htm
+-	echo "Model="$(BOARD_ID)  >> $(FS_DIR)/www.eng/currentsetting.htm
+-	echo "InternetConnectionStatus=Up" >> $(FS_DIR)/www.eng/currentsetting.htm
+-
+-lang_pid:
 -    # Generate language pid
-+# Generate language pid. 
- 	$(MAKE_PID) $(HW_ID) $(ANNEX)$(GUI_VER) $(PRODUCT_ID) $(LANG_PID)
- 	
- langpkg: lang_pid
-@@ -234,6 +217,8 @@
- 	./gen_lang.sh ./UI/wnr2500_multi/www.multi_v2.3/langs  || exit 1
- endif
+-	$(MAKE_PID) $(HW_ID) $(ANNEX)$(GUI_VER) $(PRODUCT_ID) $(LANG_PID)
+-	
+-langpkg: lang_pid
+-# Generate GUI language file. 
+-	-rm -rf $(IMAGE_DIR)/languages
+-	cp -af $(IMAGE_DIR)/EMPTY $(IMAGE_DIR)/languages
+-	chmod a+x gen_lang.sh
+-ifeq ($(GENIE_GUI),1)
+-	./gen_lang.sh ./UI/dgnd3700v2_genie/www.multi_v2.3/langs  || exit 1
+-else
+-	./gen_lang.sh ./UI/wnr2500_multi/www.multi_v2.3/langs  || exit 1
+-endif
+-
+-
+-# Geneate filesystem image from target
+-FAKEROOT_SH=$(ROOT)/fakeroot.sh
  
-+burn:
-+	cd $(IMAGE_DIR) ; ./nand_small_page_brcm_ecc_tool $(BOARD_ID).burn.bin $(BOARD_ID).bin;
- 
- # Geneate filesystem image from target
- FAKEROOT_SH=$(ROOT)/fakeroot.sh
-@@ -242,15 +227,13 @@
+ fs:
  	$(STRIP) -d target/lib/modules/*.ko
  	@echo -e "\\e[35mSOURCE: make \\e[36mFS \\e[0m"	
  ifeq ($(BOOT_NAND_FLASH),1)
@@ -173,9 +280,6 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -	-./makeDevs
 -	cp -f $(TARGET_HOME)/../Kernel/bcm963xx/vmlinux.lz $(KERNEL)
 -	cp $(KERNEL) $(FS_DIR)/.
-+#	-./makeDevs
-+#	cp -f $(TARGET_HOME)/../Kernel/bcm963xx/vmlinux.lz $(KERNEL)
-+#	cp $(KERNEL) $(FS_DIR)/.
 +	cp -f $(TARGET_HOME)/$(PROJ_DIR_KERNEL)/$(PROJ_BIN_KERNEL) $(FS_DIR)/.
  	chmod +x $(IMAGE_DIR)/sc_crc32
 -	$(IMAGE_DIR)/sc_crc32 $(FS_DIR)/vmlinux.lz $(FS_DIR)/kernel_cksum
@@ -185,7 +289,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	echo -e "/kernel_cksum" >> $(TARGET_HOME)/nocomprlist
  	mkdir -p -m 777 $(FS_DIR)/config/factory
  	mkdir -p -m 777 $(FS_DIR)/config/nvram
-@@ -271,86 +254,42 @@
+@@ -271,86 +167,40 @@
  endif	
  	mkdir -p -m 777 $(FS_DIR)/config/xxx
  	chmod 777 $(FS_DIR)/config
@@ -252,10 +356,13 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 +	@echo -e "\\e[35mDone! Image \\e[36m$(IMG_NAME) has been built.\\e[0m"
  endif
  
- 
 +clean_uclibc:
 +	@echo -e "\\e[35mUCLIBC: make \\e[36mclean \\e[0m"
 +	-$(MAKE) -C uClibc-0.9.32 clean -s
+ 
++clean_apps:
++	@echo -e "\\e[35mAPPS: make \\e[36mclean \\e[0m"
++	-$(MAKE) -C $(APPS_DIR) clean -s
  
 -ifeq ($(ZIP_3G),1)
 -ZIP3G_DIR=$(IMAGE_DIR)/zip3g
@@ -276,10 +383,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -burn:
 -	cd $(IMAGE_DIR) ; ./nand_small_page_brcm_ecc_tool $(BOARD_ID).burn.bin $(BOARD_ID).bin;
 -
-+clean_apps:
-+	@echo -e "\\e[35mAPPS: make \\e[36mclean \\e[0m"
-+	-$(MAKE) -C $(APPS_DIR) clean -s
- 
+-
 -clean:
 -	fakeroot rm -rf $(TARGET_HOME)/target
 +clean_third-party:
@@ -291,9 +395,8 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 +clean_target:
 +	@echo -e "\\e[35mTARGET: \\e[36mclean \\e[0m"
  	-rm -rf $(TARGET_HOME)/target
-+#	fakeroot rm -rf $(TARGET_HOME)/target
-+
+ 
 +clean_img:
 +	@echo -e "\\e[35mIMG: \\e[36mclean \\e[0m"
 +	-rm -f $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/empty.img $(IMAGE_DIR)/langpkg.img $(IMAGE_DIR)/$(BOARD_ID).info $(IMAGE_DIR)/$(BOARD_ID).zip $(IMAGE_DIR)/$(BOARD_ID).bin $(IMAGE_DIR)/$(BOARD_ID).img
- 
++

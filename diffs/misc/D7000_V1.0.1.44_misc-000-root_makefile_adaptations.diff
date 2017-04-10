@@ -1,7 +1,11 @@
 diff -urN D7000_V1.0.1.44_WW_src/Makefile diff -urN D7000_V1.0.1.44_WW_src/Makefile
 --- D7000_V1.0.1.44_WW_src/Makefile	2016-10-11 17:57:55.000000000 +0200
 +++ D7000_V1.0.1.44_WW_src/Makefile	2017-01-12 20:27:44.184650622 +0100
-@@ -4,6 +4,9 @@
+@@ -1,9 +1,12 @@
+ #
+ #	<MODULE> serial product makefile 
+-#	Usage:  make kernel source bootcode
++#	Usage:  make kernel/source
  #
  #NOTE: do "make all_clean" if need change ANNEX after compiled
  
@@ -11,7 +15,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Makefile diff -urN D7000_V1.0.1.44_WW_src/Makef
  ANNEX=A
  #ANNEX=B
  
-@@ -22,24 +25,25 @@
+@@ -22,24 +25,28 @@
  prepare: creat_rules Kernel/bcm963xx 
  
  kernel:
@@ -37,6 +41,9 @@ diff -urN D7000_V1.0.1.44_WW_src/Makefile diff -urN D7000_V1.0.1.44_WW_src/Makef
 -#	ln -sf uclibc-crosstools-gcc-4.4.2-1/usr/ /opt/toolchains/uclibc-crosstools;
  	make -C Source -s
  
++source_orig: prepare
++	make ORIG=1 -C Source orig -s
++
  source_clean:
  	make -C Source clean_all
  

@@ -3,6 +3,8 @@ include Settings.mak
 
 all: toolchain sources
 
+orig: toolchain sources_orig
+
 download: download_work 
 
 ipk: prepare_ipk build_ipk index_ipk
@@ -28,6 +30,9 @@ prepare_toolchain: download_sources
 
 sources: patch_sources
 	@cd $(SRC_DIR); sudo $(MAKE) kernel && sudo $(MAKE) source;
+
+sources_orig: patch_sources
+	@cd $(SRC_DIR); sudo $(MAKE) kernel && sudo $(MAKE) source_orig;
 
 download_sources:
 	@./$(SCRIPTS_DIR)/dl_sources.sh $(SRC_DIR) $(SRC_URL) $(SRC_FILE)
@@ -125,6 +130,7 @@ info:
 
 help: info
 	@echo "make			- download sources, compile & install toolchain, compile sources, compile work-thirdparty, create img"
+	@echo "make orig		- download sources, compile & install toolchain, compile sources, create img"
 	@echo "make download		- download & extract sources, download/copy & extract work-thirdparty apps without patching"
 	@echo "make  ipk		- download sources, download/copy, config, patch, compile work-thirdparty apps, build packets & index"
 	@echo "make clean		- cleanup toolchain sources, kernel & app sources (included work-thirdparty apps), target, img"
@@ -133,6 +139,7 @@ help: info
 	@echo "make toolchain		- download sources, extract, patch & compile the toolchain"
 	@echo "make prepare_toolchain	- download sources, extract & patch the toolchain without compiling"
 	@echo "make sources		- download sources, patch and compile kernel, apps, work-thirdparty apps, drivers, target, create img"
+	@echo "make sources_orig	- download sources, patch and compile kernel, apps, drivers, target, create img"
 	@echo "make download_sources	- download sources from web"
 	@echo "make patch_sources	- download sources, extract & patch sources without compiling"
 	@echo "make work		- download sources, download/copy, config, patch, compile work-thirdparty apps"
