@@ -117,8 +117,6 @@ info:
 	@echo ""
 	@echo $(PROJECT_PLOT)
 	@echo ""
-	@echo $(PROJECT_TARGET)
-	@echo ""
 	@echo $(GITHUB_DIR)
 	@echo ""
 	@echo $(PROJECT_LICENSE)

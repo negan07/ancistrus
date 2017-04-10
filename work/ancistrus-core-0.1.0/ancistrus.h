@@ -1,14 +1,14 @@
-#ifndef PROJFOUNDER
-#define PROJFOUNDER	"negan07"
-#endif
 #ifndef PROJNAME
 #define PROJNAME	"ancistrus"
 #endif
-#ifndef PROJPLOT
-#define PROJPLOT	"Netgear's Nighthawk Router Experience Distributed Project"
-#endif
 #ifndef PROJTARGET
 #define PROJTARGET	"D7000"
+#endif
+#ifndef PROJFOUNDER
+#define PROJFOUNDER	"negan07"
+#endif
+#ifndef PROJPLOT
+#define PROJPLOT	"Netgear's " PROJTARGET " Nighthawk Router Experience Distributed Project"
 #endif
 #ifndef HOMEPAGE
 #define HOMEPAGE	"https://github.com/" PROJFOUNDER "/" PROJNAME
@@ -18,7 +18,7 @@
 #endif
 #define COPYRIGHT												\
 "################################################################################"				\
-"\n# \n# " PROJNAME "\n# \n# " PROJPLOT "\n# \n# " PROJTARGET "\n# \n# " HOMEPAGE "\n# \n# " LICENSE "\n# \n# \n"
+"\n# \n# " PROJNAME "\n# \n# " PROJPLOT "\n# \n# " HOMEPAGE "\n# \n# " LICENSE "\n# \n# \n"
 
 #define ERR(format, ...) fprintf(stderr, format, ##__VA_ARGS__)		/* stderr format output message */
 //#define ERR(...) fprintf(stderr, __VA_ARGS__)

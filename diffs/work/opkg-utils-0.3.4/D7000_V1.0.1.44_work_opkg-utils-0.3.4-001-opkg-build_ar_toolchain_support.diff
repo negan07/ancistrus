@@ -1,29 +1,7 @@
 diff -urN work/opkg-utils-0.3.4/opkg-build work/opkg-utils-0.3.4/opkg-build
 --- work/opkg-utils-0.3.4/opkg-build	2016-10-07 18:29:53.000000000 +0200
 +++ work/opkg-utils-0.3.4/opkg-build	2017-04-04 14:47:25.570386375 +0200
-@@ -11,6 +11,21 @@
- # 2003-04-25 rea@sr.unh.edu
- #   Updated to work on Familiar Pre0.7rc1, with busybox tar.
- #   Note it Requires: binutils-ar (since the busybox ar can't create)
-+#
-+# Revised & adapted:
-+#
-+# ancistrus
-+#
-+# Netgear's Nighthawk Router Experience Distributed Project
-+#
-+# D7000
-+#
-+# https://github.com/negan07/ancistrus
-+#
-+# License: GPLv2
-+#
-+#
-+
- set -e
- 
- version=1.0
-@@ -208,15 +223,22 @@
+@@ -208,15 +208,22 @@
      esac
  }
  
@@ -49,7 +27,7 @@ diff -urN work/opkg-utils-0.3.4/opkg-build work/opkg-utils-0.3.4/opkg-build
      case $opt in
  	o ) owner=$OPTARG
  	    ogargs="--owner=$owner"
-@@ -232,6 +254,8 @@
+@@ -232,6 +239,8 @@
  	    ;;
  	Z ) compressor=$OPTARG
  	    ;;
@@ -58,7 +36,7 @@ diff -urN work/opkg-utils-0.3.4/opkg-build work/opkg-utils-0.3.4/opkg-build
  	v ) echo $version
  	    exit 0
  	    ;;
-@@ -305,11 +329,15 @@
+@@ -305,11 +314,15 @@
  fi
  
  rm -f $pkg_file
@@ -79,7 +57,7 @@ diff -urN work/opkg-utils-0.3.4/opkg-build work/opkg-utils-0.3.4/opkg-build
  
  rm $tmp_dir/debian-binary $tmp_dir/data.tar.$cext $tmp_dir/control.tar.gz
  rmdir $tmp_dir
-@@ -346,6 +374,10 @@
+@@ -346,6 +359,10 @@
  
  Specify which compression type to use when building a package. Allowed values are B<gzip>, B<bzip2> and B<xz> (default is B<gzip>).
  

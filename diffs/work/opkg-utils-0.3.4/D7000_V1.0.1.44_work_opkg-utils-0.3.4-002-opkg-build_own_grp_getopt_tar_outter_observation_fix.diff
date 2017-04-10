@@ -1,7 +1,7 @@
 diff -urN work/opkg-utils-0.3.4/opkg-build work/opkg-utils-0.3.4/opkg-build
 --- work/opkg-utils-0.3.4/opkg-build	2017-04-04 23:21:46.566819127 +0200
 +++ work/opkg-utils-0.3.4/opkg-build	2017-04-05 21:21:17.549018779 +0200
-@@ -241,12 +241,20 @@
+@@ -226,12 +226,20 @@
  while getopts "cCg:ho:vOZ:T:" opt; do
      case $opt in
  	o ) owner=$OPTARG
@@ -22,7 +22,7 @@ diff -urN work/opkg-utils-0.3.4/opkg-build work/opkg-utils-0.3.4/opkg-build
  	    ;;
  	c ) outer=tar
  	    ;;
-@@ -331,7 +339,7 @@
+@@ -316,7 +324,7 @@
  rm -f $pkg_file
  case $outer in
  tar)

@@ -12,9 +12,10 @@ export BUILD
 endif
 
 PROJECT_NAME		?= ancistrus
-PROJECT_FOUNDER		?= negan07
-PROJECT_PLOT		?= "Netgear's Nighthawk Router Experience Distributed Project"
 PROJECT_TARGET		?= D7000
+PROJECT_FOUNDER		?= negan07
+PROJECT_PLOT		?= "Netgear's $(PROJECT_TARGET) Nighthawk Router Experience Distributed Project"
+
 GITHUB_DIR		?= https://github.com/$(PROJECT_FOUNDER)/$(PROJECT_NAME)
 PROJECT_HOMEPAGE	?= https://$(PROJECT_FOUNDER).github.io/$(PROJECT_NAME)
 PROJECT_REPOSITORY	?= https://raw.githubusercontent.com/$(PROJECT_FOUNDER)/$(PROJECT_NAME)/gh-pages/$(PROJECT_NAME)-$(ARCH)-$(PROJECT_TARGET)

@@ -2,9 +2,7 @@
 #
 # ancistrus
 #
-# Netgear's Nighthawk Router Experience Distributed Project
-#
-# D7000
+# Netgear's D7000 Nighthawk Router Experience Distributed Project
 #
 # https://github.com/negan07/ancistrus
 #
