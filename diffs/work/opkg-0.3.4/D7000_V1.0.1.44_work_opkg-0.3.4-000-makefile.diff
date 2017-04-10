@@ -1,25 +1,17 @@
 diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 --- work/opkg-0.3.4/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/opkg-0.3.4/Makefile	2017-03-23 20:35:42.745736890 +0100
-@@ -0,0 +1,101 @@
+@@ -0,0 +1,99 @@
 +include ../Rules.mak
 +
-+OPKG_CONF_PATH := $(OPKG)/utils
-+OPKG_CONF_NAME := opkg.conf
-+OPKG_CONF := $(OPKG_CONF_PATH)/$(OPKG_CONF_NAME)
++OPKG_CONF_PATH		:= $(OPKG)/utils
++OPKG_CONF_NAME		:= opkg.conf
++OPKG_CONF 		:= $(OPKG_CONF_PATH)/$(OPKG_CONF_NAME)
 +
 +ifdef DEBUG
-+PREFIX_STATE_DIR := $(TMPDIR)
++PREFIX_STATE_DIR 	:= $(TMPDIR)
 +else
-+PREFIX_STATE_DIR := /usr/local
-+endif
-+
-+ifdef BUILD
-+CONFFILES := $(CTRL_DIR)/conffiles
-+PREINST := $(CTRL_DIR)/preinst
-+POSTINST := $(CTRL_DIR)/postinst
-+PRERM := $(CTRL_DIR)/prerm
-+POSTRM := $(CTRL_DIR)/postrm
++PREFIX_STATE_DIR 	:= /usr/local
 +endif
 +
 +all: config
@@ -41,6 +33,16 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +	install -m 0644 $(OPKG_CONF) $(ETCDIR)
 +	install -m 0755 $(OPKG)/src/opkg $(BINDIR)
 +
++man-install:
++	cd $(OPKG)/man && $(MAKE) install
++
++clean:
++	$(MAKE) -C $(OPKG) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(OPKG) distclean
++
 +opkg_conf:
 +	@echo "src/gz $(PROJECT_NAME)-$(ARCH)-$(PROJECT_TARGET) $(PROJECT_REPOSITORY)" > $(OPKG_CONF)
 +	@echo "#src/gz local file:///mnt/shares/U/local" >> $(OPKG_CONF)
@@ -60,6 +62,12 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +ifndef BUILD
 +control:
 +else
++CONFFILES		:= $(CTRL_DIR)/conffiles
++PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
++PRERM			:= $(CTRL_DIR)/prerm
++POSTRM			:= $(CTRL_DIR)/postrm
++
 +control: conffiles preinst postinst prerm postrm
 +
 +conffiles:
@@ -92,14 +100,4 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +	@echo "rm -rf $(TMPDIR)/opkg/cache $(TMPDIR)/opkg/lists" >> $(POSTRM)
 +	@echo "exit 0" >> $(POSTRM)
 +endif
-+
-+man-install:
-+	cd $(OPKG)/man && $(MAKE) install
-+
-+clean:
-+	$(MAKE) -C $(OPKG) clean
-+
-+distclean:
-+	@rm -f h_config
-+	$(MAKE) -C $(OPKG) distclean
 +
