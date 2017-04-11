@@ -6,36 +6,34 @@ diff -urN work/opkg-utils-0.3.4/Makefile work/opkg-utils-0.3.4/Makefile
 +
  UTILS = opkg-build opkg-unbuild opkg-make-index opkg.py opkg-list-fields \
  	arfile.py opkg-buildpackage opkg-diff opkg-extract-file opkg-show-deps \
- 	opkg-compare-indexes update-alternatives
- 
+-	opkg-compare-indexes update-alternatives
+-
 -MANPAGES = opkg-build.1
-+DESTDIR = ../../$(SCRIPTS_DIR)/$(OPKG_UTILS)
-+
-+all:
-+	@if [ ! -f .installed ]; then \
-+	$(MAKE) prepare || exit 1; \
-+	touch .installed; \
-+	fi
-+
-+install:
-+	@echo "Nothing to install"
-+
-+prepare:
-+	install -m 0755 -d $(DESTDIR)
-+	install -m 755 $(UTILS) $(DESTDIR)
++	opkg-compare-indexes update-alternatives opkg-update-index
  
 -DESTDIR=
 -PREFIX=/usr/local
 -bindir=$(PREFIX)/bin
 -mandir=$(PREFIX)/man
--
++DESTDIR = ../../$(SCRIPTS_DIR)/$(OPKG_UTILS)
+ 
 -.SUFFIXES: .1
--
++all:
++	@if [ ! -f .installed ]; then \
++	$(MAKE) prepare || exit 1; \
++	touch .installed; \
++	fi
+ 
 -%.1: %
 -	pod2man -r "" -c "opkg-utils Documentation" $< $@
--
++install:
++	@echo "Nothing to install"
+ 
 -all: $(UTILS) $(MANPAGES)
--
++prepare:
++	install -m 0755 -d $(DESTDIR)
++	install -m 755 $(UTILS) $(DESTDIR)
+ 
 -install: all
 -	install -d $(DESTDIR)$(bindir)
 -	install -m 755 $(UTILS) $(DESTDIR)$(bindir)
