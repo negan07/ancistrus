@@ -47,7 +47,10 @@ prepare_package: creat_rules
 	rm -rf $(BUILD_DIR_PATH)/$(D) $(BUILD_TMP); \
 	mkdir -p -m 0755 $(BUILD_TMP) || exit 1; \
 	mkdir -p -m 0755 $(CTRL_DIR_PATH) || exit 1; \
-	echo "Package: $(NAME_$(D))"				> $(CTRL); \
+	if [ ! -z $(DEBUG) ]; then \
+	echo "Package: $(NAME_$(D))-debug" 			> $(CTRL); \
+	else echo "Package: $(NAME_$(D))"			> $(CTRL); \
+	fi; \
 	echo "Version: $(VER_$(D))"				>> $(CTRL); \
 	echo "Depends: $(DEP_$(D))"				>> $(CTRL); \
 	echo "Section: $(SEC_$(D))"				>> $(CTRL); \
