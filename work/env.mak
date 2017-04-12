@@ -3,7 +3,10 @@ PROFILE_ARCH		:= $(CPU_ARCH)
 export TMPDIR		:= /tmp
 export TMPETC		:= /etc
 ifndef DEBUG
+export LDLIB		:= /lib
 export USRETC		:= /usr/etc
+export USRSBIN		:= /usr/sbin
+export USRSBINRCAPP	:= $(USRSBIN)/rc_app
 export ETCDIR		:= $(PREFIX)/usr/etc
 export BINDIR		:= $(PREFIX)/usr/sbin
 export APPDIR		:= $(BINDIR)/rc_app
@@ -12,7 +15,10 @@ export LIBDIR		:= $(PREFIX)/lib
 export MODDIR		:= $(LIBDIR)/modules
 export WWWDIR		:= $(PREFIX)/www.eng
 else
+export LDLIB		:= $(RECEIVE_DIR)
 export USRETC		:= $(RECEIVE_DIR)
+export USRSBIN		:= $(RECEIVE_DIR)
+export USRSBINRCAPP	:= $(RECEIVE_DIR)
 export ETCDIR		:= $(PREFIX)
 export BINDIR		:= $(PREFIX)
 export APPDIR		:= $(PREFIX)
@@ -25,7 +31,10 @@ else
 PROFILE_ARCH		:= I386
 export TMPDIR		:= $(PREFIX)/tmp
 export TMPETC		:= $(TMPDIR)/etc
+export LDLIB		:= $(PREFIX)/lib
 export USRETC		:= $(PREFIX)/usr/etc
+export USRSBIN		:= $(PREFIX)/usr/sbin
+export USRSBINRCAPP	:= $(USRSBIN)/rc_app
 export ETCDIR		:= $(TMPDIR)/etc
 export BINDIR		:= $(PREFIX)/usr/sbin
 export APPDIR		:= $(BINDIR)/rc_app
