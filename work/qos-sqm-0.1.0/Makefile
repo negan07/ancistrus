@@ -30,10 +30,10 @@ control: preinst postinst prerm postrm
 
 preinst:
 	@echo "#!/bin/sh" > $(PREINST)
-	@echo "echo \"Check if qos-netgear-36_42n package installed...\"" >> $(PREINST)
-	@echo "if [ \`$(USRSBIN)/opkg list-installed | grep qos-netgear-36_42n | head -c 18\` = qos-netgear-36_42n ]; then" >> $(PREINST)
+	@echo "echo \"Check if qos-netgear package installed...\"" >> $(PREINST)
+	@echo "if [ \`$(USRSBIN)/opkg list-installed | grep qos-netgear | head -c 11\` = qos-netgear ]; then" >> $(PREINST)
 	@echo "echo \"Another qos package seems to be already installed: remove it before installing this one\"" >> $(PREINST)
-	@echo "echo \"Type: 'opkg remove qos-netgear-36_42n' and then 'opkg install qos-sqm'\"" >> $(PREINST)
+	@echo "echo \"Type: 'opkg remove qos-netgear' and then 'opkg install qos-sqm'\"" >> $(PREINST)
 	@echo "exit 1" >> $(PREINST)
 	@echo "else" >> $(PREINST)
 	@echo "echo \"Stopping qos service...\"" >> $(PREINST)
