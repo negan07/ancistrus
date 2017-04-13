@@ -1,3 +1,5 @@
+export RCBIN		:= rc
+export RCAPPSBIN	:= rc_apps
 ifndef LOCAL
 PROFILE_ARCH		:= $(CPU_ARCH)
 export TMPDIR		:= /tmp
@@ -6,7 +8,10 @@ ifndef DEBUG
 export LDLIB		:= /lib
 export USRETC		:= /usr/etc
 export USRSBIN		:= /usr/sbin
+export USRSBINSCR	:= $(USRSBIN)/scripts
 export USRSBINRCAPP	:= $(USRSBIN)/rc_app
+export RC		:= $(USRSBIN)/$(RCBIN)
+export RCAPPS		:= $(USRSBINRCAPP)/$(RCAPPSBIN)
 export ETCDIR		:= $(PREFIX)/usr/etc
 export BINDIR		:= $(PREFIX)/usr/sbin
 export APPDIR		:= $(BINDIR)/rc_app
@@ -18,7 +23,10 @@ else
 export LDLIB		:= $(RECEIVE_DIR)
 export USRETC		:= $(RECEIVE_DIR)
 export USRSBIN		:= $(RECEIVE_DIR)
+export USRSBINSCR	:= $(RECEIVE_DIR)
 export USRSBINRCAPP	:= $(RECEIVE_DIR)
+export RC		:= $(RECEIVE_DIR)/$(RCBIN)
+export RCAPPS		:= $(RECEIVE_DIR)/$(RCAPPSBIN)
 export ETCDIR		:= $(PREFIX)
 export BINDIR		:= $(PREFIX)
 export APPDIR		:= $(PREFIX)
@@ -34,7 +42,10 @@ export TMPETC		:= $(TMPDIR)/etc
 export LDLIB		:= $(PREFIX)/lib
 export USRETC		:= $(PREFIX)/usr/etc
 export USRSBIN		:= $(PREFIX)/usr/sbin
+export USRSBINSCR	:= $(USRSBIN)/scripts
 export USRSBINRCAPP	:= $(USRSBIN)/rc_app
+export RC		:= $(USRSBIN)/$(RCBIN)
+export RCAPPS		:= $(USRSBINRCAPP)/$(RCAPPSBIN)
 export ETCDIR		:= $(TMPDIR)/etc
 export BINDIR		:= $(PREFIX)/usr/sbin
 export APPDIR		:= $(BINDIR)/rc_app
