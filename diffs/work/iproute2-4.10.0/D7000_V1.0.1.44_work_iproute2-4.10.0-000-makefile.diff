@@ -41,7 +41,7 @@ diff -urN work/iproute2-4.10.0/Makefile work/iproute2-4.10.0/Makefile
  
  LIBNETLINK=../lib/libnetlink.a ../lib/libutil.a
  LDLIBS += $(LIBNETLINK)
-@@ -70,22 +73,17 @@
+@@ -70,22 +73,16 @@
  Config:
  	sh configure $(KERNEL_INCLUDE)
  
@@ -61,13 +61,12 @@ diff -urN work/iproute2-4.10.0/Makefile work/iproute2-4.10.0/Makefile
 -	install -m 0755 -d $(DESTDIR)$(BASH_COMPDIR)
 -	install -m 0644 bash-completion/tc $(DESTDIR)$(BASH_COMPDIR)
 -	install -m 0644 include/bpf_elf.h $(DESTDIR)$(HDRDIR)
-+install: 
++install: control
 +	$(SSTRIP) tc/tc ip/ip
 +	if [ -e $(ETCDIR)/iproute2 ]; then \
 +	rm -rf $(ETCDIR)/iproute2;\
 +	fi
 +	install -m 0755 -d $(ETCDIR)
-+#	install -m 0755 -d $(ETCDIR)/iproute2
 +	install -m 0755 -d $(BINDIR)
 +	install -m 0755 tc/tc $(BINDIR)
 +	install -m 0755 ip/ip $(BINDIR)
@@ -75,3 +74,50 @@ diff -urN work/iproute2-4.10.0/Makefile work/iproute2-4.10.0/Makefile
  
  snapshot:
  	echo "static const char SNAPSHOT[] = \""`date +%y%m%d`"\";" \
+@@ -105,4 +102,46 @@
+ cscope:
+ 	cscope -b -q -R -Iinclude -sip -slib -smisc -snetem -stc
+ 
++ifndef BUILD
++control:
++else
++PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
++PRERM			:= $(CTRL_DIR)/prerm
++
++control: preinst postinst prerm
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "[ -d $(USRETC)/iproute2 ] && mv -rf $(USRETC)/iproute2 $(USRETC)/iproute2.orig" >> $(PREINST)
++	@echo "[ -d $(TMPETC)/iproute2 ] && mv -rf $(TMPETC)/iproute2 $(TMPETC)/iproute2.orig" >> $(PREINST)
++	@echo "[ -f $(USRSBIN)/ip ] && cp -f $(USRSBIN)/ip $(USRSBIN)/ip.orig" >> $(PREINST)
++	@echo "[ -f $(USRSBIN)/tc ] && cp -f $(USRSBIN)/tc $(USRSBIN)/tc.orig" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "cp -rf $(USRETC)/iproute2 $(TMPETC)/iproute2" >> $(POSTINST)
++	@echo "echo \"Testing iproute2 basic functionality...\"" >> $(POSTINST)
++	@echo "echo" >> $(POSTINST)
++	@echo "$(USRSBIN)/tc qdisc show > /dev/null 2>&1" >> $(POSTINST)
++	@echo "if [ \$$? -eq 0 ]; then" >> $(POSTINST)
++	@echo "echo \"Looking good\"" >> $(POSTINST)
++	@echo "rm -rf $(USRETC)/iproute2.orig $(TMPETC)/iproute2.orig $(USRSBIN)/ip.orig $(USRSBIN)/tc.orig" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++	@echo "else" >> $(POSTINST)
++	@echo "echo \"Something wrong: reverting to original iproute2 ...\"" >> $(POSTINST)
++	@echo "[ -d $(USRETC)/iproute2.orig ] && mv -rf $(USRETC)/iproute2.orig $(USRETC)/iproute2" >> $(POSTINST)
++	@echo "[ -d $(TMPETC)/iproute2.orig ] && mv -rf $(TMPETC)/iproute2.orig $(TMPETC)/iproute2" >> $(POSTINST)
++	@echo "[ -f $(USRSBIN)/ip.orig ] && mv -f $(USRSBIN)/ip.orig $(USRSBIN)/ip" >> $(POSTINST)
++	@echo "[ -f $(USRSBIN)/tc.orig ] && mv -f $(USRSBIN)/tc.orig $(USRSBIN)/tc" >> $(POSTINST)
++	@echo "exit 1" >> $(POSTINST)
++	@echo "fi" >> $(POSTINST)
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "echo \"iproute2 builtin required: cannot uninstall...\"" >> $(PRERM)
++	@echo "exit 1" >> $(PRERM)
++	@echo "fi" >> $(PRERM)
++endif
++
+ .EXPORT_ALL_VARIABLES:
