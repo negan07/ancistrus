@@ -221,7 +221,7 @@ logging_setup
     stats)
     show_sqm stats
     ;;
-    -v|-V|--version|version)
+    -v|-V|--version|version|help)
 cat << _EOF_
 ################################################################################
 # (Cero3 Shaper)
@@ -243,10 +243,54 @@ cat << _EOF_
 #
 #
 # qos-sqm - version: 0.1.0
+#
+Usage: rc_qos < start restart stop show stats version help > (< debug >) (< verbose >)
+
+Settings.
+There are many settings, but the main are the most important to know and to be modified for best usage.
+Main.
+qos_enable - 0: disable qos / 1: enable qos. (Default: 0).
+qos_uplink_rate - real upload bandwith in kbps (no bearer no max): it can be discovered with 'speedtest' or with network-test package 'betterspeedtest.sh' script. It is the most important parameter, bad setting may bring to qos failure. (Default: 512).
+qos_dwlink_rate - real download bandwith in kbps: as before (Default: 0 - download qos disabled).
+qos_script - one of the qos script present in the package: there are some scripts available, see the related description (Default: simple.qos).
+
+Others.
+Default values should commonly satisfy: change them only if you know what to do. Consider that ingress=download, egress=upload.
+qos_disc - The qos disc sched algorithm used (the related sched .ko module must be present and loaded): fq_codel is the recommended for most usage (Default: fq_codel).
+qos_llam - Link layer adjustment method. Values are: htb_private / tc_stab (default is tc_stab). (Def. default).
+qos_llayer - adsl link layer (Def. none).
+qos_overhead - as it is (Def. 0).
+qos_stab_mtu - as it is (Def. 2047).
+qos_stab_mpu - as it is (Def. 0).
+qos_stab_tsize - as it is (Def. 512).
+qos_autoflow - 1: Limit the number of flows / 0: The default of 1024 will be used for all Xfq_codel qdiscs (Def. 0).
+qos_limit - as it is (Def. 1001).
+qos_ilimit - Ingress limit (Def. void).
+qos_elimit - Egress limit (Def. void).
+qos_itarget - Ingress target (Def. void).
+qos_etarget - Egress target (Def. void).
+qos_iecn - Ingress Explicit Congestion Notification (Def. ECN).
+qos_eecn - Egress Explicit Congestion Notification (Def. NOECN).
+qos_zero_dscp_ingress - 1: Squashing differentiated services code points (DSCP) from ingress / 0: Keeping differentiated services code points (DSCP) from ingress. (Def. 1).
+qos_ignore_dscp_ingress - 1: Do not perform DSCP based filtering on ingress. (1-tier classification) / 0: Perform DSCP based filtering on ingress. (3-tier classification) (Def. 1).
+qos_idisc_opts - Other ingress qdisc options (Def. void).
+qos_edisc_opts - Other egress qdisc options (Def. void).
+qos_codel_target - Target of 5ms is good for fast links, in the wors cases it depends from dw bandwidth and it is recalculated (Def. 5ms).
+qos_ipt_mask - Iptables mask (Def. 0xff).
+qos_shaper_burst - 1: set an optional burst parameter to leap over CPU interrupts when the CPU is severly loaded / 0: Default Burst, HTB will use MTU plus shipping and handling. (Def. 1).
+qos_htb_quantum_function - Scale quantum with bandwidth to lower computation cost. Values are: linear / step / other-unknown (Def. linear).
+
+All settings can be setup at once with 'anc nvram set VAR1 VAL1 VAR2 VAL2 ... VARN VALN'
+or singularly with 'anc nvram set VAR1 VAL1' 'anc nvram set VAR2 VAL2' ... 'anc nvram set VARN VALN' .
+
+Finally, settings must be stored permanently with: 'anc nvram commit' or 'nvram commit' .
+
+If you wanna look for previously stored value, type: 'anc nvram get VAR1 VAL1 VAR2 VAL2 ... VARN VALN'
+or singularly with 'anc nvram get VAR1 VAL1' 'anc nvram get VAR2 VAL2' ... 'anc nvram get VARN VALN' .
 _EOF_
     ;;
     *)
-    echo "Usage: $0 < start restart stop show stats version > (< debug >) (< verbose >)" && exit 1
+    echo "Usage: $0 < start restart stop show stats version help > (< debug >) (< verbose >)" && exit 1
     ;;
     esac
 

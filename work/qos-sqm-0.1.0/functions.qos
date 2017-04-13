@@ -401,7 +401,7 @@ get_burst() {
     echo $BURST
 }
 
-# Create optional burst parameters to leap over CPU interupts when the CPU is
+# Create optional burst parameters to leap over CPU interrupts when the CPU is
 # severly loaded. We need to be conservative though.
 get_htb_burst() {
     HTB_MTU=$( get_mtu $1 )
