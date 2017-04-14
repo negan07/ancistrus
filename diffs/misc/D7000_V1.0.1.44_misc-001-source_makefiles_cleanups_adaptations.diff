@@ -108,7 +108,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  
  pre_fs:
  	rm -rf target
-@@ -95,59 +63,57 @@
+@@ -95,59 +63,59 @@
  	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
  	cd target/lib; ln -sf libscnvram.so libconfig.so
  ifeq ($(ITUNES_SERVER),1)
@@ -176,6 +176,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 +WORK_AUTHOR=$(shell cd ../..; git log --max-count=1 --pretty='format:%an';)
 +WORK_AUTHOR_EMAIL=$(shell cd ../..; git log --max-count=1 --pretty='format:%ae';)
 +WORK_VER=$(shell cd ../..; git rev-list --count HEAD;)
++BUILDING_DATE=$(shell date -u '+%Y-%m-%d %H:%M')
 +GIT_INFO=$(FS_DIR)/usr/etc/$(WORK_PROJECT)_git.info
 +
 +ifneq ($(ORIG),1)
@@ -187,13 +188,14 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 +	echo Homepage: $(WORK_WWW) >> $(GIT_INFO)
 +	echo Revision Author: $(WORK_AUTHOR) - $(WORK_AUTHOR_EMAIL) >> $(GIT_INFO)
 +	echo Build Revision Author Number: $(WORK_VER) >> $(GIT_INFO)
++	echo Building Date: $(BUILDING_DATE) UTC >> $(GIT_INFO)
 +	echo Model: $(BOARD_ID) >> $(GIT_INFO)
 +	echo Firmware: V$(VER)_$(SUB_VER) >> $(GIT_INFO)
 +
  prefs:
  	# Generate version
  	echo $(ETCVERSION) > $(FS_DIR)/usr/etc/version	
-@@ -163,7 +129,6 @@
+@@ -163,7 +131,6 @@
  	echo "Firmware="V$(VER)_$(SUB_VER)"@netgear_region#" > $(CUR_SETTING)
  	echo "RegionTag="$(BOARD_ID)_"@netgear_region#" >>  $(CUR_SETTING)
  	echo "Region=@netgear_region#"  >> $(CUR_SETTING)
@@ -201,7 +203,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	echo "Model="$(BOARD_ID)  >> $(CUR_SETTING)
  	echo "InternetConnectionStatus=@if_wan_up#" >> $(CUR_SETTING)
  	if [ "$(OPENDNS)" == "1" ]; then echo "ParentalControlSupported=1" >> $(CUR_SETTING); fi
-@@ -173,84 +138,15 @@
+@@ -173,84 +140,15 @@
  	# Generate fw info which will bind to trx file
  	echo $(VERSION) > $(FW_INFO)
  	echo $(REGION) >> $(FW_INFO)
@@ -289,7 +291,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	echo -e "/kernel_cksum" >> $(TARGET_HOME)/nocomprlist
  	mkdir -p -m 777 $(FS_DIR)/config/factory
  	mkdir -p -m 777 $(FS_DIR)/config/nvram
-@@ -271,86 +167,40 @@
+@@ -271,86 +169,40 @@
  endif	
  	mkdir -p -m 777 $(FS_DIR)/config/xxx
  	chmod 777 $(FS_DIR)/config
