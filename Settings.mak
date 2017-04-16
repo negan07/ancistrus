@@ -24,7 +24,7 @@ PROJECT_LICENSE		?= "License: $(LICENSE_NAME)"
 
 FWVER			?= V1.0.1.44
 CPU_ARCH_NAME		?= ARM
-PREFIX_NAME		?= $(PROJECT_NAME)_target
+RCBOOT			?= /usr/etc/rcS
 
 OPKG_PKG_DIR		?= build
 DIFFS_DIR		?= diffs

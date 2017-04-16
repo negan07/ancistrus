@@ -119,6 +119,7 @@ export SSTRIP		:= $(STRIP)
 endif
 
 export STRIPFLAGS 	:= -x -R .note -R .comment -R .version --strip-unneeded
+export STRIPKOFLAGS	:= -d --strip-unneeded
 
 ifeq ($(ARCH),mips)
 export CFLAGS 		:= -mips32 -march=mips32 -mtune=mips32 -Wa,-mips32 -G 0 -pipe -funit-at-a-time -fomit-frame-pointer -fno-strict-aliasing -fno-common -mno-shared -mabi=32 -msoft-float
