@@ -25,16 +25,9 @@ control: preinst postinst prerm postrm
 
 preinst:
 	@echo "#!/bin/sh" > $(PREINST)
-	@echo "echo \"Check if qos-sqm package installed...\"" >> $(PREINST)
-	@echo "if [ \`$(USRSBIN)/opkg list-installed | grep qos-sqm | head -c 7\` = qos-sqm ]; then" >> $(PREINST)
-	@echo "echo \"Another qos package seems to be already installed: remove it before installing this one\"" >> $(PREINST)
-	@echo "echo \"Type: 'opkg remove qos-sqm' and then 'opkg install qos-netgear'\"" >> $(PREINST)
-	@echo "exit 1" >> $(PREINST)
-	@echo "else" >> $(PREINST)
 	@echo "echo \"Stopping qos service...\"" >> $(PREINST)
 	@echo "$(RC) qos stop" >> $(PREINST)
 	@echo "exit 0" >> $(PREINST)
-	@echo "fi" >> $(PREINST)
 
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
