@@ -64,10 +64,12 @@ prepare_package: creat_rules
 	mkdir -p -m 0755 $(CTRL_DIR_PATH) || exit 1; \
 	if [ ! -z $(DEBUG) ]; then \
 	echo "Package: $(NAME_$(D))-debug" 			> $(CTRL); \
-	else echo "Package: $(NAME_$(D))"			> $(CTRL); \
+	echo "Depends: $(DEP_$(D))-debug"			>> $(CTRL); \
+	else \
+	echo "Package: $(NAME_$(D))"				> $(CTRL); \
+	echo "Depends: $(DEP_$(D))"				>> $(CTRL); \
 	fi; \
 	echo "Version: $(VER_$(D))"				>> $(CTRL); \
-	echo "Depends: $(DEP_$(D))"				>> $(CTRL); \
 	echo "Section: $(SEC_$(D))"				>> $(CTRL); \
 	echo "Architecture: $(ARCH_LCASE)$(PROJECT_TARGET)"	>> $(CTRL); \
 	echo "Maintainer: $(GITHUB_DIR)"			>> $(CTRL); \

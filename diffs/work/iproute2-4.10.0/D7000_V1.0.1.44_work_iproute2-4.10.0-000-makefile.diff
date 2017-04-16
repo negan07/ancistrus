@@ -89,8 +89,8 @@ diff -urN work/iproute2-4.10.0/Makefile work/iproute2-4.10.0/Makefile
 +
 +preinst:
 +	@echo "#!/bin/sh" > $(PREINST)
-+	@echo "[ -d $(USRETC)/iproute2 ] && mv -rf $(USRETC)/iproute2 $(USRETC)/iproute2.orig" >> $(PREINST)
-+	@echo "[ -d $(TMPETC)/iproute2 ] && mv -rf $(TMPETC)/iproute2 $(TMPETC)/iproute2.orig" >> $(PREINST)
++	@echo "[ -d $(USRETC)/iproute2 ] && mv -f $(USRETC)/iproute2 $(USRETC)/iproute2.orig" >> $(PREINST)
++	@echo "[ -d $(TMPETC)/iproute2 ] && mv -f $(TMPETC)/iproute2 $(TMPETC)/iproute2.orig" >> $(PREINST)
 +	@echo "[ -f $(USRSBIN)/ip ] && cp -f $(USRSBIN)/ip $(USRSBIN)/ip.orig" >> $(PREINST)
 +	@echo "[ -f $(USRSBIN)/tc ] && cp -f $(USRSBIN)/tc $(USRSBIN)/tc.orig" >> $(PREINST)
 +	@echo "exit 0" >> $(PREINST)
@@ -107,8 +107,8 @@ diff -urN work/iproute2-4.10.0/Makefile work/iproute2-4.10.0/Makefile
 +	@echo "exit 0" >> $(POSTINST)
 +	@echo "else" >> $(POSTINST)
 +	@echo "echo \"Something wrong: reverting to original iproute2 ...\"" >> $(POSTINST)
-+	@echo "[ -d $(USRETC)/iproute2.orig ] && mv -rf $(USRETC)/iproute2.orig $(USRETC)/iproute2" >> $(POSTINST)
-+	@echo "[ -d $(TMPETC)/iproute2.orig ] && mv -rf $(TMPETC)/iproute2.orig $(TMPETC)/iproute2" >> $(POSTINST)
++	@echo "[ -d $(USRETC)/iproute2.orig ] && mv -f $(USRETC)/iproute2.orig $(USRETC)/iproute2" >> $(POSTINST)
++	@echo "[ -d $(TMPETC)/iproute2.orig ] && mv -f $(TMPETC)/iproute2.orig $(TMPETC)/iproute2" >> $(POSTINST)
 +	@echo "[ -f $(USRSBIN)/ip.orig ] && mv -f $(USRSBIN)/ip.orig $(USRSBIN)/ip" >> $(POSTINST)
 +	@echo "[ -f $(USRSBIN)/tc.orig ] && mv -f $(USRSBIN)/tc.orig $(USRSBIN)/tc" >> $(POSTINST)
 +	@echo "exit 1" >> $(POSTINST)
