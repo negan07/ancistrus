@@ -275,18 +275,17 @@ qos_zero_dscp_ingress - 1: Squashing differentiated services code points (DSCP) 
 qos_ignore_dscp_ingress - 1: Do not perform DSCP based filtering on ingress. (1-tier classification) / 0: Perform DSCP based filtering on ingress. (3-tier classification) (Def. 1).
 qos_idisc_opts - Other ingress qdisc options (Def. void).
 qos_edisc_opts - Other egress qdisc options (Def. void).
-qos_codel_target - Target of 5ms is good for fast links, in the wors cases it depends from dw bandwidth and it is recalculated (Def. 5ms).
+qos_codel_target - Target of 5ms is good for fast links, in the worst cases it depends from dw bandwidth and it is recalculated (Def. 5ms).
 qos_ipt_mask - Iptables mask (Def. 0xff).
 qos_shaper_burst - 1: set an optional burst parameter to leap over CPU interrupts when the CPU is severly loaded / 0: Default Burst, HTB will use MTU plus shipping and handling. (Def. 1).
 qos_htb_quantum_function - Scale quantum with bandwidth to lower computation cost. Values are: linear / step / other-unknown (Def. linear).
 
-All settings can be setup at once with 'anc nvram set VAR1 VAL1 VAR2 VAL2 ... VARN VALN'
-or singularly with 'anc nvram set VAR1 VAL1' 'anc nvram set VAR2 VAL2' ... 'anc nvram set VARN VALN' .
-
+All settings can be setup at once with 'anc nvram set qos_enable 1 qos_uplink_rate 400 qos_dwlink_rate 15000 ... VARN VALN'
 Finally, settings must be stored permanently with: 'anc nvram commit' or 'nvram commit' .
+They can also be setup singularly with 'anc nvram set qos_enable 1' 'anc nvram set qos_uplink_rate 400' 'anc nvram set qos_dwlink_rate 15000' ... 'anc nvram set VARN VALN' 'anc nvram commit' .
 
-If you wanna look for previously stored value, type: 'anc nvram get VAR1 VAL1 VAR2 VAL2 ... VARN VALN'
-or singularly with 'anc nvram get VAR1 VAL1' 'anc nvram get VAR2 VAL2' ... 'anc nvram get VARN VALN' .
+If you wanna look for previously stored value, type: 'anc nvram get qos_enable qos_uplink_rate qos_dwlink_rate ... VARN'
+or singularly with 'anc nvram get qos_enable' 'anc nvram get qos_uplink_rate' 'anc nvram get qos_dwlink_rate' ... 'anc nvram get VARN' .
 _EOF_
     ;;
     *)

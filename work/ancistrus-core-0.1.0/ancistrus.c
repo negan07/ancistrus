@@ -28,7 +28,7 @@ SEARCHOPT
 	case BCMSHOW:  //nvram.bcm name=value list
 	nvram_bcm_show();
 	break;
-	case RGET:  //get a var (in reentrant safe mode): no loop for this, use EVGET instead
+	case RGET:  //get a var (in reentrant safe mode): no loop for this, use GET instead
 	var=NV_SGETR(PAR[3]);
 	puts(var);
 	SFREE(var);
@@ -36,7 +36,7 @@ SEARCHOPT
 	case GET:  //get a var series (name=val): output is ready for `eval` cmd
 	PARLOOP printf("%s=%s\n", PAR[j], NV_SGET(PAR[j]));
 	break;
-	case BCMRGET:  //get a bcmvar (in reentrant safe mode): no loop for this, use EVBCMGET instead
+	case BCMRGET:  //get a bcmvar (in reentrant safe mode): no loop for this, use BCMGET instead
 	var=NV_BSGETR(PAR[3]);
 	puts(var);
 	SFREE(var);
