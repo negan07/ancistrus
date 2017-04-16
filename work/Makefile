@@ -41,6 +41,21 @@ install:
 ifdef BUILD
 build: prepare_package build_package build_index
 
+monolithic: build
+	@$(foreach D, $(ZLIB) $(LIBARCHIVE) $(OPKG), echo -e "\\e[35m$(CUR_REL_PATH): make local \\e[36m$D \\e[0m"; \
+	sudo $(MAKE) -j$(NUMTHREAD) -C $D distclean; \
+	sudo $(MAKE) LOCAL=1 -j$(NUMTHREAD) -C $D; \
+	sudo $(MAKE) LOCAL=1 -j$(NUMTHREAD) -C $D install;)
+	@$(foreach D, $(ZLIB) $(LIBARCHIVE) $(OPKG), echo -e "\\e[35m$(CUR_REL_PATH): make distclean \\e[36m$D \\e[0m"; \
+	sudo $(MAKE) -j$(NUMTHREAD) -C $D distclean;)
+	@echo -e "\\e[35m$(CUR_REL_PATH): making FS modifications on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
+	@sudo cp -f $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT) $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT).orig
+	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
+	@sudo ../opkg -f ../opkg.conf update || exit 1
+	@$(foreach P, $(SUBDIRS), [ "$(P)" = "$(LIBARCHIVE)" ] || [ "$(P)" = "$(OPKG_UTILS)" ] || [ "$(P)" = "$(ZLIB)" ] || \
+	../opkg -f ../opkg.conf install $(NAME_$(P)) || exit 1;)
+	@sudo rm -rf $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)/tmp/* ../opkg ../opkg.conf
+
 prepare_package: creat_rules
 	@[ -d $(BUILD_DIR_PATH) ] || mkdir -p -m 0755 $(BUILD_DIR_PATH) || exit 1;
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): prepare package \\e[36m$D \\e[0m"; \
@@ -70,8 +85,13 @@ build_package:
 	@[ -d $(BUILD_DIR_PATH) ] && [ -x ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build ]
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): build package \\e[36m$D \\e[0m"; \
 	[ -d $(BUILD_DIR_PATH)/$(D) ] || exit 1; \
+	if [ ! -z $(MONOLITHIC) ]; then \
 	[ "$(D)" = "$(LIBARCHIVE)" ] || [ "$(D)" = "$(OPKG_UTILS)" ] || [ "$(D)" = "$(ZLIB)" ] || \
-	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1;)
+	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1; \
+	else \
+	[ "$(D)" = "$(LIBARCHIVE)" ] || [ "$(D)" = "$(OPKG_UTILS)" ] || [ "$(D)" = "$(ZLIB)" ] || \
+	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1; \
+	fi;)
 
 build_index:
 	@[ -d $(BUILD_DIR_PATH) ] && [ -x ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-make-index ]
@@ -122,6 +142,7 @@ creat_rules:
 	@echo "export GIT_NAME		:= $(PROJECT_NAME)" >> $(RULES)
 	@echo "export PROJECT		:= $(PROJECT_TARGET)" >> $(RULES)
 	@echo "export CPU_ARCH		:= $(CPU_ARCH_NAME)" >> $(RULES)
+	@echo "export CPU_LARCH		:= $(ARCH_LCASE)" >> $(RULES)
 	@echo "export GIT_ROOT_DIR	:= $(GIT_ROOT)" >> $(RULES)
 	@echo "export WORK_DIR		:= $(CUR_PATH)" >> $(RULES)
 	@echo "export SOURCE_PATH 	:= $(SRC_PATH_NAME)" >> $(RULES)

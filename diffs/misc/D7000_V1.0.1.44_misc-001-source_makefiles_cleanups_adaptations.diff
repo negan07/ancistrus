@@ -77,25 +77,25 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -	IMG_NAME_GPL=$(BOARD_ID)-$(VERSION).img
 -	BIN_NAME=$(IMAGE_DIR)/$(BOARD_ID)-$(VERSION).bin
 -endif
+-
+-
+-ifeq ($(BRIDGE),1)
+-	FUNC = 01
+-endif
 +IMG_NAME=$(BOARD_ID)-$(VERSION).img
 +IMG_NAME_GPL=$(BOARD_ID)-$(VERSION).img
 +BIN_NAME=$(BOARD_ID)-$(VERSION).bin
  
-+all: work
- 
--ifeq ($(BRIDGE),1)
--	FUNC = 01
--endif
--
 -ifeq ($(MULTI_PVC),1)
 -	FUNC = 03
 -endif
--
++all: work
+ 
 -PID=$(FIRMWARE_DIR)/PID_$(VERSION)
 +orig: clean_img clean_target pre_fs apps drivers prefs fs img
  
 -all: build_test
-+work: clean_img clean_target pre_fs apps third-party drivers prefs_work prefs fs img
++work: clean_img clean_target pre_fs apps drivers third-party prefs_work prefs fs img
  
 -build_test: pre_fs apps drivers prefs fs img
 +clean_all: clean_uclibc clean_apps clean_third-party clean_target clean_img
@@ -108,12 +108,16 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  
  pre_fs:
  	rm -rf target
-@@ -95,59 +63,59 @@
+@@ -95,59 +63,66 @@
  	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
  	cd target/lib; ln -sf libscnvram.so libconfig.so
  ifeq ($(ITUNES_SERVER),1)
+-	make -C uClibc-0.9.32/
 +	@echo -e "\\e[35mSOURCE: make \\e[36mUCLIBC \\e[0m"
- 	make -C uClibc-0.9.32/
++	@if [ ! -f uClibc-0.9.32/.compiled ]; then \
++	make -C uClibc-0.9.32/; \
++	touch uClibc-0.9.32/.compiled; \
++	fi
  	cp -af uClibc-0.9.32/lib/ld-uClibc-0.9.32.so target/lib/
  endif
  
@@ -131,8 +135,13 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -	fi
 -
  apps:
- 	@echo -e "\\e[35mSOURCE: make \\e[36mAPPS \\e[0m"		
- 	$(MAKE) -C $(APPS_DIR) 
+-	@echo -e "\\e[35mSOURCE: make \\e[36mAPPS \\e[0m"		
+-	$(MAKE) -C $(APPS_DIR) 
++	@echo -e "\\e[35mSOURCE: make \\e[36mAPPS \\e[0m"
++	@if [ ! -f $(APPS_DIR)/.compiled ]; then \
++	$(MAKE) -C $(APPS_DIR); \
++	touch $(APPS_DIR)/.compiled; \
++	fi
  	$(MAKE) -C $(APPS_DIR) install 
  	
  drivers:
@@ -150,7 +159,8 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -	@echo -e "\\e[35mSOURCE: make \\e[36mUI \\e[0m"	
 -	$(MAKE) -C $(UI_DIR) -s	
 -
-+	$(MAKE) -C $(THIRD_PARTY_DIR) install
++#	$(MAKE) -C $(THIRD_PARTY_DIR) install
++	$(MAKE) BUILD=1 MONOLITHIC=1 -C $(THIRD_PARTY_DIR) monolithic
  	
  #
 -# Generate files in target/ before make squash image
@@ -195,7 +205,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  prefs:
  	# Generate version
  	echo $(ETCVERSION) > $(FS_DIR)/usr/etc/version	
-@@ -163,7 +131,6 @@
+@@ -163,7 +138,6 @@
  	echo "Firmware="V$(VER)_$(SUB_VER)"@netgear_region#" > $(CUR_SETTING)
  	echo "RegionTag="$(BOARD_ID)_"@netgear_region#" >>  $(CUR_SETTING)
  	echo "Region=@netgear_region#"  >> $(CUR_SETTING)
@@ -203,7 +213,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	echo "Model="$(BOARD_ID)  >> $(CUR_SETTING)
  	echo "InternetConnectionStatus=@if_wan_up#" >> $(CUR_SETTING)
  	if [ "$(OPENDNS)" == "1" ]; then echo "ParentalControlSupported=1" >> $(CUR_SETTING); fi
-@@ -173,84 +140,15 @@
+@@ -173,84 +147,15 @@
  	# Generate fw info which will bind to trx file
  	echo $(VERSION) > $(FW_INFO)
  	echo $(REGION) >> $(FW_INFO)
@@ -291,7 +301,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	echo -e "/kernel_cksum" >> $(TARGET_HOME)/nocomprlist
  	mkdir -p -m 777 $(FS_DIR)/config/factory
  	mkdir -p -m 777 $(FS_DIR)/config/nvram
-@@ -271,86 +169,40 @@
+@@ -271,86 +176,42 @@
  endif	
  	mkdir -p -m 777 $(FS_DIR)/config/xxx
  	chmod 777 $(FS_DIR)/config
@@ -361,10 +371,12 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 +clean_uclibc:
 +	@echo -e "\\e[35mUCLIBC: make \\e[36mclean \\e[0m"
 +	-$(MAKE) -C uClibc-0.9.32 clean -s
++	-rm -f uClibc-0.9.32/.compiled
  
 +clean_apps:
 +	@echo -e "\\e[35mAPPS: make \\e[36mclean \\e[0m"
 +	-$(MAKE) -C $(APPS_DIR) clean -s
++	-rm -f $(APPS_DIR)/.compiled
  
 -ifeq ($(ZIP_3G),1)
 -ZIP3G_DIR=$(IMAGE_DIR)/zip3g

@@ -1,7 +1,7 @@
 diff -urN work/zlib-1.2.11/Makefile work/zlib-1.2.11/Makefile
 --- work/zlib-1.2.11/Makefile	2017-04-06 18:00:46.662292000 +0200
 +++ work/zlib-1.2.11/Makefile	2017-04-06 18:01:08.566300143 +0200
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,34 @@
 +include ../Rules.mak
 +
 +all: config
@@ -14,7 +14,16 @@ diff -urN work/zlib-1.2.11/Makefile work/zlib-1.2.11/Makefile
 +	touch h_config; \
 +	fi
 +
-+configure:
++ifdef LOCAL
++configure: configure-local
++else
++configure: configure-cross
++endif
++
++configure-local:
++	cd $(ZLIB) && ./configure --static
++
++configure-cross:
 +	cd $(ZLIB) && CHOST=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" ./configure --static
 +
 +install:

@@ -1,7 +1,7 @@
 diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 --- work/opkg-0.3.4/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/opkg-0.3.4/Makefile	2017-03-23 20:35:42.745736890 +0100
-@@ -0,0 +1,85 @@
+@@ -0,0 +1,121 @@
 +include ../Rules.mak
 +
 +OPKG_CONF_PATH		:= $(OPKG)/utils
@@ -23,10 +23,27 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +	touch h_config; \
 +	fi
 +
-+configure:
++ifdef LOCAL
++configure: configure-local
++install: install-local
++opkg_conf: opkg_conf-local
++else
++configure: configure-cross
++install: install-cross
++opkg_conf: opkg_conf-cross
++endif
++
++configure-local:
++	cd $(OPKG) && ./configure --build=$(BUILD_HOST) LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-larchive" CPPFLAGS="-I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --disable-gpg --disable-shared --with-static-libopkg --prefix=$(PREFIX_STATE_DIR) --localstatedir=$(PREFIX_STATE_DIR)/opkg
++
++configure-cross:
 +	cd $(OPKG) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -lssl -lcrypto" CURL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -lcurl" LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-lssl -lcrypto -lcurl -larchive" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include -I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/include -I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --disable-gpg --disable-shared --with-static-libopkg --prefix=$(PREFIX_STATE_DIR) --localstatedir=$(PREFIX_STATE_DIR)/opkg
 +
-+install: opkg_conf control
++install-local: opkg_conf-local
++	install -m 0644 $(OPKG_CONF) $(GIT_ROOT_DIR)
++	install -m 0755 $(OPKG)/src/opkg $(GIT_ROOT_DIR)
++
++install-cross: opkg_conf control
 +	$(SSTRIP) $(OPKG)/src/opkg
 +	install -m 0755 -d $(ETCDIR)
 +	install -m 0755 -d $(BINDIR)
@@ -43,7 +60,24 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +	@rm -f h_config
 +	$(MAKE) -C $(OPKG) distclean
 +
-+opkg_conf:
++opkg_conf-local:
++	@echo "src/gz local file://$(GIT_ROOT_DIR)/$(OPKG_PKG_DIR)" > $(OPKG_CONF)
++	@echo "arch $(CPU_LARCH)$(PROJECT_TARGET) 1" >> $(OPKG_CONF)
++	@echo "arch $(CPU_LARCH) 6" >> $(OPKG_CONF)
++	@echo "arch all 11" >> $(OPKG_CONF)
++	@echo "arch any 16" >> $(OPKG_CONF)
++	@echo "arch noarch 21" >> $(OPKG_CONF)
++	@echo "dest root /" >> $(OPKG_CONF)
++	@echo "dest ram /tmp" >> $(OPKG_CONF)
++	@echo "option autoremove 1" >> $(OPKG_CONF)
++	@echo "option offline_root $(SOURCE_PATH)/$(SRC_TARGET_REL_DIR)" >> $(OPKG_CONF)
++	@echo "option tmp_dir /tmp" >> $(OPKG_CONF)
++	@echo "option lock_file /tmp/opkg/run" >> $(OPKG_CONF)
++	@echo "option cache_dir /tmp/opkg/cache" >> $(OPKG_CONF)
++	@echo "option lists_dir /tmp/opkg/lists" >> $(OPKG_CONF)
++	@echo "" >> $(OPKG_CONF)
++
++opkg_conf-cross:
 +	@echo "src/gz $(PROJECT_NAME)-$(ARCH)-$(PROJECT_TARGET) $(PROJECT_REPOSITORY)" > $(OPKG_CONF)
 +	@echo "#src/gz local file:///mnt/shares/U/local" >> $(OPKG_CONF)
 +	@echo "#src/gz debug https://192.168.0.51/debug" >> $(OPKG_CONF)
@@ -55,6 +89,8 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +	@echo "dest root /" >> $(OPKG_CONF)
 +	@echo "dest ram $(TMPDIR)" >> $(OPKG_CONF)
 +	@echo "option autoremove 1" >> $(OPKG_CONF)
++	@echo "option tmp_dir $(TMPDIR)" >> $(OPKG_CONF)
++	@echo "option lock_file $(TMPDIR)/opkg/run" >> $(OPKG_CONF)
 +	@echo "option cache_dir $(TMPDIR)/opkg/cache" >> $(OPKG_CONF)
 +	@echo "option lists_dir $(TMPDIR)/opkg/lists" >> $(OPKG_CONF)
 +	@echo "" >> $(OPKG_CONF)

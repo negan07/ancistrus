@@ -15,25 +15,28 @@ diff -urN D7000_V1.0.1.44_WW_src/Makefile diff -urN D7000_V1.0.1.44_WW_src/Makef
  ANNEX=A
  #ANNEX=B
  
-@@ -22,24 +25,28 @@
+@@ -22,24 +25,30 @@
  prepare: creat_rules Kernel/bcm963xx 
  
  kernel:
 -	@echo "PROFILE=963138GW" > Kernel/bcm963xx/PROFILE.make
 -	@echo "963138GW" > Kernel/bcm963xx/.last_profile
+-	@cd Kernel/bcm963xx/; make sc_kernel;
 +	@echo -e "\\e[35mKERNEL: make \\e[36mvmlinux.lz \\e[0m"
 +	@echo "PROFILE=$(PROFILE_NAME)" > Kernel/bcm963xx/PROFILE.make
 +	@echo $(PROFILE_NAME) > Kernel/bcm963xx/.last_profile
- 	@cd Kernel/bcm963xx/; make sc_kernel;
- 
++	@if [ ! -f Kernel/bcm963xx/.compiled ]; then \
++	cd Kernel/bcm963xx/; make sc_kernel; touch .compiled; \
++	fi
++
 +kernel_menuconfig:
 +	@cd Kernel/bcm963xx/kernel/linux-3.4rt; make ARCH=$(ARCH_NAME) menuconfig ;
 +
 +kernel_clean:
 +	@echo -e "\\e[35mKERNEL: make \\e[36mclean \\e[0m"
 +	@echo "PROFILE=$(PROFILE_NAME)" > Kernel/bcm963xx/PROFILE.make
-+	@cd Kernel/bcm963xx/; make sc_clean ;
-+
++	@cd Kernel/bcm963xx/; make sc_clean ; rm -f .compiled;
+ 
  source: prepare
 -#	if [ -h /opt/toolchains/uclibc-crosstools ]; then\
 -#		rm -rf /opt/toolchains/uclibc-crosstools;\
