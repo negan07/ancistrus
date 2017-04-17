@@ -5,6 +5,9 @@ NVRAM_NAME		:= nvram
 VER_$(NVRAM_NAME)	:= 0.1.0
 NVRAM			:= $(NVRAM_NAME)-$(VER_$(NVRAM_NAME))
 NAME_$(NVRAM)		:= $(NVRAM_NAME)
+ifdef DEBUG
+NAME_$(NVRAM)		:= $(NVRAM_NAME)-debug
+endif
 VER_$(NVRAM)		:= $(VER_$(NVRAM_NAME))
 DL_$(NVRAM)		:= $(SRC_APPS_REL_DIR)
 TAR_$(NVRAM)		:= nvram
@@ -20,6 +23,9 @@ CORE_WORK_NAME		:= $(PROJECT_NAME)-core
 VER_$(CORE_WORK_NAME)	:= 0.1.0
 CORE_WORK		:= $(CORE_WORK_NAME)-$(VER_$(CORE_WORK_NAME))
 NAME_$(CORE_WORK)	:= $(CORE_WORK_NAME)
+ifdef DEBUG
+NAME_$(CORE_WORK)	:= $(CORE_WORK_NAME)-debug
+endif
 VER_$(CORE_WORK)	:= $(VER_$(CORE_WORK_NAME))
 DL_$(CORE_WORK)		:= void
 TAR_$(CORE_WORK)	:= void
@@ -34,6 +40,9 @@ UTELNETD_NAME		:= utelnetd
 VER_$(UTELNETD_NAME)	:= 0.1.11
 UTELNETD		:= $(UTELNETD_NAME)-$(VER_$(UTELNETD_NAME))
 NAME_$(UTELNETD)	:= $(UTELNETD_NAME)
+ifdef DEBUG
+NAME_$(UTELNETD)	:= $(UTELNETD_NAME)-debug
+endif
 VER_$(UTELNETD)		:= $(VER_$(UTELNETD_NAME))
 DL_$(UTELNETD)		:= http://public.pengutronix.de/software/utelnetd
 TAR_$(UTELNETD)		:= $(UTELNETD).tar.gz
@@ -50,6 +59,9 @@ IPROUTE2_NAME		:= iproute2
 VER_$(IPROUTE2_NAME)	:= 4.10.0
 IPROUTE2		:= $(IPROUTE2_NAME)-$(VER_$(IPROUTE2_NAME))
 NAME_$(IPROUTE2)	:= $(IPROUTE2_NAME)
+ifdef DEBUG
+NAME_$(IPROUTE2)	:= $(IPROUTE2_NAME)-debug
+endif
 VER_$(IPROUTE2)		:= $(VER_$(IPROUTE2_NAME))
 DL_$(IPROUTE2)		:= https://www.kernel.org/pub/linux/utils/net/iproute2
 TAR_$(IPROUTE2)		:= $(IPROUTE2).tar.gz
@@ -66,6 +78,9 @@ NETPERF_NAME		:= netperf
 VER_$(NETPERF_NAME)	:= 2.7.0
 NETPERF			:= $(NETPERF_NAME)-$(VER_$(NETPERF_NAME))
 NAME_$(NETPERF)		:= $(NETPERF_NAME)
+ifdef DEBUG
+NAME_$(NETPERF)		:= $(NETPERF_NAME)-debug
+endif
 VER_$(NETPERF)		:= $(VER_$(NETPERF_NAME))
 DL_$(NETPERF)		:= https://fossies.org/linux/misc
 #DL_$(NETPERF)		:= ftp://ftp.netperf.org/netperf
@@ -83,6 +98,9 @@ NETWORKTEST_NAME	:= network-test
 VER_$(NETWORKTEST_NAME)	:= 0.1.0
 NETWORKTEST		:= $(NETWORKTEST_NAME)-$(VER_$(NETWORKTEST_NAME))
 NAME_$(NETWORKTEST)	:= $(NETWORKTEST_NAME)
+ifdef DEBUG
+NAME_$(NETWORKTEST)	:= $(NETWORKTEST_NAME)-debug
+endif
 VER_$(NETWORKTEST)	:= $(VER_$(NETWORKTEST_NAME))
 DL_$(NETWORKTEST)	:= void
 TAR_$(NETWORKTEST)	:= void
@@ -97,6 +115,9 @@ QOS_NG_3642N_NAME	:= qos-netgear
 VER_$(QOS_NG_3642N_NAME):= 36_42n
 QOS_NG_3642N		:= $(QOS_NG_3642N_NAME)-$(VER_$(QOS_NG_3642N_NAME))
 NAME_$(QOS_NG_3642N)	:= $(QOS_NG_3642N_NAME)
+ifdef DEBUG
+NAME_$(QOS_NG_3642N)	:= $(QOS_NG_3642N_NAME)-debug
+endif
 VER_$(QOS_NG_3642N)	:= $(VER_$(QOS_NG_3642N_NAME))
 DL_$(QOS_NG_3642N)	:= void
 TAR_$(QOS_NG_3642N)	:= void
@@ -111,6 +132,9 @@ QOS_SQM_NAME		:= qos-sqm
 VER_$(QOS_SQM_NAME)	:= 0.1.0
 QOS_SQM			:= $(QOS_SQM_NAME)-$(VER_$(QOS_SQM_NAME))
 NAME_$(QOS_SQM)		:= $(QOS_SQM_NAME)
+ifdef DEBUG
+NAME_$(QOS_SQM)		:= $(QOS_SQM_NAME)-debug
+endif
 VER_$(QOS_SQM)		:= $(VER_$(QOS_SQM_NAME))
 DL_$(QOS_SQM)		:= void
 TAR_$(QOS_SQM)		:= void
@@ -133,6 +157,9 @@ ZLIB_NAME		:= zlib
 VER_$(ZLIB_NAME)	:= 1.2.11
 ZLIB			:= $(ZLIB_NAME)-$(VER_$(ZLIB_NAME))
 NAME_$(ZLIB)		:= $(ZLIB_NAME)
+ifdef DEBUG
+NAME_$(ZLIB)		:= $(ZLIB_NAME)-debug
+endif
 VER_$(ZLIB)		:= $(VER_$(ZLIB_NAME))
 DL_$(ZLIB)		:= http://zlib.net
 TAR_$(ZLIB)		:= $(ZLIB).tar.gz
@@ -149,6 +176,9 @@ LIBARCHIVE_NAME		:= libarchive
 VER_$(LIBARCHIVE_NAME)	:= 3.3.1
 LIBARCHIVE		:= $(LIBARCHIVE_NAME)-$(VER_$(LIBARCHIVE_NAME))
 NAME_$(LIBARCHIVE)	:= $(LIBARCHIVE_NAME)
+ifdef DEBUG
+NAME_$(LIBARCHIVE)	:= $(LIBARCHIVE_NAME)-debug
+endif
 VER_$(LIBARCHIVE)	:= $(VER_$(LIBARCHIVE_NAME))
 DL_$(LIBARCHIVE)	:= http://www.libarchive.org/downloads
 TAR_$(LIBARCHIVE)	:= $(LIBARCHIVE).tar.gz
@@ -165,6 +195,9 @@ OPKG_UTILS_NAME		:= opkg-utils
 VER_$(OPKG_UTILS_NAME)	:= 0.3.4
 OPKG_UTILS		:= $(OPKG_UTILS_NAME)-$(VER_$(OPKG_UTILS_NAME))
 NAME_$(OPKG_UTILS)	:= $(OPKG_UTILS_NAME)
+ifdef DEBUG
+NAME_$(OPKG_UTILS)	:= $(OPKG_UTILS_NAME)-debug
+endif
 VER_$(OPKG_UTILS)	:= $(VER_$(OPKG_UTILS_NAME))
 DL_$(OPKG_UTILS)	:= http://git.yoctoproject.org/cgit/cgit.cgi/opkg-utils/snapshot
 TAR_$(OPKG_UTILS)	:= $(OPKG_UTILS).tar.gz
@@ -181,6 +214,9 @@ OPKG_NAME		:= opkg
 VER_$(OPKG_NAME)	:= 0.3.4
 OPKG			:= $(OPKG_NAME)-$(VER_$(OPKG_NAME))
 NAME_$(OPKG)		:= $(OPKG_NAME)
+ifdef DEBUG
+NAME_$(OPKG)		:= $(OPKG_NAME)-debug
+endif
 VER_$(OPKG)		:= $(VER_$(OPKG_NAME))
 DL_$(OPKG)		:= http://downloads.yoctoproject.org/releases/opkg
 TAR_$(OPKG)		:= $(OPKG).tar.gz
