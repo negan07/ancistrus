@@ -55,8 +55,10 @@ control: preinst prerm postrm
 
 preinst:
 	@echo "#!/bin/sh" > $(PREINST)
+	@echo "if [ ! -f $(USRETC)/$(RCS).orig ]; then" >> $(PREINST)
 	@echo "echo \"Backup original $(RCS) startup script ($(RCS).orig)...\"" >> $(PREINST)
 	@echo "[ -f $(USRETC)/$(RCS) ] && cp -f $(USRETC)/$(RCS) $(USRETC)/$(RCS).orig" >> $(PREINST)
+	@echo "fi" >> $(PREINST)
 	@echo "exit 0" >> $(PREINST)
 
 prerm:
@@ -65,14 +67,14 @@ prerm:
 	@echo "if [ -f $(USRETC)/$(RCS).orig ]; then" >> $(PRERM)
 	@echo "exit 0" >> $(PRERM)
 	@echo "else" >> $(PRERM)
-	@echo "echo \"Backup not present: can't uninstall...\"" >> $(PRERM)
+	@echo "echo \"$(RCS) Backup not present: can't uninstall...\"" >> $(PRERM)
 	@echo "exit 1" >> $(PRERM)
 	@echo "fi" >> $(PRERM)
 
 postrm:
 	@echo "#!/bin/sh" > $(POSTRM)
 	@echo "echo \"Push back original $(RCS) startup script...\"" >> $(POSTRM)
-	@echo "mv -f $(USRETC)/$(RCS).orig $(USRETC)/$(RCS)" >> $(POSTRM)
+	@echo "[ -f $(USRETC)/$(RCS).orig ] && mv -f $(USRETC)/$(RCS).orig $(USRETC)/$(RCS)" >> $(POSTRM)
 	@echo "exit 0" >> $(POSTRM)
 endif
 
