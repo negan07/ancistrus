@@ -69,12 +69,14 @@ cd $DBGDIR
 THISLNK
 }
 
-export LD_LIBRARY_PATH=$DBGDIR
-
 	if [ $# != "1" ]; then
 	echo "Usage: $0 <core> <ko> <qos> <web> <del> <*anyfiledir*>"
 	exit 1
 	fi
+
+export LD_LIBRARY_PATH=$DBGDIR
+ln -sf /usr/sbin/rc $DBGDIR/rc > /dev/null 2>&1
+ln -sf /usr/sbin/rc_app/rc_apps $DBGDIR/rc_apps > /dev/null 2>&1
 
 	case $1 in
 	core)
