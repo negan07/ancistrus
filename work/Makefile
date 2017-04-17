@@ -7,6 +7,7 @@ CUR_REL_PATH		:= $(notdir $(CUR_PATH))
 SRC_PATH_NAME		:= $(shell cd ../$(SRC_DIR); pwd;)
 RULES			:= $(CUR_PATH)/Rules.mak
 ARCH_LCASE		:= $(shell echo $(CPU_ARCH_NAME) | tr A-Z a-z)
+OPKGBUILD		:= $(ZLIB) $(LIBARCHIVE) $(OPKG)
 NUMTHREAD		:= $$((2 * `getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1`))
 #NUMTHREAD		:= $$((2 * `grep processor /proc/cpuinfo | wc -l`))
 
@@ -22,6 +23,7 @@ BUILD_TMP		:= $(BUILD_DIR_PATH)/tmp
 CTRL_DIR_PATH		:= $(BUILD_TMP)/CONTROL
 CTRL			:= $(CTRL_DIR_PATH)/control
 CTRL_SCRIPTS		:= preinst postinst prerm postrm
+OPKGLIST		:= $(ZLIB) $(LIBARCHIVE) $(OPKG_UTILS)
 ifndef DEBUG
 PREFIX_PATH		:= $(BUILD_TMP)
 else
@@ -38,23 +40,18 @@ install:
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): install \\e[36m$D \\e[0m"; \
 	$(MAKE) -j$(NUMTHREAD) -C $D install || exit 1;)
 
+opkg-local: creat_rules prepare
+	@if [ ! -x $(GIT_ROOT)/$(LBIN_DIR)/opkg ] || [ ! -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf ]; then \
+	$(foreach D, $(OPKGBUILD), echo -e "\\e[35m$(CUR_REL_PATH): make local \\e[36m$D \\e[0m"; \
+	[ ! -f $(D)/h_config ] || $(MAKE) -j$(NUMTHREAD) -C $D distclean; \
+	$(MAKE) LOCAL=1 -j$(NUMTHREAD) -C $D; \
+	$(MAKE) LOCAL=1 -j$(NUMTHREAD) -C $D install;) \
+	$(foreach D, $(OPKGBUILD), echo -e "\\e[35m$(CUR_REL_PATH): make distclean \\e[36m$D \\e[0m"; \
+	$(MAKE) -j$(NUMTHREAD) -C $D distclean;) \
+	fi
+
 ifdef BUILD
 build: prepare_package build_package build_index
-
-monolithic: build
-	@$(foreach D, $(ZLIB) $(LIBARCHIVE) $(OPKG), echo -e "\\e[35m$(CUR_REL_PATH): make local \\e[36m$D \\e[0m"; \
-	sudo $(MAKE) -j$(NUMTHREAD) -C $D distclean; \
-	sudo $(MAKE) LOCAL=1 -j$(NUMTHREAD) -C $D; \
-	sudo $(MAKE) LOCAL=1 -j$(NUMTHREAD) -C $D install;)
-	@$(foreach D, $(ZLIB) $(LIBARCHIVE) $(OPKG), echo -e "\\e[35m$(CUR_REL_PATH): make distclean \\e[36m$D \\e[0m"; \
-	sudo $(MAKE) -j$(NUMTHREAD) -C $D distclean;)
-	@echo -e "\\e[35m$(CUR_REL_PATH): making FS modifications on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
-	@sudo cp -f $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT) $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT).orig
-	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
-	@sudo ../opkg -f ../opkg.conf update || exit 1
-	@$(foreach P, $(SUBDIRS), [ "$(P)" = "$(LIBARCHIVE)" ] || [ "$(P)" = "$(OPKG_UTILS)" ] || [ "$(P)" = "$(ZLIB)" ] || \
-	../opkg -f ../opkg.conf install $(NAME_$(P)) || exit 1;)
-	@sudo rm -rf $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)/tmp/* ../opkg ../opkg.conf
 
 prepare_package: creat_rules
 	@[ -d $(BUILD_DIR_PATH) ] || mkdir -p -m 0755 $(BUILD_DIR_PATH) || exit 1;
@@ -62,14 +59,9 @@ prepare_package: creat_rules
 	rm -rf $(BUILD_DIR_PATH)/$(D) $(BUILD_TMP); \
 	mkdir -p -m 0755 $(BUILD_TMP) || exit 1; \
 	mkdir -p -m 0755 $(CTRL_DIR_PATH) || exit 1; \
-	if [ ! -z $(DEBUG) ]; then \
-	echo "Package: $(NAME_$(D))-debug" 			> $(CTRL); \
-	echo "Depends: $(DEP_$(D))-debug"			>> $(CTRL); \
-	else \
 	echo "Package: $(NAME_$(D))"				> $(CTRL); \
-	echo "Depends: $(DEP_$(D))"				>> $(CTRL); \
-	fi; \
 	echo "Version: $(VER_$(D))"				>> $(CTRL); \
+	echo "Depends: $(DEP_$(D))"				>> $(CTRL); \
 	echo "Section: $(SEC_$(D))"				>> $(CTRL); \
 	echo "Architecture: $(ARCH_LCASE)$(PROJECT_TARGET)"	>> $(CTRL); \
 	echo "Maintainer: $(GITHUB_DIR)"			>> $(CTRL); \
@@ -82,16 +74,16 @@ prepare_package: creat_rules
 	$(MAKE) -j$(NUMTHREAD) -C $D install || exit 1; \
 	$(foreach S, $(CTRL_SCRIPTS), chmod -f 755 $(CTRL_DIR_PATH)/$(S);) \
 	mv -f $(BUILD_TMP) $(BUILD_DIR_PATH)/$(D);)
+	@echo -e "\\e[35m$(CUR_REL_PATH): cleanup void \\e[36mPackages \\e[0m";
+	@$(foreach R, $(OPKGLIST), rm -rf $(BUILD_DIR_PATH)/$(R);)
 
 build_package:
 	@[ -d $(BUILD_DIR_PATH) ] && [ -x ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build ]
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): build package \\e[36m$D \\e[0m"; \
-	[ -d $(BUILD_DIR_PATH)/$(D) ] || exit 1; \
-	if [ ! -z $(MONOLITHIC) ]; then \
-	[ "$(D)" = "$(LIBARCHIVE)" ] || [ "$(D)" = "$(OPKG_UTILS)" ] || [ "$(D)" = "$(ZLIB)" ] || \
+	echo "$(OPKGLIST)" | grep "$(D)" > /dev/null 2>&1 || [ -d $(BUILD_DIR_PATH)/$(D) ] || exit 1; \
+	if [ ! -z $(MONOLITHIC) ]; then echo "$(OPKGLIST)" | grep "$(D)" > /dev/null 2>&1 || \
 	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1; \
-	else \
-	[ "$(D)" = "$(LIBARCHIVE)" ] || [ "$(D)" = "$(OPKG_UTILS)" ] || [ "$(D)" = "$(ZLIB)" ] || \
+	else echo "$(OPKGLIST)" | grep "$(D)" > /dev/null 2>&1 || \
 	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1; \
 	fi;)
 
@@ -101,11 +93,22 @@ build_index:
 	@cd $(BUILD_DIR_PATH); ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-make-index -a $(BUILD_DIR_PATH) > Packages || exit 1; \
 	gzip -qf Packages || exit 1; gzip -qt Packages.gz || exit 1;
 
+monolithic: build
+	@echo -e "\\e[35m$(CUR_REL_PATH): making FS modifications on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
+	@cp -f $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT) $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT).orig
+	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
+	@[ -x $(GIT_ROOT)/$(LBIN_DIR)/opkg ] || exit 1
+	@[ -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf ] || exit 1
+	@$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf update || exit 1
+	@$(foreach P, $(SUBDIRS), echo "$(OPKGLIST)" | grep "$(P)" > /dev/null 2>&1 || \
+	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf install $(NAME_$(P)) || exit 1;)
+	@rm -rf $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)/tmp/*
+
 clean_build:
 	@$(foreach D, $(DIRLIST), echo -e "\\e[35m$(CUR_REL_PATH): clean build dir \\e[36m$D \\e[0m"; rm -rf $(BUILD_DIR_PATH)/$(D);)
 
 dist_clean_build:
-	@rm -rf $(BUILD_DIR_PATH)
+	@rm -rf $(BUILD_DIR_PATH) $(GIT_ROOT)/$(LBIN_DIR)
 	@rm -f $(OPKG_UTILS)/.installed
 endif
 
@@ -144,7 +147,7 @@ creat_rules:
 	@echo "export GIT_NAME		:= $(PROJECT_NAME)" >> $(RULES)
 	@echo "export PROJECT		:= $(PROJECT_TARGET)" >> $(RULES)
 	@echo "export CPU_ARCH		:= $(CPU_ARCH_NAME)" >> $(RULES)
-	@echo "export CPU_LARCH		:= $(ARCH_LCASE)" >> $(RULES)
+	@echo "export CPU_LCARCH	:= $(ARCH_LCASE)" >> $(RULES)
 	@echo "export GIT_ROOT_DIR	:= $(GIT_ROOT)" >> $(RULES)
 	@echo "export WORK_DIR		:= $(CUR_PATH)" >> $(RULES)
 	@echo "export SOURCE_PATH 	:= $(SRC_PATH_NAME)" >> $(RULES)

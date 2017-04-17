@@ -15,12 +15,13 @@ PROJECT_NAME		?= ancistrus
 PROJECT_TARGET		?= D7000
 PROJECT_FOUNDER		?= negan07
 PROJECT_PLOT		?= "Netgear's $(PROJECT_TARGET) Nighthawk Router Experience Distributed Project"
+LICENSE_NAME		?= GPLv2
+PROJECT_LICENSE		?= "License: $(LICENSE_NAME)"
 
 GITHUB_DIR		?= https://github.com/$(PROJECT_FOUNDER)/$(PROJECT_NAME)
 PROJECT_HOMEPAGE	?= https://$(PROJECT_FOUNDER).github.io/$(PROJECT_NAME)
-PROJECT_REPOSITORY	?= https://raw.githubusercontent.com/$(PROJECT_FOUNDER)/$(PROJECT_NAME)/gh-pages/$(PROJECT_NAME)-$(ARCH)-$(PROJECT_TARGET)
-LICENSE_NAME		?= GPLv2
-PROJECT_LICENSE		?= "License: $(LICENSE_NAME)"
+PROJECT_REP_ROOT	?= https://raw.githubusercontent.com/$(PROJECT_FOUNDER)/$(PROJECT_NAME)/gh-pages
+LOCAL_REP_ROOT		?= https://192.168.0.51
 
 FWVER			?= V1.0.1.44
 CPU_ARCH_NAME		?= ARM
@@ -28,6 +29,7 @@ RCBOOT			?= /usr/etc/rcS
 
 OPKG_PKG_DIR		?= build
 DIFFS_DIR		?= diffs
+LBIN_DIR		?= localbin
 SCRIPTS_DIR		?= scripts
 WORK_SRC_DIR		?= work
 DEBUG_DIR		?= /home/ftp

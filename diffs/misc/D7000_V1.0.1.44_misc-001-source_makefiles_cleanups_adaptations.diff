@@ -143,7 +143,8 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 +	touch $(APPS_DIR)/.compiled; \
 +	fi
  	$(MAKE) -C $(APPS_DIR) install 
- 	
+-	
++
  drivers:
 -	@echo -e "\\e[35mSOURCE: make \\e[36mdrivers \\e[0m"
 +	@echo -e "\\e[35mSOURCE: make \\e[36mDRIVERS \\e[0m"
@@ -151,6 +152,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  
  third-party:
  	@echo -e "\\e[35mSOURCE: make \\e[36mTHIRD PARTY \\e[0m"
++	$(MAKE) -C $(THIRD_PARTY_DIR) opkg-local
  	$(MAKE) -C $(THIRD_PARTY_DIR)
 -	$(MAKE) -C $(THIRD_PARTY_DIR)	install
 -
@@ -158,10 +160,9 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -ui:
 -	@echo -e "\\e[35mSOURCE: make \\e[36mUI \\e[0m"	
 -	$(MAKE) -C $(UI_DIR) -s	
--
-+#	$(MAKE) -C $(THIRD_PARTY_DIR) install
 +	$(MAKE) BUILD=1 MONOLITHIC=1 -C $(THIRD_PARTY_DIR) monolithic
- 	
+ 
+-	
  #
 -# Generate files in target/ before make squash image
 +# Generate files in target/ before making img
@@ -365,19 +366,10 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -endif
 -ifeq ($(ZIP_3G),1)
 -	make zip3g
-+	@echo -e "\\e[35mDone! Image \\e[36m$(IMG_NAME) has been built.\\e[0m"
- endif
- 
-+clean_uclibc:
-+	@echo -e "\\e[35mUCLIBC: make \\e[36mclean \\e[0m"
-+	-$(MAKE) -C uClibc-0.9.32 clean -s
-+	-rm -f uClibc-0.9.32/.compiled
- 
-+clean_apps:
-+	@echo -e "\\e[35mAPPS: make \\e[36mclean \\e[0m"
-+	-$(MAKE) -C $(APPS_DIR) clean -s
-+	-rm -f $(APPS_DIR)/.compiled
- 
+-endif
+-
+-
+-
 -ifeq ($(ZIP_3G),1)
 -ZIP3G_DIR=$(IMAGE_DIR)/zip3g
 -ZIP3GFS_DIR=$(ZIP3G_DIR)/rootfs
@@ -392,12 +384,21 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -#	@cd $(ZIP3G_DIR) && $(MAKESQUASHFS) $(ZIP3GFS_DIR) zip3g.img -be -noappend -b 32768
 -#	create PID bin image file.
 -	cd $(ZIP3G_DIR) && ./zip3g.sh
--endif
--
++	@echo -e "\\e[35mDone! Image \\e[36m$(IMG_NAME) has been built.\\e[0m"
+ endif
+ 
 -burn:
 -	cd $(IMAGE_DIR) ; ./nand_small_page_brcm_ecc_tool $(BOARD_ID).burn.bin $(BOARD_ID).bin;
--
--
++clean_uclibc:
++	@echo -e "\\e[35mUCLIBC: make \\e[36mclean \\e[0m"
++	-$(MAKE) -C uClibc-0.9.32 clean -s
++	-rm -f uClibc-0.9.32/.compiled
+ 
++clean_apps:
++	@echo -e "\\e[35mAPPS: make \\e[36mclean \\e[0m"
++	-$(MAKE) -C $(APPS_DIR) clean -s
++	-rm -f $(APPS_DIR)/.compiled
+ 
 -clean:
 -	fakeroot rm -rf $(TARGET_HOME)/target
 +clean_third-party:
