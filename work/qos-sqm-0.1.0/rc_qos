@@ -24,7 +24,7 @@
 
 path_binaries() {
 # Paths & binaries
-[ -z "$LIBDIR" ] && LIBDIR=/lib
+[ -z "$LIBDIR" ] && LIBDIR=/lib/modules
 [ -z "$ETCDIR" ] && ETCDIR=/usr/etc
 [ -z "$BINDIR" ] && BINDIR=/usr/sbin
 [ -z "$SCRIPTSDIR" ] && SCRIPTSDIR=${BINDIR}/scripts
