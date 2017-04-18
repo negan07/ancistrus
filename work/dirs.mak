@@ -33,7 +33,7 @@ HOME_$(CORE_WORK)	:= $(GITHUB_DIR)
 LIC_$(CORE_WORK)	:= $(LICENSE_NAME)
 SEC_$(CORE_WORK)	:= thirdparty
 PRIO_$(CORE_WORK)	:= required
-DEP_$(CORE_WORK)	:= $(NVRAM_NAME)
+DEP_$(CORE_WORK)	:= $(NAME_$(NVRAM))
 DESC_$(CORE_WORK)	:= Main work tool
 
 UTELNETD_NAME		:= utelnetd
@@ -108,7 +108,7 @@ HOME_$(NETWORKTEST)	:= https://github.com/richb-hanover/CeroWrtScripts
 LIC_$(NETWORKTEST)	:= GPLv2
 SEC_$(NETWORKTEST)	:= thirdparty
 PRIO_$(NETWORKTEST)	:= optional
-DEP_$(NETWORKTEST)	:= $(NETPERF_NAME)
+DEP_$(NETWORKTEST)	:= $(NAME_$(NETPERF))
 DESC_$(NETWORKTEST)	:= Enhanced network stress and network speed test scripts
 
 QOS_NG_3642N_NAME	:= qos-netgear
@@ -142,7 +142,7 @@ HOME_$(QOS_SQM)		:= https://github.com/tohojo/sqm-scripts
 LIC_$(QOS_SQM)		:= GPLv2
 SEC_$(QOS_SQM)		:= thirdparty
 PRIO_$(QOS_SQM)		:= standard
-DEP_$(QOS_SQM)		:= $(NVRAM_NAME),$(CORE_WORK_NAME),$(IPROUTE2_NAME)
+DEP_$(QOS_SQM)		:= $(NAME_$(NVRAM)),$(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
 DESC_$(QOS_SQM)		:= Quality Of Service CeroWrt script tool
 
 OPENSSL_NAME		:= openssl
