@@ -41,6 +41,9 @@ if [ -d .git ]; then
   cat .git/config
   echo
 
+# echo "== Commit Log"
+# git log --pretty='format:%<(10)%an%<(20)%ad%<(20)%s' --date=format:'%d/%m/%Y  %H:%M' > commit_log_`git rev-list --count HEAD`
+
   echo "== Most Recent Commit"
 # git log --max-count=1
   git log --max-count=1 --pretty='format:%Cblue%<(10)%h%Cred%<(10)%an%Cgreen%<(20)%ad%Creset%<(20)%s' --date=format:'%d/%m/%Y %H:%M'

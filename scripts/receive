@@ -22,7 +22,7 @@
 #
 # telnet the router:
 # cd $RDIR
-# curl -f -s -k -o ${THISONE} ${SERVER}://${ADDR}/${THISONE}
+# curl -f -s -k -O ${SERVER}://${ADDR}/${THISONE}
 # chmod 755 $THISONE
 # export LD_LIBRARY_PATH=$DBGDIR
 # Files are located in $DBGDIR .
@@ -51,7 +51,7 @@ ln -sf $RDIR/$THISONE $DBGDIR/$THISONE > /dev/null 2>&1
 
 GET() {									# www get a file from the $ADDR server
 rm -f $1
-curl -f -s -k -o ${1} ${SERVER}://${ADDR}/${1} > /dev/null 2>&1
+curl -f -s -k -O ${SERVER}://${ADDR}/${1} > /dev/null 2>&1
 	if [ $? != 0 ]; then
 	echo "$1 not found"
 	else
