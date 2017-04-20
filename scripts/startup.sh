@@ -33,7 +33,7 @@ CONF=${OPKG}.conf
 ARC=${OPKG}.zip
 ABSARC=${BIN}.zip
 
-URL=https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/tools
+URL=https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/tools/ancistrus-arm-D7000
 
 [ ! -z "$1" ] && URL=$1
 
