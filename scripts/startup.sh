@@ -14,6 +14,7 @@
 # Usage: $0 (<url>)
 #
 # <url> is optional and to be used only if remote url is different from the built-in one.
+# This script can be executed once and only once and it should be deleted after being run successfully.
 #
 # web-login the router and enable debug mode: http://${ROUTERLANIP}/setup.cgi?todo=debug
 # telnet the router (login: root):
@@ -25,6 +26,7 @@
 #
 
 DIR=/etc
+DESTDIR=/usr/sbin
 BIN=opkg
 OPKG=${DIR}/${BIN}
 CONF=${OPKG}.conf
@@ -35,22 +37,25 @@ URL=https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/tools
 
 [ ! -z "$1" ] && URL=$1
 
+[ -x ${DESTDIR}/${BIN} ] && echo "${BIN} looks already installed." && exit 3
 cd $DIR
+rm -f ${OPKG} ${CONF} ${ARC}
 echo "Downloading & extracting: ${ARC} ..."
 curl -k -O ${URL}/${ABSARC}
 unzip ${ARC}
 	if [ $? -ne 0 -o ! -f ${OPKG} -o ! -f ${CONF} ]; then
 	echo "Problem has occurred: check either connection or download urls."
-	exit 1
+	exit 2
 	fi
 chmod 755 ${OPKG}
 chmod 644 ${CONF}
 ${OPKG} update
 ${OPKG} install $BIN
-	if [ $? -ne 0 -o ! -x /usr/sbin/${BIN} ]; then
+	if [ $? -ne 0 -o ! -x ${DESTDIR}/${BIN} ]; then
 	echo "${BIN} installation failed: check repository urls on ${CONF}"
-	exit 2
+	exit 1
 	fi
 rm -f ${OPKG} ${ARC}
+echo "This script can now be deleted: type 'rm ${DIR}/startup.sh'"
 exit 0
 
