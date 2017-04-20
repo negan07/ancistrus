@@ -36,7 +36,7 @@ preinst:
 
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
-	@echo "echo \"Type '$(USRSBINSCR)/rc_qos help' to see the options & settings\"" >> $(POSTINST)
+	@echo "echo \"Type '$(USRSBINRCAPP)/rc_qos help' to see the options & settings\"" >> $(POSTINST)
 	@echo "echo \"If already setup earlier, simply type: 'nvram set qos_enable=1' and then '$(RC) qos restart'\"" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
