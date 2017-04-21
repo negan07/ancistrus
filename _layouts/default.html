@@ -16,10 +16,15 @@
 
         <section id="downloads">
           {% if site.show_downloads %}
-            <a href="{{ https://raw.githubusercontent.com/negan07/ancistrus/master/scripts/startup.sh }}" class="btn">Download router initialization script</a>
-            <a href="{{ ./img/D7000-V1.0.1.44_1.0.1-ancistrus_negan07-build-137.zip }}" class="btn">Download monolithic .img</a>
+            <a href="https://raw.githubusercontent.com/negan07/ancistrus/master/scripts/startup.sh" class="btn">Download router initialization script</a>
+            <!-- a href="./img/D7000-V1.0.1.44_1.0.1-ancistrus_negan07-build-137.zip" class="btn">Download monolithic .img</a-->
           {% endif %}
-          <a href="{{ site.github.repository_url }}" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+	<section id="wiki">
+            <a href="site.github.repository_url/wiki" class="btn btn-github"><span class="icon"></span>Wiki Board</a>
+        </section>
+        <section id="github">
+          <a href="site.github.repository_url" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
         </section>
       </div>
     </header>
@@ -27,6 +32,13 @@
     <div class="container">
       <section id="main_content">
         {{ content }}
+      </section>
+    </div>
+
+    <div class="container">
+      <section id="footer">
+        <a href="https://raw.githubusercontent.com/negan07/ancistrus/master/DISCLAIMER" class="btn btn-github"><span class="icon"></span>DISCLAIMER</a>
+	<a href="https://raw.githubusercontent.com/negan07/ancistrus/master/LICENSE" class="btn btn-github"><span class="icon"></span>License</a>
       </section>
     </div>
 
