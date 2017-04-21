@@ -14,18 +14,18 @@
         <h1>{{ site.title | default: site.github.repository_name }}</h1>
         <h2>{{ site.description | default: site.github.project_tagline }}</h2>
 
+	<section id="github">
+            <a href="{{ site.github.repository_url }}/wiki" class="btn btn-github"><span class="icon"></span>Wiki Board</a>
+            <a href="{{ site.github.repository_url }}" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+
         <section id="downloads">
           {% if site.show_downloads %}
             <a href="https://raw.githubusercontent.com/negan07/ancistrus/master/scripts/startup.sh" class="btn">Download router initialization script</a>
-            <!-- a href="./img/D7000-V1.0.1.44_1.0.1-ancistrus_negan07-build-137.zip" class="btn">Download monolithic .img</a-->
+            <!-- a href="./img/D7000--ancistrus_negan07-build-.zip" class="btn">Download monolithic .img</a-->
           {% endif %}
         </section>
-	<section id="wiki">
-            <a href="site.github.repository_url/wiki" class="btn btn-github"><span class="icon"></span>Wiki Board</a>
-        </section>
-        <section id="github">
-          <a href="site.github.repository_url" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
-        </section>
+
       </div>
     </header>
 
