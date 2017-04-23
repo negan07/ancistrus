@@ -284,6 +284,8 @@ All settings can be setup at once with 'anc nvram set qos_enable 1 qos_uplink_ra
 Finally, settings must be stored permanently with: 'anc nvram commit' or 'nvram commit' .
 They can also be setup singularly with 'anc nvram set qos_enable 1' 'anc nvram set qos_uplink_rate 400' 'anc nvram set qos_dwlink_rate 15000' ... 'anc nvram set VARN VALN' 'anc nvram commit' .
 
+Reload then qos-sqm by typing: 'rc qos restart' .
+
 If you wanna look for previously stored value, type: 'anc nvram get qos_enable qos_uplink_rate qos_dwlink_rate ... VARN'
 or singularly with 'anc nvram get qos_enable' 'anc nvram get qos_uplink_rate' 'anc nvram get qos_dwlink_rate' ... 'anc nvram get VARN' .
 _EOF_
