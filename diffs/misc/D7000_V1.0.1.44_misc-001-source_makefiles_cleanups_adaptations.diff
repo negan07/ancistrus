@@ -334,14 +334,15 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -#	dd if=/dev/zero of=file128k.tmp bs=1k count=128; \
 -#	cat $(CFE_ROM_FILE)  file128k.tmp | head --bytes=$(FLASH_NAND_BLOCK_SIZE) > cferom.tmp; 
 -#	cd $(IMAGE_DIR) ; cp $(BOARD_ID)_$(FLASH).par $(BOARD_ID).par; ./bb $(BOARD_ID)
+-	cd $(IMAGE_DIR) ; ./bb $(BOARD_ID)
+-	cd $(IMAGE_DIR) ; ./bb_dual $(BOARD_ID)_dual
+-	cd $(IMAGE_DIR) ; cp $(BOARD_ID).img $(IMG_NAME) -f
 +	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(FS_DIR) -o $(IMAGE_DIR)/rootfs.img -N $(TARGET_HOME)/nocomprlist
 +	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/EMPTY -o $(IMAGE_DIR)/empty.img -N $(TARGET_HOME)/nocomprlist
 +	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/languages -o $(IMAGE_DIR)/langpkg.img -N $(TARGET_HOME)/nocomprlist
 +	rm $(TARGET_HOME)/nocomprlist
- 	cd $(IMAGE_DIR) ; ./bb $(BOARD_ID)
--	cd $(IMAGE_DIR) ; ./bb_dual $(BOARD_ID)_dual
--	cd $(IMAGE_DIR) ; cp $(BOARD_ID).img $(IMG_NAME) -f
-+#	cd $(IMAGE_DIR) ; ./bb_dual $(BOARD_ID)_dual
++	cd $(IMAGE_DIR) ; ./bb $(BOARD_ID) || exit 1
++	cd $(IMAGE_DIR) ; ./bb_dual $(BOARD_ID)_dual || exit 1
 +	cd $(IMAGE_DIR) ; cp -f $(BOARD_ID).img ../../../$(IMG_NAME)
  	@echo
 -	@echo -e "Done! Image $(BOARD_ID).img has been built in $(IMAGE_DIR)."
