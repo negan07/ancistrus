@@ -342,7 +342,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 +	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/languages -o $(IMAGE_DIR)/langpkg.img -N $(TARGET_HOME)/nocomprlist
 +	rm $(TARGET_HOME)/nocomprlist
 +	cd $(IMAGE_DIR) ; ./bb $(BOARD_ID) || exit 1
-+	cd $(IMAGE_DIR) ; ./bb_dual $(BOARD_ID)_dual || exit 1
++#	cd $(IMAGE_DIR) ; ./bb_dual $(BOARD_ID)_dual || exit 1
 +	cd $(IMAGE_DIR) ; cp -f $(BOARD_ID).img ../../../$(IMG_NAME)
  	@echo
 -	@echo -e "Done! Image $(BOARD_ID).img has been built in $(IMAGE_DIR)."
