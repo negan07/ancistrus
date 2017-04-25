@@ -48,10 +48,11 @@ ifndef BUILD
 control:
 else
 PREINST			:= $(CTRL_DIR)/preinst
+POSTINST		:= $(CTRL_DIR)/postinst
 PRERM			:= $(CTRL_DIR)/prerm
 POSTRM			:= $(CTRL_DIR)/postrm
 
-control: preinst prerm postrm
+control: preinst postinst prerm postrm
 
 preinst:
 	@echo "#!/bin/sh" > $(PREINST)
@@ -60,6 +61,14 @@ preinst:
 	@echo "[ -f $(USRETC)/$(RCS) ] && cp -f $(USRETC)/$(RCS) $(USRETC)/$(RCS).orig" >> $(PREINST)
 	@echo "fi" >> $(PREINST)
 	@echo "exit 0" >> $(PREINST)
+
+postinst:
+	@echo "#!/bin/sh" > $(POSTINST)
+	@echo "echo \"Updating root login passwd...\"" >> $(POSTINST)
+	@echo "echo \"root:\`anc nvram rget http_password\`\" | chpasswd" >> $(POSTINST)
+	@echo "echo \"Disabling non superuser login...\"" >> $(POSTINST)
+	@echo "touch $(TMPETC)/nologin" >> $(POSTINST)
+	@echo "exit 0" >> $(POSTINST)
 
 prerm:
 	@echo "#!/bin/sh" > $(PRERM)
@@ -75,6 +84,7 @@ postrm:
 	@echo "#!/bin/sh" > $(POSTRM)
 	@echo "echo \"Push back original $(RCS) startup script...\"" >> $(POSTRM)
 	@echo "[ -f $(USRETC)/$(RCS).orig ] && mv -f $(USRETC)/$(RCS).orig $(USRETC)/$(RCS)" >> $(POSTRM)
+	@echo "rm -f $(TMPETC)/nologin" >> $(POSTRM)
 	@echo "exit 0" >> $(POSTRM)
 endif
 
