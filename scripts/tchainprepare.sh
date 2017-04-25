@@ -42,7 +42,7 @@ cd $TCDIR
 echo "Extracting crosstools from tar.bz2 archive..."
 tar xjf ../${TARTC} || exit 3
 chmod -f 755 src/build
-chmod -f 644 src/*.brcm.config
+chmod -f 644 src/*.config
 # extract archives on dl dir
 cd $BRDLDIR
 echo "Extracting crosstools before patching..."

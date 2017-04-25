@@ -103,7 +103,7 @@ diff -urN work/nvram-0.1.0/Makefile work/nvram-0.1.0/Makefile
 +prerm:
 +	@echo "#!/bin/sh" > $(PRERM)
 +	@echo "echo \"$(LIBS) builtin required: cannot uninstall...\"" >> $(PRERM)
++	@echo "echo" >> $(PRERM)
 +	@echo "exit 1" >> $(PRERM)
-+	@echo "fi" >> $(PRERM)
 +endif
  

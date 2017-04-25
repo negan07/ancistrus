@@ -127,7 +127,6 @@ endif
 
 ifeq ($(ARCH),arm)
 export CFLAGS 		:= -marm -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon-fp16 -pipe -funit-at-a-time -fomit-frame-pointer -ffixed-r8 -fno-common -mno-thumb-interwork -mabi=aapcs-linux -mfloat-abi=soft
-#CFLAGS 		+= -mfloat-abi=softfp
 endif
 
 ifeq ($(ARCH),i386)

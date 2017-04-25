@@ -116,8 +116,8 @@ diff -urN work/iproute2-4.10.0/Makefile work/iproute2-4.10.0/Makefile
 +prerm:
 +	@echo "#!/bin/sh" > $(PRERM)
 +	@echo "echo \"iproute2 builtin required: cannot uninstall...\"" >> $(PRERM)
++	@echo "echo" >> $(PRERM)
 +	@echo "exit 1" >> $(PRERM)
-+	@echo "fi" >> $(PRERM)
 +endif
 +
  .EXPORT_ALL_VARIABLES:

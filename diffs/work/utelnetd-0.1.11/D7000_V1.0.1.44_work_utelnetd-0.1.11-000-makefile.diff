@@ -98,7 +98,7 @@ diff -urN work/utelnetd-0.1.11/Makefile work/utelnetd-0.1.11/Makefile
 +prerm:
 +	@echo "#!/bin/sh" > $(PRERM)
 +	@echo "echo \"$(BINS) builtin required: cannot uninstall...\"" >> $(PRERM)
++	@echo "echo" >> $(PRERM)
 +	@echo "exit 1" >> $(PRERM)
-+	@echo "fi" >> $(PRERM)
 +endif
 +
