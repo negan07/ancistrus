@@ -21,8 +21,7 @@
 
         <section id="downloads">
           {% if site.show_downloads %}
-            <a href="./startup.html" class="btn">Download router initialization script</a>
-            <!-- a href="./scripts/ancistrus-arm-D7000/startup.sh" class="btn">Download router initialization script</a-->
+            <a href="./scripts/ancistrus-arm-D7000/startup.sh" class="btn">Download router initialization script</a>
             <!-- a href="./img/D7000--ancistrus_negan07-build-.zip" class="btn">Download monolithic .img</a-->
           {% endif %}
         </section>
@@ -33,6 +32,26 @@
     <div class="container">
       <section id="main_content">
         {{ content }}
+      </section>
+      <section id="startup">
+        <p>Startup script: initialize router for package installations.</p>
+
+	<p>Usage: ./startup.sh (url)</p>
+
+	<p>(url) is optional and to be used only if remote url is different from the built-in one.</p>
+
+	<p>This script can be executed once and only once and it should be deleted after being run successfully.</p>
+
+	<p>With 192.168.0.1 router lan-ip web-login the router and enable debug mode: http://192.168.0.1/setup.cgi?todo=debug</p>
+
+	<p>telnet the router (login: root):</p>
+
+	<p>$ cd /etc
+	$ curl -k -O https://raw.githubusercontent.com/negan07/ancistrus/master/scripts/startup.sh
+	$ chmod 755 startup.sh
+	$ ./startup.sh</p>
+
+	<p>Follow the instructions on terminal.</p>
       </section>
     </div>
 
