@@ -202,6 +202,7 @@ fi
 # ancistrus
 echo "=============ancistrus start " > /dev/console
 echo "root:`anc nvram rget http_password`" | chpasswd
+echo "nobody:`anc nvram rget http_password`" | chpasswd
 touch /etc/nologin
 utelnetd -l /usr/sbin/login -d
 # snr retrain: [ min -136 = 65400 ] ... [ -1 = 65535] 0 1 ... [ 100 = default ] ... [ 32767 max ]

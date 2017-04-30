@@ -64,9 +64,9 @@ preinst:
 
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
-	@echo "echo \"Updating root login passwd...\"" >> $(POSTINST)
+	@echo "echo \"Updating console login passwd...\"" >> $(POSTINST)
 	@echo "echo \"root:\`anc nvram rget http_password\`\" | chpasswd" >> $(POSTINST)
-	@echo "echo \"Disabling non superuser login...\"" >> $(POSTINST)
+	@echo "echo \"nobody:\`anc nvram rget http_password\`\" | chpasswd" >> $(POSTINST)
 	@echo "touch $(TMPETC)/nologin" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
