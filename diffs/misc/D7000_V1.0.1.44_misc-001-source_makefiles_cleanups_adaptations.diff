@@ -1,23 +1,3 @@
-diff -urN D7000_V1.0.1.44_WW_src/Source/env.mak D7000_V1.0.1.44_WW_src/Source/env.mak
---- D7000_V1.0.1.44_WW_src/Source/env.mak	2016-10-11 17:57:47.000000000 +0200
-+++ D7000_V1.0.1.44_WW_src/Source/env.mak	2017-01-13 14:24:56.249727068 +0100
-@@ -18,7 +18,7 @@
- export IMAGE_DIR=$(ROOT)/image
- export TARGET_DIR=$(ROOT)/target
- export SC_LIBS_DIR=$(APPS_DIR)/sc_libs
--export THIRD_PARTY_DIR=$(ROOT)/third_party
-+export THIRD_PARTY_DIR=$(ROOT)/../../work
- export LOADER_DIR = $(TARGET_HOME)/cfe
- export CFERAM_DIR = $(TARGET_HOME)/cferam
- export DPF_DIR = $(TARGET_HOME)/dpf
-@@ -29,6 +29,7 @@
- export HOSTTOOLS_DIR = $(TARGET_HOME)/../Kernel/bcm963xx/hostTools
- export MAKE_BIN_DIR = $(TOOLS_DIR)/make_bin
- export FUNC = 00
-+export ATMDIR = linux-atm-2.4.0
- 
- export ROOTFS = $(FS_DIR)
- 
 diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/Makefile
 --- D7000_V1.0.1.44_WW_src/Source/Makefile	2016-10-11 17:57:47.000000000 +0200
 +++ D7000_V1.0.1.44_WW_src/Source/Makefile	2017-01-14 00:22:33.678101901 +0100
@@ -77,20 +57,20 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -	IMG_NAME_GPL=$(BOARD_ID)-$(VERSION).img
 -	BIN_NAME=$(IMAGE_DIR)/$(BOARD_ID)-$(VERSION).bin
 -endif
--
--
--ifeq ($(BRIDGE),1)
--	FUNC = 01
--endif
 +IMG_NAME=$(BOARD_ID)-$(VERSION).img
 +IMG_NAME_GPL=$(BOARD_ID)-$(VERSION).img
 +BIN_NAME=$(BOARD_ID)-$(VERSION).bin
  
++all: work
+ 
+-ifeq ($(BRIDGE),1)
+-	FUNC = 01
+-endif
+-
 -ifeq ($(MULTI_PVC),1)
 -	FUNC = 03
 -endif
-+all: work
- 
+-
 -PID=$(FIRMWARE_DIR)/PID_$(VERSION)
 +orig: clean_img clean_target pre_fs apps drivers prefs fs img
  
@@ -115,7 +95,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -	make -C uClibc-0.9.32/
 +	@echo -e "\\e[35mSOURCE: make \\e[36mUCLIBC \\e[0m"
 +	@if [ ! -f uClibc-0.9.32/.compiled ]; then \
-+	make -C uClibc-0.9.32/; \
++	make UCLIBC_EXTRA_CFLAGS="$(UCLIBC_EXTRA_CFLAGS)" -C uClibc-0.9.32/ || exit 1; \
 +	touch uClibc-0.9.32/.compiled; \
 +	fi
  	cp -af uClibc-0.9.32/lib/ld-uClibc-0.9.32.so target/lib/
@@ -132,19 +112,19 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -	    exit 1;                     \
 -	else                            \
 -	    echo "fakeroot OK";         \
--	fi
--
- apps:
--	@echo -e "\\e[35mSOURCE: make \\e[36mAPPS \\e[0m"		
--	$(MAKE) -C $(APPS_DIR) 
++apps:
 +	@echo -e "\\e[35mSOURCE: make \\e[36mAPPS \\e[0m"
 +	@if [ ! -f $(APPS_DIR)/.compiled ]; then \
-+	$(MAKE) -C $(APPS_DIR); \
++	$(MAKE) -C $(APPS_DIR) || exit 1; \
 +	touch $(APPS_DIR)/.compiled; \
-+	fi
- 	$(MAKE) -C $(APPS_DIR) install 
+ 	fi
++	$(MAKE) -C $(APPS_DIR) install || exit 1
+ 
+-apps:
+-	@echo -e "\\e[35mSOURCE: make \\e[36mAPPS \\e[0m"		
+-	$(MAKE) -C $(APPS_DIR) 
+-	$(MAKE) -C $(APPS_DIR) install 
 -	
-+
  drivers:
 -	@echo -e "\\e[35mSOURCE: make \\e[36mdrivers \\e[0m"
 +	@echo -e "\\e[35mSOURCE: make \\e[36mDRIVERS \\e[0m"
@@ -367,10 +347,19 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -endif
 -ifeq ($(ZIP_3G),1)
 -	make zip3g
--endif
--
--
--
++	@echo -e "\\e[35mDone! Image \\e[36m$(IMG_NAME) has been built.\\e[0m"
+ endif
+ 
++clean_uclibc:
++	@echo -e "\\e[35mUCLIBC: make \\e[36mclean \\e[0m"
++	-$(MAKE) -C uClibc-0.9.32 clean -s
++	-rm -f uClibc-0.9.32/.compiled
+ 
++clean_apps:
++	@echo -e "\\e[35mAPPS: make \\e[36mclean \\e[0m"
++	-$(MAKE) -C $(APPS_DIR) clean -s
++	-rm -f $(APPS_DIR)/.compiled
+ 
 -ifeq ($(ZIP_3G),1)
 -ZIP3G_DIR=$(IMAGE_DIR)/zip3g
 -ZIP3GFS_DIR=$(ZIP3G_DIR)/rootfs
@@ -385,21 +374,12 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -#	@cd $(ZIP3G_DIR) && $(MAKESQUASHFS) $(ZIP3GFS_DIR) zip3g.img -be -noappend -b 32768
 -#	create PID bin image file.
 -	cd $(ZIP3G_DIR) && ./zip3g.sh
-+	@echo -e "\\e[35mDone! Image \\e[36m$(IMG_NAME) has been built.\\e[0m"
- endif
- 
+-endif
+-
 -burn:
 -	cd $(IMAGE_DIR) ; ./nand_small_page_brcm_ecc_tool $(BOARD_ID).burn.bin $(BOARD_ID).bin;
-+clean_uclibc:
-+	@echo -e "\\e[35mUCLIBC: make \\e[36mclean \\e[0m"
-+	-$(MAKE) -C uClibc-0.9.32 clean -s
-+	-rm -f uClibc-0.9.32/.compiled
- 
-+clean_apps:
-+	@echo -e "\\e[35mAPPS: make \\e[36mclean \\e[0m"
-+	-$(MAKE) -C $(APPS_DIR) clean -s
-+	-rm -f $(APPS_DIR)/.compiled
- 
+-
+-
 -clean:
 -	fakeroot rm -rf $(TARGET_HOME)/target
 +clean_third-party:
