@@ -13,7 +13,7 @@
 #
 # Usage: $0 <absdir1> <absdir2>
 #
-# To be used before migrating code from old to new firmware version.
+# To be used before migrating code from old to new firmware version or to prepare some .diff patches.
 # Parameters must be absolute dirs.
 # Destination dir tree starts from the git root source dir.
 # Suppose source dir structures to be similar (if not, edit this).
@@ -36,7 +36,10 @@ do
 	esac
 done
 
+TAG=`echo ${1##*/} | cut -d '_' -f 1`_`echo ${1##*/} | cut -d '_' -f 2`
+
 DESTDIR=diff-${1##*/}-${2##*/}
+
 mkdir -p -m 0755 $DESTDIR
 
 for D in $LISTDIR
@@ -50,7 +53,39 @@ do
 	mkdir -p -m 0755 $DESTDIR/$D
 		for I in `ls $1/$D`
 		do
-		diff -urN $1/$D/$I $2/$D/$I > $DESTDIR/$D/$I.diff
+			case $I in
+			apple)
+			mkdir -p -m 0755 $DESTDIR/$D/$I
+				for A in `ls $1/$D/$I`
+				do
+				diff -urN $1/$D/$I/$A $2/$D/$I/$A > $DESTDIR/$D/$I/${TAG}_apps_${I}_${A}-000-all.diff
+				done
+			;;
+			mediaserver)
+			mkdir -p -m 0755 $DESTDIR/$D/$I
+				for M in `ls $1/$D/$I`
+				do
+					case $M in
+					library)
+						for L in `ls $1/$D/$I/$M`
+						do
+						diff -urN $1/$D/$I/$M/$L $2/$D/$I/$M/$L > $DESTDIR/$D/$I/${TAG}_apps_${I}_${M}_${L}-000-all.diff
+						done
+					;;
+					*)
+					diff -urN $1/$D/$I/$M $2/$D/$I/$M > $DESTDIR/$D/$I/${TAG}_apps_${I}_${M}-000-all.diff
+					;;
+					esac
+				done
+			;;
+			Makefile)
+			diff -uN $1/$D/$I $2/$D/$I > $DESTDIR/$D/${TAG}_misc-004-source_apps_makefile_cleanups_adaptations.diff
+			;;
+			*)
+			mkdir -p -m 0755 $DESTDIR/$D/$I
+			diff -urN $1/$D/$I $2/$D/$I > $DESTDIR/$D/$I/${TAG}_apps_${I}-000-all.diff
+			;;
+			esac
 		done
 	;;
 	Makefile|Kernel/bcm963xx|Source)	
