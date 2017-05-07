@@ -1,0 +1,36 @@
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/arm.uClibc-0.9.32.brcm.config crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/arm.uClibc-0.9.32.brcm.config
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/arm.uClibc-0.9.32.brcm.config	2014-01-16 20:54:24.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/arm.uClibc-0.9.32.brcm.config	2017-02-20 22:17:11.544753557 +0100
+@@ -265,7 +265,7 @@
+ # uClibc development/debugging options
+ #
+ CROSS_COMPILER_PREFIX=""
+-UCLIBC_EXTRA_CFLAGS="-mcpu=cortex-a9 -mtune=cortex-a9 -march=armv7-a -mabi=aapcs-linux -mfpu=neon-fp16"
++UCLIBC_EXTRA_CFLAGS="-mcpu=cortex-a9 -mtune=cortex-a9 -march=armv7-a -mabi=aapcs-linux -mfpu=neon-fp16 -mfloat-abi=soft"
+ # DODEBUG is not set
+ DOSTRIP=y
+ # DOASSERTS is not set
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mipsel.uClibc-0.9.32.brcm.config crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mipsel.uClibc-0.9.32.brcm.config
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mipsel.uClibc-0.9.32.brcm.config	2014-01-16 20:54:24.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mipsel.uClibc-0.9.32.brcm.config	2017-02-20 22:17:09.000765998 +0100
+@@ -243,7 +243,7 @@
+ # uClibc development/debugging options
+ #
+ CROSS_COMPILER_PREFIX=""
+-UCLIBC_EXTRA_CFLAGS="-mips32 -march=mips32 -mtune=mips32 -mabi=32"
++UCLIBC_EXTRA_CFLAGS="-mips32 -march=mips32 -mtune=mips32 -mabi=32 -msoft-float"
+ # DODEBUG is not set
+ # DODEBUG_PT is not set
+ DOSTRIP=y
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mips.uClibc-0.9.32.brcm.config crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mips.uClibc-0.9.32.brcm.config
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mips.uClibc-0.9.32.brcm.config	2014-01-16 20:54:24.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/mips.uClibc-0.9.32.brcm.config	2017-02-20 22:17:10.164760304 +0100
+@@ -243,7 +243,7 @@
+ # uClibc development/debugging options
+ #
+ CROSS_COMPILER_PREFIX=""
+-UCLIBC_EXTRA_CFLAGS="-mips32 -march=mips32 -mtune=mips32 -mabi=32"
++UCLIBC_EXTRA_CFLAGS="-mips32 -march=mips32 -mtune=mips32 -mabi=32 -msoft-float"
+ # DODEBUG is not set
+ # DODEBUG_PT is not set
+ DOSTRIP=y
