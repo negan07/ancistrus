@@ -25,6 +25,7 @@ LOCAL_REP_ROOT		?= https://192.168.0.51
 
 FWVER			?= V1.0.1.44
 CPU_ARCH_NAME		?= ARM
+FPU_TYPE		?= hard
 RCBOOT			?= /usr/etc/rcS
 
 OPKG_PKG_DIR		?= build
@@ -67,4 +68,5 @@ PREFIX_I386		?= $(TARGET_I386)
 TCHAIN_DIR		?= $(TCHAIN_$(CPU_ARCH_NAME)_DIR)
 TCHAIN_PREFIX		?= $(PREFIX_$(CPU_ARCH_NAME))
 TCHAIN_PATH		?= $(TCHAIN_DIR)/$(TCHAIN_PREFIX)
+TCHAIN_GCC_CONF_ARGS	?= $(TCHAIN_DIR)/../lib/gcc/$(TARGET_$(CPU_ARCH_NAME))/4.6.2/plugin/include/configargs.h
 
