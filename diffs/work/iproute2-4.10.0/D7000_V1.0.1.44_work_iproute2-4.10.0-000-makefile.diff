@@ -74,49 +74,26 @@ diff -urN work/iproute2-4.10.0/Makefile work/iproute2-4.10.0/Makefile
  
  snapshot:
  	echo "static const char SNAPSHOT[] = \""`date +%y%m%d`"\";" \
-@@ -105,4 +102,46 @@
+@@ -105,4 +102,23 @@
  cscope:
  	cscope -b -q -R -Iinclude -sip -slib -smisc -snetem -stc
  
 +ifndef BUILD
 +control:
 +else
-+PREINST			:= $(CTRL_DIR)/preinst
 +POSTINST		:= $(CTRL_DIR)/postinst
 +PRERM			:= $(CTRL_DIR)/prerm
 +
-+control: preinst postinst prerm
-+
-+preinst:
-+	@echo "#!/bin/sh" > $(PREINST)
-+	@echo "[ -d $(USRETC)/iproute2 ] && mv -f $(USRETC)/iproute2 $(USRETC)/iproute2.orig" >> $(PREINST)
-+	@echo "[ -d $(TMPETC)/iproute2 ] && mv -f $(TMPETC)/iproute2 $(TMPETC)/iproute2.orig" >> $(PREINST)
-+	@echo "[ -f $(USRSBIN)/ip ] && cp -f $(USRSBIN)/ip $(USRSBIN)/ip.orig" >> $(PREINST)
-+	@echo "[ -f $(USRSBIN)/tc ] && cp -f $(USRSBIN)/tc $(USRSBIN)/tc.orig" >> $(PREINST)
-+	@echo "exit 0" >> $(PREINST)
++control: postinst prerm
 +
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
 +	@echo "cp -rf $(USRETC)/iproute2 $(TMPETC)/iproute2" >> $(POSTINST)
-+	@echo "echo \"Testing iproute2 basic functionality...\"" >> $(POSTINST)
-+	@echo "echo" >> $(POSTINST)
-+	@echo "$(USRSBIN)/tc qdisc show > /dev/null 2>&1" >> $(POSTINST)
-+	@echo "if [ \$$? -eq 0 ]; then" >> $(POSTINST)
-+	@echo "echo \"Looking good\"" >> $(POSTINST)
-+	@echo "rm -rf $(USRETC)/iproute2.orig $(TMPETC)/iproute2.orig $(USRSBIN)/ip.orig $(USRSBIN)/tc.orig" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
-+	@echo "else" >> $(POSTINST)
-+	@echo "echo \"Something wrong: reverting to original iproute2 ...\"" >> $(POSTINST)
-+	@echo "[ -d $(USRETC)/iproute2.orig ] && mv -f $(USRETC)/iproute2.orig $(USRETC)/iproute2" >> $(POSTINST)
-+	@echo "[ -d $(TMPETC)/iproute2.orig ] && mv -f $(TMPETC)/iproute2.orig $(TMPETC)/iproute2" >> $(POSTINST)
-+	@echo "[ -f $(USRSBIN)/ip.orig ] && mv -f $(USRSBIN)/ip.orig $(USRSBIN)/ip" >> $(POSTINST)
-+	@echo "[ -f $(USRSBIN)/tc.orig ] && mv -f $(USRSBIN)/tc.orig $(USRSBIN)/tc" >> $(POSTINST)
-+	@echo "exit 1" >> $(POSTINST)
-+	@echo "fi" >> $(POSTINST)
++
 +prerm:
 +	@echo "#!/bin/sh" > $(PRERM)
 +	@echo "echo \"iproute2 builtin required: cannot uninstall...\"" >> $(PRERM)
-+	@echo "echo" >> $(PRERM)
 +	@echo "exit 1" >> $(PRERM)
 +endif
 +
