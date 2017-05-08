@@ -58,7 +58,7 @@ do
 			mkdir -p -m 0755 $DESTDIR/$D/$I
 				for A in `ls $1/$D/$I`
 				do
-				diff -urN $1/$D/$I/$A $2/$D/$I/$A > $DESTDIR/$D/$I/${TAG}_apps_${I}_${A}-000-all.diff
+				diff -urN $1/$D/$I/$A $2/$D/$I/$A > $DESTDIR/$D/$I/${TAG}_apps_${I}-000-${A}.diff
 				done
 			;;
 			mediaserver)
@@ -69,11 +69,11 @@ do
 					library)
 						for L in `ls $1/$D/$I/$M`
 						do
-						diff -urN $1/$D/$I/$M/$L $2/$D/$I/$M/$L > $DESTDIR/$D/$I/${TAG}_apps_${I}_${M}_${L}-000-all.diff
+						diff -urN $1/$D/$I/$M/$L $2/$D/$I/$M/$L > $DESTDIR/$D/$I/${TAG}_apps_${I}-000-${M}_${L}.diff
 						done
 					;;
 					*)
-					diff -urN $1/$D/$I/$M $2/$D/$I/$M > $DESTDIR/$D/$I/${TAG}_apps_${I}_${M}-000-all.diff
+					diff -urN $1/$D/$I/$M $2/$D/$I/$M > $DESTDIR/$D/$I/${TAG}_apps_${I}-000-${M}.diff
 					;;
 					esac
 				done
