@@ -1,0 +1,47 @@
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/Makefile D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/Makefile	2016-10-11 17:54:20.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/Makefile	2017-04-29 22:13:51.585930533 +0200
+@@ -12,7 +12,7 @@
+ 
+ %.install:
+ 	#(cd $(patsubst %.install, %, $@) && $(MAKE) install)
+-	$(STRIP) ./routed/routed
++	$(SSTRIP) ./routed/routed
+ 	cp ./routed/routed ../../target/usr/sbin/
+ 
+ %.clean:
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/MCONFIG D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/MCONFIG
+--- D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/MCONFIG	2016-10-11 17:54:20.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/MCONFIG	2017-04-29 22:16:29.684872827 +0200
+@@ -10,7 +10,7 @@
+ EXECPREFIX=/home/mkumar/work/linux_dist32/filesystem/usr
+ INSTALLROOT=
+ CC=mips-uclibc-gcc
+-CFLAGS=-Os -Wall -Werror -W -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline -O2 -Wall -W -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline 
++CFLAGS+=-Os -Wall -Werror -W -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline -Wbad-function-cast -Wcast-qual 
+ CFLAGS+=-D_BIG_ENDDIAN_
+ LDFLAGS=
+ LIBS=
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/routed/Makefile D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/routed/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/routed/Makefile	2016-10-11 17:54:20.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/netkit-routedv2-0.1/routed/Makefile	2017-05-04 00:14:55.813027299 +0200
+@@ -5,16 +5,14 @@
+ 
+ include ../../../Rules.mak
+ CC=$(CROSS)gcc
+-CFLAGS += -Wno-strict-aliasing -Wno-unused-but-set-variable
+-OBJS=	af.o if.o input.o main.o output.o startup.o \
+-	tables.o timer.o trace.o inet.o
++CFLAGS += -Os -Wall -Werror -W -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline -Wbad-function-cast -Wcast-qual -Wno-strict-aliasing -Wno-unused-but-set-variable
++OBJS=	af.o if.o input.o main.o output.o startup.o tables.o timer.o trace.o inet.o
+ 
+ routed: $(OBJS)
+-	$(CC) $(LDFLAGS) $^ $(LIBS) -o $@
++	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
+ 
+ install: all
+ 	install -s -m$(DAEMONMODE) routed $(INSTALLROOT)$(SBINDIR)
+-#	install -m$(MANMODE) routed.8 $(INSTALLROOT)$(MANDIR)/man8
+ 
+ clean:
+ 	rm -f *.o routed

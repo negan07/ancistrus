@@ -1,0 +1,10 @@
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/apple/alsa-lib-1.0.26/build.sh D7000_V1.0.1.44_WW_src/Source/apps/apple/alsa-lib-1.0.26/build.sh
+--- D7000_V1.0.1.44_WW_src/Source/apps/apple/alsa-lib-1.0.26/build.sh	2016-10-11 17:54:07.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/apple/alsa-lib-1.0.26/build.sh	2017-05-04 20:53:03.767753219 +0200
+@@ -2,5 +2,4 @@
+ build_dir=build_sc
+ cd $build_dir
+ 
+-CPPFLAGS="-I." CFLAGS="-I`pwd`/../ -I. -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --prefix= \
+-		  --disable-python
++CPPFLAGS="-I." CFLAGS="${1} -I`pwd`/../ -I. -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --prefix= --disable-python

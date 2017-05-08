@@ -1,0 +1,9 @@
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/apple/libgcrypt-1.5.0/build.sh D7000_V1.0.1.44_WW_src/Source/apps/apple/libgcrypt-1.5.0/build.sh
+--- D7000_V1.0.1.44_WW_src/Source/apps/apple/libgcrypt-1.5.0/build.sh	2016-10-11 17:53:55.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/apple/libgcrypt-1.5.0/build.sh	2017-05-04 20:53:03.771753087 +0200
+@@ -1,4 +1,4 @@
+ #!/bin/bash
+ build_dir=build_sc
+ cd $build_dir
+-CC=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-gcc  CFLAGS=-I`pwd`/../../target/usr/include LDFLAGS=-L`pwd`/../../target/usr/lib ../configure --host=arm-linux --build=i686-pc-linux-gnu prefix=/usr --enable-shared --enable-static --disable-asm --with-gpg-error-prefix=`pwd`/../../target/usr --enable-digests="md5 rmd160 sha1 sha256 sha512" --enable-ciphers="arcfour des aes cast5" --enable-pubkey-ciphers="rsa dsa"
++CC=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-gcc  CFLAGS="${1} -I`pwd`/../../target/usr/include" LDFLAGS=-L`pwd`/../../target/usr/lib ../configure --host=arm-linux --build=i686-pc-linux-gnu prefix=/usr --enable-shared --enable-static --disable-asm --with-gpg-error-prefix=`pwd`/../../target/usr --enable-digests="md5 rmd160 sha1 sha256 sha512" --enable-ciphers="arcfour des aes cast5" --enable-pubkey-ciphers="rsa dsa"

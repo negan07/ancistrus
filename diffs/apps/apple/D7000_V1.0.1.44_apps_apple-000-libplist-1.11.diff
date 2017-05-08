@@ -1,0 +1,9 @@
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/apple/libplist-1.11/build.sh D7000_V1.0.1.44_WW_src/Source/apps/apple/libplist-1.11/build.sh
+--- D7000_V1.0.1.44_WW_src/Source/apps/apple/libplist-1.11/build.sh	2016-10-11 17:54:03.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/apple/libplist-1.11/build.sh	2017-05-04 20:53:03.771753087 +0200
+@@ -2,4 +2,4 @@
+ build_dir=build_sc
+ cd $build_dir
+ 
+-CPPFLAGS="-I`pwd`/../../../libiconv.1.8/include/ -I`pwd`/../../libxml2-2.9.1/include/ " CFLAGS="-I`pwd`/../../../libiconv.1.8/include/ -I`pwd`/../../libxml2-2.9.1/include/ -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-static-libstdc++ -Wl,--as-needed -L`pwd`/../../../libiconv.1.8/lib/ -L`pwd`/../../target/lib -lxml2 -L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --enable-static --prefix=  --without-cython
++CPPFLAGS="-I`pwd`/../../../libiconv.1.8/include/ -I`pwd`/../../libxml2-2.9.1/include/ " CFLAGS="${1} -I`pwd`/../../../libiconv.1.8/include/ -I`pwd`/../../libxml2-2.9.1/include/ -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-static-libstdc++ -Wl,--as-needed -L`pwd`/../../../libiconv.1.8/lib/ -L`pwd`/../../target/lib -lxml2 -L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --enable-static --prefix=  --without-cython

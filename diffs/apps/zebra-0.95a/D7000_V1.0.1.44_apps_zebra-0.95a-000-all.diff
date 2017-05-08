@@ -1,0 +1,185 @@
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/bgpd/Makefile D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/bgpd/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/bgpd/Makefile	2016-10-11 17:54:41.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/bgpd/Makefile	2017-05-01 21:49:32.197798478 +0200
+@@ -197,7 +197,7 @@
+ 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ CCLD = $(CC)
+ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+-CFLAGS = -g -O2 -Wall
++CFLAGS +=  -Wall -Os
+ DIST_SOURCES = $(libbgp_a_SOURCES) $(bgpd_SOURCES)
+ DATA = $(sysconf_DATA)
+ 
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/lib/Makefile D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/lib/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/lib/Makefile	2016-10-11 17:54:41.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/lib/Makefile	2017-05-04 12:40:39.883494661 +0200
+@@ -71,7 +71,7 @@
+ OBJEXT = o
+ PATH_SEPARATOR = :
+ AMTAR = ${SHELL} ${APPDIR}/zebra-0.95a/missing --run tar
+-AR = ar
++AR = $(CROSS)ar
+ AWK = gawk
+ BGPD = bgpd
+ #CC = /opt/ralink/buildroot-gdb/bin/mipsel-linux-gcc
+@@ -93,7 +93,7 @@
+ OSPFD = ospfd
+ OTHER_METHOD = 
+ PACKAGE = zebra
+-RANLIB = ranlib
++RANLIB = $(CROSS)ranlib
+ RIPD = ripd
+ RIPNGD = ripngd
+ RTREAD_METHOD = rtread_netlink.o
+@@ -176,7 +176,7 @@
+ 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ CCLD = $(CC)
+ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+-CFLAGS = -g -O2 -Wall
++CFLAGS += -Os -Wall
+ DIST_SOURCES = $(libzebra_a_SOURCES)
+ HEADERS = $(noinst_HEADERS)
+ 
+@@ -199,6 +199,7 @@
+ 	-rm -f libzebra.a
+ 	$(libzebra_a_AR) libzebra.a $(libzebra_a_OBJECTS) $(libzebra_a_LIBADD)
+ 	$(RANLIB) libzebra.a
++	$(STRIP) $(STRIPFLAGS) libzebra.a
+ 
+ mostlyclean-compile:
+ 	-rm -f *.$(OBJEXT) core *.core
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/Makefile D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/Makefile	2016-10-11 17:54:41.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/Makefile	2017-05-04 00:24:20.919057510 +0200
+@@ -4,9 +4,9 @@
+ CPP=$(CROSS)gcc -E
+ STRIP=$(CROSS)strip
+ all:  
+-	$(MAKE) -e -C lib
+-	$(MAKE) -e -C zebra
+-	$(MAKE) -e -C ripd
++	$(MAKE) -C lib
++	$(MAKE) -C zebra
++	$(MAKE) -C ripd
+ clean:
+ 	$(MAKE) -C lib clean
+ 	$(MAKE) -C ripd clean
+@@ -15,7 +15,7 @@
+ 	-rm -f ../../target/usr/sbin/zebra 
+ 
+ install:
+-	$(STRIP) ripd/ripd
+-	$(STRIP) zebra/zebra
++	$(SSTRIP) ripd/ripd
++	$(SSTRIP) zebra/zebra
+ 	cp -f ripd/ripd ../../target/usr/sbin/
+ 	cp -f zebra/zebra ../../target/usr/sbin/
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ospf6d/Makefile D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ospf6d/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ospf6d/Makefile	2016-10-11 17:54:41.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ospf6d/Makefile	2017-05-01 21:49:32.201798354 +0200
+@@ -199,7 +199,7 @@
+ 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ CCLD = $(CC)
+ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+-CFLAGS = -g -O2 -Wall
++CFLAGS +=  -Os -Wall
+ DIST_SOURCES = $(libospf6_a_SOURCES) $(ospf6d_SOURCES) \
+ 	$(ospf6test_SOURCES)
+ DATA = $(sysconf_DATA)
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ospfd/Makefile D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ospfd/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ospfd/Makefile	2016-10-11 17:54:41.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ospfd/Makefile	2017-05-01 21:49:32.201798354 +0200
+@@ -190,7 +190,7 @@
+ 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ CCLD = $(CC)
+ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+-CFLAGS = -g -O2 -Wall
++CFLAGS +=  -Wall -Os
+ DIST_SOURCES = $(libospf_a_SOURCES) $(ospfd_SOURCES)
+ DATA = $(sysconf_DATA)
+ 
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ripd/Makefile D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ripd/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ripd/Makefile	2016-10-11 17:54:41.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ripd/Makefile	2017-05-04 12:40:39.887494584 +0200
+@@ -71,7 +71,7 @@
+ OBJEXT = o
+ PATH_SEPARATOR = :
+ AMTAR = ${SHELL} ${APPDIR}/zebra-0.95a/missing --run tar
+-AR = ar
++AR = $(CROSS)ar
+ AWK = gawk
+ BGPD = bgpd
+ #CC = /opt/ralink/buildroot-gdb/bin/mipsel-linux-gcc
+@@ -93,7 +93,7 @@
+ OSPFD = ospfd
+ OTHER_METHOD = 
+ PACKAGE = zebra
+-RANLIB = ranlib
++RANLIB = $(CROSS)ranlib
+ RIPD = ripd
+ RIPNGD = ripngd
+ RTREAD_METHOD = rtread_netlink.o
+@@ -167,8 +167,7 @@
+ 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ CCLD = $(CC)
+ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+-#CFLAGS = -ggdb -O2 -Wall 
+-CFLAGS = -O2 -Wall 
++CFLAGS += -Os -Wall 
+ DIST_SOURCES = $(librip_a_SOURCES) $(ripd_SOURCES)
+ DATA = $(sysconf_DATA)
+ 
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ripngd/Makefile D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ripngd/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ripngd/Makefile	2016-10-11 17:54:41.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/ripngd/Makefile	2017-05-01 21:49:32.205798231 +0200
+@@ -165,7 +165,7 @@
+ 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ CCLD = $(CC)
+ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+-CFLAGS = -g -O2 -Wall
++CFLAGS +=  -Wall -Os
+ DIST_SOURCES = $(libripng_a_SOURCES) $(ripngd_SOURCES)
+ DATA = $(sysconf_DATA)
+ 
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/vtysh/Makefile D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/vtysh/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/vtysh/Makefile	2016-10-11 17:54:41.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/vtysh/Makefile	2017-05-01 21:49:32.205798231 +0200
+@@ -137,7 +137,7 @@
+ 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ CCLD = $(CC)
+ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+-CFLAGS = -g -O2 -Wall
++CFLAGS +=  -Wall -Os
+ DIST_SOURCES = $(vtysh_SOURCES)
+ DATA = $(sysconf_DATA)
+ 
+diff -urN D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/zebra/Makefile D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/zebra/Makefile
+--- D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/zebra/Makefile	2016-10-11 17:54:41.000000000 +0200
++++ D7000_V1.0.1.44_WW_src/Source/apps/zebra-0.95a/zebra/Makefile	2017-05-04 12:40:39.887494584 +0200
+@@ -68,7 +68,7 @@
+ OBJEXT = o
+ PATH_SEPARATOR = :
+ AMTAR = ${SHELL} ${APPDIR}/zebra-0.95a/missing --run tar
+-AR = ar
++AR = $(CROSS)ar
+ AWK = gawk
+ BGPD = bgpd
+ CC = $(CROSS)gcc
+@@ -91,7 +91,7 @@
+ OSPFD = ospfd
+ OTHER_METHOD = 
+ PACKAGE = zebra
+-RANLIB = ranlib
++RANLIB = $(CROSS)ranlib
+ RIPD = ripd
+ RIPNGD = ripngd
+ RTREAD_METHOD = rtread_netlink.o
+@@ -177,7 +177,7 @@
+ 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ CCLD = $(CC)
+ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+-CFLAGS = -O2 -Wall 
++CFLAGS += -Os -Wall
+ DIST_SOURCES = $(zebra_SOURCES)
+ DATA = $(sysconf_DATA)
+ 
