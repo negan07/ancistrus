@@ -18,7 +18,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/env.mak D7000_V1.0.1.44_WW_src/Source/en
  
  export ROOTFS = $(FS_DIR)
  
-@@ -45,12 +46,17 @@
+@@ -45,12 +46,18 @@
  export AS=$(CROSS)as
  export RANLIB=$(CROSS)ranlib
  export STRIP=$(CROSS)strip
@@ -33,6 +33,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/env.mak D7000_V1.0.1.44_WW_src/Source/en
 -#export CFLAGS += -Wno-strict-aliasing
 -
 +# flags settings
++FPU_FLOAT_TYPE := hard
 +export FLOATABI := $(shell tail -n 1 $(CROSS_GCC_CONF_ARGS) | cut -d '"' -f 16 )
 +export STRIPFLAGS := -x -R .note -R .comment -R .version --strip-unneeded
 +export UCLIBC_EXTRA_CFLAGS := -mcpu=cortex-a9 -mtune=cortex-a9 -march=armv7-a -mabi=aapcs-linux -mfpu=neon-fp16 -mfloat-abi=$(FLOATABI)
