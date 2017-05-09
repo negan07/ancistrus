@@ -31,8 +31,8 @@ preinst:
 
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
+	@echo "[ \`anc nvram rget qos_enable\` -eq 1 ] && echo \"Restarting qos service...\" && $(RC) qos restart" >> $(POSTINST)
 	@echo "echo \"Enable, setup & apply qos from webgui\"" >> $(POSTINST)
-	@echo "echo \"If already setup earlier, simply type: 'nvram set qos_enable=1' and then '$(RC) qos restart'\"" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
 prerm:
