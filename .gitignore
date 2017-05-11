@@ -99,6 +99,7 @@ dkms.conf
 crosstools-*
 D7000_*_src
 build
+localbin
 scripts/opkg-utils-*/
 *target*
 vmlinux.*
