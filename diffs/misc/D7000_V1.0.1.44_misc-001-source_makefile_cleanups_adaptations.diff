@@ -285,7 +285,7 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
  	echo -e "/kernel_cksum" >> $(TARGET_HOME)/nocomprlist
  	mkdir -p -m 777 $(FS_DIR)/config/factory
  	mkdir -p -m 777 $(FS_DIR)/config/nvram
-@@ -271,86 +179,42 @@
+@@ -271,86 +179,47 @@
  endif	
  	mkdir -p -m 777 $(FS_DIR)/config/xxx
  	chmod 777 $(FS_DIR)/config
@@ -305,6 +305,11 @@ diff -urN D7000_V1.0.1.44_WW_src/Source/Makefile D7000_V1.0.1.44_WW_src/Source/M
 -	$(HOSTTOOLS_DIR)/bcmImageBuilder --output $(IMAGE_DIR)/bcm963xx_fs_kernel --chip $(CHIP_ID) --board "963281TAN" --blocksize $(BLOCKSIZE) --image-version 4101GW0701531 --cfefile $(LOADER) --rootfsfile $(FS_NAME) --kernelfile $(KERNEL) 
 -#	$(HOSTTOOLS_DIR)/bcmImageBuilder --output $(IMAGE_DIR)/bcm963xx_fs_kernel --chip $(CHIP_ID) --board "9$(CHIP_ID)GW" --blocksize $(BLOCKSIZE) --cfefile $(LOADER) --rootfsfile $(FS_NAME) --kernelfile  $(KERNEL)
 -#	rm -f $(FS_NAME)
++	@echo -e "\\e[35mSOURCE: FS garbage \\e[36mcleanup\\e[0m"
++	-find $(FS_DIR) -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1
++	-find $(FS_DIR) -type f -name *.gz -exec rm -f '{}' \;
++	-find $(FS_DIR) -type f -name *DGND*.jpg -exec rm -f '{}' \;
++	mogrify -format jpg $(FS_DIR)/www.eng/image/apmodelink.jpg
 +	@echo -e "\\e[35mSOURCE: \\e[36mFS created\\e[0m"
  endif
  
