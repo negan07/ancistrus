@@ -229,6 +229,25 @@ DESC_$(OPKG)		:= Lightweight package management system
 DIRLIST			+= $(OPKG)
 TARLIST			+= $(OPKG)
 
+SMONTOOLS_NAME		:= smartmontools
+VER_$(SMONTOOLS_NAME)	:= 6.5
+SMONTOOLS		:= $(SMONTOOLS_NAME)-$(VER_$(SMONTOOLS_NAME))
+NAME_$(SMONTOOLS)	:= $(SMONTOOLS_NAME)
+ifdef DEBUG
+NAME_$(SMONTOOLS)	:= $(SMONTOOLS_NAME)-debug
+endif
+VER_$(SMONTOOLS)	:= $(VER_$(SMONTOOLS_NAME))
+DL_$(SMONTOOLS)		:= https://sourceforge.net/projects/smartmontools/files/smartmontools/6.5
+TAR_$(SMONTOOLS)	:= $(SMONTOOLS).tar.gz
+HOME_$(SMONTOOLS)	:= https://www.smartmontools.org/
+LIC_$(SMONTOOLS)	:= GPLv2
+SEC_$(SMONTOOLS)	:= thirdparty
+PRIO_$(SMONTOOLS)	:= optional
+DEP_$(SMONTOOLS)	:= 
+DESC_$(SMONTOOLS)	:= S.M.A.R.T. utility toolset
+DIRLIST			+= $(SMONTOOLS)
+TARLIST			+= $(SMONTOOLS)
+
 BUILTINLIB		:=
 BUILTIN			:=
 THIRDPARTYLIB		:=
@@ -246,6 +265,7 @@ THIRDPARTY		+= $(NETWORKTEST)
 THIRDPARTY		+= $(QOS_SQM)
 THIRDPARTY		+= $(OPKG_UTILS)
 THIRDPARTY		+= $(OPKG)
+THIRDPARTY		+= $(SMONTOOLS)
 endif
 
 SUBDIRS			:=
