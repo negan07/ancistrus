@@ -248,6 +248,25 @@ DESC_$(SMONTOOLS)	:= S.M.A.R.T. utility toolset
 DIRLIST			+= $(SMONTOOLS)
 TARLIST			+= $(SMONTOOLS)
 
+HDPARM_NAME		:= hdparm
+VER_$(HDPARM_NAME)	:= 9.52
+HDPARM			:= $(HDPARM_NAME)-$(VER_$(HDPARM_NAME))
+NAME_$(HDPARM)		:= $(HDPARM_NAME)
+ifdef DEBUG
+NAME_$(HDPARM)		:= $(HDPARM_NAME)-debug
+endif
+VER_$(HDPARM)		:= $(VER_$(HDPARM_NAME))
+DL_$(HDPARM)		:= https://sourceforge.net/projects/hdparm/files/hdparm
+TAR_$(HDPARM)		:= $(HDPARM).tar.gz
+HOME_$(HDPARM)		:= https://sourceforge.net/projects/hdparm/
+LIC_$(HDPARM)		:= BSD
+SEC_$(HDPARM)		:= builtin
+PRIO_$(HDPARM)		:= required
+DEP_$(HDPARM)		:= 
+DESC_$(HDPARM)		:= Get/set ATA/SATA drive parameters under Linux
+DIRLIST			+= $(HDPARM)
+TARLIST			+= $(HDPARM)
+
 BUILTINLIB		:=
 BUILTIN			:=
 THIRDPARTYLIB		:=
@@ -257,6 +276,7 @@ THIRDPARTY		+= $(CORE_WORK)
 ifndef LOCAL
 BUILTIN			+= $(UTELNETD)
 BUILTIN			+= $(IPROUTE2)
+BUILTIN			+= $(HDPARM)
 THIRDPARTYLIB		+= $(ZLIB)
 THIRDPARTYLIB		+= $(LIBARCHIVE)
 THIRDPARTY		+= $(NETPERF)
