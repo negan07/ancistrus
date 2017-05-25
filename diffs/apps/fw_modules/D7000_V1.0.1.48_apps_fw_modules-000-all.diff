@@ -1,0 +1,29 @@
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/fw_modules/Makefile D7000_V1.0.1.48_WW_src/Source/apps/fw_modules/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/fw_modules/Makefile	2016-10-11 17:56:56.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/fw_modules/Makefile	2017-05-03 23:57:16.504724043 +0200
+@@ -2,6 +2,8 @@
+ include ../../Rules.mak
+ endif
+ 
++XCFLAGS := $(CFLAGS) -Os -s -Wall -Werror
++CFLAGS:=
+ CROSS_COMPILE = $(CROSS)
+ 
+ KERNELDIR = $(KERNEL_DIR)
+@@ -26,8 +28,6 @@
+ #EXTRA_CFLAGS += -Werror
+ EXTRA_CFLAGS += -I$(SHARED_DIR) -I$(KERNEL_DIR)/arch/arm/mach-bcm963xx/include
+ 
+-XCFLAGS = -Wall -Os -s -Werror
+-
+ IPTPAT_UTIL = iptpat_util
+ 
+ all:modules $(IPTPAT_UTIL)
+@@ -45,6 +45,7 @@
+ 	-rm -f ../../target/usr/sbin/iptpat_util 
+ 
+ install:
++	$(SSTRIP) ./iptpat_util
+ 	cp -a $(OBJS) ../../target/lib/modules
+ 	cp ./iptpat_util ../../target/usr/sbin
+ 

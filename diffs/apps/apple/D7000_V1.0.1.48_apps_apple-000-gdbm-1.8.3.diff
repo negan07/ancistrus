@@ -1,0 +1,34 @@
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/apple/gdbm-1.8.3/build.sh D7000_V1.0.1.48_WW_src/Source/apps/apple/gdbm-1.8.3/build.sh
+--- D7000_V1.0.1.48_WW_src/Source/apps/apple/gdbm-1.8.3/build.sh	2016-10-11 17:54:11.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/apple/gdbm-1.8.3/build.sh	2017-05-04 22:29:38.044869300 +0200
+@@ -1,7 +1,8 @@
+ #!/bin/bash
+ build_dir=build_sc
+ cd $build_dir
+-CC=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-gcc ../configure --target=arm-linux --host=arm-linux --build=i686-pc-linux-gnu --enable-shared --enable-static
++
++CFLAGS="${1}" CC=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-gcc ../configure --target=arm-linux --host=arm-linux --build=i686-pc-linux-gnu --enable-shared --enable-static
+ echo "INSTALL_ROOT := \$(DESTDIR)" >> Makefile
+ echo "BINGRP := `id -u`" >> Makefile
+ echo "BINOWN := `id -g`" >> Makefile
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/apple/gdbm-1.8.3/configure D7000_V1.0.1.48_WW_src/Source/apps/apple/gdbm-1.8.3/configure
+--- D7000_V1.0.1.48_WW_src/Source/apps/apple/gdbm-1.8.3/configure	2016-10-11 17:54:11.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/apple/gdbm-1.8.3/configure	2017-05-04 22:33:14.555908267 +0200
+@@ -3792,7 +3792,7 @@
+ 
+ fi
+ if test -z "$ac_cv_prog_STRIP"; then
+-  ac_ct_STRIP=$STRIP
++  ac_ct_STRIP="$STRIP"
+   # Extract the first word of "strip", so it can be a program name with args.
+ set dummy strip; ac_word=$2
+ echo "$as_me:$LINENO: checking for $ac_word" >&5
+@@ -6567,7 +6567,7 @@
+ NM=$lt_NM
+ 
+ # A symbol stripping program
+-STRIP=$STRIP
++STRIP="$STRIP"
+ 
+ # Used to examine libraries when file_magic_cmd begins "file"
+ MAGIC_CMD=$MAGIC_CMD

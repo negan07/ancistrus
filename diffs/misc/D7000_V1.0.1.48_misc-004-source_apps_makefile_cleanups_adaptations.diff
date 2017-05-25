@@ -1,0 +1,201 @@
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/Makefile D7000_V1.0.1.48_WW_src/Source/apps/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/Makefile	2016-10-11 17:57:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/Makefile	2017-01-13 20:54:43.313811768 +0100
+@@ -1,131 +1,111 @@
+ include ../Rules.mak
+ 
+ GPL             :=
+-PRIVATE         :=
+ SUBDIRS         :=
+ 
+-GPLLIB += nvram
+-GPLLIB += sc_libs
+-GPLLIB += cnapt
++GPLLIB		+= nvram
++GPLLIB		+= sc_libs
++GPLLIB		+= cnapt
+ #------------------------------------
+ ifeq ($(USB),1)
+-GPLLIB += libiconv.1.8
+-GPL += samba-3.0.22
++GPLLIB		+= libiconv.1.8
++GPL		+= samba-3.0.22
+ ifeq ($(EXT4),1)
+-GPL += e2fsprogs
++GPL		+= e2fsprogs
+ endif
+-#PRIVATE += usbapps
+-GPL += bftpd-2.3
+-#GPL += fuse.2.7.4
+-#GPL += ntfsprogs.2.0.0
+-#GPL += ntfs-3g
+-GPL += mtool
+-GPL += hd-idle
+-GPL += hdparm-9.43
+-GPL += lsof_4.82_src
++GPL		+= bftpd-2.3
++GPL		+= mtool
++GPL		+= hd-idle
++GPL		+= hdparm-9.43
++GPL		+= lsof_4.82_src
+ endif
+ ifeq ($(DLNA),1)
+-GPL += mediaserver
++GPL		+= mediaserver
+ endif
+ ifeq ($(IPV6),1)
+-GPLLIB += flex-2.5.4
+-GPL += radvd-1.1
+-GPL += dhcpv6
+-GPL += totd-1.4
++GPLLIB		+= flex-2.5.4
++GPL		+= radvd-1.1
++GPL		+= dhcpv6
++GPL		+= totd-1.4
+ endif
+ 
+-#------------------------------------
++#------------------------------------------
+ # gpl
+-GPL             += busybox
+-GPL             += dnrd-2.19/src
++GPL		+= busybox
++GPL		+= dnrd-2.19/src
+ ifeq ($(HTTPS),1)
+-GPLLIB 			+=$(OPENSSL_USE)
++GPLLIB		+=$(OPENSSL_USE)
+ else
+ ifeq ($(TR069),1)
+-GPLLIB 			+=$(OPENSSL_USE)
++GPLLIB		+=$(OPENSSL_USE)
+ endif
+ endif
+ ifeq ($(OPENVPN),1)
+-GPL			+= lzo-2.06
+-GPL			+= openvpn-2.3.2
+-GPL			+= zip30
+-endif
+-GPL              += spi_firewall_modules
+-GPL              += kernel_upgrade
+-GPLLIB           += libixml
+-GPL             += mini_httpd-1.17beta1
+-GPL             += udhcp-0.9.7
+-GPL             += utelnetd-0.1.9
+-GPL             += smtpc
+-GPL             += syslogd
+-GPL             += linux-atm-2.4.0
+-GPL             += ppp-2.4.1.pppoe4.orig
+-GPL             += rp-pppoe
+-GPL             += bridge-utils
+-GPL             += fw_modules
++GPL		+= lzo-2.06
++GPL		+= openvpn-2.3.2
++GPL		+= zip30
++endif
++GPL		+= spi_firewall_modules
++GPL		+= kernel_upgrade
++GPLLIB		+= libixml
++GPL		+= mini_httpd-1.17beta1
++GPL		+= udhcp-0.9.7
++GPL		+= utelnetd-0.1.9
++GPL		+= smtpc
++GPL		+= syslogd
++GPL		+= linux-atm-2.4.0
++GPL		+= ppp-2.4.1.pppoe4.orig
++GPL		+= rp-pppoe
++GPL		+= bridge-utils
++GPL		+= fw_modules
+ ifeq ($(IPQOS),1)
+-GPL             += bwping-1.1
++GPL		+= bwping-1.1
+ endif
+-GPL             += iptables
+-GPL             += cron
++GPL		+= iptables
++GPL		+= cron
+ ifeq ($(IP6_6RD_CE),1)
+-GPL	+= iproute2-2.6.38
++GPL		+= iproute2-2.6.38
+ else
+-GPL             += iproute-2.6.20-070313
++GPL		+= iproute-2.6.20-070313
+ endif
+-GPL             += netkit-routedv2-0.1
+-GPL             += ez-ipupdate-3.0.11b8
+-GPL             += reaim-0.8
+-GPL	         += miniupnpd-20080427
+-#GPL             += quagga_0.99.11
++GPL		+= netkit-routedv2-0.1
++GPL		+= ez-ipupdate-3.0.11b8
++GPL		+= reaim-0.8
++GPL		+= miniupnpd-20080427
+ GPL		+= zebra-0.95a
+ ifeq ($(HIDDEN_PASSWORD),1)
+-GPL             += base64
++GPL		+= base64
+ endif
+ ifeq ($(TIME_MACHINE),1)
+ GPL		+= apple
+ else
+-GPLLIB           += libdaemon-0.14
+-GPL             += avahi-0.6.30
++GPLLIB		+= libdaemon-0.14
++GPL		+= avahi-0.6.30
+ endif
+ ifeq ($(READY_SHARE_CLOUD),1)
+-GPL += proccgi
+-GPL += curl
+-endif
+-ifeq ($(VPN),1)
+-#GPL += gmp-4.2.1
++GPL		+= proccgi
++GPL		+= curl
+ endif
+-GPL             += bind-9.2.3
+-GPL             += noip-2.1.9-1
+-GPL             += tcpdump/libpcap-1.2.0
+-GPL             += tcpdump/tcpdump-4.2.0
+-#------------------------------------
+-GPL += curl
++GPL		+= bind-9.2.3
++GPL		+= noip-2.1.9-1
++GPL		+= tcpdump/libpcap-1.2.0
++GPL		+= tcpdump/tcpdump-4.2.0
++#------------------------------------------
++GPL		+= curl
+ #for mpstat
+-GPL += sysstat
+-SUBDIRS += $(GPLLIB)
+-SUBDIRS += $(PRIVATE)
+-SUBDIRS += $(GPL)
++GPL		+= sysstat
++
++SUBDIRS		+= $(GPLLIB)
++SUBDIRS		+= $(GPL)
+ 
+ $(SUBDIRS)::
+-	@for i in $(SUBDIRS) ; do echo -e "\\e[35mapps: make \\e[36m$$i \\e[0m"; $(MAKE) -C $$i || exit 1; done
+-ifeq ($(VPN),1)
+-#	$(MAKE) -C gmp-4.2.1
+-#	$(MAKE) -C gmp-4.2.1 install
+-#	$(MAKE) -C openswan-2.6.24 programs
+-endif
++	@for i in $(SUBDIRS) ; do echo -e "\\e[35mAPPS: make \\e[36m$$i \\e[0m"; $(MAKE) -C $$i || exit 1; done
++
+ all:    $(SUBDIRS)
+ 
+ clean:
+-	@for i in $(SUBDIRS) ; do echo -e "\\e[35mapps: clean \\e[36m$$i \\e[0m"; $(MAKE) -C $$i clean  || exit 1; done
+-ifeq ($(VPN),1)	
+-	$(MAKE) -C openswan-2.6.24 clean
+-endif
++	@for i in $(SUBDIRS) ; do echo -e "\\e[35mAPPS: clean \\e[36m$$i \\e[0m"; $(MAKE) -C $$i clean  || exit 1; done
+ 
+ install:
+-	@for i in $(SUBDIRS) ; do echo -e "\\e[35mapps: install \\e[36m$$i \\e[0m"; $(MAKE) -C $$i install  || exit 1; done
+-ifeq ($(VPN),1)	
+-	#rm -rf openswan-2.6.24/temp
+-	#$(MAKE) -C openswan-2.6.24 DESTDIR=$(TARGET_HOME)/apps/openswan-2.6.24/temp install
+-endif
++	@for i in $(SUBDIRS) ; do echo -e "\\e[35mAPPS: install \\e[36m$$i \\e[0m"; $(MAKE) -C $$i install  || exit 1; done
+ 

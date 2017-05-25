@@ -1,0 +1,126 @@
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/arpd/Makefile D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/arpd/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/arpd/Makefile	2016-10-11 18:49:29.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/arpd/Makefile	2017-05-01 23:52:20.118076275 +0200
+@@ -42,7 +42,7 @@
+ 
+ ACLOCAL = aclocal
+ AUTOCONF = autoconf
+-AUTOMAKE = automake-1.4
++AUTOMAKE = automake
+ AUTOHEADER = autoheader
+ 
+ INSTALL = /usr/bin/install -c
+@@ -101,8 +101,8 @@
+ PROGRAMS =  $(sbin_PROGRAMS)
+ 
+ 
+-DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I../..
+-CPPFLAGS = 
++DEFS = -DHAVE_CONFIG_H
++CPPFLAGS = -I. -I../.. -I../../src/include
+ LDFLAGS = 
+ LIBS = 
+ atmarp_OBJECTS =  atmarp.o
+@@ -113,7 +113,7 @@
+ atmarpd_LDADD = $(LDADD)
+ atmarpd_DEPENDENCIES =  $(top_builddir)/src/lib/libatm.la
+ atmarpd_LDFLAGS = 
+-CFLAGS = -I$(top_srcdir)/src/include -g -O2 -Wall -Wshadow -Wpointer-arith -Wwrite-strings -Wstrict-prototypes
++AM_CFLAGS = -Os -Wall -Wshadow -Wpointer-arith -Wwrite-strings -Wstrict-prototypes
+ COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ CCLD = $(CC)
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile	2016-10-11 18:49:15.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile	2017-05-01 23:52:22.886109498 +0200
+@@ -44,7 +44,7 @@
+ 
+ ACLOCAL = aclocal
+ AUTOCONF = autoconf
+-AUTOMAKE = automake-1.4
++AUTOMAKE = automake
+ AUTOHEADER = autoheader
+ 
+ INSTALL = /usr/bin/install -c
+@@ -105,14 +105,14 @@
+ LTLIBRARIES =  $(lib_LTLIBRARIES)
+ 
+ 
+-DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I../..
+-CPPFLAGS = 
++DEFS = -DHAVE_CONFIG_H
++CPPFLAGS = -I. -I../.. -I../../src/include
+ LIBS = 
+ libatm_la_LDFLAGS = 
+ libatm_la_OBJECTS =  text2atm.lo atm2text.lo atmequal.lo sdu2cell.lo \
+ text2qos.lo qos2text.lo qosequal.lo sap2text.lo text2sap.lo sapequal.lo \
+ misc.lo ans.lo common.lo diag.lo kptr.lo text2ip.lo timer.lo unix.lo
+-CFLAGS = -I$(top_srcdir)/src/include -g -O2 -Wall -Wshadow -Wpointer-arith -Wwrite-strings -Wstrict-prototypes
++AM_CFLAGS = -Os -Wall -Wshadow -Wpointer-arith -Wwrite-strings -Wstrict-prototypes
+ COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ CCLD = $(CC)
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/Makefile D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/Makefile	2016-10-11 17:54:34.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/Makefile	2017-05-01 23:50:09.824663824 +0200
+@@ -1,7 +1,7 @@
+ include ../../../Rules.mak
+ export CC=$(CROSS)gcc
+ export LD=$(CROSS)ld
+-export AUTOMAKE=automake-1.4
++export AUTOMAKE=automake
+ 
+ DIRS= lib arpd
+ 
+@@ -9,8 +9,6 @@
+ 	make -e -C lib
+ 	make -e -C switch all-am
+ 	make -e -C arpd
+-#	cp -af lib/.libs/libatm.so* ../../../tools/mipsel-linux-uclibc/lib
+-#	cp -af include/atm.h ../../../tools/mipsel-linux-uclibc/include
+ 
+ clean: $(DIRS)
+ 	make -C lib clean
+@@ -20,8 +18,8 @@
+ 	-rm -f ../../../target/usr/sbin/atmarp
+ 	-rm -f ../../../target/usr/sbin/atmarpd
+ install:
+-	$(CROSS)strip arpd/.libs/*
+-	$(CROSS)strip lib/.libs/libatm.so*
++	$(SSTRIP) arpd/.libs/*
++	$(STRIP) lib/.libs/libatm.so*
+ ifneq ($(FLASH),2M)
+ 	cp -af arpd/.libs/* ../../../target/usr/sbin/
+ endif
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/switch/Makefile D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/switch/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/switch/Makefile	2016-10-11 18:49:27.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/linux-atm-2.4.0/src/switch/Makefile	2017-05-01 23:52:21.502092873 +0200
+@@ -42,7 +42,7 @@
+ 
+ ACLOCAL = aclocal
+ AUTOCONF = autoconf
+-AUTOMAKE = automake-1.4
++AUTOMAKE = automake
+ AUTOHEADER = autoheader
+ 
+ INSTALL = /usr/bin/install -c
+@@ -102,8 +102,8 @@
+ LIBRARIES =  $(noinst_LIBRARIES)
+ 
+ 
+-DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I../..
+-CPPFLAGS = 
++DEFS = -DHAVE_CONFIG_H
++CPPFLAGS = -I. -I../.. -I../../src/include
+ LDFLAGS = 
+ LIBS = 
+ libsw_a_LIBADD = 
+@@ -116,7 +116,7 @@
+ swc_LDFLAGS = 
+ LEX_OUTPUT_ROOT = lex.yy
+ LEXLIB = -lfl
+-CFLAGS = -I$(top_srcdir)/src/include -g -O2 -Wall -Wshadow -Wpointer-arith -Wwrite-strings -Wstrict-prototypes
++AM_CFLAGS = -Os -Wall -Wshadow -Wpointer-arith -Wwrite-strings -Wstrict-prototypes
+ COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ CCLD = $(CC)

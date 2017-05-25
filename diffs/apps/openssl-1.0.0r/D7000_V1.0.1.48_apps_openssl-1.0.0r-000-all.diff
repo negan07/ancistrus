@@ -1,0 +1,1042 @@
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/apps/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/apps/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/apps/Makefile	2016-10-11 17:53:15.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/apps/Makefile	2017-04-29 23:16:36.936131266 +0200
+@@ -6,7 +6,7 @@
+ TOP=		..
+ CC=		cc
+ INCLUDES=	-I$(TOP) -I../include $(KRB5_INCLUDES)
+-CFLAG=		-g -static
++CFLAG=		$(CFLAGS) -Os -static
+ MAKEFILE=	Makefile
+ PERL=		perl
+ RM=		rm -f
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/aes/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/aes/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/aes/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/aes/Makefile	2017-05-04 12:48:13.618863870 +0200
+@@ -7,9 +7,9 @@
+ CC=	cc
+ CPP=	$(CC) -E
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ AES_ENC=aes_core.o aes_cbc.o
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/asn1/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/asn1/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/asn1/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/asn1/Makefile	2017-05-04 12:48:13.618863870 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+@@ -55,12 +55,12 @@
+ 	(cd ../..; $(MAKE) DIRS=crypto SDIRS=$(DIR) sub_all)
+ 
+ test:	test.c
+-	cc -g -I../../include -c test.c
+-	cc -g -I../../include -o test test.o -L../.. -lcrypto
++	cc -I../../include -c test.c
++	cc -I../../include -o test test.o -L../.. -lcrypto
+ 
+ pk:	pk.c
+-	cc -g -I../../include -c pk.c
+-	cc -g -I../../include -o pk pk.o -L../.. -lcrypto
++	cc -I../../include -c pk.c
++	cc -I../../include -o pk pk.o -L../.. -lcrypto
+ 
+ all:	lib
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bf/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bf/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bf/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bf/Makefile	2017-05-04 12:48:13.618863870 +0200
+@@ -7,9 +7,9 @@
+ CC=	cc
+ CPP=	$(CC) -E
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ BF_ENC=		bf_enc.o
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bio/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bio/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bio/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bio/Makefile	2017-05-04 12:48:13.618863870 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bn/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bn/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bn/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/bn/Makefile	2017-05-04 12:48:13.622863793 +0200
+@@ -7,9 +7,9 @@
+ CC=	cc
+ CPP=    $(CC) -E
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ BN_ASM=		bn_asm.o
+ 
+@@ -53,7 +53,7 @@
+ 	cc -I../../include divtest.c -o divtest ../../libcrypto.a
+ 
+ bnbug: bnbug.c ../../libcrypto.a top
+-	cc -g -I../../include bnbug.c -o bnbug ../../libcrypto.a
++	cc -I../../include bnbug.c -o bnbug ../../libcrypto.a
+ 
+ lib:	$(LIBOBJ)
+ 	$(AR) $(LIB) $(LIBOBJ)
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/buffer/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/buffer/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/buffer/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/buffer/Makefile	2017-05-04 12:48:13.622863793 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/camellia/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/camellia/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/camellia/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/camellia/Makefile	2017-05-04 12:48:13.622863793 +0200
+@@ -7,9 +7,9 @@
+ CC=	cc
+ CPP=	$(CC) -E
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CMLL_ENC= camellia.o cmll_misc.o cmll_cbc.o
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/cast/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/cast/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/cast/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/cast/Makefile	2017-05-04 12:48:13.622863793 +0200
+@@ -7,9 +7,9 @@
+ CC=	cc
+ CPP=	$(CC) -E
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CAST_ENC=c_enc.o
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/cms/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/cms/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/cms/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/cms/Makefile	2017-05-04 12:48:13.622863793 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/comp/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/comp/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/comp/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/comp/Makefile	2017-05-04 12:48:13.622863793 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/conf/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/conf/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/conf/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/conf/Makefile	2017-05-04 12:48:13.622863793 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/des/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/des/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/des/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/des/Makefile	2017-05-04 12:48:13.626863718 +0200
+@@ -7,9 +7,9 @@
+ CC=	cc
+ CPP=	$(CC) -E
+ INCLUDES=-I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ RANLIB=		ranlib
+ DES_ENC=	des_enc.o fcrypt_b.o
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dh/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dh/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dh/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dh/Makefile	2017-05-04 12:48:13.626863718 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dsa/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dsa/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dsa/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dsa/Makefile	2017-05-04 12:48:13.626863718 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dso/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dso/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dso/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/dso/Makefile	2017-05-04 12:48:13.626863718 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ec/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ec/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ec/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ec/Makefile	2017-05-04 12:48:13.626863718 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ecdh/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ecdh/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ecdh/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ecdh/Makefile	2017-05-04 12:48:13.626863718 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g -Wall
++CFLAG=$(CFLAGS) -Os -Wall
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ecdsa/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ecdsa/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ecdsa/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ecdsa/Makefile	2017-05-04 12:48:13.626863718 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g -Wall
++CFLAG=$(CFLAGS) -Os -Wall
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/engine/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/engine/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/engine/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/engine/Makefile	2017-05-04 12:48:13.630863641 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/err/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/err/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/err/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/err/Makefile	2017-05-04 12:48:13.630863641 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/evp/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/evp/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/evp/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/evp/Makefile	2017-05-04 12:48:13.630863641 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/hmac/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/hmac/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/hmac/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/hmac/Makefile	2017-05-04 12:48:13.630863641 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/idea/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/idea/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/idea/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/idea/Makefile	2017-05-04 12:48:13.630863641 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/krb5/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/krb5/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/krb5/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/krb5/Makefile	2017-05-04 12:48:13.630863641 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/lhash/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/lhash/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/lhash/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/lhash/Makefile	2017-05-04 12:48:13.630863641 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/Makefile	2017-05-04 12:48:13.646863337 +0200
+@@ -8,12 +8,12 @@
+ INCLUDE=	-I. -I$(TOP) -I../include $(ZLIB_INCLUDE)
+ # INCLUDES targets sudbirs!
+ INCLUDES=	-I.. -I../.. -I../asn1 -I../evp -I../../include $(ZLIB_INCLUDE)
+-CFLAG=		-g
++CFLAG=		$(CFLAGS) -Os
+ MAKEDEPPROG=	makedepend
+ MAKEDEPEND=	$(TOP)/util/domd $(TOP) -MD $(MAKEDEPPROG)
+ MAKEFILE=       Makefile
+ RM=             rm -f
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ RECURSIVE_MAKE=	[ -n "$(SDIRS)" ] && for i in $(SDIRS) ; do \
+ 		    (cd $$i && echo "making $$target in $(DIR)/$$i..." && \
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md2/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md2/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md2/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md2/Makefile	2017-05-04 12:48:13.634863566 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md4/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md4/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md4/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md4/Makefile	2017-05-04 12:48:13.634863566 +0200
+@@ -7,9 +7,9 @@
+ CC=     cc
+ CPP=    $(CC) -E
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=       Makefile
+-AR=             ar r
++AR=             $(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md5/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md5/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md5/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/md5/Makefile	2017-05-04 12:48:13.634863566 +0200
+@@ -7,9 +7,9 @@
+ CC=     cc
+ CPP=    $(CC) -E
+ INCLUDES=-I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=       Makefile
+-AR=             ar r
++AR=             $(CROSS)ar r
+ 
+ MD5_ASM_OBJ=
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/mdc2/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/mdc2/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/mdc2/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/mdc2/Makefile	2017-05-04 12:48:13.634863566 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/modes/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/modes/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/modes/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/modes/Makefile	2017-05-04 12:48:13.634863566 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/objects/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/objects/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/objects/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/objects/Makefile	2017-05-04 12:48:13.634863566 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ PERL=		perl
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ocsp/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ocsp/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ocsp/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ocsp/Makefile	2017-05-04 12:48:13.634863566 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pem/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pem/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pem/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pem/Makefile	2017-05-04 12:48:13.634863566 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pkcs12/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pkcs12/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pkcs12/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pkcs12/Makefile	2017-05-04 12:48:13.638863489 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pkcs7/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pkcs7/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pkcs7/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pkcs7/Makefile	2017-05-04 12:48:13.638863489 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ PEX_LIBS=
+ EX_LIBS=
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pqueue/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pqueue/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pqueue/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/pqueue/Makefile	2017-05-04 12:48:13.638863489 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rand/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rand/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rand/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rand/Makefile	2017-05-04 12:48:13.638863489 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc2/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc2/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc2/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc2/Makefile	2017-05-04 12:48:13.638863489 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc4/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc4/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc4/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc4/Makefile	2017-05-04 12:48:13.638863489 +0200
+@@ -7,8 +7,8 @@
+ CC=	cc
+ CPP=    $(CC) -E
+ INCLUDES=
+-CFLAG=-g
+-AR=		ar r
++CFLAG=$(CFLAGS) -Os
++AR=		$(CROSS)ar r
+ 
+ RC4_ENC=rc4_enc.o rc4_skey.o
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc5/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc5/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc5/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rc5/Makefile	2017-05-04 12:48:13.638863489 +0200
+@@ -7,9 +7,9 @@
+ CC=	cc
+ CPP=	$(CC) -E
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ RC5_ENC=		rc5_enc.o
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ripemd/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ripemd/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ripemd/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ripemd/Makefile	2017-05-04 12:48:13.638863489 +0200
+@@ -7,9 +7,9 @@
+ CC=     cc
+ CPP=    $(CC) -E
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=       Makefile
+-AR=             ar r
++AR=             $(CROSS)ar r
+ 
+ RIP_ASM_OBJ=
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rsa/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rsa/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rsa/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/rsa/Makefile	2017-05-04 12:48:13.638863489 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/seed/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/seed/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/seed/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/seed/Makefile	2017-05-04 12:48:13.638863489 +0200
+@@ -7,9 +7,9 @@
+ CC=	cc
+ CPP=	$(CC) -E
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/sha/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/sha/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/sha/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/sha/Makefile	2017-05-04 12:48:13.642863414 +0200
+@@ -7,9 +7,9 @@
+ CC=     cc
+ CPP=    $(CC) -E
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=       Makefile
+-AR=             ar r
++AR=             $(CROSS)ar r
+ 
+ SHA1_ASM_OBJ=
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/stack/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/stack/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/stack/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/stack/Makefile	2017-05-04 12:48:13.642863414 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/store/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/store/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/store/Makefile	2016-10-11 17:53:18.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/store/Makefile	2017-05-04 12:48:13.642863414 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ts/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ts/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ts/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ts/Makefile	2017-05-04 12:48:13.642863414 +0200
+@@ -6,14 +6,14 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I../../include
+-CFLAG = -g
++CFLAG = $(CFLAGS) -Os
+ INSTALL_PREFIX=
+ OPENSSLDIR=     /usr/local/ssl
+ INSTALLTOP=/usr/local/ssl
+ MAKEDEPPROG=	makedepend
+ MAKEDEPEND=	$(TOP)/util/domd $(TOP) -MD $(MAKEDEPPROG)
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ PEX_LIBS=
+ EX_LIBS=
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/txt_db/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/txt_db/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/txt_db/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/txt_db/Makefile	2017-05-04 12:48:13.642863414 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ui/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ui/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ui/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/ui/Makefile	2017-05-04 12:48:13.642863414 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/whrlpool/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/whrlpool/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/whrlpool/Makefile	2016-10-11 17:53:20.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/whrlpool/Makefile	2017-05-04 12:48:13.642863414 +0200
+@@ -7,9 +7,9 @@
+ CC=	cc
+ CPP=	$(CC) -E
+ INCLUDES=
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ WP_ASM_OBJ=wp_block.o
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/x509/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/x509/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/x509/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/x509/Makefile	2017-05-04 12:48:13.642863414 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/x509v3/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/x509v3/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/x509v3/Makefile	2016-10-11 17:53:19.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/crypto/x509v3/Makefile	2017-05-04 12:48:13.646863337 +0200
+@@ -6,9 +6,9 @@
+ TOP=	../..
+ CC=	cc
+ INCLUDES= -I.. -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/bio/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/bio/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/bio/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/bio/Makefile	2017-04-29 23:16:36.964131952 +0200
+@@ -1,5 +1,5 @@
+ CC=cc
+-CFLAGS= -g -I../../include
++CFLAGS= $(CFLAGS) -Os -I../../include
+ LIBS= -L../.. ../../libssl.a ../../libcrypto.a
+ EXAMPLES=saccept sconnect
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/easy_tls/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/easy_tls/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/easy_tls/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/easy_tls/Makefile	2017-05-01 21:51:00.487113477 +0200
+@@ -1,10 +1,10 @@
+ # Makefile for easy-tls example application (rudimentary client and server)
+ # $Id: Makefile,v 1.2 2001/09/18 09:15:40 bodo Exp $
+ 
+-SOLARIS_CFLAGS=-Wall -pedantic -g -O2
++SOLARIS_CFLAGS=$(CFLAGS) -Wall -pedantic -Os
+ SOLARIS_LIBS=-lxnet
+ 
+-LINUX_CFLAGS=-Wall -pedantic -g -O2
++LINUX_CFLAGS=$(CFLAGS) -Wall -pedantic -Os
+ LINUX_LIBS=
+ 
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/cluster_labs/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/cluster_labs/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/cluster_labs/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/cluster_labs/Makefile	2017-04-29 23:16:36.964131952 +0200
+@@ -5,7 +5,7 @@
+ 
+ CC=		gcc
+ PIC=		-fPIC
+-CFLAGS=		-g -I../../../include $(PIC) -DENGINE_DYNAMIC_SUPPORT -DFLAT_INC
++CFLAGS=		$(CFLAGS) -Os -I../../../include $(PIC) -DENGINE_DYNAMIC_SUPPORT -DFLAT_INC
+ AR=		ar r
+ RANLIB=		ranlib
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/ibmca/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/ibmca/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/ibmca/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/ibmca/Makefile	2017-04-29 23:16:36.964131952 +0200
+@@ -5,7 +5,7 @@
+ 
+ CC=		gcc
+ PIC=		-fPIC
+-CFLAGS=		-g -I../../../include $(PIC) -DENGINE_DYNAMIC_SUPPORT -DFLAT_INC
++CFLAGS=		$(CFLAGS) -Os -I../../../include $(PIC) -DENGINE_DYNAMIC_SUPPORT -DFLAT_INC
+ AR=		ar r
+ RANLIB=		ranlib
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/rsaref/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/rsaref/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/rsaref/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/rsaref/Makefile	2017-04-29 23:16:36.964131952 +0200
+@@ -5,7 +5,7 @@
+ 
+ CC=		gcc
+ PIC=		-fPIC
+-CFLAGS=		-g -I../../../include $(PIC) -DENGINE_DYNAMIC_SUPPORT
++CFLAGS=		$(CFLAGS) -Os -I../../../include $(PIC) -DENGINE_DYNAMIC_SUPPORT
+ AR=		ar r
+ RANLIB=		ranlib
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/zencod/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/zencod/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/zencod/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/engines/zencod/Makefile	2017-04-29 23:16:36.968132051 +0200
+@@ -5,7 +5,7 @@
+ 
+ CC=		gcc
+ PIC=		-fPIC
+-CFLAGS=		-g -I../../../include $(PIC) -DENGINE_DYNAMIC_SUPPORT -DFLAT_INC
++CFLAGS=		$(CFLAGS) -Os -I../../../include $(PIC) -DENGINE_DYNAMIC_SUPPORT -DFLAT_INC
+ AR=		ar r
+ RANLIB=		ranlib
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/prime/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/prime/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/prime/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/prime/Makefile	2017-04-29 23:16:36.968132051 +0200
+@@ -1,5 +1,5 @@
+ CC=cc
+-CFLAGS= -g -I../../include -Wall
++CFLAGS= $(CFLAGS) -Os -I../../include -Wall
+ LIBS=  -L../.. -lcrypto
+ EXAMPLES=prime
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/sign/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/sign/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/sign/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/sign/Makefile	2017-04-29 23:16:36.968132051 +0200
+@@ -1,5 +1,5 @@
+ CC=cc
+-CFLAGS= -g -I../../include -Wall
++CFLAGS= $(CFLAGS) -Os -I../../include -Wall
+ LIBS=  -L../.. -lcrypto
+ EXAMPLES=sign
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/state_machine/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/state_machine/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/state_machine/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/state_machine/Makefile	2017-04-29 23:16:36.968132051 +0200
+@@ -1,4 +1,4 @@
+-CFLAGS=-I../../include -Wall -Werror -g
++CFLAGS=-I../../include -Wall -Werror $(CFLAGS) -Os
+ 
+ all: state_machine
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/tunala/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/tunala/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/tunala/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/demos/tunala/Makefile	2017-05-01 21:51:00.491113358 +0200
+@@ -9,9 +9,9 @@
+ 
+ RM=rm -f
+ CC=gcc
+-DEBUG_FLAGS=-g -ggdb3 -Wall -Wshadow
++DEBUG_FLAGS= -Wall -Wshadow
+ INCLUDE_FLAGS=-I$(SSL_INCLUDEDIR)
+-CFLAGS=$(DEBUG_FLAGS) $(INCLUDE_FLAGS) -DNO_CONFIG_H
++CFLAGS +=  $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -DNO_CONFIG_H -Os
+ COMPILE=$(CC) $(CFLAGS) -c
+ 
+ # Edit, particularly the "-ldl" if not building with "dlfcn" support
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/engines/ccgost/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/engines/ccgost/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/engines/ccgost/Makefile	2016-10-11 17:53:21.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/engines/ccgost/Makefile	2017-04-29 23:16:36.968132051 +0200
+@@ -2,7 +2,7 @@
+ TOP=../..
+ CC=cc
+ INCLUDES= -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE= Makefile
+ AR= ar r
+ CFLAGS= $(INCLUDES) $(CFLAG)
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/engines/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/engines/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/engines/Makefile	2016-10-11 17:53:21.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/engines/Makefile	2017-04-29 23:16:36.968132051 +0200
+@@ -6,7 +6,7 @@
+ TOP=	..
+ CC=	cc
+ INCLUDES= -I../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+ AR=		ar r
+ ENGDIRS= ccgost
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/Makefile	2016-10-11 18:29:40.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/Makefile	2017-04-29 23:16:43.192284365 +0200
+@@ -64,7 +64,7 @@
+ CC = $(CROSS)gcc
+ STRIP = $(CROSS)strip
+ RANLIBRANLIB = $(CROSS)ranlib
+-CFLAG= -fPIC -DOPENSSL_PIC -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -DTLS_FALLBACK_SCSV -DL_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall
++CFLAG= $(CFLAGS) -fPIC -DOPENSSL_PIC -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -DTLS_FALLBACK_SCSV -DL_ENDIAN -DTERMIO -Os -fomit-frame-pointer -Wall
+ DEPFLAG= -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE
+ PEX_LIBS= 
+ EX_LIBS= -ldl
+@@ -505,7 +505,7 @@
+ 	$(STRIP) -g  $(SHARED_CRYPTO) $(SHARED_SSL) 
+ 	cp -a $(SHARED_CRYPTO) $(SHARED_SSL) ../../target/lib
+ 	cp -af libcrypto.so* libssl.so* ../../target/lib
+-	$(STRIP) apps/openssl
++	$(SSTRIP) apps/openssl
+ 	cp -af apps/openssl ../../target/usr/sbin
+ 
+ install_sw:openssl.pc libssl.pc libcrypto.pc
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/ssl/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/ssl/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/ssl/Makefile	2016-10-11 17:53:22.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/ssl/Makefile	2017-05-04 12:48:13.646863337 +0200
+@@ -6,9 +6,9 @@
+ TOP=	..
+ CC=	cc
+ INCLUDES= -I../crypto -I$(TOP) -I../include $(KRB5_INCLUDES)
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+-AR=		ar r
++AR=		$(CROSS)ar r
+ # KRB5 stuff
+ KRB5_INCLUDES=
+ 
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/test/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/test/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/test/Makefile	2016-10-11 17:53:17.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/test/Makefile	2017-04-29 23:16:36.972132148 +0200
+@@ -6,7 +6,7 @@
+ TOP=		..
+ CC=		cc
+ INCLUDES=	-I$(TOP) -I../include $(KRB5_INCLUDES)
+-CFLAG=		-g
++CFLAG=$(CFLAGS) -Os
+ MAKEDEPEND=	$(TOP)/util/domd $(TOP) -MD $(MAKEDEPPROG)
+ PERL=		perl
+ # KRB5 stuff
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/tools/Makefile D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/tools/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/tools/Makefile	2016-10-11 17:53:15.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/openssl-1.0.0r/tools/Makefile	2017-04-29 23:16:36.972132148 +0200
+@@ -6,7 +6,7 @@
+ TOP=	..
+ CC=	cc
+ INCLUDES= -I$(TOP) -I../../include
+-CFLAG=-g
++CFLAG=$(CFLAGS) -Os
+ MAKEFILE=	Makefile
+ 
+ CFLAGS= $(INCLUDES) $(CFLAG)

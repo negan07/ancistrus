@@ -1,0 +1,17 @@
+diff -urN D7000_V1.0.1.48_WW_src/Source/apps/curl/Makefile D7000_V1.0.1.48_WW_src/Source/apps/curl/Makefile
+--- D7000_V1.0.1.48_WW_src/Source/apps/curl/Makefile	2016-10-11 17:55:00.000000000 +0200
++++ D7000_V1.0.1.48_WW_src/Source/apps/curl/Makefile	2017-04-29 21:06:04.227491195 +0200
+@@ -29,11 +29,11 @@
+ configure:
+ 	cd $(CURL_DIR); ./configure --host=arm-linux CC=$(CROSS)gcc PKG_CONFIG_PATH=$(STAGING_DIR) \
+ 			--without-cyassl --with-ssl=$(STAGING_DIR) --libdir=$(STAGING_DIR)/lib/ --includedir=$(STAGING_DIR)/include \
+-			-enable-shared=yes -enable-static=yes 
++			-enable-shared=yes -enable-static=yes CFLAGS="$(CFLAGS) -Os -Wno-system-headers"
+ 
+ install:
+ 	$(STRIP) $(CURL_DIR)/lib/.libs/libcurl.so.*
+-	$(STRIP) $(CURL_DIR)/src/.libs/curl
++	$(SSTRIP) $(CURL_DIR)/src/.libs/curl
+ 	cp -rf $(CURL_DIR)/lib/.libs/libcurl.so* $(DESTLIB)
+ 	cp -rf $(CURL_DIR)/src/.libs/curl $(DESTBIN)
+ 
