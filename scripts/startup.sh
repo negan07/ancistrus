@@ -32,6 +32,8 @@ OPKG=${DIR}/${BIN}
 CONF=${OPKG}.conf
 ARC=${OPKG}.zip
 ABSARC=${BIN}.zip
+WWW=/www
+LANGSDIR=${WWW}/langs
 
 URL=https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/tools/ancistrus-arm-D7000
 
@@ -40,6 +42,14 @@ URL=https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/tools/ancistrus
 [ -x ${DESTDIR}/${BIN} ] && echo "${BIN} looks already installed." && exit 3
 cd $DIR
 rm -f ${OPKG} ${CONF} ${ARC}
+echo "Cleaning up some garbage files..."
+find /opt -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1
+find ${WWW}/cgi-bin -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1
+rm -f ${WWW}/*DGND*.jpg ${LANGSDIR}/ENU/*.gz
+	for D in `ls ${LANGSDIR}/GW`
+	do
+	[ -d ${LANGSDIR}/GW/${D} ] && rm -f ${LANGSDIR}/GW/${D}/*.gz
+	done
 echo "Downloading & extracting: ${ARC} ..."
 curl -k -O ${URL}/${ABSARC}
 unzip ${ARC}
