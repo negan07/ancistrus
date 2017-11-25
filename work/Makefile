@@ -7,7 +7,6 @@ CUR_REL_PATH		:= $(notdir $(CUR_PATH))
 SRC_PATH_NAME		:= $(shell cd ../$(SRC_DIR); pwd;)
 RULES			:= $(CUR_PATH)/Rules.mak
 ARCH_LCASE		:= $(shell echo $(CPU_ARCH_NAME) | tr A-Z a-z)
-FLOATABI_NAME		:= $(shell tail -n 1 $(TCHAIN_GCC_CONF_ARGS) | cut -d '"' -f 16 )
 OPKGBUILD		:= $(ZLIB) $(LIBARCHIVE) $(OPKG)
 NUMTHREAD		:= $$((2 * `getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1`))
 #NUMTHREAD		:= $$((2 * `grep processor /proc/cpuinfo | wc -l`))
@@ -16,10 +15,6 @@ ifneq "$(or $(LOCAL),$(DEBUG))" ""
 PREFIX_PATH		:= $(DEBUG_DIR)
 else
 PREFIX_PATH		:= $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)
-endif
-
-ifeq ($(FLOATABI_NAME), $(FPU_TYPE))
-FPU_NAME=FPU
 endif
 
 ifdef BUILD
@@ -68,7 +63,7 @@ prepare_package: creat_rules
 	echo "Version: $(VER_$(D))"					>> $(CTRL); \
 	echo "Depends: $(DEP_$(D))"					>> $(CTRL); \
 	echo "Section: $(SEC_$(D))"					>> $(CTRL); \
-	echo "Architecture: $(ARCH_LCASE)$(PROJECT_TARGET)$(FPU_NAME)"	>> $(CTRL); \
+	echo "Architecture: $(ARCH_LCASE)$(PROJECT_TARGET)	"	>> $(CTRL); \
 	echo "Maintainer: $(GITHUB_DIR)"				>> $(CTRL); \
 	echo "Source: $(GITHUB_DIR)"					>> $(CTRL); \
 	echo "Description: $(DESC_$(D))"				>> $(CTRL); \
@@ -158,10 +153,6 @@ creat_rules:
 	@echo "export PROJECT		:= $(PROJECT_TARGET)" >> $(RULES)
 	@echo "export CPU_ARCH		:= $(CPU_ARCH_NAME)" >> $(RULES)
 	@echo "export CPU_LCARCH	:= $(ARCH_LCASE)" >> $(RULES)
-	@echo "export FLOATABI		:= $(FLOATABI_NAME)" >> $(RULES)
-ifeq ($(FLOATABI_NAME), $(FPU_TYPE))
-	@echo "export FPU		:= $(FPU_NAME)" >> $(RULES)
-endif
 	@echo "export GIT_ROOT_DIR	:= $(GIT_ROOT)" >> $(RULES)
 	@echo "export WORK_DIR		:= $(CUR_PATH)" >> $(RULES)
 	@echo "export SOURCE_PATH 	:= $(SRC_PATH_NAME)" >> $(RULES)

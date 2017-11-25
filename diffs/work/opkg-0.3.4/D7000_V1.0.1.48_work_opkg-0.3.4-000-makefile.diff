@@ -1,7 +1,7 @@
 diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 --- work/opkg-0.3.4/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/opkg-0.3.4/Makefile	2017-03-23 20:35:42.745736890 +0100
-@@ -0,0 +1,133 @@
+@@ -0,0 +1,129 @@
 +include ../Rules.mak
 +
 +ifdef DEBUG
@@ -10,11 +10,7 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +PREFIX_STATE_DIR 	:= /usr/local
 +endif
 +
-+ifdef FPU
-+MFPU=-$(FPU)
-+endif
-+
-+OPKG_REP_NAME		:= $(PROJECT_NAME)-$(ARCH)-$(PROJECT_TARGET)$(MFPU)
++OPKG_REP_NAME		:= $(PROJECT_NAME)-$(ARCH)-$(PROJECT_TARGET)
 +OPKG_CONF_PATH		:= $(OPKG)/utils
 +OPKG_CONF_NAME		:= opkg.conf
 +OPKG_CONF 		:= $(OPKG_CONF_PATH)/$(OPKG_CONF_NAME)
@@ -68,7 +64,7 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +
 +opkg_conf-local:
 +	@echo "src/gz local file://$(GIT_ROOT_DIR)/$(OPKG_PKG_DIR)" > $(OPKG_CONF)
-+	@echo "arch $(CPU_LCARCH)$(PROJECT_TARGET)$(FPU) 1" >> $(OPKG_CONF)
++	@echo "arch $(CPU_LCARCH)$(PROJECT_TARGET) 1" >> $(OPKG_CONF)
 +	@echo "arch $(CPU_LCARCH) 6" >> $(OPKG_CONF)
 +	@echo "arch all 11" >> $(OPKG_CONF)
 +	@echo "arch any 16" >> $(OPKG_CONF)
@@ -93,7 +89,7 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +endif
 +	@echo "#src/gz local file:///mnt/shares/U/local" >> $(OPKG_CONF)
 +	@echo "#src/gz localdebug $(LOCAL_REP_ROOT)/localdebug" >> $(OPKG_CONF)
-+	@echo "arch $(ARCH)$(PROJECT_TARGET)$(FPU) 1" >> $(OPKG_CONF)
++	@echo "arch $(ARCH)$(PROJECT_TARGET) 1" >> $(OPKG_CONF)
 +	@echo "arch $(ARCH) 6" >> $(OPKG_CONF)
 +	@echo "arch all 11" >> $(OPKG_CONF)
 +	@echo "arch any 16" >> $(OPKG_CONF)

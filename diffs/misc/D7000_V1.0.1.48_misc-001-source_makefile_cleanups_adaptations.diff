@@ -164,17 +164,17 @@ diff -urN D7000_V1.0.1.48_WW_src/Source/Makefile D7000_V1.0.1.48_WW_src/Source/M
  
 +WORK_PROJECT=$(shell cd ../..; basename -s .git `git config --get remote.origin.url`;)
 +WORK_WWW=$(shell cd ../..; git config --get remote.origin.url;)
++
 +WORK_AUTHOR=$(shell cd ../..; git log --max-count=1 --pretty='format:%an';)
 +WORK_AUTHOR_EMAIL=$(shell cd ../..; git log --max-count=1 --pretty='format:%ae';)
++
 +WORK_VER=$(shell cd ../..; git rev-list --count HEAD;)
 +BUILDING_DATE=$(shell date -u '+%Y-%m-%d %H:%M')
++
 +GIT_INFO=$(FS_DIR)/usr/etc/$(WORK_PROJECT)_git.info
-+ifeq ($(FLOATABI),$(FPU_FLOAT_TYPE))
-+UFPU=_FPU
-+endif
 +
 +ifneq ($(ORIG),1)
-+IMG_NAME=$(BOARD_ID)-$(VERSION)-$(WORK_PROJECT)_$(WORK_AUTHOR)-build-$(WORK_VER)$(UFPU).img
++IMG_NAME=$(BOARD_ID)-$(VERSION)-$(WORK_PROJECT)_$(WORK_AUTHOR)-build-$(WORK_VER).img
 +endif
 +
 +prefs_work:

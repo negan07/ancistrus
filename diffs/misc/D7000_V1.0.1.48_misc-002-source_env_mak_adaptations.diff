@@ -26,16 +26,16 @@ diff -urN D7000_V1.0.1.48_WW_src/Source/env.mak D7000_V1.0.1.48_WW_src/Source/en
  CROSS_DIR = /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/
  CROSS_DIR_LIB = /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/lib/
  CROSS_DIR_USR_LIB = /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/arm-unknown-linux-uclibcgnueabi/lib/
-+CROSS_GCC_CONF_ARGS = $(CROSS_DIR)/../lib/gcc/arm-unknown-linux-uclibcgnueabi/4.6.2/plugin/include/configargs.h
++
  TOOLS_DIR = $(ROOT)/tools/
  export PATH := $(CROSS_DIR):$(TOOLS_DIR):$(PATH)
  
 -#export CFLAGS += -Wno-strict-aliasing
 -
 +# flags settings
-+FPU_FLOAT_TYPE := hard
-+export FLOATABI := $(shell tail -n 1 $(CROSS_GCC_CONF_ARGS) | cut -d '"' -f 16 )
 +export STRIPFLAGS := -x -R .note -R .comment -R .version --strip-unneeded
-+export UCLIBC_EXTRA_CFLAGS := -mcpu=cortex-a9 -mtune=cortex-a9 -march=armv7-a -mabi=aapcs-linux -mfpu=neon-fp16 -mfloat-abi=$(FLOATABI)
-+export CFLAGS := -marm -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon-fp16 -pipe -funit-at-a-time -fomit-frame-pointer -ffixed-r8 -fno-common -mno-thumb-interwork -mabi=aapcs-linux -mfloat-abi=$(FLOATABI)
++
++export UCLIBC_EXTRA_CFLAGS := -mcpu=cortex-a9 -mtune=cortex-a9 -march=armv7-a -mabi=aapcs-linux -mfpu=neon-fp16 -mfloat-abi=soft
++
++export CFLAGS := -marm -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon-fp16 -pipe -funit-at-a-time -fomit-frame-pointer -ffixed-r8 -fno-common -mno-thumb-interwork -mabi=aapcs-linux -mfloat-abi=soft
  
