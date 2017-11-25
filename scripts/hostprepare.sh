@@ -9,18 +9,24 @@
 # License: GPLv2
 #
 #
-# host system: ubuntu yakkety x86/64
+# host system: debian stretch x64
 # prepare the host system for developing
 #
 
-# ubuntu has dash posix compliant only default shell, faster than bash but with tiny command set
+# install sudo first because debian-base misses it
+# switching to root console
+# su
+# apt-get install sudo
+# exit
+
+# debian has dash posix compliant only default shell, faster than bash but with tiny command set
 # e.g. += support is missing creating problem on making and many more
 # switching from dash to bash (action is reversible)
 # answer no to next question
-# sudo dpkg-reconfigure
+# sudo dpkg-reconfigure dash
 sudo dpkg-reconfigure -p critical dash
 
-# update the system: it's recommended to enable main, universe, restricted & multiverse repositories
+# update the system: it's recommended to enable main, contrib, security, recommended repositories
 sudo apt-get update
 sudo apt-get upgrade
 
@@ -46,10 +52,20 @@ sudo apt-get install mawk
 # some dev libraries
 sudo apt-get install compat-lib*
 sudo apt-get install libssl-dev
-sudo apt-get install ncurses-dev
-sudo apt-get install libncurses5
-sudo apt-get install libncursesw5-dev:i386
-sudo apt-get install libstdc++5:i386
+sudo apt-get install debian-keyring 
+sudo apt-get install g++-multilib g++-6-multilib
+#sudo apt-get install ncurses-dev
+sudo apt-get install libncurses5 libncurses5-dev
+sudo apt-get install lib32ncurses5 lib32ncurses5-dev
+sudo apt-get install libncursesw5 libncursesw5-dev
+#sudo apt-get install libncursesw5-dev:i386
+sudo apt-get install lib32ncursesw5 lib32ncursesw5-dev
+sudo apt-get install libtinfo5 libtinfo-dev
+sudo apt-get install lib32tinfo5 lib32tinfo-dev
+sudo apt-get install libstdc++5
+sudo apt-get install libstdc++6 libstdc++-6-dev
+#sudo apt-get install libstdc++5:i386
+sudo apt-get install libx32stdc++6 libx32stdc++-6-dev
 sudo apt-get install liblzo2-dev
 sudo apt-get install uuid-dev
 sudo apt-get install libpam0g-dev
@@ -59,9 +75,14 @@ sudo apt-get install texinfo
 sudo apt-get install xutils-dev
 sudo apt-get install intltool
 
+# network support
+sudo apt-get install net-tools
+sudo apt-get install curl libcurl4-openssl-dev
+
 # opkg compile support
-sudo apt-get install libarchive-dev
-sudo apt-get install libassuan-dev libgpg-error-dev libgpgme11-dev
+sudo apt-get install libarchive-tools libarchive-dev
+#sudo apt-get install libassuan-dev libgpg-error-dev libgpgme11-dev
+sudo apt-get install libassuan-dev libgpg-error-dev libgpgme-dev
 
 # subversion/cvs support
 sudo apt-get install subversion mercurial
@@ -72,8 +93,10 @@ sudo apt-get install git gitk git-gui
 
 # github support
 sudo apt-get install xclip
-sudo apt-get install ssh-agent
-sudo apt-get install gpg
+#sudo apt-get install ssh-agent
+sudo apt-get install ssh-agent-filter
+#sudo apt-get install gpg
+sudo apt-get install gnupg
 
 # squashfs support
 sudo apt-get install squashfs-tools

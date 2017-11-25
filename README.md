@@ -14,8 +14,8 @@ a) the embedded software developing experience;
 b) the router performances, ability and reliability.
 
 The word 'distributed' is to be intended with the same meaning of git developing system philosophy.
-Interested people with up to tiny unix programming or www knowledge may offer his own contribute 
-to this project with code, scripts, patches, fixes, methods, ideas, everything useful.
+People are a resource: those interested with up to tiny unix programming or www knowledge may offer
+their own contribute with code, scripts, patches, fixes, methods, ideas, everything useful.
 
 The approach is typical learn-to-learn oriented: feel free to join with your own contribution. 
 

@@ -31,7 +31,7 @@
 NAME=anc
 THISONE=receive
 SERVER=https								# kind of server: http or ftp
-ADDR=192.168.0.51							# local host ip (development pc machine i386)
+ADDR=192.168.0.7							# local host ip (development pc machine i386)
 RDIR=/tmp/etc								# this script location
 DBGDIR=$RDIR/${NAME}dbg							# debug dir
 LANGDIR=www.eng								# www dir

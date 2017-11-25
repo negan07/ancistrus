@@ -67,7 +67,7 @@ ERR=$?
 	esac
 	if [ ! -d $DSTDIR ]; then
 	echo "$DSTDIR not present"
-		if [ ! -f $SRCFILE ]; then						#avoid dir ovewritings
+		if [ ! -f $SRCFILE ]; then						#avoid dir overwritings
 		echo "$SRCFILE not present"
 			case $URL in
 			http*)								#download from web

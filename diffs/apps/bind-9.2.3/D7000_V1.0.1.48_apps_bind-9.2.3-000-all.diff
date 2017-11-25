@@ -804,16 +804,7 @@ diff -urN D7000_V1.0.1.48_WW_src/Source/apps/bind-9.2.3/lib/lwres/unix/Makefile 
 diff -urN D7000_V1.0.1.48_WW_src/Source/apps/bind-9.2.3/lib/Makefile D7000_V1.0.1.48_WW_src/Source/apps/bind-9.2.3/lib/Makefile
 --- D7000_V1.0.1.48_WW_src/Source/apps/bind-9.2.3/lib/Makefile	2016-10-11 17:56:13.000000000 +0200
 +++ D7000_V1.0.1.48_WW_src/Source/apps/bind-9.2.3/lib/Makefile	2017-05-04 23:02:58.511069668 +0200
-@@ -98,6 +98,8 @@
- 			(cd $$i; ${MAKE} ${MAKEDEFS} DESTDIR="${DESTDIR}" all) || exit 1; \
- 		fi; \
- 	done
-+	$(STRIP) ${libdir}/libdns*.so
-+	$(STRIP) ${libdir}/libisc*.so
- 
- install:: all
- 
-@@ -123,7 +125,7 @@
+@@ -123,7 +123,7 @@
  ###     EXT_CFLAGS
  
  CC = 		/opt/toolchains/uclibc-crosstools-gcc-4.4.2-1-with-ftw/usr/bin/mips-linux-gcc
@@ -873,18 +864,7 @@ diff -urN D7000_V1.0.1.48_WW_src/Source/apps/bind-9.2.3/make/Makefile D7000_V1.0
 diff -urN D7000_V1.0.1.48_WW_src/Source/apps/bind-9.2.3/Makefile D7000_V1.0.1.48_WW_src/Source/apps/bind-9.2.3/Makefile
 --- D7000_V1.0.1.48_WW_src/Source/apps/bind-9.2.3/Makefile	2016-10-11 17:56:15.000000000 +0200
 +++ D7000_V1.0.1.48_WW_src/Source/apps/bind-9.2.3/Makefile	2017-05-04 23:05:15.405514719 +0200
-@@ -96,7 +96,9 @@
- 			echo "making all in `pwd`/$$i"; \
- 			(cd $$i; ${MAKE} ${MAKEDEFS} DESTDIR="${DESTDIR}" all) || exit 1; \
- 		fi; \
--	done
-+	done 
-+	$(STRIP) ${libdir}/libdns*.so
-+	$(STRIP) ${libdir}/libisc*.so
- 
- #install:: all
- 
-@@ -122,7 +124,7 @@
+@@ -122,7 +122,7 @@
  ###     EXT_CFLAGS
  
  CC = $(CROSS)gcc		
@@ -893,12 +873,20 @@ diff -urN D7000_V1.0.1.48_WW_src/Source/apps/bind-9.2.3/Makefile D7000_V1.0.1.48
  STD_CINCLUDES =	
  STD_CDEFINES =	
  STD_CWARNINGS =	 -W -Wall -Wmissing-prototypes -Wcast-qual -Wwrite-strings -Wformat
-@@ -275,7 +277,7 @@
+@@ -275,10 +275,12 @@
  
  install:: isc-config.sh installdirs
  	${INSTALL_SCRIPT} isc-config.sh ${DESTDIR}${bindir}
 -	$(STRIP) ${bindir}/dig
+-	cp -a ${bindir}/dig ../../target/usr/sbin/ 
+-	cp -a ${libdir}/libdns* ../../target/lib/ 
+-	cp -a ${libdir}/libisc* ../../target/lib/ 
++	$(STRIP) ${libdir}/libdns*.so
++	$(STRIP) ${libdir}/libisc*.so
 +	$(SSTRIP) ${bindir}/dig
- 	cp -a ${bindir}/dig ../../target/usr/sbin/ 
- 	cp -a ${libdir}/libdns* ../../target/lib/ 
- 	cp -a ${libdir}/libisc* ../../target/lib/ 
++	cp -a ${bindir}/dig ../../target/usr/sbin/
++	cp -a ${libdir}/libdns* ../../target/lib/
++	cp -a ${libdir}/libisc* ../../target/lib/
+ 	rm -rf ../../target/lib/*.a
+ 	
+ tags:

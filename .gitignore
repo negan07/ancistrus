@@ -96,6 +96,7 @@ dkms.conf
 # ancistrus
 # https://github.com/negan07/ancistrus #
 ########################################
+diff-*
 crosstools-*
 D7000_*_src
 build
@@ -122,4 +123,6 @@ work/libarchive-*/
 work/opkg-*/
 work/smartmontools-*/
 work/hdparm-*/
+work/openvpn-*/
+work/lzo-*/
 
