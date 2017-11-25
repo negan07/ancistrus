@@ -1,0 +1,29 @@
+diff -urN D7000_V1.0.1.50_WW_src/Source/apps/hdparm-9.43/Makefile D7000_V1.0.1.50_WW_src/Source/apps/hdparm-9.43/Makefile
+--- D7000_V1.0.1.50_WW_src/Source/apps/hdparm-9.43/Makefile	2016-10-11 17:56:06.000000000 +0200
++++ D7000_V1.0.1.50_WW_src/Source/apps/hdparm-9.43/Makefile	2017-05-02 13:27:14.091739212 +0200
+@@ -9,7 +9,7 @@
+ CC = $(CROSS)gcc
+ STRIP = $(CROSS)strip
+ 
+-CFLAGS := -O2 -W -Wall -Wbad-function-cast -Wcast-align -Wpointer-arith -Wcast-qual -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -fkeep-inline-functions -Wwrite-strings -Waggregate-return -Wnested-externs -Wtrigraphs $(CFLAGS)
++CFLAGS := -Os -W -Wall -Wbad-function-cast -Wcast-align -Wpointer-arith -Wcast-qual -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -fkeep-inline-functions -Wwrite-strings -Waggregate-return -Wnested-externs -Wtrigraphs $(CFLAGS)
+ 
+ LDFLAGS = -s
+ #LDFLAGS = -s -static
+@@ -24,7 +24,7 @@
+ 
+ hdparm: hdparm.h sgio.h $(OBJS)
+ 	$(CC) $(LDFLAGS) -o hdparm $(OBJS)
+-	$(STRIP) hdparm
++	$(SSTRIP) hdparm
+ 
+ hdparm.o:	hdparm.h sgio.h
+ 
+@@ -37,7 +37,6 @@
+ fwdownload.o: fwdownload.c sgio.h hdparm.h
+ 
+ install: all hdparm.8
+-	$(STRIP) hdparm
+ 	cp -a  hdparm $(DESTDIR)
+ 
+ clean:

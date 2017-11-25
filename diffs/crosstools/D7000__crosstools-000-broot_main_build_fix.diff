@@ -1,0 +1,21 @@
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build	2014-01-16 20:55:01.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build	2016-12-25 23:07:21.489831798 +0100
+@@ -16,7 +16,7 @@
+ CHECK_ERR=
+ 
+ #target dirtory validation functin 
+-function validate_target_dir() {
++validate_target_dir() {
+    if [ -d "$1" ] && [ "$(ls -A $1)" ]; then
+        echo "$1 already has a toolchain installed.  Please delete the old toolchain before continuing."
+        CHECK_ERR=y 
+@@ -33,7 +33,7 @@
+ }
+ 
+ #build toolchain for a particular target
+-function build_toolchain() {
++build_toolchain() {
+     echo "################### Build $1 toolchain #####################"
+     cd $buildhome
+     # get the config file

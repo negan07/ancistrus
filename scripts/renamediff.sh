@@ -17,7 +17,7 @@
 # It must be invoked from the script source dir.
 # .diff patches must be located in $DIFFDIR dir.
 # To be used when migrating .diff patches from old to new firmware version.
-# Parameters must be version numbers like '1.0.1.48' .
+# Parameters must be version numbers like '1.0.1.50' .
 # If oldfwvernum is wrong no change will be made on filenames.
 # $DIFFDIR dir must be present.
 #

@@ -1,0 +1,34 @@
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c	2011-01-01 16:33:56.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.c	2016-12-27 20:09:08.000000000 +0100
+@@ -281,11 +281,7 @@
+   build_search_tree (ar);
+ }
+ 
+-#endif /* DEFINE_NON_INLINE_P */
+-
+-#if DEFINE_INLINE_P
+-
+-SIM_ARANGE_INLINE int
++int
+ sim_addr_range_hit_p (ADDR_RANGE *ar, address_word addr)
+ {
+   ADDR_RANGE_TREE *t = ar->range_tree;
+@@ -302,4 +298,4 @@
+   return 0;
+ }
+ 
+-#endif /* DEFINE_INLINE_P */
++#endif /* DEFINE_NON_INLINE_P */
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h	2011-01-01 16:33:56.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gdb-7.3.1/sim/common/sim-arange.h	2016-12-27 20:09:59.000000000 +0100
+@@ -63,7 +63,7 @@
+ 
+ /* Return non-zero if ADDR is in range AR, traversing the entire tree.
+    If no range is specified, that is defined to mean "everything".  */
+-extern INLINE int
++extern int
+ sim_addr_range_hit_p (ADDR_RANGE * /*ar*/, address_word /*addr*/);
+ #define ADDR_RANGE_HIT_P(ar, addr) \
+   ((ar)->range_tree == NULL || sim_addr_range_hit_p ((ar), (addr)))

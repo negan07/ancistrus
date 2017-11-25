@@ -1,0 +1,96 @@
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf	2009-04-21 21:03:23.000000000 +0200
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.gperf	2016-12-27 18:35:58.000000000 +0100
+@@ -22,6 +22,9 @@
+ static unsigned int hash (const char *, unsigned int);
+ #ifdef __GNUC__
+ __inline
++#ifdef __GNUC_STDC_INLINE__
++__attribute__ ((__gnu_inline__))
++#endif
+ #endif
+ const char * libc_name_p (const char *, unsigned int);
+ %}
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h	2009-04-21 21:03:23.000000000 +0200
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/cp/cfns.h	2016-12-27 18:37:33.000000000 +0100
+@@ -53,6 +53,9 @@
+ static unsigned int hash (const char *, unsigned int);
+ #ifdef __GNUC__
+ __inline
++#ifdef __GNUC_STDC_INLINE__
++__attribute__ ((__gnu_inline__))
++#endif
+ #endif
+ const char * libc_name_p (const char *, unsigned int);
+ /* maximum key range = 391, duplicates = 0 */
+@@ -96,7 +99,7 @@
+       400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
+       400, 400, 400, 400, 400, 400, 400
+     };
+-  register int hval = len;
++  register int hval = (int)len;
+ 
+   switch (hval)
+     {
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c	2010-11-25 20:03:27.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/gengtype.c	2016-12-26 23:49:25.000000000 +0100
+@@ -3594,13 +3594,13 @@
+ 		  int has_length, struct fileloc *line, const char *if_marked,
+ 		  bool emit_pch, type_p field_type, const char *field_name)
+ {
++      struct pair newv;
+   /* If the field reference is relative to V, rather than to some
+      subcomponent of V, we can mark any subarrays with a single stride.
+      We're effectively treating the field as a global variable in its
+      own right.  */
+   if (v && type == v->type)
+     {
+-      struct pair newv;
+ 
+       newv = *v;
+       newv.type = field_type;
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h	2011-01-03 21:52:22.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/ira-int.h	2016-12-27 14:08:17.000000000 +0100
+@@ -1123,8 +1123,13 @@
+ ira_allocno_object_iter_cond (ira_allocno_object_iterator *i, ira_allocno_t a,
+ 			      ira_object_t *o)
+ {
+-  *o = ALLOCNO_OBJECT (a, i->n);
+-  return i->n++ < ALLOCNO_NUM_OBJECTS (a);
++   int n = i->n++;
++   if (n < ALLOCNO_NUM_OBJECTS (a))
++   {
++     *o = ALLOCNO_OBJECT (a, n);
++     return true;
++   }
++   return false;
+ }
+ 
+ /* Loop over all objects associated with allocno A.  In each
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in	2011-08-20 09:51:09.000000000 +0200
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/gcc-4.6.2/gcc/Makefile.in	2016-12-26 23:27:47.000000000 +0100
+@@ -4245,18 +4245,10 @@
+ doc/gccint.info: $(TEXI_GCCINT_FILES)
+ doc/cppinternals.info: $(TEXI_CPPINT_FILES)
+ 
+-doc/%.info: %.texi
+-	if [ x$(BUILD_INFO) = xinfo ]; then \
+-		$(MAKEINFO) $(MAKEINFOFLAGS) -I . -I $(gcc_docdir) \
+-			-I $(gcc_docdir)/include -o $@ $<; \
+-	fi
++doc/%.info: 
+ 
+ # Duplicate entry to handle renaming of gccinstall.info
+-doc/gccinstall.info: $(TEXI_GCCINSTALL_FILES)
+-	if [ x$(BUILD_INFO) = xinfo ]; then \
+-		$(MAKEINFO) $(MAKEINFOFLAGS) -I $(gcc_docdir) \
+-			-I $(gcc_docdir)/include -o $@ $<; \
+-	fi
++doc/gccinstall.info:
+ 
+ doc/cpp.dvi: $(TEXI_CPP_FILES)
+ doc/gcc.dvi: $(TEXI_GCC_FILES)

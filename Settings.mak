@@ -21,9 +21,9 @@ PROJECT_LICENSE		?= "License: $(LICENSE_NAME)"
 GITHUB_DIR		?= https://github.com/$(PROJECT_FOUNDER)/$(PROJECT_NAME)
 PROJECT_HOMEPAGE	?= https://$(PROJECT_FOUNDER).github.io/$(PROJECT_NAME)
 PROJECT_REP_ROOT	?= https://raw.githubusercontent.com/$(PROJECT_FOUNDER)/$(PROJECT_NAME)/gh-pages
-LOCAL_REP_ROOT		?= https://192.168.0.51
+LOCAL_REP_ROOT		?= https://192.168.0.7
 
-FWVER			?= V1.0.1.48
+FWVER			?= V1.0.1.50
 CPU_ARCH_NAME		?= ARM
 RCBOOT			?= /usr/etc/rcS
 
@@ -42,7 +42,7 @@ SRC_APPS_REL_DIR	?= $(SRC_REL_DIR)/Source/apps
 SRC_BUILDS_REL_DIR	?= Source/Builds
 SRC_TARGET_REL_DIR	?= Source/target
 SRC_URL			?= http://www.downloads.netgear.com/files/GPL
-SRC_FILE		?= $(PROJECT_TARGET)_WW_src.tar.bz2_$(FWVER).zip
+SRC_FILE		?= $(PROJECT_TARGET)_$(FWVER)_WW_src.tar.gz.zip
 
 TCHAIN_SRC_DIR		?= crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources
 TCHAIN_TAR		?= $(SRC_DIR)/Source/$(TCHAIN_SRC_DIR).tar.bz2

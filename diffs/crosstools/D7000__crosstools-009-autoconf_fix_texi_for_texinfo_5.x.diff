@@ -1,0 +1,21 @@
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi	2009-11-05 03:42:15.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/autoconf-2.65/doc/autoconf.texi	2016-12-26 23:02:16.000000000 +0100
+@@ -15,7 +15,7 @@
+ @c The ARG is an optional argument.  To be used for macro arguments in
+ @c their documentation (@defmac).
+ @macro ovar{varname}
+-@r{[}@var{\varname\}@r{]}@c
++@r{[}@var{\varname\}@r{]}
+ @end macro
+ 
+ @c @dvar(ARG, DEFAULT)
+@@ -23,7 +23,7 @@
+ @c The ARG is an optional argument, defaulting to DEFAULT.  To be used
+ @c for macro arguments in their documentation (@defmac).
+ @macro dvar{varname, default}
+-@r{[}@var{\varname\} = @samp{\default\}@r{]}@c
++@r{[}@var{\varname\} = @samp{\default\}@r{]}
+ @end macro
+ 
+ @c Handling the indexes with Texinfo yields several different problems.

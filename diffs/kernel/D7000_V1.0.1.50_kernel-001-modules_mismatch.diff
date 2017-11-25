@@ -1,0 +1,43 @@
+diff -urN D7000_V1.0.1.50_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/hotplug.c D7000_V1.0.1.50_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/hotplug.c
+--- D7000_V1.0.1.50_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/hotplug.c	2016-10-11 17:47:55.000000000 +0200
++++ D7000_V1.0.1.50_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/hotplug.c	2017-01-03 19:59:56.621028892 +0100
+@@ -99,7 +99,7 @@
+  *
+  * Called with IRQs disabled
+  */
+-void platform_cpu_die(unsigned int cpu)
++void __ref platform_cpu_die(unsigned int cpu)
+ {
+ 	int spurious = 0;
+ 
+diff -urN D7000_V1.0.1.50_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/pcie-bcm63xx.c D7000_V1.0.1.50_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/pcie-bcm63xx.c
+--- D7000_V1.0.1.50_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2016-10-20 12:43:45.000000000 +0200
++++ D7000_V1.0.1.50_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2017-01-03 21:06:00.845231666 +0100
+@@ -35,7 +35,7 @@
+ 
+ extern unsigned long getMemorySize(void);
+ static int bcm63xx_pcie_get_baraddrsize_index(void);
+-static struct pci_bus *bcm63xx_pcie_scan_bus(int nr, struct pci_sys_data *sys);
++static struct pci_bus *bcm63xx_pcie_scan_bus(int nr, struct pci_sys_data *sys) __ref;
+ static int bcm63xx_pcie_map_irq(const struct pci_dev *dev, u8 slot, u8 pin);
+ static int bcm63xx_pcie_setup(int nr, struct pci_sys_data *sys);
+ static void bcm63xx_pcie_phy_mode_config(int index);
+@@ -643,7 +643,7 @@
+ }
+ 
+ static struct pci_bus *
+-bcm63xx_pcie_scan_bus(int nr, struct pci_sys_data *sys)
++__ref bcm63xx_pcie_scan_bus(int nr, struct pci_sys_data *sys)
+ {
+ 	TRACE();	
+ 	return pci_scan_root_bus(NULL, sys->busnr, &bcm63xx_pcie_ops, sys, &sys->resources);
+@@ -808,7 +808,7 @@
+ }
+ EXPORT_SYMBOL(bcm63xx_pcie_aloha);
+ 
+-static int bcm63xx_pcie_init(void)
++static int __init bcm63xx_pcie_init(void)
+ {
+ 	int i;
+ 	bool shutdown;
+
