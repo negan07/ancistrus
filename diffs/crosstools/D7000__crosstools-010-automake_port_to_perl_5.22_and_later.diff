@@ -1,0 +1,12 @@
+diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/automake-1.11.1/automake.in crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/automake-1.11.1/automake.in
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/automake-1.11.1/automake.in	2009-12-08 19:15:40.000000000 +0100
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/buildroot-2011.11/dl/automake-1.11.1/automake.in	2017-11-17 22:38:50.377249975 +0100
+@@ -4110,7 +4110,7 @@
+ sub substitute_ac_subst_variables ($)
+ {
+   my ($text) = @_;
+-  $text =~ s/\${([^ \t=:+{}]+)}/&substitute_ac_subst_variables_worker ($1)/ge;
++  $text =~ s/\$[{]([^ \t=:+{}]+)}/substitute_ac_subst_variables_worker ($1)/ge;
+   return $text;
+ }
+ 

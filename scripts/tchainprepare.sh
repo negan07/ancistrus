@@ -47,12 +47,13 @@ chmod -f 644 src/*.config
 cd $BRDLDIR
 echo "Extracting crosstools before patching..."
 tar xjf autoconf-2.65.tar.bz2 || exit 3
+tar xjf automake-1.11.1.tar.bz2 || exit 3
 tar xjf gcc-4.6.2.tar.bz2 || exit 3
 tar xjf gdb-7.3.1.tar.bz2 || exit 3
 tar xjf m4-1.4.15.tar.bz2 || exit 3
 tar xjf uClibc-0.9.32.tar.bz2 || exit 3
 # remove old archives
-rm -f autoconf-2.65.tar.bz2 gcc-4.6.2.tar.bz2 gdb-7.3.1.tar.bz2 m4-1.4.15.tar.bz2 uClibc-0.9.32.tar.bz2
+rm -f autoconf-2.65.tar.bz2 automake-1.11.1.tar.bz2 gcc-4.6.2.tar.bz2 gdb-7.3.1.tar.bz2 m4-1.4.15.tar.bz2 uClibc-0.9.32.tar.bz2
 cd ../../../../scripts
 # apply patches
 ./apply_patch.sh $PROJECT $FWVER $DIFFDIR crosstools
@@ -60,12 +61,13 @@ cd ../../../../scripts
 cd ../${TCDIR}/${BRDLDIR}
 echo "Repacking crosstools after patching..."
 tar cjf autoconf-2.65.tar.bz2 autoconf-2.65 || exit 3
+tar cjf automake-1.11.1.tar.bz2 automake-1.11.1 || exit 3
 tar cjf gcc-4.6.2.tar.bz2 gcc-4.6.2 || exit 3
 tar cjf gdb-7.3.1.tar.bz2 gdb-7.3.1 || exit 3
 tar cjf m4-1.4.15.tar.bz2 m4-1.4.15 || exit 3
 tar cjf uClibc-0.9.32.tar.bz2 uClibc-0.9.32 || exit 3
 # dir cleanup
-rm -Rf autoconf-2.65 gcc-4.6.2 gdb-7.3.1 m4-1.4.15 uClibc-0.9.32
+rm -Rf autoconf-2.65 automake-1.11.1 gcc-4.6.2 gdb-7.3.1 m4-1.4.15 uClibc-0.9.32
 cd ../../../..
 echo
 echo "Ready to start:"
