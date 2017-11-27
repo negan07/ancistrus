@@ -63,7 +63,7 @@ prepare_package: creat_rules
 	echo "Version: $(VER_$(D))"					>> $(CTRL); \
 	echo "Depends: $(DEP_$(D))"					>> $(CTRL); \
 	echo "Section: $(SEC_$(D))"					>> $(CTRL); \
-	echo "Architecture: $(ARCH_LCASE)$(PROJECT_TARGET)	"	>> $(CTRL); \
+	echo "Architecture: $(ARCH_LCASE)$(PROJECT_TARGET)"		>> $(CTRL); \
 	echo "Maintainer: $(GITHUB_DIR)"				>> $(CTRL); \
 	echo "Source: $(GITHUB_DIR)"					>> $(CTRL); \
 	echo "Description: $(DESC_$(D))"				>> $(CTRL); \
