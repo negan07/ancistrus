@@ -1,0 +1,31 @@
+diff -urN work/lzo-2.10/lzo-2.10/Makefile.in work/lzo-2.10/lzo-2.10/Makefile.in
+--- work/lzo-2.10/lzo-2.10/Makefile.in	2011-08-12 18:02:59.000000000 +0200
++++ work/lzo-2.10/lzo-2.10/Makefile.in	2017-11-26 22:48:12.738980780 +0100
+@@ -102,12 +102,12 @@
+ build_triplet = @build@
+ host_triplet = @host@
+ target_triplet = @target@
+-noinst_PROGRAMS = examples/dict$(EXEEXT) examples/lzopack$(EXEEXT) \
+-	examples/overlap$(EXEEXT) examples/precomp$(EXEEXT) \
+-	examples/precomp2$(EXEEXT) examples/simple$(EXEEXT) \
+-	lzotest/lzotest$(EXEEXT) tests/align$(EXEEXT) \
+-	tests/chksum$(EXEEXT) tests/promote$(EXEEXT) \
+-	tests/sizes$(EXEEXT) minilzo/testmini$(EXEEXT)
++noinst_PROGRAMS = #examples/dict$(EXEEXT) examples/lzopack$(EXEEXT) \
++	#examples/overlap$(EXEEXT) examples/precomp$(EXEEXT) \
++	#examples/precomp2$(EXEEXT) examples/simple$(EXEEXT) \
++	#lzotest/lzotest$(EXEEXT) tests/align$(EXEEXT) \
++	#tests/chksum$(EXEEXT) tests/promote$(EXEEXT) \
++	#tests/sizes$(EXEEXT) minilzo/testmini$(EXEEXT)
+ subdir = .
+ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+ am__aclocal_m4_deps = $(top_srcdir)/autoconf/local.m4 \
+@@ -1349,7 +1349,7 @@
+ uninstall: uninstall-am
+ 
+ install-am: all-am
+-	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
++	#@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+ 
+ installcheck: installcheck-am
+ install-strip:

@@ -267,6 +267,25 @@ DESC_$(HDPARM)		:= Get/set ATA/SATA drive parameters under Linux
 DIRLIST			+= $(HDPARM)
 TARLIST			+= $(HDPARM)
 
+LZO_NAME		:= lzo
+VER_$(LZO_NAME)		:= 2.10
+LZO			:= $(LZO_NAME)-$(VER_$(LZO_NAME))
+NAME_$(LZO)		:= $(LZO_NAME)
+ifdef DEBUG
+NAME_$(LZO)		:= $(LZO_NAME)-debug
+endif
+VER_$(LZO)		:= $(VER_$(LZO_NAME))
+DL_$(LZO)		:= http://www.oberhumer.com/opensource/lzo/download
+TAR_$(LZO)		:= $(LZO).tar.gz
+HOME_$(LZO)		:= http://www.oberhumer.com/opensource/lzo/
+LIC_$(LZO)		:= GPLv2
+SEC_$(LZO)		:= builtinlib
+PRIO_$(LZO)		:= required
+DEP_$(LZO)		:= 
+DESC_$(LZO)		:= A portable lossless data compression library
+DIRLIST			+= $(LZO)
+TARLIST			+= $(LZO)
+
 BUILTINLIB		:=
 BUILTIN			:=
 THIRDPARTYLIB		:=
@@ -274,6 +293,7 @@ THIRDPARTY		:=
 BUILTINLIB 		+= $(NVRAM)
 THIRDPARTY		+= $(CORE_WORK)
 ifndef LOCAL
+BUILTINLIB		+= $(LZO)
 BUILTIN			+= $(UTELNETD)
 BUILTIN			+= $(IPROUTE2)
 BUILTIN			+= $(HDPARM)

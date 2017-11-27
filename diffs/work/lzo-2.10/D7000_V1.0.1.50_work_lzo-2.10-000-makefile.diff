@@ -1,0 +1,29 @@
+diff -urN work/lzo-2.10/Makefile work/lzo-2.10/Makefile
+--- work/lzo-2.10/Makefile	2017-11-26 22:48:12.738980780 +0100
++++ work/lzo-2.10/Makefile	2017-11-26 22:48:12.738980780 +0100
+@@ -0,0 +1,25 @@
++include ../Rules.mak
++
++all: config
++	$(MAKE) -C $(LZO)
++	$(STRIP) $(STRIPFLAGS) $(LZO)/src/.libs/*.a
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(LZO) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" --disable-shared
++
++install:
++	@echo "Nothing to install..."
++
++clean:
++	$(MAKE) -C $(LZO) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(LZO) distclean
++
