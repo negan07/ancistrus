@@ -35,6 +35,7 @@ sudo apt-get install gcc-multilib
 sudo apt-get install libtool
 sudo apt-get install gdb
 sudo apt-get install make
+sudo apt-get install cmake
 sudo apt-get install automake
 sudo apt-get install autoconf
 sudo apt-get install binutils
