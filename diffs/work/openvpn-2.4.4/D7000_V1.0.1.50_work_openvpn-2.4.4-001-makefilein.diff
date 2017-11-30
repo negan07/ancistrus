@@ -1,0 +1,63 @@
+diff -urN work/openvpn-2.4.4/openvpn-2.4.4/Makefile.in work/openvpn-2.4.4/openvpn-2.4.4/Makefile.in
+--- work/openvpn-2.4.4/openvpn-2.4.4/Makefile.in	2017-09-26 11:27:50.000000000 +0200
++++ work/openvpn-2.4.4/openvpn-2.4.4/Makefile.in	2017-11-28 22:53:11.029489996 +0100
+@@ -484,8 +484,8 @@
+ 	config-msvc.h \
+ 	config-msvc-version.h.in
+ 
+-@WIN32_TRUE@rootdir = $(prefix)
+-@WIN32_TRUE@root_DATA = version.sh
++#@WIN32_TRUE@rootdir = $(prefix)
++#@WIN32_TRUE@root_DATA = version.sh
+ all: $(BUILT_SOURCES) config.h
+ 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+ 
+@@ -505,16 +505,16 @@
+ 	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile'; \
+ 	$(am__cd) $(top_srcdir) && \
+ 	  $(AUTOMAKE) --foreign Makefile
+-.PRECIOUS: Makefile
+-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+-	@case '$?' in \
+-	  *config.status*) \
+-	    echo ' $(SHELL) ./config.status'; \
+-	    $(SHELL) ./config.status;; \
+-	  *) \
+-	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
+-	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
+-	esac;
++#.PRECIOUS: Makefile
++#Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
++#	@case '$?' in \
++#	  *config.status*) \
++#	    echo ' $(SHELL) ./config.status'; \
++#	    $(SHELL) ./config.status;; \
++#	  *) \
++#	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
++#	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
++#	esac;
+ 
+ $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
+ 	$(SHELL) ./config.status --recheck
+@@ -525,9 +525,9 @@
+ 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
+ $(am__aclocal_m4_deps):
+ 
+-config.h: stamp-h1
+-	@test -f $@ || rm -f stamp-h1
+-	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) stamp-h1
++#config.h: stamp-h1
++#	@test -f $@ || rm -f stamp-h1
++#	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) stamp-h1
+ 
+ stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
+ 	@rm -f stamp-h1
+@@ -897,7 +897,7 @@
+ 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+ 	done
+ install: $(BUILT_SOURCES)
+-	$(MAKE) $(AM_MAKEFLAGS) install-recursive
++	#$(MAKE) $(AM_MAKEFLAGS) install-recursive
+ install-exec: install-exec-recursive
+ install-data: install-data-recursive
+ uninstall: uninstall-recursive

@@ -1,0 +1,296 @@
+diff -urN work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/forward.c work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/forward.c
+--- work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/forward.c	2017-09-26 11:27:35.000000000 +0200
++++ work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/forward.c	2017-11-28 17:45:53.442033301 +0100
+@@ -46,10 +46,111 @@
+ #include "occ-inline.h"
+ #include "ping-inline.h"
+ #include "mstats.h"
++#include "nvram.h"
++
++#include "shared/misc.h"
+ 
+ counter_type link_read_bytes_global;  /* GLOBAL */
+ counter_type link_write_bytes_global; /* GLOBAL */
+ 
++#define IPcountry_lookup "/tmp/IPcountry_lookup"
++#define Route_country_lookup "/tmp/Router_country_lookup"
++
++int route_country_lookup(void)
++{
++	char buff[256],debug[1024];
++	FILE *fp;
++
++	//sprintf(buff,"/usr/bin/geoiplookup -f /usr/share/GeoIP/GeoIP.dat %s >> /tmp/IPcountry_lookup",IPfrom);
++	sprintf(buff,"wget \"http://www.speedtest.net/api/country\" -O /tmp/Router_country_lookup");
++
++	sprintf(debug,"echo '##########%s(%d)buff=%s' > /dev/console",__func__,__LINE__,buff);
++	system(debug);
++
++	system(buff);
++	sleep(5);
++
++	fp = fopen(Route_country_lookup, "r");
++    if (fp)
++    {
++        fgets(buff, sizeof(buff), fp);
++		if(strcmp(buff,"") == 0){
++			sprintf(debug,"echo '[OpenVPN]route_country_lookup() failed' > /dev/console");
++			system(debug);
++		}
++			
++		//sprintf(debug,"echo '##########ip_country_lookup() %s' > /dev/console",buff);
++		//system(debug);
++        fclose(fp);
++    }else{
++    	sprintf(debug,"echo '[OpenVPN]route_country_lookup() connection failed' > /dev/console");
++		system(debug);
++    }
++
++	if(strstr(buff,"US") != 0){
++		//IP address from US
++		return 1;
++	}else if((strstr(buff,"EU") != 0) || (strstr(buff,"FR") != 0) || (strstr(buff,"GB") != 0) || (strstr(buff,"DE") != 0) || (strstr(buff,"IT") != 0)){
++		//IP address from Europe,France, UK, Germary
++		return 2;
++	}
++
++	//unlink(Route_country_lookup);
++
++	return 0;
++
++
++	
++}//allenwen Foxconn
++
++
++int ip_country_lookup(char *IPfrom)
++{
++	char buff[256],debug[1024];
++	FILE *fp;
++
++	//sprintf(buff,"/usr/bin/geoiplookup -f /usr/share/GeoIP/GeoIP.dat %s >> /tmp/IPcountry_lookup",IPfrom);
++	sprintf(buff,"wget \"http://www.speedtest.net/api/country?ip=%s\" -O /tmp/IPcountry_lookup",IPfrom);
++
++	sprintf(debug,"echo '##########%s(%d)buff=%s' > /dev/console",__func__,__LINE__,buff);
++	system(debug);
++
++	system(buff);
++	sleep(5);
++
++	fp = fopen(IPcountry_lookup, "r");
++    if (fp)
++    {
++        fgets(buff, sizeof(buff), fp);
++		if(strcmp(buff,"") == 0){
++			sprintf(debug,"echo '[OpenVPN]ip_country_lookup() failed' > /dev/console");
++			system(debug);
++		}
++			
++		//sprintf(debug,"echo '##########ip_country_lookup() %s' > /dev/console",buff);
++		//system(debug);
++        fclose(fp);
++    }else{
++    	sprintf(debug,"echo '[OpenVPN]ip_country_lookup() connection failed' > /dev/console");
++		system(debug);
++    }
++
++	if((strstr(buff,"US") != 0) || (strstr(buff,"CA") != 0)){
++		//IP address from US
++		return 1;
++	}else if((strstr(buff,"EU") != 0) || (strstr(buff,"FR") != 0) || (strstr(buff,"GB") != 0) || (strstr(buff,"DE") != 0) || (strstr(buff,"IT") != 0)){
++		//IP address from Europe,France, UK, Germary
++		return 2;
++	}
++
++	//unlink(IPcountry_lookup);
++
++	return 0;
++
++
++	
++}//allenwen Foxconn
++
+ /* show event wait debugging info */
+ 
+ #ifdef ENABLE_DEBUG
+@@ -536,6 +637,8 @@
+ static void
+ process_coarse_timers(struct context *c)
+ {
++    char c2addr[128] = "";
++
+ #ifdef ENABLE_CRYPTO
+     /* flush current packet-id to file once per 60
+      * seconds if --replay-persist was specified */
+@@ -564,6 +667,10 @@
+     check_inactivity_timeout(c);
+     if (c->sig->signal_received)
+     {
++        /* For netgear openvpn log */
++        print_sockaddr_remote(&c->c2.from.dest, c2addr);
++        NETGEAR_SYSLOG("26 00[OpenVPN, connection drop]from remote IP address: %s", c2addr);
++
+         return;
+     }
+ 
+@@ -571,6 +678,10 @@
+     check_ping_restart(c);
+     if (c->sig->signal_received)
+     {
++        /* For netgear openvpn log */
++        print_sockaddr_remote(&c->c2.from.dest, c2addr);
++        NETGEAR_SYSLOG("26 00[OpenVPN, connection drop]from remote IP address: %s", c2addr);
++
+         return;
+     }
+ 
+@@ -580,6 +691,10 @@
+         check_server_poll_timeout(c);
+         if (c->sig->signal_received)
+         {
++            /* For netgear openvpn log */
++            print_sockaddr_remote(&c->c2.from.dest, c2addr);
++            NETGEAR_SYSLOG("26 00[OpenVPN, connection drop]from remote IP address: %s", c2addr);
++
+             return;
+         }
+ 
+diff -urN work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/init.c work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/init.c
+--- work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/init.c	2017-09-26 11:27:37.000000000 +0200
++++ work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/init.c	2017-11-28 17:33:17.499217703 +0100
+@@ -54,6 +54,8 @@
+ 
+ #include "occ-inline.h"
+ 
++#include "shared/misc.h"
++
+ static struct context *static_context; /* GLOBAL */
+ 
+ /*
+@@ -3454,6 +3456,11 @@
+ static void
+ do_close_link_socket(struct context *c)
+ {
++    /* For netgear openvpn log */
++    char c2addr[128] = "";
++    print_sockaddr_remote(&c->c2.from.dest, c2addr);
++    NETGEAR_SYSLOG("26 00[OpenVPN, connection drop]from remote IP address: %s", c2addr);
++
+     if (c->c2.link_socket && c->c2.link_socket_owned)
+     {
+         link_socket_close(c->c2.link_socket);
+diff -urN work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/socket.c work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/socket.c
+--- work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/socket.c	2017-09-26 11:27:35.000000000 +0200
++++ work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/socket.c	2017-11-28 17:24:06.732229909 +0100
+@@ -2760,6 +2760,39 @@
+ #ifndef IF_NAMESIZE
+ #define IF_NAMESIZE 16
+ #endif
++/* For netgear openvpn log */
++ 
++void print_sockaddr_remote(const struct openvpn_sockaddr *addr, char *out)
++{
++	bool addr_is_defined;
++	addr_is_defined = addr_defined(addr);
++	if(!addr_is_defined)
++	{
++		strcpy(out, "[undef]");
++		return;
++	}
++	switch(addr->addr.sa.sa_family)
++	{
++		case AF_INET:
++		{
++			sprintf(out, "%s", inet_ntoa(addr->addr.in4.sin_addr));
++			break;
++		}
++		case AF_INET6:
++		{
++			char buf[INET6_ADDRSTRLEN] = "";
++			if(addr_is_defined)
++			{
++				getnameinfo(&addr->addr.sa, sizeof(struct sockaddr_in6), buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
++				strcpy(out, buf);
++			}
++			break;
++		}
++		default:
++			ASSERT(0);
++	}
++}
++
+ 
+ const char *
+ print_link_socket_actual_ex(const struct link_socket_actual *act,
+diff -urN work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/socket.h work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/socket.h
+--- work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/socket.h	2017-09-26 11:27:35.000000000 +0200
++++ work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/socket.h	2017-11-28 17:07:52.484306253 +0100
+@@ -388,6 +388,8 @@
+ 
+ const char *print_link_socket_actual(const struct link_socket_actual *act,
+                                      struct gc_arena *gc);
++/* For netgear openvpn log */
++void print_sockaddr_remote(const struct openvpn_sockaddr *addr, char *out);
+ 
+ 
+ #define IA_EMPTY_IF_UNDEF (1<<0)
+diff -urN work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/ssl.c work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/ssl.c
+--- work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/ssl.c	2017-09-26 11:27:37.000000000 +0200
++++ work/openvpn-2.4.4/openvpn-2.4.4/src/openvpn/ssl.c	2017-11-28 17:15:48.900273424 +0100
+@@ -64,6 +64,8 @@
+ 
+ #include "memdbg.h"
+ 
++#include "shared/misc.h"
++
+ #ifndef ENABLE_OCC
+ static const char ssl_default_options_string[] = "V0 UNDEF";
+ #endif
+@@ -2620,6 +2622,20 @@
+         verify_final_auth_checks(multi, session);
+     }
+ 
++	char c2addr[128] = "";
++  /* For netgear openvpn log */
++  if (ks->authenticated)
++  {
++	print_sockaddr_remote(&ks->remote_addr.dest, c2addr);
++	NETGEAR_SYSLOG("26 00[OpenVPN, connection successfully]from remote IP address: %s", c2addr);
++  }
++  else
++  {
++  	print_sockaddr_remote(&ks->remote_addr.dest, c2addr);
++  	NETGEAR_SYSLOG("26 00[OpenVPN, connection failed]from remote IP address: %s", c2addr);
++  }
++
++
+ #ifdef ENABLE_OCC
+     /* check options consistency */
+     if (!session->opt->disable_occ
+@@ -2716,6 +2732,7 @@
+     bool active = false;
+     struct key_state *ks = &session->key[KS_PRIMARY];      /* primary key */
+     struct key_state *ks_lame = &session->key[KS_LAME_DUCK]; /* retiring key */
++    char c2addr[128] = "";
+ 
+     /* Make sure we were initialized and that we're not in an error state */
+     ASSERT(ks->state != S_UNDEF);
+@@ -3093,6 +3110,9 @@
+ error:
+     tls_clear_error();
+     ks->state = S_ERROR;
++    /* For netgear openvpn log */
++    print_sockaddr_remote(&ks->remote_addr.dest, c2addr);
++    NETGEAR_SYSLOG("26 00[OpenVPN, connection failed]from remote IP address: %s", c2addr);
+     msg(D_TLS_ERRORS, "TLS Error: TLS handshake failed");
+     INCR_ERROR;
+     gc_free(&gc);
+diff -urN work/openvpn-2.4.4/openvpn-2.4.4/tests/t_client.sh work/openvpn-2.4.4/openvpn-2.4.4/tests/t_client.sh
+--- work/openvpn-2.4.4/openvpn-2.4.4/tests/t_client.sh	2017-09-26 11:28:12.000000000 +0200
++++ work/openvpn-2.4.4/openvpn-2.4.4/tests/t_client.sh	2017-11-28 17:05:15.272311503 +0100
+@@ -1,4 +1,4 @@
+-#!/bin/bash
++#!/bin/sh
+ #
+ # run OpenVPN client against ``test reference'' server
+ # - check that ping, http, ... via tunnel works

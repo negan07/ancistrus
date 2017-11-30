@@ -1,0 +1,69 @@
+diff -urN work/openvpn-2.4.4/Makefile work/openvpn-2.4.4/Makefile
+--- work/openvpn-2.4.4/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/openvpn-2.4.4/Makefile	2017-11-29 18:00:11.000000000 +0100
+@@ -0,0 +1,65 @@
++include ../Rules.mak
++
++#USROVPNDIR 		:= $(BINDIR)/../openvpn
++RCOVPNPATH		:= $(GIT_ROOT_DIR)/$(DIFFS_DIR)/$(WORK_SRC_DIR)/$(OPEN_VPN)
++RCOVPN			:= rc_openvpn
++
++all: config
++	$(MAKE) -C $(OPEN_VPN)
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(OPEN_VPN) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -lssl -lcrypto" LZO_LIBS="-L$(WORK_DIR)/$(LZO)/$(LZO)/src/.libs -llzo2" LDFLAGS="-L$(WORK_DIR)/$(NVRAM)" LIBS="-lscnvram" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include -I$(WORK_DIR)/$(LZO)/$(LZO)/include -I$(WORK_DIR)/$(NVRAM) -I$(GIT_ROOT_DIR)/$(SRC_ROOT_DIR)" --disable-lz4 --enable-lzo --enable-crypto --enable-server --disable-plugins --enable-management --enable-fragment --enable-multihome --enable-port-share --enable-pf --enable-debug
++
++install: control
++	$(SSTRIP) $(OPEN_VPN)/src/openvpn/openvpn
++	install -m 0755 -d $(BINDIR)
++	#install -m 0755 -d $(USROVPNDIR)
++	install -m 0755 $(OPEN_VPN)/src/openvpn/openvpn $(BINDIR)
++	#install -m 0644 $(OPEN_VPN)/keys/* $(USROVPNDIR)
++	@if [ -f $(RCOVPNPATH)/$(RCOVPN) ] && [ -x $(RCOVPNPATH)/$(RCOVPN) ]; then \
++	cp -af $(RCOVPNPATH)/$(RCOVPN) .; \
++	$(SSTRIP) $(RCOVPN); \
++	install -m 0755 -d $(APPDIR); \
++	install -m 0755 $(RCOVPN) $(APPDIR); \
++	fi
++
++clean:
++	$(MAKE) -C $(OPEN_VPN) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(OPEN_VPN) distclean
++
++ifndef BUILD
++control:
++else
++PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
++PRERM			:= $(CTRL_DIR)/prerm
++
++control: preinst postinst prerm
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "echo \"Stopping openvpn service...\"" >> $(PREINST)
++	@echo "$(RC) openvpn stop" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "eval \`nvram get openvpn_enable\`" >> $(POSTINST)
++	@echo "[ \$$openvpn_enable -eq 1 ] && echo \"Restarting openvpn service...\" && $(RC) openvpn restart" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "echo \"Openvpn builtin required: cannot uninstall...\"" >> $(PRERM)
++	@echo "exit 1" >> $(PRERM)
++endif
++
