@@ -1,6 +1,7 @@
 include ../Rules.mak
 
-QOS_KO := act_ipt.ko cls_flow.ko sch_fq_codel.ko
+QOS_KO			:= act_ipt.ko cls_flow.ko sch_fq_codel.ko
+RC_QOS			:= rc_qos
 
 all:
 	@echo "Nothing to do: run 'make install' to install."
@@ -13,7 +14,7 @@ install: control
 	install -m 0644 *.conf $(ETCDIR)
 	@$(foreach Q, $(QOS_KO), install -m 0755 $(KERNEL_DIR)/net/sched/$(Q) $(MODDIR) || exit 1; $(STRIP) $(STRIPKOFLAGS) $(MODDIR)/$(Q);)
 	install -m 0755 *.qos $(SCRDIR)
-	install -m 0755 rc_qos $(APPDIR)
+	install -m 0755 $(RC_QOS) $(APPDIR)
 
 clean: 
 	@echo "Nothing to clean"
@@ -37,7 +38,7 @@ preinst:
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
 	@echo "[ \`anc nvram rget qos_enable\` -eq 1 ] && echo \"Restarting qos service...\" && $(RC) qos restart" >> $(POSTINST)
-	@echo "echo \"Type '$(USRSBINRCAPP)/rc_qos help' to see the options & settings\"" >> $(POSTINST)
+	@echo "echo \"Type '$(USRSBINRCAPP)/$(RC_QOS) help' to see the options & settings\"" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
 prerm:
@@ -48,7 +49,7 @@ prerm:
 	
 postrm:
 	@echo "#!/bin/sh" > $(POSTRM)
-	@echo "ln -sf $(TMPETC)/$(RCAPPSBIN) $(USRSBINRCAPP)/rc_qos" >> $(POSTRM)
+	@echo "ln -sf $(TMPETC)/$(RCAPPSBIN) $(USRSBINRCAPP)/$(RC_QOS)" >> $(POSTRM)
 	@echo "exit 0" >> $(POSTRM)
 endif
 

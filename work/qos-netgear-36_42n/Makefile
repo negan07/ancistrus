@@ -1,13 +1,16 @@
 include ../Rules.mak
 
+RC_QOS			:= rc_qos
+
 all:
 	@echo "Nothing to do: run 'make install' to install."
 
 install: control
 	install -m 0755 -d $(APPDIR)
-	@if [ -f rc_qos ] && [ -x rc_qos ]; then \
-	install -m 0755 rc_qos $(APPDIR); \
-	ln -sf rc_qos $(APPDIR)/rc_buffer_bloat; \
+	@if [ -f $(RC_QOS) ] && [ -x $(RC_QOS) ]; then \
+	$(SSTRIP) $(RC_QOS); \
+	install -m 0755 $(RC_QOS) $(APPDIR); \
+	ln -sf $(RC_QOS) $(APPDIR)/rc_buffer_bloat; \
 	fi
 
 clean: 
@@ -31,7 +34,8 @@ preinst:
 
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
-	@echo "[ \`anc nvram rget qos_enable\` -eq 1 ] && echo \"Restarting qos service...\" && $(RC) qos restart" >> $(POSTINST)
+	@echo "eval \`nvram get qos_enable\`" >> $(POSTINST)
+	@echo "[ \$$qos_enable -eq 1 ] && echo \"Restarting qos service...\" && $(RC) qos restart" >> $(POSTINST)
 	@echo "echo \"Enable, setup & apply qos from webgui\"" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
@@ -43,7 +47,7 @@ prerm:
 
 postrm:
 	@echo "#!/bin/sh" > $(POSTRM)
-	@echo "ln -sf $(TMPETC)/$(RCAPPSBIN) $(USRSBINRCAPP)/rc_qos" >> $(POSTRM)
+	@echo "ln -sf $(TMPETC)/$(RCAPPSBIN) $(USRSBINRCAPP)/$(RC_QOS)" >> $(POSTRM)
 	@echo "exit 0" >> $(POSTRM)
 endif
 
