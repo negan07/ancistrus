@@ -23,7 +23,6 @@ BUILD_TMP		:= $(BUILD_DIR_PATH)/tmp
 CTRL_DIR_PATH		:= $(BUILD_TMP)/CONTROL
 CTRL			:= $(CTRL_DIR_PATH)/control
 CTRL_SCRIPTS		:= preinst postinst prerm postrm
-OPKGLIST		:= $(ZLIB) $(LIBARCHIVE) $(OPKG_UTILS)
 ifndef DEBUG
 PREFIX_PATH		:= $(BUILD_TMP)
 else
@@ -75,15 +74,15 @@ prepare_package: creat_rules
 	$(foreach S, $(CTRL_SCRIPTS), chmod -f 755 $(CTRL_DIR_PATH)/$(S);) \
 	mv -f $(BUILD_TMP) $(BUILD_DIR_PATH)/$(D);)
 	@echo -e "\\e[35m$(CUR_REL_PATH): cleanup void \\e[36mPackages \\e[0m";
-	@$(foreach R, $(OPKGLIST), rm -rf $(BUILD_DIR_PATH)/$(R);)
+	@$(foreach R, $(PKG_RM_LIST), rm -rf $(BUILD_DIR_PATH)/$(R);)
 
 build_package:
 	@[ -d $(BUILD_DIR_PATH) ] && [ -x ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build ]
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): build package \\e[36m$D \\e[0m"; \
-	echo "$(OPKGLIST)" | grep "$(D)" > /dev/null 2>&1 || [ -d $(BUILD_DIR_PATH)/$(D) ] || exit 1; \
-	if [ ! -z $(MONOLITHIC) ]; then echo "$(OPKGLIST)" | grep "$(D)" > /dev/null 2>&1 || \
+	echo "$(PKG_RM_LIST)" | grep "$(D)" > /dev/null 2>&1 || [ -d $(BUILD_DIR_PATH)/$(D) ] || exit 1; \
+	if [ ! -z $(MONOLITHIC) ]; then echo "$(PKG_RM_LIST)" | grep "$(D)" > /dev/null 2>&1 || \
 	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1; \
-	else echo "$(OPKGLIST)" | grep "$(D)" > /dev/null 2>&1 || \
+	else echo "$(PKG_RM_LIST)" | grep "$(D)" > /dev/null 2>&1 || \
 	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1; \
 	fi;)
 
@@ -100,7 +99,7 @@ monolithic: build
 	@[ -x $(GIT_ROOT)/$(LBIN_DIR)/opkg ] || exit 1
 	@[ -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf ] || exit 1
 	@$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf update || exit 1
-	@$(foreach P, $(SUBDIRS), echo "$(OPKGLIST)" | grep "$(P)" > /dev/null 2>&1 || \
+	@$(foreach P, $(SUBDIRS), echo "$(PKG_RM_LIST)" | grep "$(P)" > /dev/null 2>&1 || \
 	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf install $(NAME_$(P)) || exit 1;)
 	@rm -rf $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)/tmp/*
 

@@ -4,10 +4,7 @@ TARLIST			:=
 NVRAM_NAME		:= nvram
 VER_$(NVRAM_NAME)	:= 0.1.0
 NVRAM			:= $(NVRAM_NAME)-$(VER_$(NVRAM_NAME))
-NAME_$(NVRAM)		:= $(NVRAM_NAME)
-ifdef DEBUG
-NAME_$(NVRAM)		:= $(NVRAM_NAME)-debug
-endif
+NAME_$(NVRAM)		:= $(NVRAM_NAME)$(DBG)
 VER_$(NVRAM)		:= $(VER_$(NVRAM_NAME))
 DL_$(NVRAM)		:= $(SRC_APPS_REL_DIR)
 TAR_$(NVRAM)		:= nvram
@@ -22,10 +19,7 @@ DIRLIST			+= $(NVRAM)
 CORE_WORK_NAME		:= $(PROJECT_NAME)-core
 VER_$(CORE_WORK_NAME)	:= 0.1.0
 CORE_WORK		:= $(CORE_WORK_NAME)-$(VER_$(CORE_WORK_NAME))
-NAME_$(CORE_WORK)	:= $(CORE_WORK_NAME)
-ifdef DEBUG
-NAME_$(CORE_WORK)	:= $(CORE_WORK_NAME)-debug
-endif
+NAME_$(CORE_WORK)	:= $(CORE_WORK_NAME)$(DBG)
 VER_$(CORE_WORK)	:= $(VER_$(CORE_WORK_NAME))
 DL_$(CORE_WORK)		:= void
 TAR_$(CORE_WORK)	:= void
@@ -39,10 +33,7 @@ DESC_$(CORE_WORK)	:= Main work tool
 UTELNETD_NAME		:= utelnetd
 VER_$(UTELNETD_NAME)	:= 0.1.11
 UTELNETD		:= $(UTELNETD_NAME)-$(VER_$(UTELNETD_NAME))
-NAME_$(UTELNETD)	:= $(UTELNETD_NAME)
-ifdef DEBUG
-NAME_$(UTELNETD)	:= $(UTELNETD_NAME)-debug
-endif
+NAME_$(UTELNETD)	:= $(UTELNETD_NAME)$(DBG)
 VER_$(UTELNETD)		:= $(VER_$(UTELNETD_NAME))
 DL_$(UTELNETD)		:= http://public.pengutronix.de/software/utelnetd
 TAR_$(UTELNETD)		:= $(UTELNETD).tar.gz
@@ -58,10 +49,7 @@ TARLIST			+= $(UTELNETD)
 IPROUTE2_NAME		:= iproute2
 VER_$(IPROUTE2_NAME)	:= 4.10.0
 IPROUTE2		:= $(IPROUTE2_NAME)-$(VER_$(IPROUTE2_NAME))
-NAME_$(IPROUTE2)	:= $(IPROUTE2_NAME)
-ifdef DEBUG
-NAME_$(IPROUTE2)	:= $(IPROUTE2_NAME)-debug
-endif
+NAME_$(IPROUTE2)	:= $(IPROUTE2_NAME)$(DBG)
 VER_$(IPROUTE2)		:= $(VER_$(IPROUTE2_NAME))
 DL_$(IPROUTE2)		:= https://www.kernel.org/pub/linux/utils/net/iproute2
 TAR_$(IPROUTE2)		:= $(IPROUTE2).tar.gz
@@ -77,10 +65,7 @@ TARLIST			+= $(IPROUTE2)
 NETPERF_NAME		:= netperf
 VER_$(NETPERF_NAME)	:= 2.7.0
 NETPERF			:= $(NETPERF_NAME)-$(VER_$(NETPERF_NAME))
-NAME_$(NETPERF)		:= $(NETPERF_NAME)
-ifdef DEBUG
-NAME_$(NETPERF)		:= $(NETPERF_NAME)-debug
-endif
+NAME_$(NETPERF)		:= $(NETPERF_NAME)$(DBG)
 VER_$(NETPERF)		:= $(VER_$(NETPERF_NAME))
 DL_$(NETPERF)		:= https://fossies.org/linux/misc
 #DL_$(NETPERF)		:= ftp://ftp.netperf.org/netperf
@@ -97,10 +82,7 @@ TARLIST			+= $(NETPERF)
 NETWORKTEST_NAME	:= network-test
 VER_$(NETWORKTEST_NAME)	:= 0.1.0
 NETWORKTEST		:= $(NETWORKTEST_NAME)-$(VER_$(NETWORKTEST_NAME))
-NAME_$(NETWORKTEST)	:= $(NETWORKTEST_NAME)
-ifdef DEBUG
-NAME_$(NETWORKTEST)	:= $(NETWORKTEST_NAME)-debug
-endif
+NAME_$(NETWORKTEST)	:= $(NETWORKTEST_NAME)$(DBG)
 VER_$(NETWORKTEST)	:= $(VER_$(NETWORKTEST_NAME))
 DL_$(NETWORKTEST)	:= void
 TAR_$(NETWORKTEST)	:= void
@@ -114,15 +96,12 @@ DESC_$(NETWORKTEST)	:= Enhanced network stress and network speed test scripts
 QOS_NG_3642N_NAME	:= qos-netgear
 VER_$(QOS_NG_3642N_NAME):= 36_42n
 QOS_NG_3642N		:= $(QOS_NG_3642N_NAME)-$(VER_$(QOS_NG_3642N_NAME))
-NAME_$(QOS_NG_3642N)	:= $(QOS_NG_3642N_NAME)
-ifdef DEBUG
-NAME_$(QOS_NG_3642N)	:= $(QOS_NG_3642N_NAME)-debug
-endif
+NAME_$(QOS_NG_3642N)	:= $(QOS_NG_3642N_NAME)$(DBG)
 VER_$(QOS_NG_3642N)	:= $(VER_$(QOS_NG_3642N_NAME))
 DL_$(QOS_NG_3642N)	:= void
 TAR_$(QOS_NG_3642N)	:= void
 HOME_$(QOS_NG_3642N)	:= http://www.netgear.com
-LIC_$(QOS_NG_3642N)	:= private
+LIC_$(QOS_NG_3642N)	:= Netgear inc
 SEC_$(QOS_NG_3642N)	:= thirdparty
 PRIO_$(QOS_NG_3642N)	:= standard
 DEP_$(QOS_NG_3642N)	:= 
@@ -131,10 +110,7 @@ DESC_$(QOS_NG_3642N)	:= Quality Of Service tool from Netgear firmware 36_42n
 QOS_SQM_NAME		:= qos-sqm
 VER_$(QOS_SQM_NAME)	:= 0.1.0
 QOS_SQM			:= $(QOS_SQM_NAME)-$(VER_$(QOS_SQM_NAME))
-NAME_$(QOS_SQM)		:= $(QOS_SQM_NAME)
-ifdef DEBUG
-NAME_$(QOS_SQM)		:= $(QOS_SQM_NAME)-debug
-endif
+NAME_$(QOS_SQM)		:= $(QOS_SQM_NAME)$(DBG)
 VER_$(QOS_SQM)		:= $(VER_$(QOS_SQM_NAME))
 DL_$(QOS_SQM)		:= void
 TAR_$(QOS_SQM)		:= void
@@ -156,10 +132,7 @@ CURL			:= $(CURL_NAME)-$(VER_$(CURL_NAME))
 ZLIB_NAME		:= zlib
 VER_$(ZLIB_NAME)	:= 1.2.11
 ZLIB			:= $(ZLIB_NAME)-$(VER_$(ZLIB_NAME))
-NAME_$(ZLIB)		:= $(ZLIB_NAME)
-ifdef DEBUG
-NAME_$(ZLIB)		:= $(ZLIB_NAME)-debug
-endif
+NAME_$(ZLIB)		:= $(ZLIB_NAME)$(DBG)
 VER_$(ZLIB)		:= $(VER_$(ZLIB_NAME))
 DL_$(ZLIB)		:= http://zlib.net
 TAR_$(ZLIB)		:= $(ZLIB).tar.gz
@@ -175,10 +148,7 @@ TARLIST			+= $(ZLIB)
 LIBARCHIVE_NAME		:= libarchive
 VER_$(LIBARCHIVE_NAME)	:= 3.3.1
 LIBARCHIVE		:= $(LIBARCHIVE_NAME)-$(VER_$(LIBARCHIVE_NAME))
-NAME_$(LIBARCHIVE)	:= $(LIBARCHIVE_NAME)
-ifdef DEBUG
-NAME_$(LIBARCHIVE)	:= $(LIBARCHIVE_NAME)-debug
-endif
+NAME_$(LIBARCHIVE)	:= $(LIBARCHIVE_NAME)$(DBG)
 VER_$(LIBARCHIVE)	:= $(VER_$(LIBARCHIVE_NAME))
 DL_$(LIBARCHIVE)	:= http://www.libarchive.org/downloads
 TAR_$(LIBARCHIVE)	:= $(LIBARCHIVE).tar.gz
@@ -194,10 +164,7 @@ TARLIST			+= $(LIBARCHIVE)
 OPKG_UTILS_NAME		:= opkg-utils
 VER_$(OPKG_UTILS_NAME)	:= 0.3.4
 OPKG_UTILS		:= $(OPKG_UTILS_NAME)-$(VER_$(OPKG_UTILS_NAME))
-NAME_$(OPKG_UTILS)	:= $(OPKG_UTILS_NAME)
-ifdef DEBUG
-NAME_$(OPKG_UTILS)	:= $(OPKG_UTILS_NAME)-debug
-endif
+NAME_$(OPKG_UTILS)	:= $(OPKG_UTILS_NAME)$(DBG)
 VER_$(OPKG_UTILS)	:= $(VER_$(OPKG_UTILS_NAME))
 DL_$(OPKG_UTILS)	:= http://git.yoctoproject.org/cgit/cgit.cgi/opkg-utils/snapshot
 TAR_$(OPKG_UTILS)	:= $(OPKG_UTILS).tar.gz
@@ -213,10 +180,7 @@ TARLIST			+= $(OPKG_UTILS)
 OPKG_NAME		:= opkg
 VER_$(OPKG_NAME)	:= 0.3.4
 OPKG			:= $(OPKG_NAME)-$(VER_$(OPKG_NAME))
-NAME_$(OPKG)		:= $(OPKG_NAME)
-ifdef DEBUG
-NAME_$(OPKG)		:= $(OPKG_NAME)-debug
-endif
+NAME_$(OPKG)		:= $(OPKG_NAME)$(DBG)
 VER_$(OPKG)		:= $(VER_$(OPKG_NAME))
 DL_$(OPKG)		:= http://downloads.yoctoproject.org/releases/opkg
 TAR_$(OPKG)		:= $(OPKG).tar.gz
@@ -232,10 +196,7 @@ TARLIST			+= $(OPKG)
 SMONTOOLS_NAME		:= smartmontools
 VER_$(SMONTOOLS_NAME)	:= 6.5
 SMONTOOLS		:= $(SMONTOOLS_NAME)-$(VER_$(SMONTOOLS_NAME))
-NAME_$(SMONTOOLS)	:= $(SMONTOOLS_NAME)
-ifdef DEBUG
-NAME_$(SMONTOOLS)	:= $(SMONTOOLS_NAME)-debug
-endif
+NAME_$(SMONTOOLS)	:= $(SMONTOOLS_NAME)$(DBG)
 VER_$(SMONTOOLS)	:= $(VER_$(SMONTOOLS_NAME))
 DL_$(SMONTOOLS)		:= https://sourceforge.net/projects/smartmontools/files/smartmontools/6.5
 TAR_$(SMONTOOLS)	:= $(SMONTOOLS).tar.gz
@@ -251,10 +212,7 @@ TARLIST			+= $(SMONTOOLS)
 HDPARM_NAME		:= hdparm
 VER_$(HDPARM_NAME)	:= 9.52
 HDPARM			:= $(HDPARM_NAME)-$(VER_$(HDPARM_NAME))
-NAME_$(HDPARM)		:= $(HDPARM_NAME)
-ifdef DEBUG
-NAME_$(HDPARM)		:= $(HDPARM_NAME)-debug
-endif
+NAME_$(HDPARM)		:= $(HDPARM_NAME)$(DBG)
 VER_$(HDPARM)		:= $(VER_$(HDPARM_NAME))
 DL_$(HDPARM)		:= https://sourceforge.net/projects/hdparm/files/hdparm
 TAR_$(HDPARM)		:= $(HDPARM).tar.gz
@@ -270,10 +228,7 @@ TARLIST			+= $(HDPARM)
 LZO_NAME		:= lzo
 VER_$(LZO_NAME)		:= 2.10
 LZO			:= $(LZO_NAME)-$(VER_$(LZO_NAME))
-NAME_$(LZO)		:= $(LZO_NAME)
-ifdef DEBUG
-NAME_$(LZO)		:= $(LZO_NAME)-debug
-endif
+NAME_$(LZO)		:= $(LZO_NAME)$(DBG)
 VER_$(LZO)		:= $(VER_$(LZO_NAME))
 DL_$(LZO)		:= http://www.oberhumer.com/opensource/lzo/download
 TAR_$(LZO)		:= $(LZO).tar.gz
@@ -286,6 +241,22 @@ DESC_$(LZO)		:= A portable lossless data compression library
 DIRLIST			+= $(LZO)
 TARLIST			+= $(LZO)
 
+OPEN_VPN_NAME		:= openvpn
+VER_$(OPEN_VPN_NAME)	:= 2.4.4
+OPEN_VPN		:= $(OPEN_VPN_NAME)-$(VER_$(OPEN_VPN_NAME))
+NAME_$(OPEN_VPN)	:= $(OPEN_VPN_NAME)$(DBG)
+VER_$(OPEN_VPN)		:= $(VER_$(OPEN_VPN_NAME))
+DL_$(OPEN_VPN)		:= https://swupdate.openvpn.org/community/releases
+TAR_$(OPEN_VPN)		:= $(OPEN_VPN).tar.gz
+HOME_$(OPEN_VPN)	:= https://www.openvpn.net/
+LIC_$(OPEN_VPN)		:= GPLv2
+SEC_$(OPEN_VPN)		:= builtin
+PRIO_$(OPEN_VPN)	:= required
+DEP_$(OPEN_VPN)		:= 
+DESC_$(OPEN_VPN)	:= Your private path to access network resources and services securely
+DIRLIST			+= $(OPEN_VPN)
+TARLIST			+= $(OPEN_VPN)
+
 BUILTINLIB		:=
 BUILTIN			:=
 THIRDPARTYLIB		:=
@@ -297,6 +268,7 @@ BUILTINLIB		+= $(LZO)
 BUILTIN			+= $(UTELNETD)
 BUILTIN			+= $(IPROUTE2)
 BUILTIN			+= $(HDPARM)
+BUILTIN			+= $(OPEN_VPN)
 THIRDPARTYLIB		+= $(ZLIB)
 THIRDPARTYLIB		+= $(LIBARCHIVE)
 THIRDPARTY		+= $(NETPERF)
@@ -308,6 +280,7 @@ THIRDPARTY		+= $(OPKG)
 THIRDPARTY		+= $(SMONTOOLS)
 endif
 
+PKG_RM_LIST		:= $(ZLIB) $(LIBARCHIVE) $(OPKG_UTILS) $(LZO)
 SUBDIRS			:=
 SUBDIRS			+= $(BUILTINLIB)
 SUBDIRS			+= $(THIRDPARTYLIB)

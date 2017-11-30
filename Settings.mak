@@ -4,6 +4,9 @@ endif
 
 ifdef DEBUG
 export DEBUG
+export DBG		?= -debug
+else
+export DBG		?=
 endif
 
 ifdef BUILD
@@ -27,7 +30,7 @@ FWVER			?= V1.0.1.50
 CPU_ARCH_NAME		?= ARM
 RCBOOT			?= /usr/etc/rcS
 
-OPKG_PKG_DIR		?= build
+OPKG_PKG_DIR		?= build$(DBG)
 DIFFS_DIR		?= diffs
 LBIN_DIR		?= localbin
 SCRIPTS_DIR		?= scripts
@@ -36,11 +39,19 @@ DEBUG_DIR		?= /home/ftp
 RECEIVE_DIR		?= /tmp/etc/ancdbg
 
 SRC_DIR			?= $(PROJECT_TARGET)_$(FWVER)_WW_src
-SRC_APPS_DIR		?= $(SRC_DIR)/Source/apps
 SRC_REL_DIR		?= ../$(SRC_DIR)
-SRC_APPS_REL_DIR	?= $(SRC_REL_DIR)/Source/apps
-SRC_BUILDS_REL_DIR	?= Source/Builds
-SRC_TARGET_REL_DIR	?= Source/target
+SRC_ROOT_REL_DIR	?= Source
+SRC_APPS_ROOT_REL_DIR	?= $(SRC_ROOT_REL_DIR)/apps
+SRC_APPS_REL_DIR	?= $(SRC_REL_DIR)/$(SRC_APPS_ROOT_REL_DIR)
+SRC_BUILDS_REL_DIR	?= $(SRC_ROOT_REL_DIR)/Builds
+SRC_SHARED_REL_DIR	?= $(SRC_ROOT_REL_DIR)/shared
+SRC_TARGET_REL_DIR	?= $(SRC_ROOT_REL_DIR)/target
+SRC_ROOT_DIR		?= $(SRC_DIR)/$(SRC_ROOT_REL_DIR)
+SRC_APPS_DIR		?= $(SRC_DIR)/$(SRC_APPS_ROOT_REL_DIR)
+SRC_BUILDS_DIR		?= $(SRC_DIR)/$(SRC_BUILDS_REL_DIR)
+SRC_SHARED_DIR		?= $(SRC_DIR)/$(SRC_SHARED_REL_DIR)
+SRC_TARGET_DIR		?= $(SRC_DIR)/$(SRC_TARGET_REL_DIR)
+
 SRC_URL			?= http://www.downloads.netgear.com/files/GPL
 SRC_FILE		?= $(PROJECT_TARGET)_$(FWVER)_WW_src.tar.gz.zip
 

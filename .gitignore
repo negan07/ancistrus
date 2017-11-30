@@ -106,6 +106,7 @@ scripts/opkg-utils-*/
 vmlinux.*
 anc
 rc_qos
+rc_openvpn
 *.img
 *.bin
 *.bz2
