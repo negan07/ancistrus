@@ -107,6 +107,9 @@ sudo apt-get install squashfs-tools
 sudo apt-get install lzma lzma-dev
 sudo apt-get install lib32z1 lib32z1-dev
 
+# zip support
+sudo apt-get install zip unzip gzip bzip2
+
 # little local optional webserver
 #sudo apt-get install thttpd
 sudo apt-get install lighttpd
