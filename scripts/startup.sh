@@ -45,7 +45,7 @@ rm -f ${OPKG} ${CONF} ${ARC}
 echo "Cleaning up some garbage files..."
 find /opt -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1
 find ${WWW}/cgi-bin -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1
-rm -f ${WWW}/*DGND*.jpg ${LANGSDIR}/ENU/*.gz
+rm -f ${DESTDIR}/reaim ${WWW}/*DGND*.jpg ${LANGSDIR}/ENU/*.gz
 	for D in `ls ${LANGSDIR}/GW`
 	do
 	[ -d ${LANGSDIR}/GW/${D} ] && rm -f ${LANGSDIR}/GW/${D}/*.gz
@@ -60,11 +60,13 @@ unzip ${ARC}
 chmod 755 ${OPKG}
 chmod 644 ${CONF}
 ${OPKG} update
+sleep 1
 ${OPKG} install $BIN
 	if [ $? -ne 0 -o ! -x ${DESTDIR}/${BIN} ]; then
 	echo "${BIN} installation failed: check repository urls on ${CONF}"
 	exit 1
 	fi
+sleep 1
 rm -f ${OPKG} ${ARC}
 echo "This script can now be deleted: type 'rm ${DIR}/startup.sh'"
 exit 0

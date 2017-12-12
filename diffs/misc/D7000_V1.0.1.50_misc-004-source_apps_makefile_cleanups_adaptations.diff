@@ -127,7 +127,7 @@ diff -urN D7000_V1.0.1.50_WW_src/Source/apps/Makefile D7000_V1.0.1.50_WW_src/Sou
 -#GPL             += quagga_0.99.11
 +GPL		+= netkit-routedv2-0.1
 +GPL		+= ez-ipupdate-3.0.11b8
-+GPL		+= reaim-0.8
++#GPL		+= reaim-0.8
 +GPL		+= miniupnpd-20080427
  GPL		+= zebra-0.95a
  ifeq ($(HIDDEN_PASSWORD),1)
