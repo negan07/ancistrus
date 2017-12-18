@@ -78,6 +78,10 @@ mount -t jffs2 "mtd:data" /data
 /sbin/insmod /lib/modules/led_pb_api.ko
 /sbin/insmod /lib/modules/led_hw.ko
 
+#ancistrus
+#mount opkg info & status in place of unused annexB TUR lang
+mount -n -t jffs2  "mtd:language_TUR" /usr/lib/opkg
+
 #broadcomm has made some LED control, so make it off. After this control moved, should delete it too.
 /bin/echo 0300 > /proc/led
 
@@ -200,18 +204,12 @@ fi
 /usr/sbin/wlevt
 
 # ancistrus
-echo "=============ancistrus start " > /dev/console
+echo "=============login start " > /dev/console
 echo "root:`anc nvram rget http_password`" | chpasswd
 echo "nobody:`anc nvram rget http_password`" | chpasswd
 touch /etc/nologin
 utelnetd -l /usr/sbin/login -d
-# snr retrain: [ min -136 = 65400 ] ... [ -1 = 65535] 0 1 ... [ 100 = default ] ... [ 32767 max ]
-# adslctl configure --snr [ 65400 - 65535 - 0 - 32767 ]
-# 2.4Ghz tx pwr
-# wl -i wl0 txpwr [ 1 - 160 ]
-# 5Ghz tx pwr
-# wl -i wl1 txpwr [ 1 - 160 ]
-echo "=============ancistrus end " > /dev/console
+echo "=============login end " > /dev/console
 
 #Ron add for upnpd
 route add -net 239.0.0.0 netmask 255.0.0.0 br0
@@ -224,8 +222,10 @@ echo 1 > /proc/sys/net/ipv4/ip_dynaddr
 # arp ignore
 echo 1 > /proc/sys/net/ipv4/conf/all/arp_ignore
 
+#ancistrus
 # add more conntrack
-echo 4608 > /proc/sys/net/nf_conntrack_max
+#echo 4608 > /proc/sys/net/nf_conntrack_max
+echo 65536 > /proc/sys/net/nf_conntrack_max
 
 # ignore_all not yet used: this should be satisfactory
 echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
@@ -271,3 +271,10 @@ echo 10 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_time_wait
 /sbin/KC_PRINT &
 /etc/turn_on_printer_led
 
+# ancistrus
+# echo "=============snr retrain start " > /dev/console
+# while [ ! -f /tmp/wan_uptime ]; do sleep 1; done
+# snr retrain: [ min -136 = 65400 ] ... [ -1 = 65535] 0 1 ... [ 100 = default ] ... [ 32767 max ]
+# adslctl configure --sra off --snr [ 65400 - 65535 - 0 - 32767 ]
+# echo "=============snr retrain end " > /dev/console
+# echo "=============rcS FINISHED " > /dev/console

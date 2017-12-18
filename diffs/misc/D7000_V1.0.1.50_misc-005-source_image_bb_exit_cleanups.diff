@@ -47,7 +47,7 @@ diff -urN D7000_V1.0.1.50_WW_src/Source/image/bb_dual D7000_V1.0.1.50_WW_src/Sou
  
 -# Generate GUI language file. 
 -#./gen_lang.sh || exit 1
-+[ -z "$1" ] && echo "usage: $0 BOARD_ID_dual" && exit 1
++[ -z "$1" ] && echo "usage: $0 <BOARD_ID_dual>" && exit 1
  
 -# Generate bin file
 -./scBind -i $MODEL_NAME.par -o $MODEL_NAME.bin
