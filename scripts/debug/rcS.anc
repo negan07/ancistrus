@@ -18,11 +18,6 @@
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts
 
-# blinking checkpoint
-led_app off 70
-led_app off 71
-led_app blink_alt 70 71 1000 50 50
-
 # mount opkg info & status files partition
 mount -n -t jffs2  mtd:`cat /proc/mtd | grep mtd20 | awk '{printf $4;}' | sed 's/\"//;s/\"//'` /usr/lib/opkg
 
@@ -40,14 +35,17 @@ echo 65536 > /proc/sys/net/nf_conntrack_max
 
 # snr retrain
 # echo "=============snr retrain start " > /dev/console
+# blinking checkpoint
+# led_app off 70
+# led_app off 71
+# led_app blink_alt 70 71 1000 50 50
 # while [ ! -f /tmp/wan_uptime ]; do sleep 1; done
 # snr retrain: [ min -136 = 65400 ] ... [ -1 = 65535] 0 1 ... [ 100 = default ] ... [ 32767 max ]
 # snr interval: [ 65400 -> 65535 -> 0 -> 32767 ]
 # eval `nvram get snr`
 # eval `nvram get sra`
 # adslctl configure --sra $sra --snr $snr
-# echo "=============snr retrain end " > /dev/console
-
 # off blinking
-led_app off 71
-led_app on 70
+# led_app off 71
+# led_app on 70
+# echo "=============snr retrain end " > /dev/console

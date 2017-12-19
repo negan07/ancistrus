@@ -86,6 +86,7 @@ mount -n -t jffs2 ${PART} ${OPKGISDIR}
 	echo "Problem has occurred: opkg partition not mounted."
 	exit 4
 	fi
+rm -rf ${OPKGISDIR}/*
 echo
 echo "Updating console login passwd..."
 eval `nvram get http_password`
