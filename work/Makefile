@@ -93,14 +93,21 @@ build_index:
 	gzip -qf Packages || exit 1; gzip -qt Packages.gz || exit 1;
 
 monolithic: build
+	@echo -e "\\e[35m$(CUR_REL_PATH): creating opkg info/status partition dir on \\e[36m$(SRC_PATH_NAME)/$(SRC_IMAGE_REL_DIR) \\e[0m"
+	@mkdir -p -m 777 $(SRC_PATH_NAME)/$(SRC_IMAGE_REL_DIR)/opkg || exit 1
 	@echo -e "\\e[35m$(CUR_REL_PATH): making FS modifications on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
-	@cp -f $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT) $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT).orig
+	@[ -x $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT) ] && echo >> $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT)
+	@echo "# ancistrus" >> $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT)
+	@echo "/etc/$(RCAUX_NAME)" >> $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT)
+	@cp ../$(SCRIPTS_DIR)/$(RCAUX_NAME) $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCAUX) || exit 1
+	@mkdir -p -m 777 $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(OPKG_INFO_STATUS_DIR) || exit 1
 	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
 	@[ -x $(GIT_ROOT)/$(LBIN_DIR)/opkg ] || exit 1
 	@[ -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf ] || exit 1
 	@$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf update || exit 1
 	@$(foreach P, $(SUBDIRS), echo "$(PKG_RM_LIST)" | grep "$(P)" > /dev/null 2>&1 || \
 	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf install $(NAME_$(P)) || exit 1;)
+	@mv $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(OPKG_INFO_STATUS_DIR)/* $(SRC_PATH_NAME)/$(SRC_IMAGE_REL_DIR)/opkg || exit 1
 	@rm -rf $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)/tmp/*
 
 clean_build:
