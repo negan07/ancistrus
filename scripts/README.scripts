@@ -15,7 +15,6 @@ founddiff.sh			Found code differences between firmware versions.
 git_info.sh			For commit versioning & changelog usage.
 hostprepare.sh			Apt download & install necessary packets.
 opkg-utils-x.x.x		Dir containing packet building scripts & tools.
-rcS				Main boot script for monolithic .img.
 rcS.anc				Auxiliary startup boot script.
 receive				Prepare debug environment on running router.
 renamediff.sh			Rename diffs from old firmware version to new one.

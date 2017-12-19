@@ -19,7 +19,7 @@
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts
 
 # mount opkg info & status files partition
-mount -n -t jffs2  mtd:`cat /proc/mtd | grep mtd20 | awk '{printf $4;}' | sed 's/\"//;s/\"//'` /usr/lib/opkg
+mount -n -t jffs2  mtd20 /usr/lib/opkg
 
 # auth login
 echo "=============login start " > /dev/console
