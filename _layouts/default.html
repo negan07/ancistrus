@@ -20,13 +20,6 @@
             <a href="{{ site.github.repository_url }}/projects/1" class="btn btn-github"><span class="icon"></span>State of Art</a>
             <a href="{{ site.github.repository_url }}/issues" class="btn btn-github"><span class="icon"></span>Issue Trac</a>
         </section>
-
-        <section id="downloads">
-          {% if site.show_downloads %}
-            <!-- a href="./img/" class="btn">Download monolithic .img</a-->
-          {% endif %}
-        </section>
-
       </div>
     </header>
 
@@ -37,20 +30,19 @@
     </div>
 
     <header>
-    <div class="container">
-      <section id="wiki_guide">
-        <p></p><p></p>
-        <p>For a further knowledge of the whole project, it is suggested to read the 
-	<a href="{{ site.github.repository_url }}/wiki">WIKI BOARD GUIDE</a></p>
-      </section>
-    </div>
+      <div class="container">
+        <section id="wiki_guide">
+          <p></p><p></p>
+          <p>For a further knowledge of the whole project, it is suggested to read the 
+	  <a href="{{ site.github.repository_url }}/wiki">WIKI BOARD GUIDE</a></p>
+        </section>
+      </div>
     </header>
 
     <header>
-    <div class="container">
+     <div class="container">
       <section id="startup">
         <p><b>Router initialization script</b>: initialize router for package installations.</p>
-
 	<p>With 192.168.0.1 as router lan-ip, web-login the router and 
 	<a href="http://192.168.0.1/setup.cgi?todo=debug"><b>enable debug mode</b></a></p>
 	<p>telnet the router (login: root):</p>
@@ -58,16 +50,41 @@
 	<p><i>$ curl -k -O https://raw.githubusercontent.com/negan07/ancistrus/master/scripts/startup.sh</i></p>
 	<p><i>$ chmod 755 startup.sh</i></p>
 	<p><i>$ ./startup.sh</i></p>
-
 	<p>Follow the instructions on terminal.</p>
+        {% if site.show_downloads %}
 	<p>
-          {% if site.show_downloads %}
-            <a href="./scripts/ancistrus-arm-D7000/startup.sh" class="btn">Download router initialization script</a>
-          {% endif %}
+        <a href="./scripts/ancistrus-arm-D7000/startup.sh" class="btn">Download router initialization script</a>
 	</p>
+        {% endif %}
       </section>
-    </div>
+     </div>
     </header>
+
+{% if site.show_downloads %}
+    <header>
+      <div class="container">
+        <section id="downloads">
+          <p><b>Monolithic image firmware .img</b></p>
+          <p><b>Commit build:</b> #195</p>
+          <p><b>Base FW:</b> 1.0.1.50</p>
+          <p></p>
+          <p><b>Release Notes</b></p>
+	  <p><b>Kernel:</b> NEON vfp, no GPL mod overlaps, memory, overload reduction, other smalls.</p>
+	  <p><b>Uclibc:</b> fpu, code opt., other smalls.</p>
+          <p><b>GPL builtin libs/apps:</b> gcc/sstrip size opt. flags recompiled.</p>
+	  <p><b>qos-sqm</b> <i>(fq_codel)</i> package included.</p>
+	  <p>All other <b>work 3rdparty packages</b> included.</p>
+	  <p><b>Boot:</b> telnet, auth login, opkg info/status dir on dedicated mtd, other minors.</p>
+	  <p><b>Rootfs:</b> orphan cleanup.</p>
+          <p><b>10%</b> rootfs free space gained.</p>
+	  <p>
+          <a href="./img/" class="btn">Build #195</a>
+          <a href="./img/" class="btn">Build #195 no .ipk</a>
+	  </p>
+        </section>
+      </div>
+    </header>
+{% endif %}
 
     <div class="container">
       <section id="footer">
