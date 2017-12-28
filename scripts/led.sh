@@ -129,7 +129,7 @@ dark) all off white + amber
 reset) return to leds normal working conditions
 help) brief led board guide
 
-Led are treated with sercomm command:
+Leds are treated with sercomm command:
 /usr/sbin/led_app
 
 and the cumulative rc command:
@@ -146,7 +146,7 @@ led_app reboot <secs>
 led_app ctrl <blink_data|no_blink_data|off>
 
 Legend:
-<led id> = led id number each led corresponds to a number (some leds are white/amber and the colour has a different number)
+<led id> = led id number: each led corresponds to a number (some leds are white/amber and the colour has a different number)
 <blink count> = stands for number of blinks
 <on time> = duty cycle led on for blinking (in ms)
 <off time> = duty cycle led off from blinking (in ms)

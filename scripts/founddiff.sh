@@ -19,7 +19,7 @@
 # Suppose source dir structures to be similar (if not, edit this).
 #
 
-LISTDIR="Kernel/bcm963xx/kernel/linux-3.4rt Kernel/bcm963xx/bcmdrivers Kernel/bcm963xx/hostTools Kernel/bcm963xx/shared Kernel/bcm963xx/targets Kernel/bcm963xx Source/apps Source/Builds Source/image Source/shared Source/uClibc-0.9.32 Source Makefile"
+LISTDIR="Kernel/bcm963xx/kernel/linux-3.4rt Kernel/bcm963xx/bcmdrivers Kernel/bcm963xx/hostTools Kernel/bcm963xx/shared Kernel/bcm963xx/targets Kernel/bcm963xx Source/apps Source/Builds Source/image Source/shared Source/target Source/uClibc-0.9.32 Source Makefile"
 
 cd ..
 [ $# -ne 2 ] && echo "Usage: $0 <absdir1> <absdir2>" && exit 1
@@ -36,7 +36,7 @@ do
 	esac
 done
 
-TAG=`echo ${1##*/} | cut -d '_' -f 1`_`echo ${1##*/} | cut -d '_' -f 2`
+TAG=`sudo echo ${1##*/} | cut -d '_' -f 1`_`echo ${1##*/} | cut -d '_' -f 2`
 
 DESTDIR=diff-${1##*/}-${2##*/}
 
@@ -88,7 +88,16 @@ do
 			esac
 		done
 	;;
-	Makefile|Kernel/bcm963xx|Source)	
+	Source/target)
+	sudo tar xjf $1/$D.tar.bz2 -C $1/Source
+	sudo tar xjf $2/$D.tar.bz2 -C $2/Source
+	diff -urN $1/$D $2/$D > $DESTDIR/$D.diff
+	;;
+	Source)
+	rm -f $1/$D/crosstools-*.tar.bz2 $2/$D/crosstools-*.tar.bz2
+	diff -uN $1/$D $2/$D > $DESTDIR/$D.diff
+	;;
+	Makefile|Kernel/bcm963xx)	
 	diff -uN $1/$D $2/$D > $DESTDIR/$D.diff
 	;;
 	*)
