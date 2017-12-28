@@ -440,5 +440,5 @@ diff -urN D7000_V1.0.1.50_WW_src/Source/Makefile D7000_V1.0.1.50_WW_src/Source/M
  
 +clean_img:
 +	@echo -e "\\e[35mIMG: \\e[36mclean \\e[0m"
-+	-rm -rf $(IMAGE_DIR)/opkg* $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/empty.img $(IMAGE_DIR)/langpkg.img $(IMAGE_DIR)/$(BOARD_ID).par $(IMAGE_DIR)/$(BOARD_ID).info $(IMAGE_DIR)/$(BOARD_ID).zip $(IMAGE_DIR)/$(BOARD_ID).bin $(IMAGE_DIR)/$(BOARD_ID).img
++	-rm -rf $(IMAGE_DIR)/opkg* $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/empty.img $(IMAGE_DIR)/langpkg.img $(IMAGE_DIR)/$(BOARD_ID).par $(IMAGE_DIR)/$(BOARD_ID).info $(IMAGE_DIR)/$(BOARD_ID).zip $(IMAGE_DIR)/$(BOARD_ID).bin $(IMAGE_DIR)/$(BOARD_ID)*.img
 +
