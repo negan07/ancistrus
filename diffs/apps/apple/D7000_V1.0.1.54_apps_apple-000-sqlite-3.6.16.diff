@@ -1,0 +1,9 @@
+diff -urN D7000_V1.0.1.54_WW_src/Source/apps/apple/sqlite-3.6.16/build.sh D7000_V1.0.1.54_WW_src/Source/apps/apple/sqlite-3.6.16/build.sh
+--- D7000_V1.0.1.54_WW_src/Source/apps/apple/sqlite-3.6.16/build.sh	2016-10-11 17:53:53.000000000 +0200
++++ D7000_V1.0.1.54_WW_src/Source/apps/apple/sqlite-3.6.16/build.sh	2017-05-04 20:53:03.771753087 +0200
+@@ -2,4 +2,4 @@
+ build_dir=build_sc
+ cd $build_dir
+ 
+-CPPFLAGS="" CFLAGS=" -DSQLITE_ENABLE_UNLOCK_NOTIFY -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/ -ldl -lpthread " ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --enable-static --prefix= --enable-threadsafe --enable-load-extension --disable-tcl 
++CPPFLAGS="" CFLAGS="${1}  -DSQLITE_ENABLE_UNLOCK_NOTIFY -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/ -ldl -lpthread " ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --enable-static --prefix= --enable-threadsafe --enable-load-extension --disable-tcl 

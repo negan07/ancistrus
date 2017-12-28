@@ -1,0 +1,14 @@
+diff -urN D7000_V1.0.1.54_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/.config D7000_V1.0.1.54_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/.config
+--- D7000_V1.0.1.54_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/.config	2017-02-27 21:30:18.883892754 +0100
++++ D7000_V1.0.1.54_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/.config	2017-02-27 22:06:49.484748218 +0100
+@@ -490,7 +490,9 @@
+ #
+ # CONFIG_FPE_NWFPE is not set
+ CONFIG_FPE_FASTFPE=y
+-# CONFIG_VFP is not set
++CONFIG_VFP=y
++CONFIG_VFPv3=y
++CONFIG_NEON=y
+ 
+ #
+ # Userspace binary formats

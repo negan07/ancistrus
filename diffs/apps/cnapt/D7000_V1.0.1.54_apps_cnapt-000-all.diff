@@ -1,0 +1,33 @@
+diff -urN D7000_V1.0.1.54_WW_src/Source/apps/cnapt/user/lib/Makefile D7000_V1.0.1.54_WW_src/Source/apps/cnapt/user/lib/Makefile
+--- D7000_V1.0.1.54_WW_src/Source/apps/cnapt/user/lib/Makefile	2016-10-11 17:54:22.000000000 +0200
++++ D7000_V1.0.1.54_WW_src/Source/apps/cnapt/user/lib/Makefile	2017-05-01 21:27:20.796417042 +0200
+@@ -5,7 +5,7 @@
+ CC=$(CROSS)gcc
+ LD=$(CROSS)ld
+ 
+-KERNELDIR = ../../../../../Kernel/bcm963xx/kernel/linux
++#KERNELDIR = ../../../../../Kernel/bcm963xx/kernel/linux
+ 
+ all: libcnapt.so
+ 
+@@ -15,10 +15,11 @@
+ OBJS += cdmz.o
+ OBJS += cnapt.o
+ 
+-CFLAGS += -Wall -Werror -I$(KERNELDIR)/include/ -I../../kernel/ -fPIC
++CFLAGS += -Os -s -Wall -Werror -I$(KERNEL_DIR)/include/ -I../../kernel/ -fPIC
+ 
+ lib_napt.a: $(OBJS)
+ 	$(AR) crv $@ $^
++	$(STRIP) $(STRIPFLAGS) $@
+ 
+ libcnapt.so: $(OBJS)
+ 	$(CC) -shared -fPIC $^ -Wl,-soname,$@ -o $@ 
+@@ -27,6 +28,7 @@
+ 	$(CC) $(CFLAGS) -c $^ 
+ 
+ install:
++	$(STRIP) libcnapt.so
+ 	cp -a libcnapt.so $(ROOT)/target/lib/
+ clean:
+ 	rm -f *.so *.a *.o
