@@ -37,8 +37,8 @@ DBGDIR=$RDIR/${NAME}dbg							# debug dir
 LANGDIR=www.eng								# www dir
 CGI=$NAME.cgi								# actual cgi name
 BINLIST="libscnvram.so $NAME"						# main binary files
-KOLIST="sch_fq_codel.ko act_ipt.ko cls_flow.ko"				# kernel modules
-QOSLIST="functions.qos simple.qos simplest.qos simplest_tbf.qos qos-sqm.conf rc_qos"	# qos scripts and configs
+KOLIST="sch_fq_codel.ko act_ipt.ko cls_flow.ko sch_hfsc.ko"		# kernel modules
+QOSLIST="functions.qos legacy_funcs.qos qdisc_funcs.qos qos_funcs.qos qos-sqm.conf rc_qos"	# qos scripts and configs
 
 
 DIRMAKE() {								# create the work bindir
@@ -69,10 +69,7 @@ cd $DBGDIR
 THISLNK
 }
 
-	if [ $# != "1" ]; then
-	echo "Usage: $0 <core> <ko> <qos> <web> <del> <*anyfiledir*>"
-	exit 1
-	fi
+[ $# != "1" ] && echo "Usage: $0 <core> <ko> <qos> <web> <del> <*anyfiledir*>" && exit 1
 
 export LD_LIBRARY_PATH=$DBGDIR
 ln -sf /usr/sbin/rc $DBGDIR/rc > /dev/null 2>&1
