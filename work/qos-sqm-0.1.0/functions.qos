@@ -108,7 +108,7 @@ do_modules() {
 
 undo_modules() {
     for MOD in $ALL_MODULES; do
-        [ -d /sys/module/${MOD} ] || ${RMMOD} ${LIBDIR}/${MOD}.ko 2>>${OUTPUT_TARGET}
+        [ -d /sys/module/${MOD} ] && ${RMMOD} ${LIBDIR}/${MOD}.ko 2>>${OUTPUT_TARGET}
     done
 }
 
@@ -124,12 +124,14 @@ write_state_file() {
 }
 
 
-# find the ifb device associated with a specific interface, return nothing of no
+# find the ifb device associated with a specific interface, return nothing if no
 # ifb is associated with IF
 get_ifb_associated_with_if() {
    local CUR_IF=$1
+   local IFB_PREFIX="ifb4"
+  # extended grep not working so this workaround
   #local CUR_IFB=$( $TC_BINARY -p filter show parent ffff: dev ${CUR_IF} | grep -o -E ifb'[^)\ ]+' )
-   local CUR_IFB=$( $TC_BINARY -p filter show parent ffff: dev ${CUR_IF} | grep ifb | sed s/'${TC_BINARY} -p filter show parent ffff: dev '// )
+   local CUR_IFB=$( $TC_BINARY -p filter show parent ffff: dev ${CUR_IF} | grep -o "${IFB_PREFIX}${CUR_IF}" )
    sqm_debug "ifb associated with interface ${CUR_IF}: ${CUR_IFB}"
 
     # we could not detect an associated IFB for CUR_IF
