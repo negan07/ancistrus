@@ -35,7 +35,7 @@ diff -urN D7000_V1.0.1.54_WW_src/Source/env.mak D7000_V1.0.1.54_WW_src/Source/en
 +# flags settings
 +export STRIPFLAGS := -x -R .note -R .comment -R .version --strip-unneeded
 +
-+export UCLIBC_EXTRA_CFLAGS := -mcpu=cortex-a9 -mtune=cortex-a9 -march=armv7-a -mabi=aapcs-linux -mfpu=neon-fp16 -mfloat-abi=soft
++export UCLIBC_EXTRA_CFLAGS := -mcpu=cortex-a9 -mtune=cortex-a9 -march=armv7-a -mabi=aapcs-linux -mfloat-abi=soft
 +
-+export CFLAGS := -marm -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon-fp16 -pipe -funit-at-a-time -fomit-frame-pointer -ffixed-r8 -fno-common -mno-thumb-interwork -mabi=aapcs-linux -mfloat-abi=soft
++export CFLAGS := -marm -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -pipe -funit-at-a-time -fomit-frame-pointer -ffixed-r8 -fno-common -mno-thumb-interwork -mabi=aapcs-linux -mfloat-abi=soft
  

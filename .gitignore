@@ -98,6 +98,7 @@ dkms.conf
 ########################################
 diff-*
 crosstools-*
+D70_00_*
 D7000_*_src
 build
 localbin

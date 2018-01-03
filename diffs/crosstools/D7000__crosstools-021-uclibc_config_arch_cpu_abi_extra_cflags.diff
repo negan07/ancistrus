@@ -6,7 +6,7 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/a
  #
  CROSS_COMPILER_PREFIX=""
 -UCLIBC_EXTRA_CFLAGS=""
-+UCLIBC_EXTRA_CFLAGS="-mcpu=cortex-a9 -mtune=cortex-a9 -march=armv7-a -mabi=aapcs-linux"
++UCLIBC_EXTRA_CFLAGS="-mcpu=cortex-a9 -mtune=cortex-a9 -march=armv7-a -mabi=aapcs-linux -mfloat-abi=soft"
  # DODEBUG is not set
  DOSTRIP=y
  # DOASSERTS is not set
@@ -18,7 +18,7 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/m
  #
  CROSS_COMPILER_PREFIX=""
 -UCLIBC_EXTRA_CFLAGS=""
-+UCLIBC_EXTRA_CFLAGS="-mips32 -march=mips32 -mtune=mips32 -mabi=32"
++UCLIBC_EXTRA_CFLAGS="-mips32 -march=mips32 -mtune=mips32 -mabi=32 -msoft-float"
  # DODEBUG is not set
  # DODEBUG_PT is not set
  DOSTRIP=y
@@ -30,7 +30,7 @@ diff -urN crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/m
  #
  CROSS_COMPILER_PREFIX=""
 -UCLIBC_EXTRA_CFLAGS=""
-+UCLIBC_EXTRA_CFLAGS="-mips32 -march=mips32 -mtune=mips32 -mabi=32"
++UCLIBC_EXTRA_CFLAGS="-mips32 -march=mips32 -mtune=mips32 -mabi=32 -msoft-float"
  # DODEBUG is not set
  # DODEBUG_PT is not set
  DOSTRIP=y

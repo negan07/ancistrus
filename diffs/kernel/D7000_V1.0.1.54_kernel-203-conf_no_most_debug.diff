@@ -17,7 +17,7 @@ diff -urN D7000_V1.0.1.54_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/.config D700
  CONFIG_HAVE_GENERIC_DMA_COHERENT=y
  CONFIG_SLABINFO=y
  CONFIG_RT_MUTEXES=y
-@@ -1612,9 +1610,7 @@
+@@ -1610,9 +1608,7 @@
  # CONFIG_EXT4_FS_SECURITY is not set
  # CONFIG_EXT4_DEBUG is not set
  CONFIG_JBD=y
@@ -27,7 +27,7 @@ diff -urN D7000_V1.0.1.54_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/.config D700
  CONFIG_FS_MBCACHE=y
  # CONFIG_REISERFS_FS is not set
  # CONFIG_JFS_FS is not set
-@@ -1769,7 +1765,7 @@
+@@ -1767,7 +1763,7 @@
  CONFIG_MAGIC_SYSRQ=y
  # CONFIG_STRIP_ASM_SYMS is not set
  # CONFIG_UNUSED_SYMBOLS is not set
@@ -36,7 +36,7 @@ diff -urN D7000_V1.0.1.54_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/.config D700
  # CONFIG_HEADERS_CHECK is not set
  # CONFIG_DEBUG_SECTION_MISMATCH is not set
  CONFIG_DEBUG_KERNEL=y
-@@ -1797,7 +1793,7 @@
+@@ -1795,7 +1791,7 @@
  # CONFIG_DEBUG_LOCKING_API_SELFTESTS is not set
  # CONFIG_DEBUG_STACK_USAGE is not set
  # CONFIG_DEBUG_KOBJECT is not set
@@ -45,7 +45,7 @@ diff -urN D7000_V1.0.1.54_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/.config D700
  # CONFIG_DEBUG_INFO is not set
  # CONFIG_DEBUG_VM is not set
  # CONFIG_DEBUG_WRITECOUNT is not set
-@@ -1817,7 +1813,6 @@
+@@ -1815,7 +1811,6 @@
  # CONFIG_DEBUG_BLOCK_EXT_DEVT is not set
  # CONFIG_DEBUG_FORCE_WEAK_PER_CPU is not set
  # CONFIG_DEBUG_PER_CPU_MAPS is not set
@@ -53,7 +53,7 @@ diff -urN D7000_V1.0.1.54_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/.config D700
  # CONFIG_CPU_NOTIFIER_ERROR_INJECT is not set
  # CONFIG_FAULT_INJECTION is not set
  # CONFIG_DEBUG_PAGEALLOC is not set
-@@ -1828,7 +1823,6 @@
+@@ -1826,7 +1821,6 @@
  CONFIG_HAVE_C_RECORDMCOUNT=y
  CONFIG_TRACING_SUPPORT=y
  # CONFIG_FTRACE is not set
@@ -61,7 +61,7 @@ diff -urN D7000_V1.0.1.54_WW_src/Kernel/bcm963xx/kernel/linux-3.4rt/.config D700
  # CONFIG_DMA_API_DEBUG is not set
  # CONFIG_ATOMIC64_SELFTEST is not set
  # CONFIG_SAMPLES is not set
-@@ -1837,7 +1831,7 @@
+@@ -1835,7 +1829,7 @@
  # CONFIG_TEST_KSTRTOX is not set
  CONFIG_STRICT_DEVMEM=y
  CONFIG_ARM_UNWIND=y
