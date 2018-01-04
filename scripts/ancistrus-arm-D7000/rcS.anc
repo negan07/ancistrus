@@ -21,7 +21,7 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts
 # mount opkg info & status files partition
 mount -n -t jffs2  mtd20 /usr/lib/opkg
 
-# auth login
+# auth login: on newer firmware chpasswd & else not needed
 echo "=============login start " > /dev/console
 eval `nvram get http_password`
 echo "root:${http_password}" | chpasswd

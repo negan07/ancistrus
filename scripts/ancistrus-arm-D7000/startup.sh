@@ -89,12 +89,6 @@ mount -n -t jffs2 ${PART} ${OPKGISDIR}
 	fi
 rm -rf ${OPKGISDIR}/*
 echo
-echo "Updating console login passwd..."
-eval `nvram get http_password`
-echo "root:${http_password}" | chpasswd
-echo "nobody:${http_password}" | chpasswd
-touch ${NOLOGIN}
-echo
 echo "Starting ${BIN} ..."
 ${OPKG} update && sleep 1 && ${OPKG} install ${BIN}
 	if [ $? -ne 0 -o ! -x ${BINDIR}/${BIN} ]; then
