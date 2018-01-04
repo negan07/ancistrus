@@ -27,7 +27,7 @@
 
 ETCDIR=/etc
 USRETCDIR=/usr${ETCDIR}
-DESTDIR=/usr/sbin
+BINDIR=/usr/sbin
 BIN=opkg
 RCS=rcS
 RCSANC=${RCS}.anc
@@ -55,13 +55,14 @@ URL=https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/tools/ancistrus
 SCRURL=https://raw.githubusercontent.com/negan07/ancistrus/master/scripts
 [ ! -z "$2" ] && SCRURL=$2
 
-[ -x ${DESTDIR}/${BIN} ] && echo "${BIN} looks already installed." && exit 6
+[ -x ${BINDIR}/${BIN} ] && echo "${BIN} looks already installed." && exit 6
 
 cd ${ETCDIR}
 echo "Cleaning up some garbage files..."
+[ ! -z `pidof telnetenabled` ] && killall -9 telnetenabled
 find /opt -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1
 find ${WWW}/cgi-bin -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1
-rm -f ${USRETCDIR}/${RCS}.MT ${DESTDIR}/reaim ${WWW}/*DGND*.jpg ${LANGSDIR}/ENU/*.gz ${OPKG} ${CONF} ${ARC}
+rm -f ${USRETCDIR}/${RCS}.MT ${BINDIR}/reaim ${BINDIR}/telnetenabled ${WWW}/*DGND*.jpg ${LANGSDIR}/ENU/*.gz ${OPKG} ${CONF} ${ARC}
 	for D in `ls ${LANGSDIR}/GW`
 	do
 	[ -d ${LANGSDIR}/GW/${D} ] && rm -f ${LANGSDIR}/GW/${D}/*.gz
@@ -96,7 +97,7 @@ touch ${NOLOGIN}
 echo
 echo "Starting ${BIN} ..."
 ${OPKG} update && sleep 1 && ${OPKG} install ${BIN}
-	if [ $? -ne 0 -o ! -x ${DESTDIR}/${BIN} ]; then
+	if [ $? -ne 0 -o ! -x ${BINDIR}/${BIN} ]; then
 	echo "${BIN} installation failed: check repository urls on ${CONF}"
 	exit 3
 	fi

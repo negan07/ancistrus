@@ -30,8 +30,27 @@ touch /etc/nologin
 utelnetd -l /usr/sbin/login -d
 echo "=============login end " > /dev/console
 
-# add more conntracks
+# some procs kills
+for P in "telnetDBGD" "acktelnetDBGD"
+do
+S=`ps | grep "\[ ${P} \]" | awk '{printf $1}'`
+[ ! -z $S ] && [ "$S" -eq "$S" ] > /dev/null 2>&1 && kill -9 $S
+done
+
+# bump the conntracks
 echo 65536 > /proc/sys/net/nf_conntrack_max
+echo 16384 > /sys/module/nf_conntrack/parameters/hashsize
+echo 16384 > /proc/sys/net/netfilter/nf_conntrack_buckets
+echo 256 > /proc/sys/net/netfilter/nf_conntrack_expect_max
+
+# extend port range
+echo 1025 65535 > /proc/sys/net/ipv4/ip_local_port_range
+
+# more pid numbers
+echo 65536 > /proc/sys/kernel/pid_max
+
+# disable cache metrics on closing connections
+#echo 1 > /proc/sys/net/ipv4/tcp_no_metrics_save
 
 # snr retrain
 # echo "=============snr retrain start " > /dev/console
