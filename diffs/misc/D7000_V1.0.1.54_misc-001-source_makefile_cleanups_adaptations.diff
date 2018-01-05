@@ -92,9 +92,17 @@ diff -urN D7000_V1.0.1.54_WW_src/Source/Makefile D7000_V1.0.1.54_WW_src/Source/M
  
  pre_fs:
  	rm -rf target
-@@ -95,262 +63,148 @@
+@@ -94,263 +62,155 @@
+ 	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
  	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
  	cd target/lib; ln -sf libscnvram.so libconfig.so
++	$(foreach D, \
++	target/opt/leafp2p target/opt/rcagent target/opt/rcagent/cgi target/opt/rcagent/scripts target/opt/remote target/opt/xagent \
++	target/usr/sbin target/usr/sbin/rc_app target/www.eng/cgi-bin, \
++	for F in `ls -A $D`; do \
++	if [ -x $D/$$F ] && [ ! -d $D/$$F ] && [ ! -L $D/$$F ] && [ -z `echo $$F | grep "\.so"` ] && [ -z `echo $$F | grep "\.sh"` ]; then \
++	$(SSTRIP) $D/$$F; fi; done;)
++	$(SSTRIP) target/opt/rcagent/downloader
  ifeq ($(ITUNES_SERVER),1)
 -	make -C uClibc-0.9.32/
 +	@echo -e "\\e[35mSOURCE: make \\e[36mUCLIBC \\e[0m"
@@ -166,11 +174,11 @@ diff -urN D7000_V1.0.1.54_WW_src/Source/Makefile D7000_V1.0.1.54_WW_src/Source/M
 +IMG_NAME=$(BOARD_ID)-V$(VER)_$(SUB_VER)_MT.img
  endif
  
-+WORK_PROJECT=$(shell cd ../..; basename -s .git `git config --get remote.origin.url`;)
-+WORK_WWW=$(shell cd ../..; git config --get remote.origin.url;)
-+WORK_AUTHOR=$(shell cd ../..; git log --max-count=1 --pretty='format:%an';)
-+WORK_AUTHOR_EMAIL=$(shell cd ../..; git log --max-count=1 --pretty='format:%ae';)
-+WORK_VER=$(shell cd ../..; git rev-list --count HEAD;)
++WORK_PROJECT=$(shell cd ../..; basename -s .git `git config --get remote.origin.url` || basename `pwd` | tr -d -c [:alpha:];)
++WORK_WWW=$(shell cd ../..; git config --get remote.origin.url || echo "local";)
++WORK_AUTHOR=$(shell cd ../..; git log --max-count=1 --pretty='format:%an' || pwd | sed 's/\// /g' | awk '{printf $$2}';)
++WORK_AUTHOR_EMAIL=$(shell cd ../..; git log --max-count=1 --pretty='format:%ae' || echo "email@void.com";)
++WORK_VER=$(shell cd ../..; git rev-list --count HEAD || basename `pwd` | tr -d -c [:digit:];)
 +BUILDING_DATE=$(shell date -u '+%Y-%m-%d %H:%M')
 +GIT_INFO=$(FS_DIR)/usr/etc/$(WORK_PROJECT)_git.info
 +
@@ -186,6 +194,7 @@ diff -urN D7000_V1.0.1.54_WW_src/Source/Makefile D7000_V1.0.1.54_WW_src/Source/M
 +	echo Building Date: $(BUILDING_DATE) UTC >> $(GIT_INFO)
 +	echo Model: $(BOARD_ID) >> $(GIT_INFO)
 +	echo Firmware: V$(VER)_$(SUB_VER) >> $(GIT_INFO)
++	ln -sf /etc/$(WORK_PROJECT)_git.info $(FS_DIR)/www.eng/$(WORK_PROJECT)_git.info
 +
  prefs:
  	# Generate version
@@ -337,13 +346,11 @@ diff -urN D7000_V1.0.1.54_WW_src/Source/Makefile D7000_V1.0.1.54_WW_src/Source/M
 -	$(HOSTTOOLS_DIR)/bcmImageBuilder --output $(IMAGE_DIR)/bcm963xx_fs_kernel --chip $(CHIP_ID) --board "963281TAN" --blocksize $(BLOCKSIZE) --image-version 4101GW0701531 --cfefile $(LOADER) --rootfsfile $(FS_NAME) --kernelfile $(KERNEL) 
 -#	$(HOSTTOOLS_DIR)/bcmImageBuilder --output $(IMAGE_DIR)/bcm963xx_fs_kernel --chip $(CHIP_ID) --board "9$(CHIP_ID)GW" --blocksize $(BLOCKSIZE) --cfefile $(LOADER) --rootfsfile $(FS_NAME) --kernelfile  $(KERNEL)
 -#	rm -f $(FS_NAME)
-+	@echo -e "\\e[35mSOURCE: FS garbage \\e[36mcleanup\\e[0m"
++	@echo -e "\\e[35mSOURCE: FS \\e[36mgarbage orphans cleanup\\e[0m"
 +	-find $(FS_DIR) -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1
-+	-find $(FS_DIR) -type f -name *.gz -exec rm -f '{}' \;
-+	-find $(FS_DIR) -type f -name *DGND*.jpg -exec rm -f '{}' \;
-+	-find $(FS_DIR) -type f -name rcS.MT -exec rm -f '{}' \;
++	@$(foreach F, "*.gz" "*DGND*.jpg" "rcS.MT" "telnetenabled", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
 +	mogrify -format jpg $(FS_DIR)/www.eng/image/apmodelink.jpg
-+	@echo -e "\\e[35mSOURCE: \\e[36mFS created\\e[0m"
++	@echo -e "\\e[35mSOURCE: FS \\e[36mcreated\\e[0m"
  endif
  
 -
