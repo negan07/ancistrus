@@ -21,14 +21,14 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts
 # mount opkg info & status files partition
 mount -n -t jffs2  mtd20 /usr/lib/opkg
 
-# auth login: on newer firmware chpasswd & else not needed
-echo "=============login start " > /dev/console
+# auth login: on newer firmwares this stage not needed
 eval `nvram get http_password`
-echo "root:${http_password}" | chpasswd
-echo "nobody:${http_password}" | chpasswd
+echo "root:${http_password}" | chpasswd > /dev/null 2>&1
+echo "nobody:${http_password}" | chpasswd > /dev/null 2>&1
 touch /etc/nologin
+
+# starting telnet console daemon
 utelnetd -l /usr/sbin/login -d
-echo "=============login end " > /dev/console
 
 # some procs kills
 for P in "telnetDBGD" "acktelnetDBGD"
