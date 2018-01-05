@@ -1,11 +1,10 @@
 diff -urN work/openvpn-2.4.4/Makefile work/openvpn-2.4.4/Makefile
 --- work/openvpn-2.4.4/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/openvpn-2.4.4/Makefile	2017-11-29 18:00:11.000000000 +0100
-@@ -0,0 +1,72 @@
++++ work/openvpn-2.4.4/Makefile	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,69 @@
 +include ../Rules.mak
 +
 +#USROVPNDIR 		:= $(BINDIR)/../openvpn
-+RCOVPNPATH		:= $(GIT_ROOT_DIR)/$(DIFFS_DIR)/$(WORK_SRC_DIR)/$(OPEN_VPN)
 +RCOVPN			:= rc_openvpn
 +RCVPN			:= rc_vpn
 +TUNKO			:= tun.ko
@@ -31,9 +30,7 @@ diff -urN work/openvpn-2.4.4/Makefile work/openvpn-2.4.4/Makefile
 +	install -m 0755 $(KERNEL_DIR)/drivers/net/$(TUNKO) $(MODDIR)
 +	$(STRIP) $(STRIPKOFLAGS) $(MODDIR)/$(TUNKO);
 +	#install -m 0644 $(OPEN_VPN)/keys/* $(USROVPNDIR)
-+	@if [ -f $(RCOVPNPATH)/$(RCOVPN) ] && [ -x $(RCOVPNPATH)/$(RCOVPN) ]; then \
-+	cp -af $(RCOVPNPATH)/$(RCOVPN) .; \
-+	$(SSTRIP) $(RCOVPN); \
++	@if [ -f $(RCOVPN) ] && [ -x $(RCOVPN) ]; then \
 +	install -m 0755 -d $(APPDIR); \
 +	install -m 0755 $(RCOVPN) $(APPDIR); \
 +	rm -f $(APPDIR)/$(RCVPN); \
