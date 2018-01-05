@@ -21,17 +21,36 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts
 # mount opkg info & status files partition
 mount -n -t jffs2  mtd20 /usr/lib/opkg
 
-# auth login
-echo "=============login start " > /dev/console
+# auth login: on newer firmwares this stage not needed
 eval `nvram get http_password`
-echo "root:${http_password}" | chpasswd
-echo "nobody:${http_password}" | chpasswd
+echo "root:${http_password}" | chpasswd > /dev/null 2>&1
+echo "nobody:${http_password}" | chpasswd > /dev/null 2>&1
 touch /etc/nologin
-utelnetd -l /usr/sbin/login -d
-echo "=============login end " > /dev/console
 
-# add more conntracks
+# starting telnet console daemon
+utelnetd -l /usr/sbin/login -d
+
+# some procs kills
+for P in "telnetDBGD" "acktelnetDBGD"
+do
+S=`ps | grep "\[ ${P} \]" | awk '{printf $1}'`
+[ ! -z $S ] && [ "$S" -eq "$S" ] > /dev/null 2>&1 && kill -9 $S
+done
+
+# bump the conntracks
 echo 65536 > /proc/sys/net/nf_conntrack_max
+echo 16384 > /sys/module/nf_conntrack/parameters/hashsize
+echo 16384 > /proc/sys/net/netfilter/nf_conntrack_buckets
+echo 256 > /proc/sys/net/netfilter/nf_conntrack_expect_max
+
+# extend port range
+echo 1025 65535 > /proc/sys/net/ipv4/ip_local_port_range
+
+# more pid numbers
+echo 65536 > /proc/sys/kernel/pid_max
+
+# disable cache metrics on closing connections
+#echo 1 > /proc/sys/net/ipv4/tcp_no_metrics_save
 
 # snr retrain
 # echo "=============snr retrain start " > /dev/console
