@@ -105,9 +105,8 @@ localbin
 scripts/opkg-utils-*/
 *target*
 vmlinux.*
-anc
-rc_qos
-rc_openvpn
+work/ancistrus-core-*/anc
+work/qos-netgear-*/rc_qos
 *.img
 *.bin
 *.bz2
