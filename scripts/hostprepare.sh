@@ -110,6 +110,9 @@ sudo apt-get install lib32z1 lib32z1-dev
 # zip support
 sudo apt-get install zip unzip gzip bzip2
 
+# some graphic support
+sudo apt-get install imagemagick
+
 # little local optional webserver
 #sudo apt-get install thttpd
 sudo apt-get install lighttpd

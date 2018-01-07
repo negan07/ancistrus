@@ -251,11 +251,11 @@ qos_enable
 (Default: 0).
 
 qos_uplink_rate
-Real upload bandwith in kbps (no bearer, no max): it can be discovered with 'speedtest' or with network-test package 'betterspeedtest.sh' script. It is the most important parameter, bad setting may bring to qos failure.
+Real upload bandwidth in kbps (no bearer, no max): it can be discovered with 'speedtest' or with network-test package 'betterspeedtest.sh' script. It is the most important parameter, bad setting may bring to qos failure.
 (Default: 512).
 
 qos_dwlink_rate
-Real download bandwith in kbps: as before. 
+Real download bandwidth in kbps: as before. 
 (Default: 0 = download qos disabled).
 
 qos_llayer
