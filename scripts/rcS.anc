@@ -25,7 +25,6 @@ mount -n -t jffs2  mtd20 /usr/lib/opkg
 eval `nvram get http_password`
 echo "root:${http_password}" | chpasswd > /dev/null 2>&1
 echo "nobody:${http_password}" | chpasswd > /dev/null 2>&1
-touch /etc/nologin
 
 # starting telnet console daemon
 utelnetd -l /usr/sbin/login -d
