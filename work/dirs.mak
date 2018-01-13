@@ -108,7 +108,7 @@ DEP_$(QOS_NG)		:=
 DESC_$(QOS_NG)		:= Quality Of Service tool from Netgear firmware 36_42n
 
 QOS_SQM_OLD_NAME	:= qos-sqm-oldlegacy
-VER_$(QOS_SQM_OLD_NAME)	:= 0.1.0
+VER_$(QOS_SQM_OLD_NAME)	:= 0.1.1
 QOS_SQM_OLD		:= $(QOS_SQM_OLD_NAME)-$(VER_$(QOS_SQM_OLD_NAME))
 NAME_$(QOS_SQM_OLD)	:= $(QOS_SQM_OLD_NAME)$(DBG)
 VER_$(QOS_SQM_OLD)	:= $(VER_$(QOS_SQM_OLD_NAME))
@@ -122,7 +122,7 @@ DEP_$(QOS_SQM_OLD)	:= $(NAME_$(NVRAM)),$(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
 DESC_$(QOS_SQM_OLD)	:= Quality Of Service CeroWrt old legacy script tool
 
 QOS_SQM_NAME		:= qos-sqm
-VER_$(QOS_SQM_NAME)	:= 1.2.0-13.020
+VER_$(QOS_SQM_NAME)	:= 1.2.0-13.021
 QOS_SQM			:= $(QOS_SQM_NAME)-$(VER_$(QOS_SQM_NAME))
 NAME_$(QOS_SQM)		:= $(QOS_SQM_NAME)$(DBG)
 VER_$(QOS_SQM)		:= $(VER_$(QOS_SQM_NAME))
