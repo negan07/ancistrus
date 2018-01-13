@@ -19,7 +19,7 @@
 #
 # Startup rc for qos-sqm-scripts
 #
-# Usage: $0 < start restart stop show stats version > (< debug_mode >) (< verbose_mode >)
+# Usage: $0 < start restart startforced restartforced stop show stats version > (< debug_mode >) (< verbose_mode >)
 #
 
 path_binaries() {
@@ -76,7 +76,7 @@ done
 #ALL_MODULES="act_ipt sch_$QDISC sch_ingress act_mirred cls_fw cls_flow cls_u32 sch_htb sch_hfsc"
 [ -z "$ALL_MODULES" ] && ALL_MODULES="act_ipt sch_$QDISC cls_flow"
 
-[ "$SQM_DEBUG" = "1" ] && echo UPLINK=$UPLINK DOWNLINK=$DOWNLINK SCRIPT=$SCRIPT IFACE=$IFACE QDISC=$QDISC IP6MODE=$IP6MODE LLAM=$LLAM LINKLAYER=$LINKLAYER OVERHEAD=$OVERHEAD STAB_MTU=$STAB_MTU STAB_MPU=$STAB_MPU STAB_TSIZE=$STAB_TSIZE AUTOFLOW=$AUTOFLOW LIMIT=$LIMIT ILIMIT=$ILIMIT ELIMIT=$ELIMIT ITARGET=$ITARGET ETARGET=$ETARGET IECN=$IECN EECN=$EECN ZERO_DSCP_INGRESS=$ZERO_DSCP_INGRESS IGNORE_DSCP_INGRESS=$IGNORE_DSCP_INGRESS IQDISC_OPTS=$IQDISC_OPTS EQDISC_OPTS=$EQDISC_OPTS TARGET=$TARGET IPT_MASK=$IPT_MASK SHAPER_BURST=$SHAPER_BURST HTB_QUANTUM_FUNCTION=$HTB_QUANTUM_FUNCTION ALL_MODULES=$ALL_MODULES
+[ "$SQM_DEBUG" = "1" ] && echo QOS_ENABLE=$QOS_ENABLE UPLINK=$UPLINK DOWNLINK=$DOWNLINK SCRIPT=$SCRIPT IFACE=$IFACE QDISC=$QDISC IP6MODE=$IP6MODE LLAM=$LLAM LINKLAYER=$LINKLAYER OVERHEAD=$OVERHEAD STAB_MTU=$STAB_MTU STAB_MPU=$STAB_MPU STAB_TSIZE=$STAB_TSIZE AUTOFLOW=$AUTOFLOW LIMIT=$LIMIT ILIMIT=$ILIMIT ELIMIT=$ELIMIT ITARGET=$ITARGET ETARGET=$ETARGET IECN=$IECN EECN=$EECN ZERO_DSCP_INGRESS=$ZERO_DSCP_INGRESS IGNORE_DSCP_INGRESS=$IGNORE_DSCP_INGRESS IQDISC_OPTS=$IQDISC_OPTS EQDISC_OPTS=$EQDISC_OPTS TARGET=$TARGET IPT_MASK=$IPT_MASK SHAPER_BURST=$SHAPER_BURST HTB_QUANTUM_FUNCTION=$HTB_QUANTUM_FUNCTION ALL_MODULES=$ALL_MODULES
 }
 
 logging_setup() {
@@ -210,6 +210,10 @@ logging_setup
     case $1 in
     start|restart)
     stop_sqm
+    [ "${QOS_ENABLE}" != "0" ] && start_sqm
+    ;;
+    startforced|restartforced)
+    stop_sqm
     start_sqm
     ;;
     stop)
@@ -244,7 +248,7 @@ cat << _EOF_
 #
 # qos-sqm - version: 0.1.0
 #
-Usage: rc_qos < start restart stop show stats version help > (< debug >) (< verbose >)
+Usage: rc_qos < start restart startforced restartforced stop show stats version help > (< debug >) (< verbose >)
 
 Settings.
 There are many settings, but the main are the most important to know and to be modified for best usage.
@@ -291,7 +295,7 @@ or singularly with 'anc nvram get qos_enable' 'anc nvram get qos_uplink_rate' 'a
 _EOF_
     ;;
     *)
-    echo "Usage: $0 < start restart stop show stats version help > (< debug >) (< verbose >)" && exit 1
+    echo "Usage: $0 < start restart startforced restartforced stop show stats version help > (< debug >) (< verbose >)" && exit 1
     ;;
     esac
 
