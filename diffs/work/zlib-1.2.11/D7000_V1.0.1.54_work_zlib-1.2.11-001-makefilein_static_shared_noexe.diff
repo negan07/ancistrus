@@ -8,7 +8,8 @@ diff -urN work/zlib-1.2.11/zlib-1.2.11/Makefile.in work/zlib-1.2.11/zlib-1.2.11/
 -static: example$(EXE) minigzip$(EXE)
 +static: $(STATICLIB) #example$(EXE) minigzip$(EXE)
  
- shared: examplesh$(EXE) minigzipsh$(EXE)
+-shared: examplesh$(EXE) minigzipsh$(EXE)
++shared: $(SHAREDLIBV) #examplesh$(EXE) minigzipsh$(EXE)
  
 -all64: example64$(EXE) minigzip64$(EXE)
 +all64: #example64$(EXE) minigzip64$(EXE)
