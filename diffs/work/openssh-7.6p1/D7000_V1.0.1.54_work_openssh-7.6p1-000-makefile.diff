@@ -1,0 +1,192 @@
+diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
+--- work/openssh-7.6p1/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-7.6p1/Makefile	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,188 @@
++include ../Rules.mak
++
++BINS			:= $(OPEN_SSH)/sshd $(OPEN_SSH)/ssh-keygen $(OPEN_SSH)/scp
++SCRIPTS			:= rc_ssh
++SSHD_CONF		:= sshd_config
++SSHD_KEYS_DIR		:= /.ssh
++SSHD_CONF_INST_DIR	:= $(ETCDIR)
++
++all: config
++	$(MAKE) -C $(OPEN_SSH)
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(OPEN_SSH) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --prefix=$(USRDIR) --sysconfdir=$(TMPETC) --libdir=$(LDLIB) --sharedstatedir=$(LDLIB) --bindir=$(USRSBIN) --sbindir=$(USRSBIN) --libexecdir=$(USRSBIN) --localstatedir=$(VARLIB) --disable-pkcs11 --disable-etc-default-login --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-pututline --disable-pututxline --without-hardening --without-maildir --without-bsd-auth --without-xauth --without-kerberos5 --without-shadow --with-privsep-user=root --with-privsep-path=$(VARLIB)/ssh --with-cflags --with-cflags-after --with-cppflags --with-ldflags --with-ldflags-after --with-libs --with-zlib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-ssl-dir=$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) --with-ssl-engine --with-md5-passwords --with-default-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-superuser-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-pid-dir=$(TMPDIR) CFLAGS="$(CFLAGS) -Os -s" LD=$(CC)
++
++sshd_conf:
++	@echo "#	\$$OpenBSD: sshd_config,v 1.101 2017/03/14 07:19:07 djm Exp \$$" > $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# This is the sshd server system-wide configuration file.  See" >> $(SSHD_CONF)
++	@echo "# sshd_config(5) for more information." >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# This sshd was compiled with PATH=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP)" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# The strategy used for options in the default sshd_config shipped with" >> $(SSHD_CONF)
++	@echo "# OpenSSH is to specify options with their default value where" >> $(SSHD_CONF)
++	@echo "# possible, but leave them commented.  Uncommented options override the" >> $(SSHD_CONF)
++	@echo "# default value." >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "#Port 22" >> $(SSHD_CONF)
++	@echo "#AddressFamily any" >> $(SSHD_CONF)
++	@echo "#ListenAddress 0.0.0.0" >> $(SSHD_CONF)
++	@echo "#ListenAddress ::" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "HostKey $(SSHD_KEYS_DIR)/$(PROJECT).rsa" >> $(SSHD_CONF)
++	@echo "#HostKey $(SSHD_KEYS_DIR)/$(PROJECT).dsa" >> $(SSHD_CONF)
++	@echo "HostKey $(SSHD_KEYS_DIR)/$(PROJECT).ecdsa" >> $(SSHD_CONF)
++	@echo "HostKey $(SSHD_KEYS_DIR)/$(PROJECT).ed25519" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# Ciphers and keying" >> $(SSHD_CONF)
++	@echo "#RekeyLimit default none" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# Logging" >> $(SSHD_CONF)
++	@echo "SyslogFacility AUTH" >> $(SSHD_CONF)
++	@echo "LogLevel INFO" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# Authentication:" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "#LoginGraceTime 2m" >> $(SSHD_CONF)
++	@echo "PermitRootLogin yes" >> $(SSHD_CONF)
++	@echo "#StrictModes yes" >> $(SSHD_CONF)
++	@echo "#MaxAuthTries 6" >> $(SSHD_CONF)
++	@echo "#MaxSessions 10" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "#PubkeyAuthentication yes" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# The default is to check both $(SSHD_KEYS_DIR)/authorized_keys and $(SSHD_KEYS_DIR)/authorized_keys2" >> $(SSHD_CONF)
++	@echo "# but this is overridden so installations will only check $(SSHD_KEYS_DIR)/authorized_keys" >> $(SSHD_CONF)
++	@echo "AuthorizedKeysFile $(SSHD_KEYS_DIR)/authorized_keys" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "#AuthorizedPrincipalsFile none" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "#AuthorizedKeysCommand none" >> $(SSHD_CONF)
++	@echo "#AuthorizedKeysCommandUser nobody" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# For this to work you will also need host keys in $(SSHD_KEYS_DIR)/ssh_known_hosts" >> $(SSHD_CONF)
++	@echo "HostbasedAuthentication yes" >> $(SSHD_CONF)
++	@echo "# Change to yes if you don't trust ~$(SSHD_KEYS_DIR)/known_hosts for" >> $(SSHD_CONF)
++	@echo "# HostbasedAuthentication" >> $(SSHD_CONF)
++	@echo "#IgnoreUserKnownHosts no" >> $(SSHD_CONF)
++	@echo "# Don't read the user's ~/.rhosts and ~/.shosts files" >> $(SSHD_CONF)
++	@echo "#IgnoreRhosts yes" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# To disable tunneled clear text passwords, change to no here!" >> $(SSHD_CONF)
++	@echo "#PasswordAuthentication yes" >> $(SSHD_CONF)
++	@echo "#PermitEmptyPasswords no" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# Change to no to disable s/key passwords" >> $(SSHD_CONF)
++	@echo "#ChallengeResponseAuthentication yes" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# Kerberos options" >> $(SSHD_CONF)
++	@echo "#KerberosAuthentication no" >> $(SSHD_CONF)
++	@echo "#KerberosOrLocalPasswd yes" >> $(SSHD_CONF)
++	@echo "#KerberosTicketCleanup yes" >> $(SSHD_CONF)
++	@echo "#KerberosGetAFSToken no" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# GSSAPI options" >> $(SSHD_CONF)
++	@echo "#GSSAPIAuthentication no" >> $(SSHD_CONF)
++	@echo "#GSSAPICleanupCredentials yes" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# Set this to 'yes' to enable PAM authentication, account processing," >> $(SSHD_CONF)
++	@echo "# and session processing. If this is enabled, PAM authentication will" >> $(SSHD_CONF)
++	@echo "# be allowed through the ChallengeResponseAuthentication and" >> $(SSHD_CONF)
++	@echo "# PasswordAuthentication.  Depending on your PAM configuration," >> $(SSHD_CONF)
++	@echo "# PAM authentication via ChallengeResponseAuthentication may bypass" >> $(SSHD_CONF)
++	@echo "# the setting of \"PermitRootLogin without-password\"." >> $(SSHD_CONF)
++	@echo "# If you just want the PAM account and session checks to run without" >> $(SSHD_CONF)
++	@echo "# PAM authentication, then enable this but set PasswordAuthentication" >> $(SSHD_CONF)
++	@echo "# and ChallengeResponseAuthentication to 'no'." >> $(SSHD_CONF)
++	@echo "#UsePAM no" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "#AllowAgentForwarding yes" >> $(SSHD_CONF)
++	@echo "#AllowTcpForwarding yes" >> $(SSHD_CONF)
++	@echo "#GatewayPorts no" >> $(SSHD_CONF)
++	@echo "#X11Forwarding no" >> $(SSHD_CONF)
++	@echo "#X11DisplayOffset 10" >> $(SSHD_CONF)
++	@echo "#X11UseLocalhost yes" >> $(SSHD_CONF)
++	@echo "#PermitTTY yes" >> $(SSHD_CONF)
++	@echo "#PrintMotd yes" >> $(SSHD_CONF)
++	@echo "#PrintLastLog yes" >> $(SSHD_CONF)
++	@echo "#TCPKeepAlive yes" >> $(SSHD_CONF)
++	@echo "#UseLogin no" >> $(SSHD_CONF)
++	@echo "#PermitUserEnvironment no" >> $(SSHD_CONF)
++	@echo "Compression yes" >> $(SSHD_CONF)
++	@echo "#ClientAliveInterval 0" >> $(SSHD_CONF)
++	@echo "#ClientAliveCountMax 3" >> $(SSHD_CONF)
++	@echo "#UseDNS no" >> $(SSHD_CONF)
++	@echo "#PidFile $(TMPDIR)/sshd.pid" >> $(SSHD_CONF)
++	@echo "#MaxStartups 10:30:100" >> $(SSHD_CONF)
++	@echo "#PermitTunnel no" >> $(SSHD_CONF)
++	@echo "#ChrootDirectory none" >> $(SSHD_CONF)
++	@echo "#VersionAddendum none" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# no default banner path" >> $(SSHD_CONF)
++	@echo "#Banner none" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# override default of no subsystems" >> $(SSHD_CONF)
++	@echo "Subsystem	sftp	$(USRSBIN)/sftp-server" >> $(SSHD_CONF)
++	@echo "" >> $(SSHD_CONF)
++	@echo "# Example of overriding settings on a per-user basis" >> $(SSHD_CONF)
++	@echo "#Match User anoncvs" >> $(SSHD_CONF)
++	@echo "#	X11Forwarding no" >> $(SSHD_CONF)
++	@echo "#	AllowTcpForwarding no" >> $(SSHD_CONF)
++	@echo "#	PermitTTY no" >> $(SSHD_CONF)
++	@echo "#	ForceCommand cvs server" >> $(SSHD_CONF)
++	@echo "# Some additions..." >> $(SSHD_CONF)
++	@echo "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" >> $(SSHD_CONF)
++	@echo "HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa,ssh-dss" >> $(SSHD_CONF)
++	@echo "KexAlgorithms ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256" >> $(SSHD_CONF)
++	@echo "MACs hmac-sha2-256,hmac-sha2-512" >> $(SSHD_CONF)
++
++install: control sshd_conf
++	$(SSTRIP) $(BINS)
++	install -m 0755 -d $(SSHD_CONF_INST_DIR)
++	install -m 0755 -d $(BINDIR)
++	install -m 0755 -d $(APPDIR)
++	install -m 0644 $(SSHD_CONF) $(SSHD_CONF_INST_DIR)
++	install -m 0755 $(BINS) $(BINDIR)
++	install -m 0755 $(SCRIPTS) $(APPDIR)
++
++clean:
++	$(MAKE) -C $(OPEN_SSH) clean
++
++distclean:
++	@rm -f $(SSHD_CONF) h_config
++	$(MAKE) -C $(OPEN_SSH) distclean
++
++ifndef BUILD
++control:
++else
++CONFFILES		:= $(CTRL_DIR)/conffiles
++PREINST			:= $(CTRL_DIR)/preinst
++PRERM			:= $(CTRL_DIR)/prerm
++
++control: conffiles preinst prerm
++
++conffiles:
++	@echo "$(USRETC)/$(SSHD_CONF)" > $(CONFFILES)
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "for PID in \`pidof sshd\`; do" >> $(PREINST)
++	@echo "[ -e /proc/\$${PID}/stat ] && kill -9 \$$PID; done" >> $(PREINST)
++	@echo "rm -f /etc/nologin" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "for PID in \`pidof sshd\`; do" >> $(PRERM)
++	@echo "[ -e /proc/\$${PID}/stat ] && kill -9 \$$PID; done" >> $(PRERM)
++	@echo "exit 0" >> $(PRERM)
++
++endif
++

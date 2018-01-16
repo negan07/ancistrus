@@ -271,6 +271,22 @@ DESC_$(OPEN_VPN)	:= Your private path to access network resources and services s
 DIRLIST			+= $(OPEN_VPN)
 TARLIST			+= $(OPEN_VPN)
 
+OPEN_SSH_NAME		:= openssh
+VER_$(OPEN_SSH_NAME)	:= 7.6p1
+OPEN_SSH		:= $(OPEN_SSH_NAME)-$(VER_$(OPEN_SSH_NAME))
+NAME_$(OPEN_SSH)	:= $(OPEN_SSH_NAME)$(DBG)
+VER_$(OPEN_SSH)		:= $(VER_$(OPEN_SSH_NAME))
+DL_$(OPEN_SSH)		:= https://cloudflare.cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable
+TAR_$(OPEN_SSH)		:= $(OPEN_SSH).tar.gz
+HOME_$(OPEN_SSH)	:= https://www.openssh.com/
+LIC_$(OPEN_SSH)		:= BSD, ISC
+SEC_$(OPEN_SSH)		:= thirdparty
+PRIO_$(OPEN_SSH)	:= optional
+DEP_$(OPEN_SSH)		:= 
+DESC_$(OPEN_SSH)	:= Free SSH protocol suite providing encryption for network services
+DIRLIST			+= $(OPEN_SSH)
+TARLIST			+= $(OPEN_SSH)
+
 BUILTINLIB		:=
 BUILTIN			:=
 THIRDPARTYLIB		:=
@@ -293,6 +309,7 @@ THIRDPARTY		+= $(QOS_SQM)
 THIRDPARTY		+= $(OPKG_UTILS)
 THIRDPARTY		+= $(OPKG)
 THIRDPARTY		+= $(SMONTOOLS)
+THIRDPARTY		+= $(OPEN_SSH)
 endif
 
 PKG_RM_LIST		:= $(ZLIB) $(LIBARCHIVE) $(OPKG_UTILS) $(LZO)

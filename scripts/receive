@@ -39,6 +39,7 @@ CGI=$NAME.cgi								# actual cgi name
 BINLIST="libscnvram.so $NAME"						# main binary files
 KOLIST="sch_fq_codel.ko act_ipt.ko cls_flow.ko sch_hfsc.ko"		# kernel modules
 QOSLIST="functions.qos legacy_funcs.qos qdisc_funcs.qos qos_funcs.qos qos-sqm.conf rc_qos"	# qos scripts and configs
+SSHLIST="rc_ssh sshd_config sshd ssh-keygen scp"			# openssh bins scripts and configs
 
 
 DIRMAKE() {								# create the work bindir
@@ -52,7 +53,7 @@ ln -sf $RDIR/$THISONE $DBGDIR/$THISONE > /dev/null 2>&1
 GET() {									# www get a file from the $ADDR server
 rm -f $1
 curl -f -s -k -O ${SERVER}://${ADDR}/${1} > /dev/null 2>&1
-	if [ $? != 0 ]; then
+	if [ $? -ne 0 ]; then
 	echo "$1 not found"
 	else
 	chmod 755 $1 > /dev/null 2>&1
@@ -69,7 +70,7 @@ cd $DBGDIR
 THISLNK
 }
 
-[ $# != "1" ] && echo "Usage: $0 <core> <ko> <qos> <web> <del> <*anyfiledir*>" && exit 1
+[ $# -ne "1" ] && echo "Usage: $0 <core> <ko> <qos> <ssh> <web> <del> <*anyfiledir*>" && exit 1
 
 export LD_LIBRARY_PATH=$DBGDIR
 ln -sf /usr/sbin/rc $DBGDIR/rc > /dev/null 2>&1
@@ -85,6 +86,10 @@ ln -sf /usr/sbin/rc_app/rc_apps $DBGDIR/rc_apps > /dev/null 2>&1
 	qos)
 	GETLIST $QOSLIST
 	;;
+	ssh)
+	GETLIST $SSHLIST
+	mv -f ${DBGDIR}/sshd_config ${RDIR}
+	;;
 	web)
 	DIRMAKE
 	cd $DBGDIR
@@ -98,20 +103,16 @@ ln -sf /usr/sbin/rc_app/rc_apps $DBGDIR/rc_apps > /dev/null 2>&1
 	;;
 	del)
 	cd $RDIR
-	rm -rf $DBGDIR
-	rm -f ${RDIR}/${CGI}
+	rm -rf $DBGDIR /var/ssh
+	rm -f ${RDIR}/${CGI} sshd_config
 	;;
 	*)
 	DIRMAKE
 	cd $DBGDIR
 	GET $1
 	FILEABS=`echo "$1" | grep ".zip"`
-		if [ "${FILEABS}" = "$1" ]; then
-		unzip $1
-		rm -f $1
-		chmod -R 755 $FILEABS > /dev/null 2>&1
-		fi
+	[ "${FILEABS}" = "$1" ] && unzip $1 && rm -f $1 && chmod -R 755 $FILEABS > /dev/null 2>&1
 	THISLNK
 	;;
 	esac
-
+exit 0

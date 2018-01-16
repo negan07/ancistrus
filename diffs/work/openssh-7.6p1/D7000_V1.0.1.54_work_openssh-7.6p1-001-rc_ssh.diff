@@ -1,0 +1,118 @@
+diff -urN work/openssh-7.6p1/rc_ssh work/openssh-7.6p1/rc_ssh
+--- work/openssh-7.6p1/rc_ssh	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-7.6p1/rc_ssh	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,114 @@
++#!/bin/sh
++#
++# ancistrus
++#
++# Netgear's D7000 Nighthawk Router Experience Distributed Project
++#
++# https://github.com/negan07/ancistrus
++#
++# License: GPLv2
++#
++#
++# Rc script for openssh daemon sshd.
++#
++# Usage: $0 < start restart startforced restartforced stop regenkeys > (<debug>)
++#
++# <debug> runs sshd in foreground mode with pedantic debug messages.
++#
++
++stop() {
++    # Kill all clients...
++    for PID in `pidof sshd`
++    do
++    [ -e /proc/${PID}/stat ] && kill -9 $PID
++    done
++}
++
++start() {
++    # Checking if the service is already running...
++    [ ! -z `pidof sshd` ] && echo "sshd already running..." && exit 1
++
++    # Preliminary operations on fs...
++    [ ! -f ${CONFDIR}/${CONF} ] && cp ${CONFETCDIR}/${CONF} ${CONFDIR}/${CONF}
++    mkdir -p -m 0700 /var/ssh
++
++    # Renew auth login
++    eval `nvram get http_password` > /dev/null 2>&1
++    echo "${USR}:${http_password}" | chpasswd > /dev/null 2>&1
++
++    # Key generation
++    genkeys
++
++    # Starting SSHD...
++    $SSHD
++
++    # Sanity check...
++    SSHD_RC=$?
++    [ $SSHD_RC -ne 0 ] && echo "$0: Error ${SSHD_RC} starting ${SSHD}..." && exit $SSHD_RC
++}
++
++genkeys() {
++    # Creating key dir
++    [ ! -d ${KEYSDIR} ] && chown ${USR}:${USR} / && mkdir -p -m 0600 ${KEYSDIR}
++    # Creating auth key file
++    [ ! -f ${AUTHKEYS} ] && touch ${AUTHKEYS} && chmod 600 ${AUTHKEYS}
++    # Key check & generation if missed...
++    for KTYPE in $KEYTYPES
++    do
++    KEY=${KEYSDIR}/${LABEL}.${KTYPE}
++    [ ! -f $KEY ] && ${SSH_KEYGEN} -q -t ${KTYPE} -f ${KEY} -N '' && chmod 600 ${KEY} && cat ${KEY}.pub >> ${AUTHKEYS}
++    done
++    rm -f ${KEYSDIR}/*.pub
++}
++
++# Main dirs
++KEYSDIR=/.ssh
++CONFDIR=/etc
++CONFETCDIR=/usr${CONFDIR}
++CONF=sshd_config
++BINDIR=/usr/sbin
++
++# Debug purpose
++#BINDIR=/etc/ancdbg
++
++# Config paths
++AUTHKEYS=${KEYSDIR}/authorized_keys
++SSH_KEYGEN=${BINDIR}/ssh-keygen
++SSHD=${BINDIR}/sshd
++
++# Debug running
++[ "${2}" = "debug" ] && SSHD="${BINDIR}/sshd -D -ddd -e"
++
++# Generated keys
++KEYTYPES="rsa ecdsa ed25519"
++
++# User
++USR=root
++
++# Label
++LABEL=D7000
++
++eval `nvram get ssh_enable` > /dev/null 2>&1
++
++case $1 in
++start|restart)
++stop
++[ "${ssh_enable}" = "1" ] && start
++;;
++startforced|restartforced)
++stop
++start
++;;
++stop)
++stop
++;;
++regenkeys)
++stop
++rm -f ${KEYSDIR}/${LABEL}.* ${AUTHKEYS}
++genkeys
++[ "${ssh_enable}" = "1" ] && start
++;;
++*)
++echo "Usage: $0 < start restart startforced restartforced stop regenkeys > (<debug>)"
++;;
++esac
