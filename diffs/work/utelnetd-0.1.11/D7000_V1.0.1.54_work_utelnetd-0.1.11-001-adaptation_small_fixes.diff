@@ -1,16 +1,36 @@
 diff -urN work/utelnetd-0.1.11/utelnetd.c work/utelnetd-0.1.11/utelnetd.c
 --- work/utelnetd-0.1.11/utelnetd.c	2003-08-06 17:02:27.000000000 +0200
 +++ work/utelnetd-0.1.11/utelnetd.c	2017-02-02 11:20:47.151442713 +0100
-@@ -38,7 +38,7 @@
+@@ -37,9 +37,7 @@
+  */
  
  /* configuration - we'll separate this out later */
- #define USE_SYSLOG 	1
+-#define USE_SYSLOG 	1
 -#define USE_ISSUE	1
-+#define USE_ISSUE	0
- 
+-
++#define USE_SYSLOG 1
  
  #include <sys/time.h>
-@@ -141,7 +141,7 @@
+ #include <sys/socket.h>
+@@ -64,6 +62,7 @@
+ 
+ #ifdef USE_SYSLOG
+ #include <syslog.h>
++#define NETGEAR_SYSLOG(fmt, args...)    syslog(LOG_INFO, fmt, ##args)
+ #endif
+ 
+ #include <termios.h>
+@@ -84,9 +83,6 @@
+ #include <net/if.h>
+ 
+ #define BUFSIZE 4000
+-#ifdef USE_ISSUE
+-#define ISSUE_FILE "/etc/issue.net"
+-#endif
+ 
+ #define MIN(a,b) ((a) > (b) ? (b) : (a))
+ 
+@@ -141,7 +137,7 @@
   * So we have to define some helper functions which are originally 
   * available in busybox...
   */  
@@ -19,7 +39,7 @@ diff -urN work/utelnetd-0.1.11/utelnetd.c work/utelnetd-0.1.11/utelnetd.c
  void show_usage(void)
  {
  	printf("Usage: telnetd [-p port] [-i interface] [-l loginprogram] [-d]\n");
-@@ -154,7 +154,7 @@
+@@ -154,7 +150,7 @@
  	printf("\n");         
  	exit(1);
  }
@@ -28,7 +48,7 @@ diff -urN work/utelnetd-0.1.11/utelnetd.c work/utelnetd-0.1.11/utelnetd.c
  void perror_msg_and_die(char *text)
  {
  	fprintf(stderr,text);
-@@ -193,7 +193,13 @@
+@@ -193,7 +189,13 @@
      unsigned char *end = bf + len;
     
      while (ptr < end) {
@@ -43,24 +63,52 @@ diff -urN work/utelnetd-0.1.11/utelnetd.c work/utelnetd-0.1.11/utelnetd.c
  	    *totty++ = *ptr++;
  	}
  	else {
-@@ -406,14 +412,14 @@
- 	int daemonize = 0;
+@@ -262,10 +264,6 @@
+ 	static char tty_name[32];
+ 	struct tsession *ts = (struct tsession *)malloc(sizeof(struct tsession));
+ 	int t1, t2;
+-#ifdef USE_ISSUE
+-	FILE *fp;
+-	int chr;
+-#endif
+ 	ts->buf1 = (char *)malloc(BUFSIZE);
+ 	ts->buf2 = (char *)malloc(BUFSIZE);
+ 
+@@ -339,17 +337,6 @@
+ 		tcsetattr(t, TCSANOW, &termbuf);
+ 
+ 		DEBUG_OUT("stdin, stdout, stderr: %d %d %d\n", t, t1, t2);
+-#ifdef USE_ISSUE
+-		/* Display ISSUE_FILE */
+-		if ((fp = fopen(ISSUE_FILE, "r")) != NULL) {
+-			DEBUG_OUT(" Open & start display %s\n", ISSUE_FILE);
+-			while ((chr=fgetc(fp)) != EOF) { 
+-				if (chr == '\n') fputc('\r', stdout);
+-				fputc(chr, stdout);
+-			}
+-			fclose(fp);
+-		}
+-#endif
+ 		/* exec shell, with correct argv and env */
+ 		execv(loginpath, argv_init);
+ 
+@@ -407,15 +394,7 @@
  	char *interface_name = NULL;
  	struct ifreq interface;
--
-+/*
- #ifdef USE_SYSLOG
- 	char *appname;
- 	appname = strrchr (argv [0], '/');
- 	if (!appname) appname = argv [0];
- 	    else appname++;
- #endif
--
-+*/
- 	/* check if user supplied a port number */
  
+-#ifdef USE_SYSLOG
+-	char *appname;
+-	appname = strrchr (argv [0], '/');
+-	if (!appname) appname = argv [0];
+-	    else appname++;
+-#endif
+-
+ 	/* check if user supplied a port number */
+-
  	for (;;) {
-@@ -434,7 +440,9 @@
+ 		c = getopt( argc, argv, "i:p:l:hd");
+ 		if (c == EOF) break;
+@@ -434,7 +413,9 @@
  				break;
  			case 'h': 
  			default:
@@ -70,7 +118,7 @@ diff -urN work/utelnetd-0.1.11/utelnetd.c work/utelnetd-0.1.11/utelnetd.c
  				exit(1);
  		}
  	}
-@@ -450,11 +458,11 @@
+@@ -450,11 +431,11 @@
  		fprintf(stderr,"\"%s\"",loginpath);
  		perror_msg_and_die(" is no valid executable!\n");
  	}
@@ -84,7 +132,7 @@ diff -urN work/utelnetd-0.1.11/utelnetd.c work/utelnetd-0.1.11/utelnetd.c
  	argv_init[0] = loginpath;
  	sessions = 0;
  
-@@ -481,7 +489,7 @@
+@@ -481,7 +462,7 @@
  
  		/* use ioctl() here as BSD does not have setsockopt() */
  		if (ioctl(master_fd, SIOCGIFADDR, &interface) < 0) {
@@ -93,24 +141,22 @@ diff -urN work/utelnetd-0.1.11/utelnetd.c work/utelnetd-0.1.11/utelnetd.c
  			perror("ioctl SIOCGFADDR");
  			return 1;
  		}
-@@ -505,14 +513,14 @@
+@@ -505,14 +486,6 @@
  		DEBUG_OUT("  daemonizing\n");
  		if (daemon(0, 1) < 0) perror_msg_and_die("daemon");
  	}
 -
-+/*
- #ifdef USE_SYSLOG
- 	openlog(appname , LOG_NDELAY | LOG_PID, LOG_DAEMON);	
- 	syslog(LOG_INFO, "%s (port: %i, ifname: %s, login: %s) startup succeeded\n"\
- 	    , appname, portnbr, (interface_name)?interface_name:"any", loginpath);
- 	closelog();
- #endif
+-#ifdef USE_SYSLOG
+-	openlog(appname , LOG_NDELAY | LOG_PID, LOG_DAEMON);	
+-	syslog(LOG_INFO, "%s (port: %i, ifname: %s, login: %s) startup succeeded\n"\
+-	    , appname, portnbr, (interface_name)?interface_name:"any", loginpath);
+-	closelog();
+-#endif
 -
-+*/
  	maxfd = master_fd;
  
  	do {
-@@ -554,29 +562,52 @@
+@@ -554,29 +527,52 @@
  
  		/* First check for and accept new sessions.  */
  		if (FD_ISSET(master_fd, &rdfdset)) {
@@ -131,7 +177,7 @@ diff -urN work/utelnetd-0.1.11/utelnetd.c work/utelnetd-0.1.11/utelnetd.c
 -				openlog(appname , LOG_NDELAY, LOG_DAEMON);	
 -				syslog(LOG_INFO, "connection from: %s\n", inet_ntoa(sa.sin_addr));
 +				openlog( "auth", 0 , LOG_AUTH );
-+				syslog(LOG_INFO,"[admin utelnetd login] from source: %s",inet_ntoa(sa.sin_addr));
++				NETGEAR_SYSLOG("10 00[UTELNETD] admin login from source: %s",inet_ntoa(sa.sin_addr));
  				closelog();
  #endif
 -				new_ts = make_new_session(fd);
@@ -177,7 +223,7 @@ diff -urN work/utelnetd-0.1.11/utelnetd.c work/utelnetd-0.1.11/utelnetd.c
  			}
  		}
  
-@@ -594,7 +625,7 @@
+@@ -594,7 +590,7 @@
  				
  				maxlen = MIN(BUFSIZE - ts->wridx1,
  					     ts->size1);
