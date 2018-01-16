@@ -4,19 +4,21 @@ ifndef LOCAL
 PROFILE_ARCH		:= $(CPU_ARCH)
 export TMPDIR		:= /tmp
 export TMPETC		:= /etc
+export VARLIB		:= /var
+export USRDIR		:= /usr
 ifndef DEBUG
 export LDLIB		:= /lib
-export USRETC		:= /usr/etc
-export USRSBIN		:= /usr/sbin
+export USRETC		:= $(USRDIR)$(TMPETC)
+export USRSBIN		:= $(USRDIR)/sbin
 export USRSBINSCR	:= $(USRSBIN)/scripts
 export USRSBINRCAPP	:= $(USRSBIN)/rc_app
 export RC		:= $(USRSBIN)/$(RCBIN)
 export RCAPPS		:= $(USRSBINRCAPP)/$(RCAPPSBIN)
-export ETCDIR		:= $(PREFIX)/usr/etc
-export BINDIR		:= $(PREFIX)/usr/sbin
+export ETCDIR		:= $(PREFIX)$(USRETC)
+export BINDIR		:= $(PREFIX)$(USRSBIN)
 export APPDIR		:= $(BINDIR)/rc_app
 export SCRDIR		:= $(BINDIR)/scripts
-export LIBDIR		:= $(PREFIX)/lib
+export LIBDIR		:= $(PREFIX)/$(LDLIB)
 export MODDIR		:= $(LIBDIR)/modules
 export WWWDIR		:= $(PREFIX)/www.eng
 else
@@ -39,18 +41,20 @@ else
 PROFILE_ARCH		:= I386
 export TMPDIR		:= $(PREFIX)/tmp
 export TMPETC		:= $(TMPDIR)/etc
+export VARLIB		:= $(PREFIX)/var
+export USRDIR		:= $(PREFIX)/usr
 export LDLIB		:= $(PREFIX)/lib
-export USRETC		:= $(PREFIX)/usr/etc
-export USRSBIN		:= $(PREFIX)/usr/sbin
+export USRETC		:= $(USRDIR)/etc
+export USRSBIN		:= $(USRDIR)/sbin
 export USRSBINSCR	:= $(USRSBIN)/scripts
 export USRSBINRCAPP	:= $(USRSBIN)/rc_app
 export RC		:= $(USRSBIN)/$(RCBIN)
 export RCAPPS		:= $(USRSBINRCAPP)/$(RCAPPSBIN)
-export ETCDIR		:= $(TMPDIR)/etc
-export BINDIR		:= $(PREFIX)/usr/sbin
+export ETCDIR		:= $(TMPETC)
+export BINDIR		:= $(USRSBIN)
 export APPDIR		:= $(BINDIR)/rc_app
 export SCRDIR		:= $(BINDIR)/scripts
-export LIBDIR		:= $(PREFIX)/lib
+export LIBDIR		:= $(LDLIB)
 export MODDIR		:= $(LIBDIR)/modules
 export WWWDIR		:= $(PREFIX)/www.eng
 endif
