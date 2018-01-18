@@ -52,9 +52,6 @@ echo 256 > /proc/sys/net/netfilter/nf_conntrack_expect_max
 # extend port range
 echo 1025 65535 > /proc/sys/net/ipv4/ip_local_port_range
 
-# more pid numbers
-echo 65536 > /proc/sys/kernel/pid_max
-
 # disable cache metrics on closing connections
 #echo 1 > /proc/sys/net/ipv4/tcp_no_metrics_save
 
