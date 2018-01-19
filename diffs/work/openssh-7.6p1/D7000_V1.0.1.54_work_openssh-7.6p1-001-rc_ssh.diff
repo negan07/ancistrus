@@ -60,7 +60,7 @@ diff -urN work/openssh-7.6p1/rc_ssh work/openssh-7.6p1/rc_ssh
 +    for KTYPE in $KEYTYPES
 +    do
 +    KEY=${KEYSDIR}/${LABEL}.${KTYPE}
-+    [ ! -f $KEY ] && ${SSH_KEYGEN} -q -t ${KTYPE} -f ${KEY} -N '' && chmod 600 ${KEY} && cat ${KEY}.pub >> ${AUTHKEYS}
++    [ ! -f $KEY ] && ${SSH_KEYGEN} -q -t ${KTYPE} -f ${KEY} -N '' && chmod 600 ${KEY} ${KEY}.pub && cat ${KEY}.pub >> ${AUTHKEYS}
 +    done
 +}
 +
