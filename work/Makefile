@@ -107,10 +107,14 @@ monolithic: build
 	@$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf update || exit 1
 	@$(foreach P, $(SUBDIRS), echo "$(PKG_RM_LIST)" | grep "$(P)" > /dev/null 2>&1 || \
 	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf install $(NAME_$(P)) || exit 1;)
+	@echo -e "\\e[35m$(CUR_REL_PATH): making FS post install modifications on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
+	@[ ! -f $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(OPKG_INFO_STATUS_DIR)/info/zlib.control ] || \
+	rm $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCLDLIB)/libz.so.1.2.3 || exit 1
 	@[ ! -f $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCTMPDIR)/adsl_phy.bin ] || \
 	mv $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCTMPDIR)/adsl_phy.bin $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCADSLDIR)/ || exit 1
 	@[ ! -f $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(OPKG_INFO_STATUS_DIR)/info/xdsl-driver-new.control ] || \
 	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf remove xdsl-driver-new || exit 1
+	@echo -e "\\e[35m$(CUR_REL_PATH): moving opkg info/status dir and removing tmp on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
 	@mv $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(OPKG_INFO_STATUS_DIR)/* $(SRC_PATH_NAME)/$(SRC_IMAGE_REL_DIR)/opkg || exit 1
 	@rm -rf $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)/tmp/*
 

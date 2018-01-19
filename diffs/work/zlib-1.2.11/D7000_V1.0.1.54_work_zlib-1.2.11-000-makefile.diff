@@ -1,8 +1,12 @@
 diff -urN work/zlib-1.2.11/Makefile work/zlib-1.2.11/Makefile
 --- work/zlib-1.2.11/Makefile	2017-04-06 18:00:46.662292000 +0200
 +++ work/zlib-1.2.11/Makefile	2017-04-06 18:01:08.566300143 +0200
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,56 @@
 +include ../Rules.mak
++
++LIBSNAME		:= libz.so
++LIBSMAINVER		:= 1
++LIBS			:= $(LIBSNAME).$(VER_$(ZLIB))
 +
 +all: config
 +	$(MAKE) -C $(ZLIB)
@@ -14,6 +18,13 @@ diff -urN work/zlib-1.2.11/Makefile work/zlib-1.2.11/Makefile
 +	touch h_config; \
 +	fi
 +
++clean:
++	$(MAKE) -C $(ZLIB) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(ZLIB) distclean
++
 +ifdef LOCAL
 +configure:
 +	cd $(ZLIB) && ./configure --static
@@ -22,21 +33,28 @@ diff -urN work/zlib-1.2.11/Makefile work/zlib-1.2.11/Makefile
 +	@echo "Nothing to install..."
 +else
 +configure:
-+	cd $(ZLIB) && CHOST=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" ./configure --static
++	cd $(ZLIB) && CHOST=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" ./configure
 +
-+install:
-+	@echo "Nothing to install..."
++install: control
++	$(STRIP) $(ZLIB)/$(LIBS)
++	install -m 0755 -d $(LIBDIR)
++	install -m 0755 $(ZLIB)/$(LIBS) $(LIBDIR)
++	ln -sf $(LIBS) $(LIBDIR)/$(LIBSNAME)
++	ln -sf $(LIBS) $(LIBDIR)/$(LIBSNAME).$(LIBSMAINVER)
 +
-+#install:
-+#	$(STRIP) $(ZLIB)/*.so
-+#	install -m 0755 -d $(LIBDIR)
-+#	install -m 0755 $(ZLIB)/*.so* $(LIBDIR)
++ifndef BUILD
++control:
++else
++PREINST			:= $(CTRL_DIR)/preinst
++
++control: preinst
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "echo \"Removing old zlib ver & symlinks...\"" >> $(PREINST)
++	@echo "rm -f $(LDLIB)/$(LIBSNAME)*" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
 +endif
-+
-+clean:
-+	$(MAKE) -C $(ZLIB) clean
-+
-+distclean:
-+	@rm -f h_config
-+	$(MAKE) -C $(ZLIB) distclean
++endif
 +

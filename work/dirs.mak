@@ -180,7 +180,7 @@ DL_$(ZLIB)		:= http://zlib.net
 TAR_$(ZLIB)		:= $(ZLIB).tar.gz
 HOME_$(ZLIB)		:= http://zlib.net
 LIC_$(ZLIB)		:= GPLv2
-SEC_$(ZLIB)		:= thirdpartylib
+SEC_$(ZLIB)		:= builtinlib
 PRIO_$(ZLIB)		:= required
 DEP_$(ZLIB)		:= 
 DESC_$(ZLIB)		:= A Massively Spiffy Yet Delicately Unobtrusive Compression Library
@@ -310,7 +310,7 @@ HOME_$(OPEN_SSH)	:= https://www.openssh.com/
 LIC_$(OPEN_SSH)		:= BSD, ISC
 SEC_$(OPEN_SSH)		:= thirdparty
 PRIO_$(OPEN_SSH)	:= optional
-DEP_$(OPEN_SSH)		:= 
+DEP_$(OPEN_SSH)		:= zlib
 DESC_$(OPEN_SSH)	:= Free SSH protocol suite providing encryption for network services
 DIRLIST			+= $(OPEN_SSH)
 TARLIST			+= $(OPEN_SSH)
@@ -319,17 +319,18 @@ BUILTINLIB		:=
 BUILTIN			:=
 THIRDPARTYLIB		:=
 THIRDPARTY		:=
+
 BUILTINLIB 		+= $(NVRAM)
 THIRDPARTY		+= $(CORE_WORK)
 ifndef LOCAL
 BUILTINLIB		+= $(LZO)
+BUILTINLIB		+= $(ZLIB)
 BUILTIN			+= $(UTELNETD)
 BUILTIN			+= $(IPROUTE2)
 #BUILTIN		+= $(XDSL_042N)
 #BUILTIN		+= $(XDSL_042U)
 BUILTIN			+= $(HDPARM)
 BUILTIN			+= $(OPEN_VPN)
-THIRDPARTYLIB		+= $(ZLIB)
 THIRDPARTYLIB		+= $(LIBARCHIVE)
 THIRDPARTY		+= $(NETPERF)
 THIRDPARTY		+= $(NETWORKTEST)
@@ -342,7 +343,7 @@ THIRDPARTY		+= $(SMONTOOLS)
 THIRDPARTY		+= $(OPEN_SSH)
 endif
 
-PKG_RM_LIST		:= $(ZLIB) $(LIBARCHIVE) $(OPKG_UTILS) $(LZO)
+PKG_RM_LIST		:= $(LIBARCHIVE) $(OPKG_UTILS) $(LZO)
 SUBDIRS			:=
 SUBDIRS			+= $(BUILTINLIB)
 SUBDIRS			+= $(THIRDPARTYLIB)

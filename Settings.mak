@@ -32,13 +32,15 @@ PROJ_TAG		?= $(shell echo $(PROJECT_NAME) | head -c 3)
 RCBOOT_NAME		?= rcS
 RCAUX_NAME		?= $(RCBOOT_NAME).$(PROJ_TAG)
 RCTMPDIR		?= /tmp
+RCLDLIB			?= /lib
 RCRAMBOOTDIR		?= /etc
-RCBOOTDIR		?= /usr$(RCRAMBOOTDIR)
+RCUSRDIR		?= /usr
+RCBOOTDIR		?= $(RCUSRDIR)$(RCRAMBOOTDIR)
 RCADSLDIR		?= $(RCBOOTDIR)/adsl
 RCBOOT			?= $(RCBOOTDIR)/$(RCBOOT_NAME)
 RCAUX			?= $(RCBOOT).$(PROJ_TAG)
 
-OPKG_INFO_STATUS_DIR	?= /usr/lib/opkg
+OPKG_INFO_STATUS_DIR	?= $(RCUSRDIR)$(RCLDLIB)/opkg
 OPKG_PKG_DIR		?= build$(DBG)
 DIFFS_DIR		?= diffs
 LBIN_DIR		?= localbin
@@ -74,7 +76,7 @@ TCHAIN_INST_DIR		?= /opt/toolchains
 TCHAIN_MIPS_DIR		?= $(TCHAIN_INST_DIR)/crosstools-mips-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21/usr/bin
 TCHAIN_ARM_DIR		?= $(TCHAIN_INST_DIR)/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin
 TCHAIN_MIPSEL_DIR	?= $(TCHAIN_INST_DIR)/crosstools-mipsel-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21/usr/bin
-TCHAIN_I386_DIR		?= /usr/bin/
+TCHAIN_I386_DIR		?= $(RCUSRDIR)/bin/
 
 TARGET_MIPS		?= mips-unknown-linux-uclibc
 TARGET_ARM		?= arm-unknown-linux-uclibcgnueabi
