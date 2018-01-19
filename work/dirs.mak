@@ -93,6 +93,34 @@ PRIO_$(NETWORKTEST)	:= optional
 DEP_$(NETWORKTEST)	:= $(NAME_$(NETPERF))
 DESC_$(NETWORKTEST)	:= Enhanced network stress and network speed test scripts
 
+XDSL_042N_NAME		:= xdsl-driver-orig
+VER_$(XDSL_042N_NAME)	:= 042n
+XDSL_042N		:= $(XDSL_042N_NAME)-$(VER_$(XDSL_042N_NAME))
+NAME_$(XDSL_042N)	:= $(XDSL_042N_NAME)$(DBG)
+VER_$(XDSL_042N)	:= $(VER_$(XDSL_042N_NAME))
+DL_$(XDSL_042N)		:= void
+TAR_$(XDSL_042N)	:= void
+HOME_$(XDSL_042N)	:= http://www.broadcom.com
+LIC_$(XDSL_042N)	:= Broadcom inc
+SEC_$(XDSL_042N)	:= builtin
+PRIO_$(XDSL_042N)	:= required
+DEP_$(XDSL_042N)	:= 
+DESC_$(XDSL_042N)	:= Install the original XDSL builtin driver version A2pvbH042n
+
+XDSL_042U_NAME		:= xdsl-driver-new
+VER_$(XDSL_042U_NAME)	:= 042u
+XDSL_042U		:= $(XDSL_042U_NAME)-$(VER_$(XDSL_042U_NAME))
+NAME_$(XDSL_042U)	:= $(XDSL_042U_NAME)$(DBG)
+VER_$(XDSL_042U)	:= $(VER_$(XDSL_042U_NAME))
+DL_$(XDSL_042U)		:= void
+TAR_$(XDSL_042U)	:= void
+HOME_$(XDSL_042U)	:= http://www.broadcom.com
+LIC_$(XDSL_042U)	:= Broadcom inc
+SEC_$(XDSL_042U)	:= builtin
+PRIO_$(XDSL_042U)	:= required
+DEP_$(XDSL_042U)	:= 
+DESC_$(XDSL_042U)	:= Install the updated XDSL driver version A2pvbH042u
+
 QOS_NG_NAME		:= qos-netgear
 VER_$(QOS_NG_NAME)	:= 36_42n
 QOS_NG			:= $(QOS_NG_NAME)-$(VER_$(QOS_NG_NAME))
@@ -297,6 +325,8 @@ ifndef LOCAL
 BUILTINLIB		+= $(LZO)
 BUILTIN			+= $(UTELNETD)
 BUILTIN			+= $(IPROUTE2)
+#BUILTIN		+= $(XDSL_042N)
+#BUILTIN		+= $(XDSL_042U)
 BUILTIN			+= $(HDPARM)
 BUILTIN			+= $(OPEN_VPN)
 THIRDPARTYLIB		+= $(ZLIB)

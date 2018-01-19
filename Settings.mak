@@ -31,7 +31,11 @@ CPU_ARCH_NAME		?= ARM
 PROJ_TAG		?= $(shell echo $(PROJECT_NAME) | head -c 3)
 RCBOOT_NAME		?= rcS
 RCAUX_NAME		?= $(RCBOOT_NAME).$(PROJ_TAG)
-RCBOOT			?= /usr/etc/$(RCBOOT_NAME)
+RCTMPDIR		?= /tmp
+RCRAMBOOTDIR		?= /etc
+RCBOOTDIR		?= /usr$(RCRAMBOOTDIR)
+RCADSLDIR		?= $(RCBOOTDIR)/adsl
+RCBOOT			?= $(RCBOOTDIR)/$(RCBOOT_NAME)
 RCAUX			?= $(RCBOOT).$(PROJ_TAG)
 
 OPKG_INFO_STATUS_DIR	?= /usr/lib/opkg
@@ -41,7 +45,7 @@ LBIN_DIR		?= localbin
 SCRIPTS_DIR		?= scripts
 WORK_SRC_DIR		?= work
 DEBUG_DIR		?= /home/ftp
-RECEIVE_DIR		?= /tmp/etc/ancdbg
+RECEIVE_DIR		?= $(RCTMPDIR)$(RCRAMBOOTDIR)/ancdbg
 
 SRC_DIR			?= $(PROJECT_TARGET)_$(FWVER)_WW_src
 SRC_REL_DIR		?= ../$(SRC_DIR)
