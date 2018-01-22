@@ -22,8 +22,8 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts:/usr/sbin/rc_app
 mount -n -t jffs2  mtd20 /usr/lib/opkg
 
 # setup login
-export 'PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts:/usr/sbin/rc_app' > /etc/profile
-export 'PS1="${USER}@D7000:\$ "' >> /etc/profile
+echo "export PATH=${PATH}" > /etc/profile
+echo 'export PS1="${USER}@D7000:\$ "' >> /etc/profile
 
 # auth login
 eval `nvram get http_password`
@@ -34,7 +34,7 @@ echo "nobody:${http_password}" | chpasswd > /dev/null 2>&1
 utelnetd -l /usr/sbin/login -d
 
 # starting sshd
-[ -x /usr/sbin/rc_app/rc_ssh ] && rc_ssh restart
+rc ssh start
 
 # some procs kills
 for P in "telnetDBGD" "acktelnetDBGD"
