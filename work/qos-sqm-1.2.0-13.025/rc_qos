@@ -1,0 +1,506 @@
+#!/bin/sh
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+#       Copyright (C) 2012-4 Michael D. Taht, Toke Høiland-Jørgensen, Sebastian Moeller
+#
+# Revised & adapted:
+#
+# ancistrus
+#
+# Netgear's D7000 Nighthawk Router Experience Distributed Project
+#
+# https://github.com/negan07/ancistrus
+#
+# License: GPLv2
+#
+#
+# Startup rc for qos-sqm-scripts
+#
+# Usage: $0 < start restart startforced restartforced stop show stats version > (< debug_mode >) (< verbose_mode >)
+#
+
+path_binaries() {
+# Paths & binaries
+[ -z "$LIBDIR" ] && LIBDIR=/lib/modules
+[ -z "$ETCDIR" ] && ETCDIR=/usr/etc
+[ -z "$BINDIR" ] && BINDIR=/usr/sbin
+[ -z "$SCRIPTSDIR" ] && SCRIPTSDIR=${BINDIR}/scripts
+
+# Debug purpose
+#LIBDIR=/tmp/etc/ancdbg
+#ETCDIR=/tmp/etc/ancdbg
+#BINDIR=/tmp/etc/ancdbg
+#SCRIPTSDIR=/tmp/etc/ancdbg
+
+[ -z "$INSMOD" ] && INSMOD=insmod
+[ -z "$RMMOD" ] && RMMOD=rmmod
+[ -z "$TC" ] && TC=tc_wrapper
+[ -z "$IP" ] && IP=ip_wrapper
+[ -z "$TC_BINARY" ] && TC_BINARY=${BINDIR}/tc
+[ -z "$IP_BINARY" ] && IP_BINARY=${BINDIR}/ip
+[ -z "$STATE_FILE" ] && STATE_FILE=/tmp/qos.state
+[ "$SQM_DEBUG" = "1" ] && QOS_LOG=/tmp/qosdebug.log
+}
+
+get_settings() {
+# CONF
+. ${ETCDIR}/qos-sqm.conf
+
+# NVRAM
+eval `${BINDIR}/anc nvram get ${VAR}`
+set -- ${VAR}
+for SET in $SQM_VARS
+do
+VAL=$(eval echo '$'${1})
+eval "$SET=$VAL"
+shift
+done
+
+# DEFAULTS
+set -- ${DEF}
+for SET in $SQM_VARS
+do
+VAL=$(eval echo '$'${SET})
+	if [ -z "$VAL" ]; then
+	VAL=${1}
+	[ "${VAL}" = "void" ] && VAL=""
+	eval "$SET=$VAL"
+	fi
+shift
+done
+
+# These are the modules that do_modules() will attempt to load
+#ALL_MODULES="act_ipt sch_$QDISC sch_ingress act_mirred cls_fw cls_flow cls_u32 sch_htb sch_$SHAPER"
+[ -z "$ALL_MODULES" ] && ALL_MODULES="act_ipt sch_$QDISC cls_flow sch_$SHAPER"
+
+# This is the shaper/leaf list
+[ -z "$SQM_CHECK_QDISCS" ] && SQM_CHECK_QDISCS="fq_codel sfq htb tbf hfsc"
+}
+
+logging_setup() {
+# Logging verbosity
+VERBOSITY_SILENT=0
+VERBOSITY_ERROR=1
+VERBOSITY_WARNING=2
+VERBOSITY_INFO=5
+VERBOSITY_DEBUG=8
+VERBOSITY_TRACE=10
+[ -z "$SQM_VERBOSITY_MAX" ] && SQM_VERBOSITY_MAX=$VERBOSITY_INFO
+# For silencing only errors
+[ -z "$SQM_VERBOSITY_MIN" ] && SQM_VERBOSITY_MIN=$VERBOSITY_SILENT
+
+[ -z "$SQM_DEBUG" ] && SQM_DEBUG=0
+if [ "$SQM_DEBUG" -eq "1" ]
+then
+    SQM_DEBUG_LOG=${QOS_LOG}
+    OUTPUT_TARGET=${SQM_DEBUG_LOG}
+else
+    OUTPUT_TARGET="/dev/null"
+fi
+}
+
+stop_sqm() {
+
+# allow passing in the IFACE as first command line argument
+
+[ -n "$IFACE" ] || exit 1
+
+sqm_trace; sqm_trace "$(date): Stopping." # Add some space and a date stamp to verbose log output and log files to separate runs
+sqm_log "Stopping SQM on ${IFACE}"
+
+# make sure to delete the ifb associated with the current interface only
+CUR_IFB=$( get_ifb_associated_with_if ${IFACE} )
+[ -z "$CUR_IFB" ] && CUR_IFB=$( ifb_name ${IFACE} )
+
+if [ -n "${SCRIPT}" ]; then
+    if [ -f "${SCRIPTSDIR}/${SCRIPT}" -a "${SCRIPT%.sqm}" != "$SCRIPT" ]; then
+        sqm_log "Using custom SQM script: ${SCRIPT}"
+        . "${SCRIPTSDIR}/${SCRIPT}"
+    elif is_legacy_script "${SCRIPT}"; then
+        sqm_warn "Legacy script ${SCRIPT} is deprecated and should not be used."
+        sqm_warn "Using built-in sqm_stop() to shut down SQM"
+    else
+        sqm_error "Custom SQM script ${SCRIPT} not found or unsupported!"
+        sqm_warn "Using built-in code script to shut down SQM"
+    fi
+fi
+
+sqm_stop
+rm -f "${STATE_FILE}" && sqm_log "SQM was stopped on ${IFACE} successfully"
+
+return 0
+}
+
+start_sqm() {
+
+[ -n "$IFACE" ] || exit 1
+
+if [ -f "${STATE_FILE}" ]; then
+    sqm_error "SQM already activated on ${IFACE}."
+    exit 1
+fi
+
+# in case of spurious hotplug events, try double check whether the interface is really up
+if [ ! -d /sys/class/net/${IFACE} ] ; then
+    sqm_error "${IFACE} does currently not exist, not even trying to start SQM on nothing."
+    exit 1
+fi
+
+sqm_trace; sqm_trace "$(date): Starting." # Add some space and a date stamp to verbose log output and log files to separate runs
+sqm_log "Starting SQM on ${IFACE}, in: ${DOWNLINK} Kbps, out: ${UPLINK} Kbps"
+
+if [ -n "${SCRIPT}" ]; then
+    if [ -f "${SCRIPTSDIR}/${SCRIPT}" -a "${SCRIPT%.sqm}" != "$SCRIPT" ]; then
+        sqm_log "Using custom SQM script: ${SCRIPT}"
+        . "${SCRIPTSDIR}/${SCRIPT}"
+    elif is_legacy_script "${SCRIPT}"; then
+        # Emulate the old scripts but warn about usage
+        legacy_script_emulate ${SCRIPT}
+    else
+        sqm_error "Custom SQM script ${SCRIPT} not found or unsupported!"
+        sqm_error "Using built-in script code"
+    fi
+fi
+
+sqm_start && write_state_file ${STATE_FILE} ${SQM_VARS} && sqm_log "SQM was started on ${IFACE} successfully"
+
+return 0
+}
+
+show_sqm() {
+local INGR=$( ifb_name ${IFACE} )
+local INGRLNK=`$IP_BINARY link | grep ${INGR}`
+[ -z "$1" ] || S="-s"
+
+    for I in qdisc class filter
+    do
+    echo
+    echo "---- $I ----"
+        [ "${UPLINK}" -eq 0 ] || {
+        echo "--- EGRESS ---"
+        $TC_BINARY $S $I show dev ${IFACE}
+	}
+        [ "${DOWNLINK}" -eq 0 ] || [ -z "${INGRLNK}" ] || {
+        echo "--- INGRESS ---"
+        $TC_BINARY $S $I show dev ${INGR}
+        }
+    done
+echo
+echo "--- MANGLE ---"
+iptables -t mangle -nL -v
+[ "$IP6MODE" != "disable" ] && ip6tables -t mangle -nL -v
+
+return 0
+}
+
+version() {
+cat << _EOF_
+################################################################################
+# (Cero3 Shaper)
+#   Copyright (C) 2012-6
+#       Michael D. Taht, Toke Høiland-Jørgensen, Sebastian Moeller
+#       Eric Luehrsen
+#
+################################################################################
+#
+#   Copyright (C) 2017
+#       Tony Ambardar
+#
+################################################################################
+#
+# Revised & adapted:
+#
+# ancistrus
+#
+# Netgear's D7000 Nighthawk Router Experience Distributed Project
+#
+# https://github.com/negan07/ancistrus
+#
+# License: GPLv2
+#
+#
+# qos-sqm - version: 1.2.0
+#
+_EOF_
+}
+
+usage() {
+echo "Usage: $0 < start restart startforced restartforced stop show stats version help > (< debug >) (< verbose >)"
+}
+
+help_guide() {
+cat << _EOF_
+
+Settings
+There are many settings, but the main are generally the most important to know and to be modified for best usage.
+
+Main settings
+
+qos_enable
+'0': disable qos
+'1': enable qos
+(Default: 0).
+
+qos_uplink_rate
+Real upload bandwidth in kbps (no bearer, no max): it can be discovered with 'speedtest' or with network-test package 'betterspeedtest.sh' script. It is the most important parameter, bad setting may bring to qos failure.
+(Default: 512).
+
+qos_dwlink_rate
+Real download bandwidth in kbps: as before. 
+(Default: 0 = download qos disabled).
+
+qos_llayer
+Adsl link layer.
+Options
+'ethernet': VDSL connections.
+'atm': ADSL connections.
+'none': cables or other connections.
+(Default: none).
+
+qos_disc
+The qos disc sched algorithm used: note that the related sched disc algorithm must be available on router.
+Options available
+'fq_codel': is the recommended for most usage.
+'sfq': the old algorithm used by 36_42n firmware.
+(Default: fq_codel).
+
+qos_shaper
+The qos shaper sched algorithm used: note that the related shaper sched algorithm must be available on router. 
+Options available
+'htb': is the recommended for most usage.
+'hfsc': best combined with 'sfq' qdisc.
+'tbf': one of the simplest algos.
+(Default: htb).
+
+Other settings
+Default values should commonly satisfy: change them only if you know what to do.
+Consider that ingress=download, egress=upload.
+
+qos_script
+Use a custom qos script instead of builtin.
+Scripts must have .sqm extension and must have compatible content.
+Note that old legacy scripts: 'simple.qos', 'simplest.qos', 'simplest_tbf.qos' are embedded now.
+(Default: void).
+
+qos_llam
+Link layer adjustment method.
+Options available
+'htb_private': htb fixed table size of 256.
+'tc_stab': generic size table manipulations.
+(Default: default=tc_stab).
+
+qos_zero_dscp_egress
+Options available
+'1': squashing differentiated services code points (DSCP) on egress.
+'0': keeping differentiated services code points (DSCP) on egress. 
+(Default: 1).
+
+qos_zero_dscp_ingress
+Options available
+'1': squashing differentiated services code points (DSCP) from ingress
+'0': keeping differentiated services code points (DSCP) from ingress.
+(Default: 1).
+
+qos_ignore_dscp_egress
+Options available
+'1': do not perform DSCP based filtering on egress (1-tier classification).
+'0': perform DSCP based filtering on egress (n-tier classification).
+(Default: 1).
+
+qos_ignore_dscp_ingress
+Options available
+'1': do not perform DSCP based filtering on ingress (1-tier classification).
+'0': perform DSCP based filtering on ingress (n-tier classification).
+(Default: 0).
+
+qos_dserv_ingress
+Ingress prioritization scheme. 
+Options available
+For htb, hfsc shapers:
+'shaper': acting as a shaper (only).
+'classful': use of priority tiers.
+'diffserv3': priority scheme is supported.
+For tbf shaper value is only: 'shaper' (setting will be adjusted automatically at runtime).
+(Default: diffserv3).
+
+qos_dserv_egress
+Egress prioritization scheme. 
+Options available
+For htb, hfsc shapers:
+'shaper': acting as a shaper (only).
+'classful': use of priority tiers.
+'diffserv3': priority scheme is supported.
+For tbf shaper value is only: 'shaper' (setting will be adjusted automatically at runtime).
+(Default: diffserv3).
+
+qos_ipt_mask
+Iptables mask. To disable: set mask to '0xffffffff'.
+(Default: 0xff).
+
+qos_overhead
+Per-packet size overhead: can be negative.
+(Default: 0).
+
+qos_stab_mtu
+Max packet size creating size table for.
+(Default: 2047).
+
+qos_stab_mpu
+Min packet size used.
+(Default: 0).
+
+qos_stab_tsize
+Table size.
+(Default: 512).
+
+qos_autoflow
+Options available
+'1': limit the number of flows.
+'0': the default of 1024 will be used for all Xfq_codel qdiscs.
+(Default: 0).
+
+qos_limit
+Global queue size hard limit.
+(Default: 1001).
+
+qos_ilimit
+Ingress queue size limit.
+(Default: void).
+
+qos_elimit
+Egress queue size limit.
+(Default: void).
+
+qos_itarget
+Ingress minimum queue delay target.
+(Default: void).
+
+qos_etarget
+Egress minimum queue delay target.
+(Default: void).
+
+qos_iecn
+Ingress Explicit Congestion Notification.
+Options available
+'ECN': ingress ECN on.
+'NOECN': ingress ECN off.
+(Default: ECN).
+
+qos_eecn
+Egress Explicit Congestion Notification.
+Options available
+'ECN': egress ECN on.
+'NOECN': egress ECN off.
+(Default: ECN).
+
+qos_idisc_opts
+Other defined ingress qdisc options.
+(Default: void).
+
+qos_edisc_opts
+Other defined egress qdisc options.
+(Default: void).
+
+qos_codel_target
+Used in conjunction with fq_codel disc only: target of 5ms is good for fast links, in the worst cases it depends from dw bandwidth and it is recalculated.
+(Default: 5ms).
+
+qos_shaper_burst
+Options available
+'1': set an optional burst parameter to leap over CPU interrupts when the CPU is severly loaded.
+'0': default burst, shaper will use MTU plus shipping and handling.
+(Default: 1).
+
+qos_htb_quantum_function
+Used only in conjunction with htb shaper: scale quantum with bandwidth to lower computation cost.
+Options available
+'linear': function is a continuous straight line.
+'step': function is linear step by step only.
+In case of other option a value of 1500 will be used as fallback.
+(Default: linear).
+
+How to setup
+All settings can be setup at once with: 
+'anc nvram set qos_enable 1 qos_uplink_rate 400 qos_dwlink_rate 15000 ... VARN VALN' .
+Finally, settings must be stored permanently with: 
+'anc nvram commit' or 'nvram commit' .
+They can also be setup singularly with: 
+'anc nvram set qos_enable 1'
+'anc nvram set qos_uplink_rate 400'
+'anc nvram set qos_dwlink_rate 15000'
+...
+'anc nvram set VARN VALN'
+'anc nvram commit' .
+To empty a setting, reverting it to its default value, type:
+'anc nvram set VARN "" '
+'anc nvram commit' .
+Or as well, to remove a setting completely, reverting it to its default value, type:
+'anc nvram unset VARN'
+'anc nvram commit' .
+
+Reload then qos-sqm by typing: 'rc qos restart' .
+
+If you wanna look for previously stored value, type: 
+'anc nvram get qos_enable qos_uplink_rate qos_dwlink_rate ... VARN' .
+Or singularly with: 
+'anc nvram get qos_enable'
+'anc nvram get qos_uplink_rate'
+'anc nvram get qos_dwlink_rate'
+...
+'anc nvram get VARN' .
+_EOF_
+}
+
+# DEBUG
+[ "$2" = "debug" ] && SQM_DEBUG=1
+[ "$3" = "verbose" ] && SQM_VERBOSITY_MAX=8
+
+# PATH
+path_binaries
+
+# SETTINGS
+get_settings
+
+# LOG
+logging_setup
+
+# SQM FUNCTIONS
+. ${SCRIPTSDIR}/functions.qos
+. ${SCRIPTSDIR}/qdisc_funcs.qos
+. ${SCRIPTSDIR}/qos_funcs.qos
+. ${SCRIPTSDIR}/legacy_funcs.qos
+
+    case $1 in
+    start|restart)
+    stop_sqm
+    [ "${QOS_ENABLE}" != "0" ] && start_sqm
+    ;;
+    startforced|restartforced)
+    stop_sqm
+    start_sqm
+    ;;
+    stop)
+    stop_sqm
+    ;;
+    show)
+    show_sqm
+    ;;
+    stats)
+    show_sqm stats
+    ;;
+    -v|-V|--version|version)
+    version
+    ;;
+    -h|-H|--help|help)
+    version
+    usage
+    help_guide
+    ;;
+    *)
+    usage && exit 1
+    ;;
+    esac
+
