@@ -61,24 +61,19 @@ sqm_trace() { sqm_logger $VERBOSITY_TRACE "$@"; }
 # ipt needs a toggle to show the outputs for debugging (as do all users of >
 # /dev/null 2>&1 and friends)
 ipt() {
-    d=$(echo $* | sed s/-A/-D/g)
-    [ "$d" != "$*" ] && {
-        sqm_trace "iptables ${d}"
-        iptables $d >> ${OUTPUT_TARGET} 2>&1
-            [ "$IP6MODE" != "disable" ] && {
-            sqm_trace "ip6tables ${d}"
-            ip6tables $d >> ${OUTPUT_TARGET} 2>&1
-            }
-    }
-    d=$(echo $* | sed s/-I/-D/g)
-    [ "$d" != "$*" ] && {
-        sqm_trace "iptables ${d}"
-        iptables $d >> ${OUTPUT_TARGET} 2>&1
-            [ "$IP6MODE" != "disable" ] && {
-            sqm_trace "ip6tables ${d}"
-            ip6tables $d >> ${OUTPUT_TARGET} 2>&1
-            }
-    }
+    # Try to wipe pre-existing rules and chains if any
+    for rep in "s/-A/-D/g" "s/-I/-D/g" "s/-N/-X/g"
+    do
+        local d=$(echo $* | sed $rep)
+        [ "$d" != "$*" ] && {
+            sqm_trace "iptables ${d}"
+            iptables $d >> ${OUTPUT_TARGET} 2>&1
+                [ "$IP6MODE" != "disable" ] && {
+                sqm_trace "ip6tables ${d}"
+                ip6tables $d >> ${OUTPUT_TARGET} 2>&1
+                }
+        }
+    done
     sqm_trace "iptables $*"
     iptables $* >> ${OUTPUT_TARGET} 2>&1
         [ "$IP6MODE" != "disable" ] && {
@@ -201,32 +196,35 @@ get_ifb_for_if() {
 }
 
 
-# Verify that a qdisc works, and optionally that it is part of a set of
-# supported qdiscs. If passed a $2, this function will first check if $1 is in
-# that (space-separated) list and return an error if it's not.
+# Verify that a qdisc is available, using a series of checks that are
+# progressively "heavier" and less desirable. These begin with different
+# passive module introspection methods and end with a full instantiation of
+# the qdisc on a temporary IFB network device.
 #
-# note the ingress qdisc is different in that it requires tc qdisc replace dev
-# tmp_ifb ingress instead of "root ingress"
+# This last approach is to be avoided as much as possible. It should only be
+# necessary for builtin qdisc modules on minimal (or broken) Linux distros.
 verify_qdisc() {
     local qdisc=$1
-    local supported="$2"
+
+    [ -n "$qdisc" ] || return 1
+
+    # if static module with version/parameters, on minimal Linux distro by now
+    if [ -d /sys/module/sch_$qdisc ]; then
+        sqm_debug "QDISC $qdisc is useable."
+        return 0
+    fi
+
+    # try heavy-weight instantiation of qdisc on ifb
     local ifb=TMP_IFB_4_SQM
     local root_string="root" # this works for most qdiscs
     local args=""
 
-    if [ -n "$supported" ]; then
-        local found=0
-        for q in $supported; do
-            [ "$qdisc" = "$q" ] && found=1
-        done
-        [ "$found" -eq "1" ] || return 1
-    fi
     create_ifb $ifb || return 1
     case $qdisc in
         #ingress is special
         ingress) root_string="" ;;
         #cannot instantiate tbf without args
-        tbf) args="limit 1 burst 1 rate 1kbps" ;;
+        tbf) args="limit 1 burst 1514 rate 1kbps" ;;
     esac
 
     $TC qdisc replace dev $ifb $root_string $qdisc $args
@@ -236,6 +234,7 @@ verify_qdisc() {
     else
         sqm_error "QDISC $qdisc is NOT useable."
     fi
+
     delete_ifb $ifb
     return $res
 }
@@ -343,23 +342,13 @@ sqm_stop() {
     [ -n "$CUR_IFB" ] && $TC qdisc del dev $CUR_IFB root #2>> ${OUTPUT_TARGET}
     [ -n "$CUR_IFB" ] && sqm_debug "${0}: ${CUR_IFB} shaper deleted"
 
-    #ipt -t mangle -D POSTROUTING -o $IFACE -m dscp ! --dscp 0 -j DSCP --set-dscp-class be
-    #ipt -t mangle -D POSTROUTING -o $IFACE -m mark --mark 0x00/${IPT_MASK} -j QOS_MARK_${IFACE}
-    #ipt -t mangle -D PREROUTING -i vtun+ -p tcp -j DSCP --set-dscp-class BE
-    # not sure whether we need to make this conditional or whether they are
-    # silent if the deletion does not work out
-    #ipt -t mangle -D PREROUTING -i $IFACE -m dscp ! --dscp 0 -j DSCP --set-dscp-class be
-    #ipt -t mangle -D PREROUTING -i $IFACE -m mark --mark 0x00/${IPT_MASK} -j QOS_MARK_${IFACE}
-
-    #ipt -t mangle -D OUTPUT -p udp -m multiport --ports 123,53 -j DSCP --set-dscp-class EF
-    #ipt -t mangle -F QOS_MARK_${IFACE}
-    #ipt -t mangle -X QOS_MARK_${IFACE}
     ipt -t mangle -F
     ipt -t mangle -X
 
     [ -n "$CUR_IFB" ] && $IP link set dev ${CUR_IFB} down
     [ -n "$CUR_IFB" ] && $IP link delete ${CUR_IFB} type ifb
     [ -n "$CUR_IFB" ] && sqm_debug "${0}: ${CUR_IFB} interface deleted"
+
     undo_modules
 }
 
