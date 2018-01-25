@@ -150,13 +150,13 @@ DEP_$(QOS_SQM_OLD)	:= $(NAME_$(NVRAM)),$(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
 DESC_$(QOS_SQM_OLD)	:= Quality Of Service CeroWrt old legacy script tool
 
 QOS_SQM_NAME		:= qos-sqm
-VER_$(QOS_SQM_NAME)	:= 1.2.0-13.021
+VER_$(QOS_SQM_NAME)	:= 1.2.0-13.025
 QOS_SQM			:= $(QOS_SQM_NAME)-$(VER_$(QOS_SQM_NAME))
 NAME_$(QOS_SQM)		:= $(QOS_SQM_NAME)$(DBG)
 VER_$(QOS_SQM)		:= $(VER_$(QOS_SQM_NAME))
 DL_$(QOS_SQM)		:= void
 TAR_$(QOS_SQM)		:= void
-HOME_$(QOS_SQM)		:= https://github.com/guidosarducci/sqm-scripts/tree/93319ac15e0000b6ac9461b7ab9db05150b9a65d
+HOME_$(QOS_SQM)		:= https://github.com/guidosarducci/sqm-scripts
 LIC_$(QOS_SQM)		:= GPLv2
 SEC_$(QOS_SQM)		:= thirdparty
 PRIO_$(QOS_SQM)		:= standard
