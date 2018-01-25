@@ -104,7 +104,6 @@ ln -sf /usr/sbin/rc_app/rc_apps $DBGDIR/rc_apps > /dev/null 2>&1
 	del)
 	cd $RDIR
 	rm -rf $DBGDIR /var/ssh
-	rm -f ${RDIR}/${CGI} sshd_config
 	;;
 	*)
 	DIRMAKE

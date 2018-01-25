@@ -1,7 +1,7 @@
 diff -urN work/utelnetd-0.1.11/Makefile work/utelnetd-0.1.11/Makefile
 --- work/utelnetd-0.1.11/Makefile	2008-08-11 11:44:01.000000000 +0200
 +++ work/utelnetd-0.1.11/Makefile	2017-03-04 14:43:44.182317642 +0100
-@@ -1,63 +1,56 @@
+@@ -1,63 +1,59 @@
 -# Makefile for utelnetd
 -# 
 -# Configure this with the following environment variables:
@@ -11,6 +11,7 @@ diff -urN work/utelnetd-0.1.11/Makefile work/utelnetd-0.1.11/Makefile
 -# where to install
 -INSTDIR		:= /usr/local/bin/
 +BINS	:= utelnetd
++SCRIPTS	:= rc_debug_mode
 +OBJS	:= $(BINS).o
 +LDFLAGS	:=
 +LDLIBS	:=
@@ -35,7 +36,7 @@ diff -urN work/utelnetd-0.1.11/Makefile work/utelnetd-0.1.11/Makefile
 -INSTMODE  = 0755
 -INSTOWNER = root
 -INSTGROUP = root
-+LOGIN	:= /usr/sbin/login
++LOGIN	:= $(USRSBIN)/login
  
 -OBJS      = utelnetd.o
 +CFLAGS	+= -Os -I. -pipe -DSHELLPATH=\"$(LOGIN)\" -Wall
@@ -81,7 +82,9 @@ diff -urN work/utelnetd-0.1.11/Makefile work/utelnetd-0.1.11/Makefile
 +install: control
 +	$(SSTRIP) $(BINS)
 +	install -m 0755 -d $(BINDIR)
++	install -m 0755 -d $(APPDIR)
 +	install -m 0755 $(BINS) $(BINDIR)
++	install -m 0755 $(SCRIPTS) $(APPDIR)
  
  .PHONY: clean
  clean:
@@ -91,7 +94,7 @@ diff -urN work/utelnetd-0.1.11/Makefile work/utelnetd-0.1.11/Makefile
 +ifndef BUILD
 +control:
 +else
-+PRERM			:= $(CTRL_DIR)/prerm
++PRERM := $(CTRL_DIR)/prerm
 +
 +control: prerm
 +
