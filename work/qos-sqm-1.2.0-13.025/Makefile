@@ -31,19 +31,17 @@ control: preinst postinst prerm postrm
 
 preinst:
 	@echo "#!/bin/sh" > $(PREINST)
-	@echo "echo \"Stopping qos service...\"" >> $(PREINST)
 	@echo "$(RC) qos stop" >> $(PREINST)
 	@echo "exit 0" >> $(PREINST)
 
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
-	@echo "[ \`anc nvram rget qos_enable\` -eq 1 ] && echo \"Restarting qos service...\" && $(RC) qos restart" >> $(POSTINST)
+	@echo "$(RC) qos restart" >> $(POSTINST)
 	@echo "echo \"Type '$(USRSBINRCAPP)/$(RC_QOS) help' to see the options & settings\"" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
 prerm:
 	@echo "#!/bin/sh" > $(PRERM)
-	@echo "echo \"Stopping qos service...\"" >> $(PRERM)
 	@echo "$(RC) qos stop" >> $(PRERM)
 	@echo "exit 0" >> $(PRERM)
 

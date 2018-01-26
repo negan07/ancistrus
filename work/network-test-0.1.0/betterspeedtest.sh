@@ -116,7 +116,7 @@ measure_direction() {
 
 	# Start dots
 #	print_dots &
-	dots_pid=$!
+#	dots_pid=$!
 	# echo "Dots PID: $dots_pid"
 
 	# Start Ping

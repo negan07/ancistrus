@@ -1,7 +1,7 @@
 diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 --- work/openssh-7.6p1/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/openssh-7.6p1/Makefile	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,185 @@
+@@ -0,0 +1,184 @@
 +include ../Rules.mak
 +
 +BINS			:= $(OPEN_SSH)/sshd $(OPEN_SSH)/ssh-keygen $(OPEN_SSH)/scp
@@ -167,23 +167,22 @@ diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 +control:
 +else
 +CONFFILES		:= $(CTRL_DIR)/conffiles
-+PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
 +PRERM			:= $(CTRL_DIR)/prerm
 +
-+control: conffiles preinst prerm
++control: conffiles postinst prerm
 +
 +conffiles:
 +	@echo "$(USRETC)/$(SSHD_CONF)" > $(CONFFILES)
 +
-+preinst:
-+	@echo "#!/bin/sh" > $(PREINST)
-+	@echo "for PID in \`pidof sshd\`; do" >> $(PREINST)
-+	@echo "[ -e /proc/\$${PID}/stat ] && kill -9 \$$PID; done" >> $(PREINST)
-+	@echo "exit 0" >> $(PREINST)
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "$(RC) ssh start" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
 +
 +prerm:
 +	@echo "#!/bin/sh" > $(PRERM)
-+	@echo "rc ssh stop" >> $(PRERM)
++	@echo "$(RC) ssh stop" >> $(PRERM)
 +	@echo "exit 0" >> $(PRERM)
 +endif
 +
