@@ -1,43 +1,75 @@
+# COMMON NAMES
 export RCBIN		:= rc
+export RCAPP		:= rc_app
 export RCAPPSBIN	:= rc_apps
+export RCSSCR		:= rcS
+export RCSD		:= $(RCSSCR).d
+export INITD		:= init.d
+# RELEASE + DEBUG
 ifndef LOCAL
 PROFILE_ARCH		:= $(CPU_ARCH)
 export TMPDIR		:= /tmp
 export TMPETC		:= /etc
 export VARLIB		:= /var
 export USRDIR		:= /usr
+# RELEASE
 ifndef DEBUG
+# ROOT DIRS
 export LDLIB		:= /lib
+export NVRAMDIR		:= /config/nvram
 export TMPINSTDIR	:= $(PREFIX)$(TMPDIR)
 export ETCADSL		:= $(TMPETC)/adsl
 export USRETC		:= $(USRDIR)$(TMPETC)
 export USRETCADSL	:= $(USRETC)/adsl
+export USRETCINITD	:= $(USRETC)/$(INITD)
+export USRETCINITDRCSD	:= $(USRETCINITD)/$(RCSD)
+export USRETCINITDPRE	:= $(USRETCINITD)/rc.pre
+export USRETCINITDPOST	:= $(USRETCINITD)/rc.post
 export USRSBIN		:= $(USRDIR)/sbin
 export USRSBINSCR	:= $(USRSBIN)/scripts
-export USRSBINRCAPP	:= $(USRSBIN)/rc_app
+export USRSBINRCAPP	:= $(USRSBIN)/$(RCAPP)
+# ROOT BINS
 export RC		:= $(USRSBIN)/$(RCBIN)
 export RCAPPS		:= $(USRSBINRCAPP)/$(RCAPPSBIN)
+# INSTALL DIRS
 export ETCDIR		:= $(PREFIX)$(USRETC)
 export ADSLDIR		:= $(ETCDIR)/adsl
+export INITDIR		:= $(ETCDIR)/$(INITD)
+export RCSDIR		:= $(INITDIR)/$(RCSD)
+export PREDIR		:= $(INITDIR)/rc.pre
+export POSTDIR		:= $(INITDIR)/rc.post
 export BINDIR		:= $(PREFIX)$(USRSBIN)
-export APPDIR		:= $(BINDIR)/rc_app
+export APPDIR		:= $(BINDIR)/$(RCAPP)
 export SCRDIR		:= $(BINDIR)/scripts
 export LIBDIR		:= $(PREFIX)/$(LDLIB)
 export MODDIR		:= $(LIBDIR)/modules
 export WWWDIR		:= $(PREFIX)/www.eng
+# DEBUG
 else
+# ROOT DIRS
 export LDLIB		:= $(RECEIVE_DIR)
+export NVRAMDIR		:= $(RECEIVE_DIR)
 export TMPINSTDIR	:= $(RECEIVE_DIR)
 export ETCADSL		:= $(RECEIVE_DIR)
 export USRETC		:= $(RECEIVE_DIR)
 export USRETCADSL	:= $(RECEIVE_DIR)
+export USRETCINITD	:= $(RECEIVE_DIR)/$(INITD)
+export USRETCINITDRCSD	:= $(USRETCINITD)/$(RCSD)
+export USRETCINITDPRE	:= $(USRETCINITD)/rc.pre
+export USRETCINITDPOST	:= $(USRETCINITD)/rc.post
 export USRSBIN		:= $(RECEIVE_DIR)
 export USRSBINSCR	:= $(RECEIVE_DIR)
 export USRSBINRCAPP	:= $(RECEIVE_DIR)
+# ROOT BINS
 export RC		:= $(RECEIVE_DIR)/$(RCBIN)
 export RCAPPS		:= $(RECEIVE_DIR)/$(RCAPPSBIN)
+# INSTALL DIRS
 export ETCDIR		:= $(PREFIX)
 export ADSLDIR		:= $(PREFIX)
+export INITDIR		:= $(PREFIX)
+export RCSDIR		:= $(PREFIX)
+export PREDIR		:= $(PREFIX)
+export POSTDIR		:= $(PREFIX)
 export BINDIR		:= $(PREFIX)
 export APPDIR		:= $(PREFIX)
 export SCRDIR		:= $(PREFIX)
@@ -45,38 +77,51 @@ export LIBDIR		:= $(PREFIX)
 export MODDIR		:= $(PREFIX)
 export WWWDIR		:= $(PREFIX)
 endif
+# LOCAL
 else
 PROFILE_ARCH		:= I386
+# ROOT DIRS
 export TMPDIR		:= $(PREFIX)/tmp
 export TMPETC		:= $(TMPDIR)/etc
 export VARLIB		:= $(PREFIX)/var
 export USRDIR		:= $(PREFIX)/usr
 export LDLIB		:= $(PREFIX)/lib
+export NVRAMDIR		:= $(PREFIX)/config/nvram
 export TMPINSTDIR	:= $(TMPDIR)
 export ETCADSL		:= $(TMPETC)/adsl
 export USRETC		:= $(USRDIR)/etc
 export USRETCADSL	:= $(USRETC)/adsl
+export USRETCINITD	:= $(USRETC)/$(INITD)
+export USRETCINITDRCSD	:= $(USRETCINITD)/$(RCSD)
+export USRETCINITDPRE	:= $(USRETCINITD)/rc.pre
+export USRETCINITDPOST	:= $(USRETCINITD)/rc.post
 export USRSBIN		:= $(USRDIR)/sbin
 export USRSBINSCR	:= $(USRSBIN)/scripts
-export USRSBINRCAPP	:= $(USRSBIN)/rc_app
+export USRSBINRCAPP	:= $(USRSBIN)/$(RCAPP)
+# ROOT BINS
 export RC		:= $(USRSBIN)/$(RCBIN)
 export RCAPPS		:= $(USRSBINRCAPP)/$(RCAPPSBIN)
+# INSTALL DIRS
 export ETCDIR		:= $(TMPETC)
 export ADSLDIR		:= $(TMPETC)/adsl
+export INITDIR		:= $(TMPETC)/$(INITD)
+export RCSDIR		:= $(INITDIR)/$(RCSD)
+export PREDIR		:= $(INITDIR)/rc.pre
+export POSTDIR		:= $(INITDIR)/rc.post
 export BINDIR		:= $(USRSBIN)
-export APPDIR		:= $(BINDIR)/rc_app
+export APPDIR		:= $(BINDIR)/$(RCAPP)
 export SCRDIR		:= $(BINDIR)/scripts
 export LIBDIR		:= $(LDLIB)
 export MODDIR		:= $(LIBDIR)/modules
 export WWWDIR		:= $(PREFIX)/www.eng
 endif
-
+# SOURCE DIRS
 export SHARED_DIR 	:= $(SOURCE_PATH)/Source/shared
 export KERNEL_DIR 	:= $(SOURCE_PATH)/Source/kernel
 export KERNEL_INC 	:= $(KERNEL_DIR)/include
 export KERNEL_BIN	:= $(KERNEL_DIR)/../../bin
 export KERNEL_SRC 	:= $(KERNEL_DIR)
-
+# MIPS
 ifeq ($(PROFILE_ARCH),MIPS)
 export ARCH		:= mips
 export ARCH_ENDIAN	:= big
@@ -85,7 +130,7 @@ export TOOLCHAIN	:= $(TCHAIN_MIPS_DIR)
 export TARGET_NAME	:= $(TARGET_MIPS)
 export CROSS		:= $(PREFIX_MIPS)
 endif
-
+# ARM
 ifeq ($(PROFILE_ARCH),ARM)
 export ARCH		:= arm
 export ARCH_ENDIAN	:= little
@@ -94,7 +139,7 @@ export TOOLCHAIN	:= $(TCHAIN_ARM_DIR)
 export TARGET_NAME	:= $(TARGET_ARM)
 export CROSS		:= $(PREFIX_ARM)
 endif
-
+# MIPSEL
 ifeq ($(PROFILE_ARCH),MIPSEL)
 export ARCH		:= mips
 export ARCH_ENDIAN	:= little
@@ -103,7 +148,7 @@ export TOOLCHAIN	:= $(TCHAIN_MIPSEL_DIR)
 export TARGET_NAME	:= $(TARGET_MIPSEL)
 export CROSS		:= $(PREFIX_MIPSEL)
 endif
-
+# LOCAL
 ifeq ($(PROFILE_ARCH),I386)
 export ARCH		:= i386
 export ARCH_ENDIAN	:= little
@@ -112,10 +157,10 @@ export TOOLCHAIN	:= $(TCHAIN_I386_DIR)
 export TARGET_NAME	:= $(TARGET_I386)
 export CROSS		:= $(PREFIX_I386)
 endif
-
+# HOST VARS
 export PATH 		:= $(PATH):$(TOOLCHAIN)
 export BUILD_HOST	:= x86_64-unknown-linux-gnu
-
+# TOOLCHAIN BINS
 export CROSS_COMPILE	:= $(CROSS)
 export AR		:= $(CROSS)ar
 export AS		:= $(CROSS)as
@@ -133,18 +178,18 @@ export SSTRIP		:= $(CROSS)sstrip
 else
 export SSTRIP		:= $(STRIP)
 endif
-
+# STRIP FLAGS
 export STRIPFLAGS 	:= -x -R .note -R .comment -R .version --strip-unneeded
 export STRIPKOFLAGS	:= -d --strip-unneeded
-
+# MIPS GCC FLAGS
 ifeq ($(ARCH),mips)
 export CFLAGS 		:= -mips32 -march=mips32 -mtune=mips32 -Wa,-mips32 -G 0 -pipe -funit-at-a-time -fomit-frame-pointer -fno-strict-aliasing -fno-common -mno-shared -mabi=32 -msoft-float
 endif
-
+# ARM GCC FLAGS
 ifeq ($(ARCH),arm)
 export CFLAGS 		:= -marm -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -pipe -funit-at-a-time -fomit-frame-pointer -ffixed-r8 -fno-common -mno-thumb-interwork -mabi=aapcs-linux -mfloat-abi=soft
 endif
-
+# HOST GCC FLAGS
 ifeq ($(ARCH),i386)
 export CFLAGS 		:= -fomit-frame-pointer
 endif

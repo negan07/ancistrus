@@ -1,6 +1,7 @@
+# LIST OF WORK DIRS & TARS
 DIRLIST			:=
 TARLIST			:=
-
+# NVRAM
 NVRAM_NAME		:= nvram
 VER_$(NVRAM_NAME)	:= 0.1.0
 NVRAM			:= $(NVRAM_NAME)-$(VER_$(NVRAM_NAME))
@@ -15,7 +16,7 @@ PRIO_$(NVRAM)		:= required
 DEP_$(NVRAM)		:= 
 DESC_$(NVRAM)		:= Enhanced shared libscnvram
 DIRLIST			+= $(NVRAM)
-
+# CORE
 CORE_WORK_NAME		:= $(PROJECT_NAME)-core
 VER_$(CORE_WORK_NAME)	:= 0.1.0
 CORE_WORK		:= $(CORE_WORK_NAME)-$(VER_$(CORE_WORK_NAME))
@@ -29,7 +30,7 @@ SEC_$(CORE_WORK)	:= thirdparty
 PRIO_$(CORE_WORK)	:= required
 DEP_$(CORE_WORK)	:= $(NAME_$(NVRAM))
 DESC_$(CORE_WORK)	:= Main work tool
-
+# UTELNETD
 UTELNETD_NAME		:= utelnetd
 VER_$(UTELNETD_NAME)	:= 0.1.11
 UTELNETD		:= $(UTELNETD_NAME)-$(VER_$(UTELNETD_NAME))
@@ -45,7 +46,7 @@ DEP_$(UTELNETD)		:=
 DESC_$(UTELNETD)	:= Small telnet daemon for standalone use
 DIRLIST			+= $(UTELNETD)
 TARLIST			+= $(UTELNETD)
-
+# IPROUTE2
 IPROUTE2_NAME		:= iproute2
 VER_$(IPROUTE2_NAME)	:= 4.10.0
 IPROUTE2		:= $(IPROUTE2_NAME)-$(VER_$(IPROUTE2_NAME))
@@ -61,14 +62,13 @@ DEP_$(IPROUTE2)		:=
 DESC_$(IPROUTE2)	:= Set of utilities for Linux networking
 DIRLIST			+= $(IPROUTE2)
 TARLIST			+= $(IPROUTE2)
-
+# NETPERF
 NETPERF_NAME		:= netperf
 VER_$(NETPERF_NAME)	:= 2.7.0
 NETPERF			:= $(NETPERF_NAME)-$(VER_$(NETPERF_NAME))
 NAME_$(NETPERF)		:= $(NETPERF_NAME)$(DBG)
 VER_$(NETPERF)		:= $(VER_$(NETPERF_NAME))
 DL_$(NETPERF)		:= https://fossies.org/linux/misc
-#DL_$(NETPERF)		:= ftp://ftp.netperf.org/netperf
 TAR_$(NETPERF)		:= $(NETPERF).tar.gz
 HOME_$(NETPERF)		:= http://netperf.org/netperf/
 LIC_$(NETPERF)		:= GPLv2
@@ -78,7 +78,7 @@ DEP_$(NETPERF)		:=
 DESC_$(NETPERF)		:= TCP/UDP/sockets/etc performance benchmark
 DIRLIST			+= $(NETPERF)
 TARLIST			+= $(NETPERF)
-
+# NETWORK TEST
 NETWORKTEST_NAME	:= network-test
 VER_$(NETWORKTEST_NAME)	:= 0.1.0
 NETWORKTEST		:= $(NETWORKTEST_NAME)-$(VER_$(NETWORKTEST_NAME))
@@ -92,7 +92,7 @@ SEC_$(NETWORKTEST)	:= thirdparty
 PRIO_$(NETWORKTEST)	:= optional
 DEP_$(NETWORKTEST)	:= $(NAME_$(NETPERF))
 DESC_$(NETWORKTEST)	:= Enhanced network stress and network speed test scripts
-
+# XDSL DRIVER ORIG
 XDSL_042N_NAME		:= xdsl-driver-orig
 VER_$(XDSL_042N_NAME)	:= 042n
 XDSL_042N		:= $(XDSL_042N_NAME)-$(VER_$(XDSL_042N_NAME))
@@ -106,7 +106,7 @@ SEC_$(XDSL_042N)	:= builtin
 PRIO_$(XDSL_042N)	:= required
 DEP_$(XDSL_042N)	:= 
 DESC_$(XDSL_042N)	:= Install the original XDSL builtin driver version A2pvbH042n
-
+# XDSL DRIVER NEW
 XDSL_042U_NAME		:= xdsl-driver-new
 VER_$(XDSL_042U_NAME)	:= 042u
 XDSL_042U		:= $(XDSL_042U_NAME)-$(VER_$(XDSL_042U_NAME))
@@ -120,7 +120,7 @@ SEC_$(XDSL_042U)	:= builtin
 PRIO_$(XDSL_042U)	:= required
 DEP_$(XDSL_042U)	:= 
 DESC_$(XDSL_042U)	:= Install the updated XDSL driver version A2pvbH042u
-
+# QOS NG
 QOS_NG_NAME		:= qos-netgear
 VER_$(QOS_NG_NAME)	:= 36_42n
 QOS_NG			:= $(QOS_NG_NAME)-$(VER_$(QOS_NG_NAME))
@@ -134,7 +134,7 @@ SEC_$(QOS_NG)		:= thirdparty
 PRIO_$(QOS_NG)		:= standard
 DEP_$(QOS_NG)		:= 
 DESC_$(QOS_NG)		:= Quality Of Service tool from Netgear firmware 36_42n
-
+# QOS SQM OLDLEGACY
 QOS_SQM_OLD_NAME	:= qos-sqm-oldlegacy
 VER_$(QOS_SQM_OLD_NAME)	:= 0.1.1
 QOS_SQM_OLD		:= $(QOS_SQM_OLD_NAME)-$(VER_$(QOS_SQM_OLD_NAME))
@@ -148,7 +148,7 @@ SEC_$(QOS_SQM_OLD)	:= thirdparty
 PRIO_$(QOS_SQM_OLD)	:= standard
 DEP_$(QOS_SQM_OLD)	:= $(NAME_$(NVRAM)),$(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
 DESC_$(QOS_SQM_OLD)	:= Quality Of Service CeroWrt old legacy script tool
-
+# QOS SQM
 QOS_SQM_NAME		:= qos-sqm
 VER_$(QOS_SQM_NAME)	:= 1.2.0-13.025
 QOS_SQM			:= $(QOS_SQM_NAME)-$(VER_$(QOS_SQM_NAME))
@@ -162,15 +162,15 @@ SEC_$(QOS_SQM)		:= thirdparty
 PRIO_$(QOS_SQM)		:= standard
 DEP_$(QOS_SQM)		:= $(NAME_$(NVRAM)),$(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
 DESC_$(QOS_SQM)		:= Quality Of Service CeroWrt new fork script tool
-
+# OPENSSL (REDIRECT TO ORIG)
 OPENSSL_NAME		:= openssl
 VER_$(OPENSSL_NAME)	:= 1.0.0r
 OPENSSL			:= $(OPENSSL_NAME)-$(VER_$(OPENSSL_NAME))
-
+# CURL (REDIRECT TO ORIG)
 CURL_NAME		:= curl/curl
 VER_$(CURL_NAME)	:= 7.36.0
 CURL			:= $(CURL_NAME)-$(VER_$(CURL_NAME))
-
+# ZLIB
 ZLIB_NAME		:= zlib
 VER_$(ZLIB_NAME)	:= 1.2.11
 ZLIB			:= $(ZLIB_NAME)-$(VER_$(ZLIB_NAME))
@@ -186,7 +186,7 @@ DEP_$(ZLIB)		:=
 DESC_$(ZLIB)		:= A Massively Spiffy Yet Delicately Unobtrusive Compression Library
 DIRLIST			+= $(ZLIB)
 TARLIST			+= $(ZLIB)
-
+# LIBARCHIVE
 LIBARCHIVE_NAME		:= libarchive
 VER_$(LIBARCHIVE_NAME)	:= 3.3.1
 LIBARCHIVE		:= $(LIBARCHIVE_NAME)-$(VER_$(LIBARCHIVE_NAME))
@@ -202,7 +202,7 @@ DEP_$(LIBARCHIVE)	:=
 DESC_$(LIBARCHIVE)	:= Portable efficient C library for many streaming archive formats
 DIRLIST			+= $(LIBARCHIVE)
 TARLIST			+= $(LIBARCHIVE)
-
+# OPKGUTILS
 OPKG_UTILS_NAME		:= opkg-utils
 VER_$(OPKG_UTILS_NAME)	:= 0.3.4
 OPKG_UTILS		:= $(OPKG_UTILS_NAME)-$(VER_$(OPKG_UTILS_NAME))
@@ -218,7 +218,7 @@ DEP_$(OPKG_UTILS)	:=
 DESC_$(OPKG_UTILS)	:= Lightweight package prepare and build management system
 DIRLIST			+= $(OPKG_UTILS)
 TARLIST			+= $(OPKG_UTILS)
-
+# OPKG
 OPKG_NAME		:= opkg
 VER_$(OPKG_NAME)	:= 0.3.4
 OPKG			:= $(OPKG_NAME)-$(VER_$(OPKG_NAME))
@@ -234,7 +234,7 @@ DEP_$(OPKG)		:= zlib
 DESC_$(OPKG)		:= Lightweight package management system
 DIRLIST			+= $(OPKG)
 TARLIST			+= $(OPKG)
-
+# SMARTMONTOOLS
 SMONTOOLS_NAME		:= smartmontools
 VER_$(SMONTOOLS_NAME)	:= 6.5
 SMONTOOLS		:= $(SMONTOOLS_NAME)-$(VER_$(SMONTOOLS_NAME))
@@ -250,7 +250,7 @@ DEP_$(SMONTOOLS)	:=
 DESC_$(SMONTOOLS)	:= S.M.A.R.T. utility toolset
 DIRLIST			+= $(SMONTOOLS)
 TARLIST			+= $(SMONTOOLS)
-
+# HDPARM
 HDPARM_NAME		:= hdparm
 VER_$(HDPARM_NAME)	:= 9.52
 HDPARM			:= $(HDPARM_NAME)-$(VER_$(HDPARM_NAME))
@@ -266,7 +266,7 @@ DEP_$(HDPARM)		:=
 DESC_$(HDPARM)		:= Get/set ATA/SATA drive parameters under Linux
 DIRLIST			+= $(HDPARM)
 TARLIST			+= $(HDPARM)
-
+# LIBLZO
 LZO_NAME		:= lzo
 VER_$(LZO_NAME)		:= 2.10
 LZO			:= $(LZO_NAME)-$(VER_$(LZO_NAME))
@@ -282,7 +282,7 @@ DEP_$(LZO)		:=
 DESC_$(LZO)		:= A portable lossless data compression library
 DIRLIST			+= $(LZO)
 TARLIST			+= $(LZO)
-
+# OPENVPN
 OPEN_VPN_NAME		:= openvpn
 VER_$(OPEN_VPN_NAME)	:= 2.4.4
 OPEN_VPN		:= $(OPEN_VPN_NAME)-$(VER_$(OPEN_VPN_NAME))
@@ -298,7 +298,7 @@ DEP_$(OPEN_VPN)		:=
 DESC_$(OPEN_VPN)	:= Your private path to access network resources and services securely
 DIRLIST			+= $(OPEN_VPN)
 TARLIST			+= $(OPEN_VPN)
-
+# OPENSSH
 OPEN_SSH_NAME		:= openssh
 VER_$(OPEN_SSH_NAME)	:= 7.6p1
 OPEN_SSH		:= $(OPEN_SSH_NAME)-$(VER_$(OPEN_SSH_NAME))
@@ -314,12 +314,12 @@ DEP_$(OPEN_SSH)		:= zlib
 DESC_$(OPEN_SSH)	:= Free SSH protocol suite providing encryption for network services
 DIRLIST			+= $(OPEN_SSH)
 TARLIST			+= $(OPEN_SSH)
-
+# INITIALIZE CATEGORIES
 BUILTINLIB		:=
 BUILTIN			:=
 THIRDPARTYLIB		:=
 THIRDPARTY		:=
-
+# ADDING IPK TO CATEGORIES
 BUILTINLIB 		+= $(NVRAM)
 THIRDPARTY		+= $(CORE_WORK)
 ifndef LOCAL
@@ -342,11 +342,12 @@ THIRDPARTY		+= $(OPKG)
 THIRDPARTY		+= $(SMONTOOLS)
 THIRDPARTY		+= $(OPEN_SSH)
 endif
-
-PKG_RM_LIST		:= $(LIBARCHIVE) $(OPKG_UTILS) $(LZO)
+# SUM OF THE ABOVES
 SUBDIRS			:=
 SUBDIRS			+= $(BUILTINLIB)
 SUBDIRS			+= $(THIRDPARTYLIB)
 SUBDIRS			+= $(BUILTIN)
 SUBDIRS			+= $(THIRDPARTY)
+# SKIP FROM IPK CREATION
+PKG_RM_LIST		:= $(LIBARCHIVE) $(OPKG_UTILS) $(LZO)
 
