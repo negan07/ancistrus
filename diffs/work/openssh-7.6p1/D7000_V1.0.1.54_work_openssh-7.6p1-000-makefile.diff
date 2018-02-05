@@ -7,7 +7,7 @@ diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 +BINS			:= $(OPEN_SSH)/sshd $(OPEN_SSH)/ssh-keygen $(OPEN_SSH)/scp
 +SCRIPTS			:= rc_ssh
 +SSHD_CONF		:= sshd_config
-+SSHD_KEYS_DIR		:= /.ssh
++SSHD_KEYS_DIR		:= $(NVRAMDIR)/ssh
 +SSHD_CONF_INST_DIR	:= $(ETCDIR)
 +
 +all: config
