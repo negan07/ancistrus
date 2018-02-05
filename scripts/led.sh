@@ -11,7 +11,7 @@
 #
 # Led script: playing with led boards.
 #
-# Usage: $0 <kitt|halfkitt|kittwake|halfkittwake|bright|dark|reset|help>
+# Usage: $0 <kitt|halfkitt|kittwake|halfkittwake|bright|dark|reset|start|restart|stop|help>
 #
 # Methods are:
 # kitt) "supercar" K.I.T.T. mode - leds run from left to right & back
@@ -21,6 +21,8 @@
 # bright) all on white + amber
 # dark) all off white + amber
 # reset) return to leds normal working conditions
+# start|restart) start leds in normal running mode
+# stop) stop all leds, power led included
 # help) brief led board guide
 #
 
@@ -43,6 +45,8 @@ C=0
 	do
 #	C=`expr $C + 1`
 	C=$(( $C + 1 ))
+#	let C++
+#	:
 	done
 }
 
@@ -88,11 +92,11 @@ $LD ctrl no_blink_data
 LOOP_EXIT() {				# exit loop and exit
 ALL_LED_OFF
 $LD off 71 & $LD on 70
-echo
-echo "Set leds normal working condition with:"
-echo "$0 reset"
-echo "about twice"
-echo "Leds need some seconds to be waken up properly"
+cat << _EOF_
+
+Set leds normal working condition with: '$0 reset' about twice.
+Leds need some seconds to be waken up properly.
+_EOF_
 exit 0
 }
 
@@ -103,7 +107,30 @@ rc led_ctrl restart
 exit 0
 }
 
-LED_GUIDE() {
+LED_START() {				# start leds in normal running mode
+$LD off 71
+$LD on 70
+eval `nvram get led_ctrl_opt` > /dev/null 2>&1
+	case ${led_ctrl_opt} in
+	blink)
+	$LD ctrl blink_data
+	;;
+	off)
+	$LD ctrl off
+	;;
+	*)
+	$LD ctrl no_blink_data
+	;;
+	esac
+}
+
+LED_STOP() {				# stop all leds, power led included
+$LD off 70
+$LD off 71
+$LD ctrl off
+}
+
+LED_GUIDE() {				# help guide
 cat << _EOF_
 #
 # ancistrus
@@ -117,7 +144,7 @@ cat << _EOF_
 #
 # Led script: playing with led boards.
 #
-Usage: $0 <kitt|halfkitt|kittwake|halfkittwake|bright|dark|reset|help>
+Usage: $0 <kitt|halfkitt|kittwake|halfkittwake|bright|dark|reset|start|restart|stop|help>
 
 Methods are:
 kitt) "supercar" K.I.T.T. mode - leds run from left to right & back
@@ -127,6 +154,8 @@ halfkittwake) halfkitt+kittwake together
 bright) all on white + amber
 dark) all off white + amber
 reset) return to leds normal working conditions
+start|restart) start leds in normal running mode
+stop) stop all leds, power led included
 help) brief led board guide
 
 Leds are treated with sercomm command:
@@ -207,12 +236,20 @@ _EOF_
 	reset)
 	LED_RESET
 	;;
+	start|restart)
+	LED_START
+	exit 0
+	;;
+	stop)
+	LED_STOP
+	exit 0
+	;;
 	help)
 	LED_GUIDE
 	exit 0
 	;;
 	*)
-	echo "Usage: $0 <kitt|halfkitt|kittwake|halfkittwake|bright|dark|reset|help>" && exit 1
+	echo "Usage: $0 <kitt|halfkitt|kittwake|halfkittwake|bright|dark|reset|start|restart|stop|help>" && exit 1
 	esac
 
 # initializing...
@@ -221,7 +258,7 @@ echo "Press CTRL+C to exit"
 ALL_LED_OFF
 
 # trap the CTRL+C and revert leds back to normal working condition and exit
-trap LOOP_EXIT SIGINT SIGTERM
+trap LOOP_EXIT INT TERM
 
 #non stop looping: press CTRL+C to exit
 while [ 1 ]
@@ -253,4 +290,3 @@ do
 	;;
 	esac
 done
-
