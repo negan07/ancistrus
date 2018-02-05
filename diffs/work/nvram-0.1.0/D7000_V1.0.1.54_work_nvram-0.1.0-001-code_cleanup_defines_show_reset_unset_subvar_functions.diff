@@ -1,7 +1,7 @@
 diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
 --- work/nvram-0.1.0/nvram.c	2016-10-11 17:53:07.000000000 +0200
 +++ work/nvram-0.1.0/nvram.c	2017-02-05 21:24:36.082726345 +0100
-@@ -7,12 +7,15 @@
+@@ -7,12 +7,17 @@
  #include <unistd.h>
  #include <sys/ioctl.h>
  #include <sys/sysinfo.h>
@@ -10,6 +10,8 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  #include "nvram.h"
  #include <stdarg.h>
  #include "nvram_lock.h"
++#include <syslog.h>
++#define NETGEAR_SYSLOG(fmt, args...)	syslog(LOG_INFO, fmt, ##args)
 +#ifndef LOCAL
  #define BASE_PATH "/tmp/nv/"
 +#else
@@ -18,7 +20,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  #define BASE_PATH_LEN 8  // strlen(BASE_PATH) 
  
  struct nv_entry{
-@@ -140,10 +143,10 @@
+@@ -140,10 +145,10 @@
  static unsigned long crc32(char *data, int length)
  {
  	unsigned long crc, poly;
@@ -31,7 +33,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  		crc = i;
  		for (j=8; j>0; j--) {
  			if (crc&1) {
-@@ -168,14 +171,14 @@
+@@ -168,14 +173,14 @@
  	unsigned long crc;
  	int fd1 = -1;
  	char *data = NULL;
@@ -49,7 +51,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  	}
  	read(fd1, &header,sizeof(nvram_header_t));
  
-@@ -183,8 +186,9 @@
+@@ -183,8 +188,9 @@
  	lseek(fd1,NVRAM_HEADER_SIZE,0);
  	if(header.magic!=NVRAM_MAGIC)
  	{
@@ -61,7 +63,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  	}
  
  	data=malloc(header.len+1);
-@@ -197,8 +201,9 @@
+@@ -197,8 +203,9 @@
  		printf("CRC Error!!\n");
  		printf("header.crc=%lx\tcrc=%lx\n",header.crc,crc);
  #endif	
@@ -73,7 +75,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  	}
  
  	writeFileBin_unlock(NVRAM_TMP_PATH, data, header.len);
-@@ -207,13 +212,6 @@
+@@ -207,13 +214,6 @@
  	close(fd1);	
  
  	return NVRAM_SUCCESS;
@@ -87,7 +89,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  }
  
  int nvram_load(void)
-@@ -235,13 +233,19 @@
+@@ -235,13 +235,19 @@
  	int fd1 = -1;
  	char *data = NULL;
  	int len;
@@ -105,12 +107,12 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
 +// add nvram overflow prevention
 +	if(len >= (NVRAM_SIZE-NVRAM_HEADER_SIZE)) {
 +		if(data) {free(data);}
-+		system("touch /tmp/NVRAM_MAX_SIZE_REACHED");
++		NETGEAR_SYSLOG("01 00[NVRAM] Settings partition at capacity !!!");
 +		return NVRAM_LEN_ERR;
  	}
  
  	header.magic=NVRAM_MAGIC;
-@@ -249,8 +253,9 @@
+@@ -249,8 +255,9 @@
  	header.len=len;
  
  	if((fd1=open(NVRAM_PATH,O_WRONLY | O_CREAT))<0) {
@@ -122,7 +124,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  	}
  	write(fd1, &header,sizeof(nvram_header_t));
  	lseek(fd1,NVRAM_HEADER_SIZE,0);
-@@ -260,24 +265,19 @@
+@@ -260,24 +267,19 @@
  	lseek(fd1,NVRAM_HEADER_SIZE,0);
  	read(fd1, data,len);
  	if(header.crc!=crc32(data, len)){
@@ -152,7 +154,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  }
  
  int nvram_commit(void)
-@@ -385,6 +385,24 @@
+@@ -385,6 +387,24 @@
  	return pt;
  }
  
@@ -177,7 +179,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  static int nvram_unset_func_unlock(const char* name,char *path)
  {
  	char *bufspace, *targetspace;
-@@ -508,22 +526,197 @@
+@@ -508,22 +528,191 @@
  {
  	return nvram_set_func(name,value,NVRAM_BCM_PATH);	
  }
@@ -233,12 +235,6 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
 +		while(*(s++));
 +		}
 +	free(data);
-+	if(!strcmp(path, NVRAM_TMP_PATH)) fprintf(stderr, "\n"
-+	"Nvram settings file:\t\t%s\n"
-+	"Nvram total size:\t\t%d Kb\n"
-+	"Nvram occupied size:\t\t%d Kb (%d bytes)\n"
-+	"Nvram free space:\t\t%d Kb (%d bytes)\n\n"
-+	, path, NVRAM_SIZE/1024, len/1024, len, (NVRAM_SIZE-NVRAM_HEADER_SIZE-len)/1024, NVRAM_SIZE-NVRAM_HEADER_SIZE-len);
 +	err = NVRAM_SUCCESS;
 +	}
 +
@@ -379,7 +375,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  
  	return nvram_set_func( name, value, path);
  }
-@@ -531,17 +724,17 @@
+@@ -531,17 +720,17 @@
  
  int nv_setFX(const char* category, const char* key, int key_idx, const char *value_format, ...)
  {
@@ -403,7 +399,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  	va_end(arg);
  	
  
-@@ -551,9 +744,9 @@
+@@ -551,9 +740,9 @@
  
  int nv_set_int(const char* category, const char* key, int key_idx, int value)
  {
@@ -415,7 +411,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  
  	return nv_set(category, key, key_idx, value_str);
  }
-@@ -562,11 +755,11 @@
+@@ -562,11 +751,11 @@
  char* nv_get(const char* category, const char* key, int key_idx)
  {
      char *pt;
@@ -431,7 +427,7 @@ diff -urN work/nvram-0.1.0/nvram.c work/nvram-0.1.0/nvram.c
  
  	if((pt=__nvram_get_func(name, path, 1))==NULL)
  		return NULL;
-@@ -586,11 +779,11 @@
+@@ -586,11 +775,11 @@
  char* nv_get_r(const char* category, const char* key, int key_idx)
  {
      char *pt;
