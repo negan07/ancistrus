@@ -48,6 +48,7 @@ prerm:
 postrm:
 	@echo "#!/bin/sh" > $(POSTRM)
 	@echo "ln -sf $(TMPETC)/$(RCAPPSBIN) $(USRSBINRCAPP)/$(RC_QOS)" >> $(POSTRM)
+	@echo "$(RC) qos restart" >> $(POSTRM)
 	@echo "exit 0" >> $(POSTRM)
 endif
 

@@ -5,8 +5,6 @@ endif
 ifdef DEBUG
 export DEBUG
 export DBG		?= -debug
-else
-export DBG		?=
 endif
 
 ifdef BUILD
@@ -35,13 +33,18 @@ RCTMPDIR		?= /tmp
 RCLDLIB			?= /lib
 RCRAMBOOTDIR		?= /etc
 RCUSRDIR		?= /usr
+RCNVRAMCONF		?= /config/nvram
 RCBOOTDIR		?= $(RCUSRDIR)$(RCRAMBOOTDIR)
 RCADSLDIR		?= $(RCBOOTDIR)/adsl
 RCBOOT			?= $(RCBOOTDIR)/$(RCBOOT_NAME)
-RCAUX			?= $(RCBOOT).$(PROJ_TAG)
 
+RCINITD			?= init.d
+RCINITDIR		?= $(RCBOOTDIR)/$(RCINITD)
+RCRUNLEVDIR		?= $(RCBOOT).d
+RCAUX			?= $(RCBOOT).$(PROJ_TAG)
 OPKG_INFO_STATUS_DIR	?= $(RCUSRDIR)$(RCLDLIB)/opkg
 OPKG_PKG_DIR		?= build$(DBG)
+
 DIFFS_DIR		?= diffs
 LBIN_DIR		?= localbin
 SCRIPTS_DIR		?= scripts
