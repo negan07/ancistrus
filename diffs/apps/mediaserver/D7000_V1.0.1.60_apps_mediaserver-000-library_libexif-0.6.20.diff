@@ -1,0 +1,213 @@
+diff -urN D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/binary/Makefile D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/binary/Makefile
+--- D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/binary/Makefile	2016-10-13 17:51:19.000000000 +0200
++++ D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/binary/Makefile	2017-05-05 14:57:20.115087727 +0200
+@@ -70,7 +70,7 @@
+ AMTAR = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run tar
+ AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir) -g -Wall -Wmissing-declarations -Wmissing-prototypes
+ AM_DEFAULT_VERBOSITY = 1
+-AM_LDFLAGS =  -g -Wall
++AM_LDFLAGS =   -Wall
+ AR = ar
+ AUTOCONF = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoconf
+ AUTOHEADER = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoheader
+@@ -78,7 +78,7 @@
+ AWK = gawk
+ CC = gcc
+ CCDEPMODE = depmode=gcc3
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPP = gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+diff -urN D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/contrib/examples/Makefile D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/contrib/examples/Makefile
+--- D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/contrib/examples/Makefile	2016-10-13 17:51:19.000000000 +0200
++++ D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/contrib/examples/Makefile	2017-05-05 14:57:20.115087727 +0200
+@@ -107,9 +107,9 @@
+ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ ACLOCAL = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run aclocal-1.11
+ AMTAR = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run tar
+-AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir) -g -Wall -Wmissing-declarations -Wmissing-prototypes
++AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir)  -Wall -Wmissing-declarations -Wmissing-prototypes
+ AM_DEFAULT_VERBOSITY = 1
+-AM_LDFLAGS =  -g -Wall
++AM_LDFLAGS =   -Wall
+ AR = ar
+ AUTOCONF = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoconf
+ AUTOHEADER = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoheader
+@@ -117,7 +117,7 @@
+ AWK = gawk
+ CC = gcc
+ CCDEPMODE = depmode=gcc3
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPP = gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+diff -urN D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/contrib/Makefile D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/contrib/Makefile
+--- D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/contrib/Makefile	2016-10-13 17:51:19.000000000 +0200
++++ D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/contrib/Makefile	2017-05-05 14:57:20.115087727 +0200
+@@ -108,9 +108,9 @@
+   reldir="$$dir2"
+ ACLOCAL = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run aclocal-1.11
+ AMTAR = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run tar
+-AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir) -g -Wall -Wmissing-declarations -Wmissing-prototypes
++AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir)  -Wall -Wmissing-declarations -Wmissing-prototypes
+ AM_DEFAULT_VERBOSITY = 1
+-AM_LDFLAGS =  -g -Wall
++AM_LDFLAGS =   -Wall
+ AR = ar
+ AUTOCONF = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoconf
+ AUTOHEADER = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoheader
+@@ -118,7 +118,7 @@
+ AWK = gawk
+ CC = gcc
+ CCDEPMODE = depmode=gcc3
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPP = gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+diff -urN D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/doc/Makefile D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/doc/Makefile
+--- D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/doc/Makefile	2016-10-13 17:51:19.000000000 +0200
++++ D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/doc/Makefile	2017-05-05 14:57:20.115087727 +0200
+@@ -108,9 +108,9 @@
+ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ ACLOCAL = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run aclocal-1.11
+ AMTAR = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run tar
+-AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir) -g -Wall -Wmissing-declarations -Wmissing-prototypes
++AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir)  -Wall -Wmissing-declarations -Wmissing-prototypes
+ AM_DEFAULT_VERBOSITY = 1
+-AM_LDFLAGS =  -g -Wall
++AM_LDFLAGS =   -Wall
+ AR = ar
+ AUTOCONF = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoconf
+ AUTOHEADER = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoheader
+@@ -118,7 +118,7 @@
+ AWK = gawk
+ CC = gcc
+ CCDEPMODE = depmode=gcc3
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPP = gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+diff -urN D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/libexif/Makefile D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/libexif/Makefile
+--- D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/libexif/Makefile	2016-10-13 17:51:19.000000000 +0200
++++ D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/libexif/Makefile	2017-05-05 14:57:20.115087727 +0200
+@@ -158,9 +158,9 @@
+ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ ACLOCAL = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run aclocal-1.11
+ AMTAR = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run tar
+-AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir) -g -Wall -Wmissing-declarations -Wmissing-prototypes
++AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir) -Wall -Wmissing-declarations -Wmissing-prototypes
+ AM_DEFAULT_VERBOSITY = 1
+-AM_LDFLAGS =  -g -Wall
++AM_LDFLAGS = -Wall
+ AR = ar
+ AUTOCONF = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoconf
+ AUTOHEADER = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoheader
+@@ -168,7 +168,7 @@
+ AWK = $(CROSS)gawk
+ CC = $(CROSS)gcc
+ CCDEPMODE = depmode=gcc3
+-CFLAGS = -g -O2
++CFLAGS += -Os
+ CPP = $(CROSS)gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+diff -urN D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/m4m/Makefile D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/m4m/Makefile
+--- D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/m4m/Makefile	2016-10-13 17:51:19.000000000 +0200
++++ D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/m4m/Makefile	2017-05-05 14:57:20.115087727 +0200
+@@ -68,9 +68,9 @@
+ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ ACLOCAL = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run aclocal-1.11
+ AMTAR = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run tar
+-AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir) -g -Wall -Wmissing-declarations -Wmissing-prototypes
++AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir)  -Wall -Wmissing-declarations -Wmissing-prototypes
+ AM_DEFAULT_VERBOSITY = 1
+-AM_LDFLAGS =  -g -Wall
++AM_LDFLAGS =   -Wall
+ AR = ar
+ AUTOCONF = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoconf
+ AUTOHEADER = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoheader
+@@ -78,7 +78,7 @@
+ AWK = gawk
+ CC = gcc
+ CCDEPMODE = depmode=gcc3
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPP = gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+diff -urN D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/Makefile D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/Makefile
+--- D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/Makefile	2016-10-13 17:51:19.000000000 +0200
++++ D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/Makefile	2017-05-05 14:57:20.115087727 +0200
+@@ -154,9 +154,9 @@
+ distcleancheck_listfiles = find . -type f -print
+ ACLOCAL = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run aclocal-1.11
+ AMTAR = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run tar
+-AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir) -g -Wall -Wmissing-declarations -Wmissing-prototypes
++AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir)  -Wall -Wmissing-declarations -Wmissing-prototypes
+ AM_DEFAULT_VERBOSITY = 1
+-AM_LDFLAGS =  -g -Wall
++AM_LDFLAGS =   -Wall
+ AR = ar
+ AUTOCONF = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoconf
+ AUTOHEADER = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoheader
+@@ -164,7 +164,7 @@
+ AWK = gawk
+ #CC = gcc
+ CCDEPMODE = depmode=gcc3
+-CFLAGS = -g -O2
++CFLAGS += -Os
+ #CPP = gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+diff -urN D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/test/Makefile D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/test/Makefile
+--- D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/test/Makefile	2016-10-13 17:51:19.000000000 +0200
++++ D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/test/Makefile	2017-05-05 14:57:20.115087727 +0200
+@@ -177,9 +177,9 @@
+   reldir="$$dir2"
+ ACLOCAL = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run aclocal-1.11
+ AMTAR = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run tar
+-AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir) -g -Wall -Wmissing-declarations -Wmissing-prototypes
++AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir)  -Wall -Wmissing-declarations -Wmissing-prototypes
+ AM_DEFAULT_VERBOSITY = 1
+-AM_LDFLAGS =  -g -Wall
++AM_LDFLAGS =   -Wall
+ AR = ar
+ AUTOCONF = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoconf
+ AUTOHEADER = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoheader
+@@ -187,7 +187,7 @@
+ AWK = gawk
+ CC = gcc
+ CCDEPMODE = depmode=gcc3
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPP = gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+diff -urN D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/test/nls/Makefile D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/test/nls/Makefile
+--- D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/test/nls/Makefile	2016-10-13 17:51:19.000000000 +0200
++++ D7000_V1.0.1.60_WW_src/Source/apps/mediaserver/library/libexif-0.6.20/test/nls/Makefile	2017-05-05 14:57:20.115087727 +0200
+@@ -99,9 +99,9 @@
+ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ ACLOCAL = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run aclocal-1.11
+ AMTAR = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run tar
+-AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir) -g -Wall -Wmissing-declarations -Wmissing-prototypes
++AM_CPPFLAGS =  -DGETTEXT_PACKAGE=\"libexif-12\" -DLOCALEDIR=\"$(datadir)/locale\" -I$(top_srcdir) -I$(top_builddir)  -Wall -Wmissing-declarations -Wmissing-prototypes
+ AM_DEFAULT_VERBOSITY = 1
+-AM_LDFLAGS =  -g -Wall
++AM_LDFLAGS =   -Wall
+ AR = ar
+ AUTOCONF = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoconf
+ AUTOHEADER = ${SHELL} /home/trason/DGN2200v3/DGND3700v2/Source/apps/mediaserver/library/libexif-0.6.20/missing --run autoheader
+@@ -109,7 +109,7 @@
+ AWK = gawk
+ CC = gcc
+ CCDEPMODE = depmode=gcc3
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPP = gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo

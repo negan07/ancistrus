@@ -1,0 +1,12 @@
+diff -urN D7000_V1.0.1.60_WW_src/Source/apps/kernel_upgrade/Makefile D7000_V1.0.1.60_WW_src/Source/apps/kernel_upgrade/Makefile
+--- D7000_V1.0.1.60_WW_src/Source/apps/kernel_upgrade/Makefile	2016-10-11 17:57:10.000000000 +0200
++++ D7000_V1.0.1.60_WW_src/Source/apps/kernel_upgrade/Makefile	2017-05-02 14:42:29.397757477 +0200
+@@ -5,6 +5,8 @@
+ PWD := $(shell pwd)
+ KVER := 2.6
+ 
++CFLAGS:=
++
+ #EXTRA_CFLAGS += -Werror 
+ #_ZIP_3G_ Will be define by Kbuild, refer KERNEL_SRC/Makefile
+ #EXTRA_CFLAGS += -D_ZIP_3G_			

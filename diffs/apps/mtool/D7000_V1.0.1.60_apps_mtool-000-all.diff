@@ -1,0 +1,25 @@
+diff -urN D7000_V1.0.1.60_WW_src/Source/apps/mtool/Makefile D7000_V1.0.1.60_WW_src/Source/apps/mtool/Makefile
+--- D7000_V1.0.1.60_WW_src/Source/apps/mtool/Makefile	2016-10-11 17:57:02.000000000 +0200
++++ D7000_V1.0.1.60_WW_src/Source/apps/mtool/Makefile	2017-05-02 12:57:26.753299291 +0200
+@@ -108,7 +108,7 @@
+ OBJS = direntry.o mainloop.o mk_direntry.o mlabel.o streamcache.o vfat.o
+ 
+ 
+-CFLAGS = $(CPPFLAGS) $(DEFS) $(MYCFLAGS) -fno-strict-aliasing -I.  -I. $(USERCFLAGS) 
++CFLAGS += $(CPPFLAGS) $(DEFS) $(MYCFLAGS) -fno-strict-aliasing -I.  -I. $(USERCFLAGS) 
+ CXXFLAGS  = $(CPPFLAGS) $(DEFS) $(MYCXXFLAGS) -I.  -I. $(USERCFLAGS) 
+ LINK      = $(CC) $(LDFLAGS) $(USERLDFLAGS) 
+ ALLLIBS   = $(USERLDLIBS) $(MACHDEPLIBS) $(SHLIB) $(LIBS)
+@@ -120,11 +120,10 @@
+ 
+ 
+ $(BIN): $(OBJS1)
+-
+ 	$(LINK) $(OBJS1) -o $@ $(ALLLIBS)
+ 
+ install:
+-	$(STRIP) $(BIN)
++	$(SSTRIP) $(BIN)
+ 	cp -a $(BIN) ../../target/usr/sbin
+ #	cp -a mtools.conf ../../target/usr/etc
+ 
