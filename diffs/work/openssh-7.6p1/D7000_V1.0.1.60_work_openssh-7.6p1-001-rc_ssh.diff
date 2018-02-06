@@ -101,7 +101,7 @@ diff -urN work/openssh-7.6p1/rc_ssh work/openssh-7.6p1/rc_ssh
 +    sync
 +    [ "${ssh_enable}" = "1" ] && start
 +}
-
++
 +# Dirs
 +CONFIG=/config
 +NVRAMCONFIGDIR=/nvram
@@ -127,7 +127,7 @@ diff -urN work/openssh-7.6p1/rc_ssh work/openssh-7.6p1/rc_ssh
 +AUTHKEYS=${KEYSDIR}/${AUTHKEYSNAME}
 +SSH_KEYGEN=${BINDIR}/ssh-keygen
 +SSHD=${BINDIR}/sshd
-
++
 +# Debug running
 +[ "${2}" = "debug" ] && SSHD="${BINDIR}/sshd -D -ddd -e"
 +
