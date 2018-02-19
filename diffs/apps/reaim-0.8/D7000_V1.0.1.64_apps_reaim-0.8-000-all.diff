@@ -1,0 +1,14 @@
+diff -urN D7000_V1.0.1.64_WW_src/Source/apps/reaim-0.8/Makefile D7000_V1.0.1.64_WW_src/Source/apps/reaim-0.8/Makefile
+--- D7000_V1.0.1.64_WW_src/Source/apps/reaim-0.8/Makefile	2016-10-11 17:56:51.000000000 +0200
++++ D7000_V1.0.1.64_WW_src/Source/apps/reaim-0.8/Makefile	2017-04-29 23:24:30.218569552 +0200
+@@ -15,8 +15,8 @@
+ endif
+ 
+ reaim: reaim.c
+-	$(CC) -o reaim reaim.c -Os -s -Wall $(FW_FLAGS)
+-	$(STRIP) reaim
++	$(CC) -o reaim reaim.c $(CFLAGS) -Os -s -Wall $(FW_FLAGS)
++	$(SSTRIP) reaim
+ 
+ clean:
+ 	-rm -f reaim

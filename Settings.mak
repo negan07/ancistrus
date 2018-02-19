@@ -24,7 +24,7 @@ PROJECT_HOMEPAGE	?= https://$(PROJECT_FOUNDER).github.io/$(PROJECT_NAME)
 PROJECT_REP_ROOT	?= https://raw.githubusercontent.com/$(PROJECT_FOUNDER)/$(PROJECT_NAME)/gh-pages
 LOCAL_REP_ROOT		?= https://192.168.0.7
 
-FWVER			?= V1.0.1.60
+FWVER			?= V1.0.1.64
 CPU_ARCH_NAME		?= ARM
 PROJ_TAG		?= $(shell echo $(PROJECT_NAME) | head -c 3)
 RCBOOT_NAME		?= rcS
@@ -69,7 +69,7 @@ SRC_SHARED_DIR		?= $(SRC_DIR)/$(SRC_SHARED_REL_DIR)
 SRC_TARGET_DIR		?= $(SRC_DIR)/$(SRC_TARGET_REL_DIR)
 
 SRC_URL			?= http://www.downloads.netgear.com/files/GPL
-SRC_FILE		?= $(PROJECT_TARGET)_$(FWVER)_gpl_src_20180124.tar.gz
+SRC_FILE		?= $(PROJECT_TARGET)_v1.0.1.64_gpl_src_20180131.tar.gz
 
 TCHAIN_SRC_DIR		?= crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources
 TCHAIN_TAR		?= $(SRC_DIR)/Source/$(TCHAIN_SRC_DIR).tar.bz2

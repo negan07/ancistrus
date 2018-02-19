@@ -1,0 +1,76 @@
+diff -urN D7000_V1.0.1.64_WW_src/Source/image/bb D7000_V1.0.1.64_WW_src/Source/image/bb
+--- D7000_V1.0.1.64_WW_src/Source/image/bb	2016-10-11 17:52:44.000000000 +0200
++++ D7000_V1.0.1.64_WW_src/Source/image/bb	2017-04-23 14:08:36.404184400 +0200
+@@ -1,30 +1,20 @@
+ #!/bin/sh
+ 
+-[ -z "$1" ] && echo "usage: bb <DGND3700v2|DGND3700Bv2>" && exit 1
++[ -z "$1" ] && echo "usage: $0 <BOARD_ID>" && exit 1
+ 
+ MODEL_NAME=$1
+ 
+-# Generate GUI language file. 
+-#./gen_lang.sh || exit 1
+-
+ # Generate bin file
+-./scBind -i $MODEL_NAME.par -o $MODEL_NAME.bin
+-
+-# zip bin file tobe img file
+-./zipImage $MODEL_NAME.bin
++rm -f $MODEL_NAME.bin $MODEL_NAME.zip $MODEL_NAME.img
++./scBind -i $MODEL_NAME.par -o $MODEL_NAME.bin || exit 2
+ 
+-#make bin file for burn
+-#rm -rf $MODEL_NAME.burn.bin
+-#./nand_small_page_brcm_ecc_tool $MODEL_NAME.burn.bin $MODEL_NAME.bin
+-#./bb_5357
++# zip bin file to be img file
++./zipImage $MODEL_NAME.bin || exit 3
+ 
+ echo "===================================================================="
+ echo " Image for UI Upgrade: $MODEL_NAME.img"
+ echo " Image for Sercomm Upgrade Utility: $MODEL_NAME.bin"
+-#echo " Image for NAND Flash Burn: $MODEL_NAME.burn.bin"
+ echo "===================================================================="
+ 
+-
+-
+-
++exit 0
+ 
+diff -urN D7000_V1.0.1.64_WW_src/Source/image/bb_dual D7000_V1.0.1.64_WW_src/Source/image/bb_dual
+--- D7000_V1.0.1.64_WW_src/Source/image/bb_dual	2016-10-11 17:52:44.000000000 +0200
++++ D7000_V1.0.1.64_WW_src/Source/image/bb_dual	2017-04-23 14:08:34.964200753 +0200
+@@ -1,23 +1,21 @@
+ #!/bin/sh
+-MODEL_NAME=$1
+ 
+-# Generate GUI language file. 
+-#./gen_lang.sh || exit 1
++[ -z "$1" ] && echo "usage: $0 <BOARD_ID_dual>" && exit 1
+ 
+-# Generate bin file
+-./scBind -i $MODEL_NAME.par -o $MODEL_NAME.bin
++MODEL_NAME=$1
+ 
+-# zip bin file tobe img file
+-#./tools/src/zipImage/zipImage $MODEL_NAME.bin
++# Generate bin file
++rm -f $MODEL_NAME.bin $MODEL_NAME.out $MODEL_NAME.img
++./scBind -i $MODEL_NAME.par -o $MODEL_NAME.bin || exit 2
+ 
+-#make bin file for burn
+-./createnfimg -l 1 -b 4 -m 14 -i $MODEL_NAME.bin
++# make bin file for burn
++./createnfimg -l 1 -b 4 -m 14 -i $MODEL_NAME.bin || exit 3
+ rm -rf $MODEL_NAME.bin
+ mv $MODEL_NAME.out $MODEL_NAME.bin
+ 
+ echo "===================================================================="
+-#echo " Image for UI Upgrade: $MODEL_NAME.img"
+-#echo " Image for Sercomm Upgrade Utility: $MODEL_NAME.bin"
+ echo " Image for NAND Flash Burn: $MODEL_NAME.bin"
+ echo "===================================================================="
+ 
++exit 0
++
