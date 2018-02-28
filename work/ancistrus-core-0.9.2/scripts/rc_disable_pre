@@ -28,16 +28,17 @@ eval `nvram get anc_boot_disable` > /dev/null 2>&1
 [ "${anc_boot_disable}" = "1" ] && exit 1		#skip flag
 
 TAG=_pre
+RCAPPDIR=/usr/sbin/rc_app
 SERV=`basename $0`
 SERV=${SERV%${TAG}}
 
 case "$1" in
 enable)							#enable service (remove inhibition)
 nvram unset ${SERV}_disable
-rc_${SERV} start
+${RCAPPDIR}/rc_${SERV} start
 ;;
 disable)						#disable service (add/enable inhibition)
-rc_${SERV} stop
+${RCAPPDIR}/rc_${SERV} stop
 nvram set ${SERV}_disable=1
 ;;
 esac
