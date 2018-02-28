@@ -1,7 +1,7 @@
 diff -urN work/openssh-7.6p1/rc_ssh work/openssh-7.6p1/rc_ssh
 --- work/openssh-7.6p1/rc_ssh	1970-01-01 01:00:00.000000000 +0100
 +++ work/openssh-7.6p1/rc_ssh	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,174 @@
+@@ -0,0 +1,203 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -15,33 +15,40 @@ diff -urN work/openssh-7.6p1/rc_ssh work/openssh-7.6p1/rc_ssh
 +#
 +# Rc script for openssh daemon sshd.
 +#
-+# Usage: $0 < start restart startforced restartforced stop regenkeys regenauth regenmoduli > (<debug>)
++# Usage: $0 < start restart startforced restartforced stop fwup remoteup fwdown remotedown regenkeys regenauth regenmoduli > (<debug>)
 +#
 +# <debug> runs sshd in foreground mode with pedantic debug messages.
 +#
 +
 +stop() {
-+    # Kill all clients...
++    # Kill all clients
 +    for PID in `pidof sshd`
 +    do
 +    [ -e /proc/${PID}/stat ] && kill -9 $PID
 +    done
 +    rm -rf ${VARDIR} /tmp/sshd.pid ${CONFDIR}/moduli
++
++    # Stop remote service
++    remotedown
 +}
 +
 +start() {
-+    # Checking if the service is already running...
-+    [ ! -z `pidof sshd` ] && echo "sshd already running..." && exit 1
++    # Checking if service is enabled
++    eval `nvram get ssh_enable` > /dev/null 2>&1
++    [ "${ssh_enable}" = "1" ] || [ ! -z "$1" ] || return 1
 +
-+    # Checking nvram dir...
++    # Checking if the service is already running
++    [ ! -z "`pidof sshd`" ] && echo "sshd already running..." && exit 1
++
++    # Checking nvram dir
 +    [ ! -d ${NVRAMDIR} ] && echo "$0: Nvram error !" && exit 2
 +
-+    # Preliminary fs operations...
++    # Preliminary fs operations
 +    [ ! -d ${VARDIR} ] && mkdir -p -m 0700 ${VARDIR}
 +    [ ! -f ${CONFDIR}/${CONF} ] && cp -f ${CONFETCDIR}/${CONF} ${CONFDIR}/
 +    [ -f ${KEYSDIR}/moduli ] && cp -f ${KEYSDIR}/moduli ${CONFDIR}/ && chmod 600 ${CONFDIR}/moduli
 +
-+    # Retrocompatibility...
++    # Retrocompatibility
 +    [ -d /.ssh ] && rm -rf /.ssh
 +
 +    # Renew auth login
@@ -52,19 +59,35 @@ diff -urN work/openssh-7.6p1/rc_ssh work/openssh-7.6p1/rc_ssh
 +    # Keys generation
 +    genkeys
 +
-+    # Starting SSHD...
++    # Starting 'sshd'
 +    $SSHD
 +
-+    # Sanity check...
++    # Sanity check
 +    SSHD_RC=$?
 +    [ $SSHD_RC -ne 0 ] && echo "$0: Error ${SSHD_RC} starting ${SSHD}..." && exit $SSHD_RC
++
++    # Starting remote service
++    remoteup
++}
++
++remotedown() {
++    # Stopping remote service
++    eval `nvram get ssh_remote_port` > /dev/null 2>&1
++    [ ! -z "${ssh_remote_port}" ] && ${ANC} fw remote del ls SSH tcp $ssh_remote_port 22
++}
++
++remoteup() {
++    # Checking if remote service is enabled
++    eval `nvram get ssh_remote_enable` > /dev/null 2>&1
++    eval `nvram get ssh_remote_port` > /dev/null 2>&1
++    [ ! -z "`pidof sshd`" ] && [ "${ssh_remote_enable}" = "1" ] && [ ! -z "${ssh_remote_port}" ] && ${ANC} fw remote add ls SSH tcp $ssh_remote_port 22
 +}
 +
 +genkeys() {
-+    # Preliminary fs operations...
++    # Preliminary fs operations
 +    [ -d ${TMPKEYSDIR} ] && rm -rf ${TMPKEYSDIR}
 +    [ ! -d ${KEYSDIR} ] && chown ${USR}:${USR} / ${CONFIG} ${NVRAMDIR} && chmod 0755 ${CONFIG} ${NVRAMDIR} && mkdir -p -m 0600 ${KEYSDIR}
-+    # Key check & generation if missed...
++    # Key check & generation if missed
 +    for KTYPE in $KEYTYPES
 +    do
 +    KEY=${KEYSDIR}/${LABEL}.${KTYPE}
@@ -99,7 +122,7 @@ diff -urN work/openssh-7.6p1/rc_ssh work/openssh-7.6p1/rc_ssh
 +    rm -f /tmp/moduli.all
 +    mv -f /tmp/moduli.safe ${KEYSDIR}/moduli
 +    sync
-+    [ "${ssh_enable}" = "1" ] && start
++    start
 +}
 +
 +# Dirs
@@ -127,52 +150,58 @@ diff -urN work/openssh-7.6p1/rc_ssh work/openssh-7.6p1/rc_ssh
 +AUTHKEYS=${KEYSDIR}/${AUTHKEYSNAME}
 +SSH_KEYGEN=${BINDIR}/ssh-keygen
 +SSHD=${BINDIR}/sshd
++ANC=${BINDIR}/anc
 +
 +# Debug running
 +[ "${2}" = "debug" ] && SSHD="${BINDIR}/sshd -D -ddd -e"
 +
-+eval `nvram get ssh_enable` > /dev/null 2>&1
-+
 +case $1 in
 +start|restart)
 +stop
-+[ "${ssh_enable}" = "1" ] && start
++start
 +;;
 +startforced|restartforced)
 +stop
-+start
++start $1
 +;;
 +stop)
 +stop
++;;
++fwup|remoteup)
++remotedown
++remoteup
++;;
++fwdown|remotedown)
++remotedown
 +;;
 +regenkeys)
 +stop
 +rm -f ${KEYSDIR}/${LABEL}.* ${AUTHKEYS}
 +sync
 +genkeys
-+[ "${ssh_enable}" = "1" ] && start
++start
 +;;
 +regenauth)
 +stop
 +genauth
-+[ "${ssh_enable}" = "1" ] && start
++start
 +;;
 +regenmoduli)
 +cat << _EOF_
 +'moduli' generation will take a very long time to finish with about 50% of cpu load.
 +Better to execute it while router is in an average low traffic state & usage.
 +
-+In alternative, consider the possibility of generating it from an external host machine
++Alternatively, consider the possibility of generating it from an external host machine
 +and then upload it on ${KEYSDIR} .
 +
 +Ssh server will be closed in the meanwhile.
-+Running in the background: this console session can exit.
++Running in the background in few seconds: later, this console session can exit.
 +_EOF_
-+sleep 15
++sleep 2
 +stop
 +genmoduli &
 +;;
 +*)
-+echo "Usage: $0 < start restart startforced restartforced stop regenkeys regenauth regenmoduli > (<debug>)"
++echo "Usage: $0 < start restart startforced restartforced stop fwup remoteup fwdown remotedown regenkeys regenauth regenmoduli > (<debug>)"
 +;;
 +esac

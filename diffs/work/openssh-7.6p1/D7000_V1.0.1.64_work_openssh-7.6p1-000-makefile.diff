@@ -1,11 +1,14 @@
 diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 --- work/openssh-7.6p1/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/openssh-7.6p1/Makefile	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,184 @@
+@@ -0,0 +1,192 @@
 +include ../Rules.mak
 +
 +BINS			:= $(OPEN_SSH)/sshd $(OPEN_SSH)/ssh-keygen $(OPEN_SSH)/scp
-+SCRIPTS			:= rc_ssh
++STARTUP			:= rc_ssh
++SCRIPTS			:= $(STARTUP)
++PRIOS			:= 10
++PRIOF			:= 10
 +SSHD_CONF		:= sshd_config
 +SSHD_KEYS_DIR		:= $(NVRAMDIR)/ssh
 +SSHD_CONF_INST_DIR	:= $(ETCDIR)
@@ -149,12 +152,12 @@ diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 +
 +install: control sshd_conf
 +	$(SSTRIP) $(BINS)
-+	install -m 0755 -d $(SSHD_CONF_INST_DIR)
-+	install -m 0755 -d $(BINDIR)
-+	install -m 0755 -d $(APPDIR)
++	for D in $(SSHD_CONF_INST_DIR) $(BINDIR) $(APPDIR) $(RCSDIR) $(FWDIR); do install -m 0755 -d $$D; done
 +	install -m 0644 $(SSHD_CONF) $(SSHD_CONF_INST_DIR)
 +	install -m 0755 $(BINS) $(BINDIR)
 +	install -m 0755 $(SCRIPTS) $(APPDIR)
++	ln -sf $(USRSBINRCAPP)/$(STARTUP) $(RCSDIR)/S$(PRIOS)sshd
++	ln -sf $(USRSBINRCAPP)/$(STARTUP) $(FWDIR)/F$(PRIOF)sshd
 +
 +clean:
 +	$(MAKE) -C $(OPEN_SSH) clean
@@ -177,12 +180,17 @@ diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 +
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
-+	@echo "$(RC) ssh start" >> $(POSTINST)
++	@echo "ln -sf $(USRSBINRCAPP)/$(STARTUP) $(TMPETC)/$(INITD)/$(RCSD)/S$(PRIOS)sshd" >> $(POSTINST)
++	@echo "ln -sf $(USRSBINRCAPP)/$(STARTUP) $(TMPETC)/$(INITD)/$(RCFW)/F$(PRIOF)sshd" >> $(POSTINST)
++	@echo "chown root:root / $(CONFDIR) $(NVRAMDIR)" >> $(POSTINST)
++	@echo "chmod 0755 $(CONFDIR) $(NVRAMDIR)" >> $(POSTINST)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +
 +prerm:
 +	@echo "#!/bin/sh" > $(PRERM)
-+	@echo "$(RC) ssh stop" >> $(PRERM)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop" >> $(PRERM)
++	@echo "rm -f $(TMPETC)/$(INITD)/$(RCSD)/S$(PRIOS)sshd $(TMPETC)/$(INITD)/$(RCFW)/F$(PRIOF)sshd" >> $(PRERM)
 +	@echo "exit 0" >> $(PRERM)
 +endif
 +
