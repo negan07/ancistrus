@@ -535,7 +535,7 @@ diff -urN work/nvram-0.1.0/nvram.h work/nvram-0.1.0/nvram.h
   * crc      = use crc-32                    
   * reserved = reserved 	                    
   */
-@@ -78,19 +92,27 @@
+@@ -78,19 +92,29 @@
  int nvram_commit(void);
  
  /*
@@ -549,6 +549,7 @@ diff -urN work/nvram-0.1.0/nvram.h work/nvram-0.1.0/nvram.h
  #define nvram_bcm_get(name) nvram_get_func(name,NVRAM_BCM_PATH)
 +char* nvram_get(const char *name);
  #define nvram_safe_get(msg) (nvram_get(msg)?:"")
++#define nvram_safedef_get(msg, def) (nvram_get(msg)?:def)
  #define nvram_bcm_safe_get(msg) (nvram_bcm_get(msg)?:"")
 -char* nvram_get(const char *name);
 +
@@ -561,11 +562,12 @@ diff -urN work/nvram-0.1.0/nvram.h work/nvram-0.1.0/nvram.h
  char* nvram_get_r(const char *name);
 +char* nvram_bcm_get_r(const char *name);
  #define nvram_safe_get_r(name) (nvram_get_r(name)?:strdup(""))
++#define nvram_safedef_get_r(name, def) (nvram_get_r(name)?:strdup(def))
 +#define nvram_bcm_safe_get_r(name) (nvram_bcm_get_r(name)?:strdup(""))
  
  /*
   * Match an NVRAM variable
-@@ -122,11 +144,89 @@
+@@ -122,11 +146,89 @@
   * NOTE: use nvram_commit to commit this change to flash.
   */
  int nvram_set(const char* name,const char* value);

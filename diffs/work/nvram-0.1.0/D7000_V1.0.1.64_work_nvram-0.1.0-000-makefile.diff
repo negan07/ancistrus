@@ -1,7 +1,7 @@
 diff -urN work/nvram-0.1.0/Makefile work/nvram-0.1.0/Makefile
 --- work/nvram-0.1.0/Makefile	2017-05-02 12:33:28.031781668 +0200
 +++ work/nvram-0.1.0/Makefile	2017-04-25 23:37:09.822096143 +0200
-@@ -1,35 +1,83 @@
+@@ -1,35 +1,45 @@
 -include ../../Rules.mak
 -CC=$(CROSS)gcc
 +include ../Rules.mak
@@ -59,49 +59,11 @@ diff -urN work/nvram-0.1.0/Makefile work/nvram-0.1.0/Makefile
  
 -install :
 -	cp -f libscnvram.so $(DESTLIB)
-+install: control
-+	install -m 0755 -d $(LIBDIR)
-+	cp -f $(LIBS) $(LIBDIR)
++install:
++	@echo "Nothing to install: install will be made by $(CORE_WORK) ."
  
  clean:
 -	rm -rf *~ *.o *.so nvram $(BINS)
 -	-rm -rf $(DESTLIB)/libscnvram.so
 +	rm -rf *~ *.o *.so $(LIBS)
-+
-+ifndef BUILD
-+control:
-+else
-+PREINST			:= $(CTRL_DIR)/preinst
-+POSTINST		:= $(CTRL_DIR)/postinst
-+PRERM			:= $(CTRL_DIR)/prerm
-+
-+control: preinst postinst prerm
-+
-+preinst:
-+	@echo "#!/bin/sh" > $(PREINST)
-+	@echo "[ -f $(LDLIB)/$(LIBS) ] && cp -f $(LDLIB)/$(LIBS) $(LDLIB)/$(LIBS).orig" >> $(PREINST)
-+	@echo "exit 0" >> $(PREINST)
-+
-+postinst:
-+	@echo "#!/bin/sh" > $(POSTINST)
-+	@echo "echo \"Testing nvram basic functionality...\"" >> $(POSTINST)
-+	@echo "echo" >> $(POSTINST)
-+	@echo "nvram set libnvram=working" >> $(POSTINST)
-+	@echo "eval \`nvram get libnvram\`" >> $(POSTINST)
-+	@echo "if [ \$$libnvram = working ]; then" >> $(POSTINST)
-+	@echo "nvram unset libnvram" >> $(POSTINST)
-+	@echo "echo \"$(LIBS) looking good\"" >> $(POSTINST)
-+	@echo "rm -f $(LDLIB)/$(LIBS).orig" >> $(POSTINST)
-+	@echo "exit 0" >> $(POSTINST)
-+	@echo "else" >> $(POSTINST)
-+	@echo "echo \"Something wrong: reverting to original $(LIBS) ...\"" >> $(POSTINST)
-+	@echo "[ -f $(LDLIB)/$(LIBS).orig ] && mv -f $(LDLIB)/$(LIBS).orig $(LDLIB)/$(LIBS)" >> $(POSTINST)
-+	@echo "exit 1" >> $(POSTINST)
-+	@echo "fi" >> $(POSTINST)
-+
-+prerm:
-+	@echo "#!/bin/sh" > $(PRERM)
-+	@echo "echo \"$(LIBS) builtin required: cannot uninstall...\"" >> $(PRERM)
-+	@echo "exit 1" >> $(PRERM)
-+endif
  
