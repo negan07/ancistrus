@@ -34,7 +34,8 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/image/D7000.par.work D7000_V1.0.1.64_WW_
 +:langpkg_SVE.img                        &02d00000
 +:langpkg_RUS.img                        &02e00000
 +:langpkg_ESP.img                        &02f00000
-+:langpkg_CSY.img                        &03000000
-+:opkg.img                              &03100000
++:init.d.img                             &03000000
++:opkg.img                               &03100000
++:xxx.img                                &03200000
 +%D7000.pid		                &00003fff
 +$size				        &10000
