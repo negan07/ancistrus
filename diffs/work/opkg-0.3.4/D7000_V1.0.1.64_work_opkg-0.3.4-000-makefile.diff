@@ -1,7 +1,7 @@
 diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 --- work/opkg-0.3.4/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/opkg-0.3.4/Makefile	2017-03-23 20:35:42.745736890 +0100
-@@ -0,0 +1,129 @@
+@@ -0,0 +1,152 @@
 +include ../Rules.mak
 +
 +ifdef DEBUG
@@ -14,6 +14,8 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +OPKG_CONF_PATH		:= $(OPKG)/utils
 +OPKG_CONF_NAME		:= opkg.conf
 +OPKG_CONF 		:= $(OPKG_CONF_PATH)/$(OPKG_CONF_NAME)
++OPKGLANGPART		:= /config/language_TUR
++OPKGPART		:= mtd20
 +
 +all: config
 +	$(MAKE) -C $(OPKG)
@@ -107,13 +109,29 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +control:
 +else
 +CONFFILES		:= $(CTRL_DIR)/conffiles
++PREINST			:= $(CTRL_DIR)/preinst
 +POSTINST		:= $(CTRL_DIR)/postinst
 +POSTRM			:= $(CTRL_DIR)/postrm
 +
-+control: conffiles postinst postrm
++control: conffiles preinst postinst postrm
 +
 +conffiles:
 +	@echo "$(USRETC)/$(OPKG_CONF_NAME)" > $(CONFFILES)
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "[ -f $(OPKG_INFO_STATUS_DIR)/status ] && exit 0" >> $(PREINST)
++	@echo "echo \"Preparing $(OPKG) package installation...\"" >> $(PREINST)
++	@echo "echo" >> $(PREINST)
++	@echo "echo \"Mounting opkg info & status files partition...\"" >> $(PREINST)
++	@echo "[ ! -d $(OPKG_INFO_STATUS_DIR) ] && mkdir -m 0777 $(OPKG_INFO_STATUS_DIR)" >> $(PREINST)
++	@echo "umount $(OPKG_INFO_STATUS_DIR) > /dev/null 2>&1" >> $(PREINST)
++	@echo "umount $(OPKGLANGPART) > /dev/null 2>&1" >> $(PREINST)
++	@echo "mount -n -t jffs2 $(OPKGPART) $(OPKG_INFO_STATUS_DIR)" >> $(PREINST)
++	@echo "[ \$$? -ne 0 ] && echo \"Problem has occurred: opkg partition not mounted.\" && exit 1" >> $(PREINST)
++	@echo "rm -rf $(OPKG_INFO_STATUS_DIR)/*" >> $(PREINST)
++	@echo "sync" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
 +
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
@@ -122,12 +140,17 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +	@echo "echo \"$(OPKG) configuration on: $(TMPETC)/$(OPKG_CONF_NAME)\"" >> $(POSTINST)
 +	@echo "echo" >> $(POSTINST)
 +	@echo "echo \"Type: 'opkg update' to update packages list\"" >> $(POSTINST)
-+	@echo "echo \"Type: 'opkg help' to see the options\"" >> $(POSTINST)
++	@echo "echo \"Type: 'opkg list' to see the list of the available packages\"" >> $(POSTINST)
++	@echo "echo \"Type: 'opkg list-installed' to see the list of the already installed packages\"" >> $(POSTINST)
++	@echo "echo \"Type: 'opkg install <packagename>' to install a package\"" >> $(POSTINST)
++	@echo "echo \"Type: 'opkg help' to see all the options\"" >> $(POSTINST)
++	@echo "echo" >> $(POSTINST)
++	@echo "echo \"Example: 'opkg install qos-sqm' to install qos-sqm scripts package\"" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +
 +postrm:
 +	@echo "#!/bin/sh" > $(POSTRM)
-+	@echo "rm -rf $(TMPDIR)/opkg/cache $(TMPDIR)/opkg/lists" >> $(POSTRM)
++	@echo "rm -rf $(TMPDIR)/opkg" >> $(POSTRM)
 +	@echo "exit 0" >> $(POSTRM)
 +endif
 +
