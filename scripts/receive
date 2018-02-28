@@ -11,7 +11,7 @@
 #
 # Receive script: prepare debug environment on running router.
 #
-# Usage: $0 <core> <ko> <qos> <web> <del> <*anyfiledir*>
+# Usage: $0 <core> <ko> <qos> <ssh> <www> <del> <*anyfiledir*>
 #
 # An http(s), or (s)ftp server must be run on local i386 host.
 # On local host i386 machine it must be placed into http(s) or (s)ftp root server dir $DEBUG_DIR .
@@ -29,14 +29,24 @@
 #
 
 NAME=anc
+CGI=${NAME}.cgi
 THISONE=receive
 SERVER=https								# kind of server: http or ftp
 ADDR=192.168.0.7							# local host ip (development pc machine i386)
 RDIR=/tmp/etc								# this script location
-DBGDIR=$RDIR/${NAME}dbg							# debug dir
-LANGDIR=www.eng								# www dir
-CGI=$NAME.cgi								# actual cgi name
-BINLIST="libscnvram.so $NAME"						# main binary files
+WWW=/www.eng								# www dir
+DBGDIR=${RDIR}/${NAME}dbg						# debug dir
+BINLIST="profile libscnvram.so $NAME led.sh dslreconfig.sh"		# core main files
+KINITLIST="kernelprocskill.sh printserverkill.sh Kopt.sh"		# core kinit files
+SINITLIST="Sopt.sh"							# core sinit files
+FINITLIST="Fopt.sh"							# core fw services
+CINITLIST=""								# core schedule services
+PRELIST="rc_disable_pre debug_mode_pre"					# core pre files
+POSTLIST="wan_post schedule_post wlan_post firewall_post"		# core post files
+SERVLIST="apple check_conn check_fw dnrd dnshj iserver led_ctrl ntp potcounter printk schedule show_mem_log syslogd xCloud" # inhibit services
+WWWMAINLIST="top.html adv_index.htm top.js advanced.js"			# main webpages
+WWWCSSLIST="top.css"							# main css
+WWWLIST="${NAME}_index.htm ${NAME}_home.htm"				# common webpages
 KOLIST="sch_fq_codel.ko act_ipt.ko cls_flow.ko sch_hfsc.ko"		# kernel modules
 QOSLIST="functions.qos legacy_funcs.qos qdisc_funcs.qos qos_funcs.qos qos-sqm.conf rc_qos"	# qos scripts and configs
 SSHLIST="rc_ssh sshd_config sshd ssh-keygen scp"			# openssh bins scripts and configs
@@ -47,7 +57,7 @@ mkdir -p -m 0755 $DBGDIR > /dev/null 2>&1
 }
 
 THISLNK() {								# create a symlink to this
-ln -sf $RDIR/$THISONE $DBGDIR/$THISONE > /dev/null 2>&1
+ln -sf ${RDIR}/${THISONE} ${DBGDIR}/${THISONE} > /dev/null 2>&1
 }
 
 GET() {									# www get a file from the $ADDR server
@@ -70,15 +80,24 @@ cd $DBGDIR
 THISLNK
 }
 
-[ $# -ne "1" ] && echo "Usage: $0 <core> <ko> <qos> <ssh> <web> <del> <*anyfiledir*>" && exit 1
+[ $# -ne 1 ] && echo "Usage: $0 <core> <ko> <qos> <ssh> <www> <del> <*anyfiledir*>" && exit 1
 
 export LD_LIBRARY_PATH=$DBGDIR
-ln -sf /usr/sbin/rc $DBGDIR/rc > /dev/null 2>&1
-ln -sf /usr/sbin/rc_app/rc_apps $DBGDIR/rc_apps > /dev/null 2>&1
 
 	case $1 in
 	core)
-	GETLIST $BINLIST
+	for G in $BINLIST $KINITLIST $SINITLIST $FINITLIST $CINITLIST $PRELIST $POSTLIST; do GETLIST $G; done
+	for D in rcS.d rc.pre rc.post rc.fw rc.sch; do mkdir -p -m 0755 ${DBGDIR}/init.d/${D} > /dev/null 2>&1; done
+	mv -f $KINITLIST $SINITLIST $FINITLIST $CINITLIST ${DBGDIR}/init.d/
+	mv -f *_pre ${DBGDIR}/init.d/rc.pre/
+	mv -f *_post ${DBGDIR}/init.d/rc.post/
+	for P in $SERVLIST; do ln -sf rc_disable_pre ${DBGDIR}/init.d/rc.pre/${P}_pre; done
+	I=1; for K in $KINITLIST; do ln -sf ../$K ${DBGDIR}/init.d/rcS.d/K0${I}${K}; let I++; done
+	J=1; for S in $SINITLIST; do ln -sf ../$S ${DBGDIR}/init.d/rcS.d/S0${J}${S}; let J++; done
+	L=1; for F in $FINITLIST; do ln -sf ../$F ${DBGDIR}/init.d/rc.fw/F0${L}${F}; let L++; done
+	M=1; for C in $CINITLIST; do ln -sf ../$C ${DBGDIR}/init.d/rc.sch/C0${M}${C}; let M++; done
+	ln -sf ${DBGDIR}/${NAME} ${RDIR}/rc_apps > /dev/null 2>&1
+	[ ! -f ${RDIR}/profile ] && mv -f ${DBGDIR}/profile ${RDIR}/
 	;;
 	ko)
 	GETLIST $KOLIST
@@ -87,23 +106,30 @@ ln -sf /usr/sbin/rc_app/rc_apps $DBGDIR/rc_apps > /dev/null 2>&1
 	GETLIST $QOSLIST
 	;;
 	ssh)
+	cp -f ${RDIR}/sshd_config ${RDIR}/sshd_config.old > /dev/null 2>&1
 	GETLIST $SSHLIST
 	mv -f ${DBGDIR}/sshd_config ${RDIR}
+	ln -sf ${DBGDIR}/rc_ssh ${DBGDIR}/init.d/rc.fw/F10ssh
 	;;
-	web)
-	DIRMAKE
-	cd $DBGDIR
-	rm -rf ${DBGDIR}/${LANGDIR}
-	GET ${LANGDIR}.zip
-	unzip ${LANGDIR}.zip
-	rm -f ${LANGDIR}.zip
-	chmod -R 755 $LANGDIR
-	ln -sf ${DBGDIR}/${CGI} ${RDIR}/${CGI} > /dev/null 2>&1
-	GETLIST $BINLIST
+	www)
+	for G in $BINLIST $WWWMAINLIST $WWWCSSLIST $CSSLIST $WWWLIST; do GETLIST $G; done	
+	mkdir -p -m 0755 ${DBGDIR}${WWW}
+	mv -f $WWWMAINLIST $WWWCSSLIST $WWWLIST ${DBGDIR}${WWW}/
+	for F in ${WWWMAINLIST}; do [ -f ${WWW}/${F}.orig ] && continue; mv -f ${WWW}/${F} ${WWW}/${F}.orig; ln -sf ${DBGDIR}${WWW}/${F} ${WWW}/${F}; done
+	for F in ${WWWCSSLIST}; do [ -f ${WWW}/style/${F}.orig ] && continue; mv -f ${WWW}/style/${F} ${WWW}/style/${F}.orig; ln -sf ${DBGDIR}${WWW}/${F} ${WWW}/style/${F}; done
+	for F in ${WWWLIST}; do [ -f ${WWW}/${F} ] && continue; ln -sf ${DBGDIR}${WWW}/${F} ${WWW}/${F}; done
+	ln -sf ${DBGDIR}/${NAME} ${RDIR}/${CGI} > /dev/null 2>&1
+	[ ! -f ${WWW}/${CGI} ] && ln -sf ${RDIR}/${CGI} ${WWW}/${CGI} > /dev/null 2>&1
 	;;
 	del)
 	cd $RDIR
-	rm -rf $DBGDIR /var/ssh
+	rm -rf $DBGDIR
+	pidof sshd > /dev/null 2>&1 || rm -rf /var/ssh
+	mv -f ${RDIR}/sshd_config.old ${RDIR}/sshd_config > /dev/null 2>&1
+	[ -x /usr/sbin/${NAME} ] && ln -sf /usr/sbin/${NAME} ${RDIR}/rc_apps > /dev/null 2>&1 || ln -sf /usr/sbin/rc_app/rc_apps ${RDIR}/rc_apps > /dev/null 2>&1
+	for F in ${WWWMAINLIST}; do [ -f ${WWW}/${F}.orig ] && mv -f ${WWW}/${F}.orig ${WWW}/${F}; done
+	for F in ${WWWCSSLIST}; do [ -f ${WWW}/style/${F}.orig ] && mv -f ${WWW}/style/${F}.orig ${WWW}/style/${F}; done
+	for F in ${WWWLIST}; do [ -f ${WWW}/${F} ] && rm -f ${WWW}/${F}; done
 	;;
 	*)
 	DIRMAKE
