@@ -144,7 +144,7 @@ measure_direction() {
 	do
 		netperf $TESTPROTO -H $TESTHOST -t $dir -l $TESTDUR -v 0 -P 0 >> $SPEEDFILE &
 		# echo "Starting PID $! params: $TESTPROTO -H $TESTHOST -t $dir -l $TESTDUR -v 0 -P 0 >> $SPEEDFILE"
-		I=$(( $I + 1 ))
+		let I++
 	done
 	
 	# Wait until each of the background netperf processes completes 
@@ -152,7 +152,7 @@ measure_direction() {
 	# echo `pgrep -P $$ netperf `
 
 #	for i in `pgrep -P $$ netperf `		# gets a list of PIDs for child processes named 'netperf'
-	for i in `ps ax | awk '{sub(/.*\//, "", $5)} $5 ~ /netperf/ {print $1}'` # gets a list of PIDs for processes named 'netperf'
+	for i in `pidof netperf`		# gets a list of PIDs for processes named 'netperf'
 	do
 		#echo "Waiting for $i"
 		wait $i

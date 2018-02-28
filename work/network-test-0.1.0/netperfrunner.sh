@@ -193,7 +193,7 @@ while [ $I -le $MAXSESSIONS ]
 do
 	netperf $TESTPROTO -H $TESTHOST -t TCP_STREAM -l $TESTDUR -v 0 -P 0 >> $ULFILE &
 	# echo "Starting upload #$i $!"
-	I=$(( $I + 1 ))
+	let I++
 done
 
 # Start $MAXSESSIONS download datastreams from netperf server to the client
@@ -203,7 +203,7 @@ while [ $I -le $MAXSESSIONS ]
 do
 	netperf $TESTPROTO -H $TESTHOST -t TCP_MAERTS -l $TESTDUR -v 0 -P 0 >> $DLFILE &
 	# echo "Starting download #$i $!"
-	I=$(( $I + 1 ))
+	let I++
 done
 
 # Wait until each of the background netperf processes completes 
@@ -211,9 +211,9 @@ done
 # echo `pgrep -P $$ netperf `
 
 #for i in `pgrep -P $$ netperf`		# get a list of PIDs for child processes named 'netperf'
-for i in `ps ax | awk '{sub(/.*\//, "", $5)} $5 ~ /netperf/ {print $1}'` # get a list of PIDs for processes named 'netperf'
+for i in `pidof netperf`		# gets a list of PIDs for processes named 'netperf'
 do
-	# echo "Waiting for $i"
+	#echo "Waiting for $i"
 	wait $i
 done
 

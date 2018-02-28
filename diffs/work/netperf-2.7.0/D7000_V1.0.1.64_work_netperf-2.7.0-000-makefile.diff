@@ -1,11 +1,12 @@
 diff -urN work/netperf-2.7.0/Makefile work/netperf-2.7.0/Makefile
 --- work/netperf-2.7.0/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/netperf-2.7.0/Makefile	2017-03-23 20:35:45.893669092 +0100
-@@ -0,0 +1,46 @@
+@@ -0,0 +1,25 @@
 +include ../Rules.mak
 +
 +all: config
 +	$(MAKE) -C $(NETPERF)
++	$(SSTRIP) $(NETPERF)/src/netperf
 +
 +config:
 +	@if [ ! -f h_config ]; then \
@@ -16,10 +17,8 @@ diff -urN work/netperf-2.7.0/Makefile work/netperf-2.7.0/Makefile
 +configure:
 +	cd $(NETPERF) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --target=$(TARGET_NAME) CFLAGS="$(CFLAGS) -fcommon -Os" --disable-sctp --enable-omni
 +
-+install: control
-+	$(SSTRIP) $(NETPERF)/src/netperf
-+	install -m 0755 -d $(BINDIR)
-+	install -m 0755 $(NETPERF)/src/netperf $(BINDIR)
++install:
++	@echo "Nothing to install: install will be made by $(NETWORKTEST) ."
 +
 +clean:
 +	$(MAKE) -C $(NETPERF) clean
@@ -27,24 +26,4 @@ diff -urN work/netperf-2.7.0/Makefile work/netperf-2.7.0/Makefile
 +distclean:
 +	@rm -f h_config
 +	$(MAKE) -C $(NETPERF) distclean
-+
-+ifndef BUILD
-+control:
-+else
-+PREINST			:= $(CTRL_DIR)/preinst
-+PRERM			:= $(CTRL_DIR)/prerm
-+
-+control: preinst prerm
-+
-+preinst:
-+	@echo "#!/bin/sh" > $(PREINST)
-+	@echo "killall -9 netperf > /dev/null 2>&1" >> $(PREINST)
-+	@echo "exit 0" >> $(PREINST)
-+
-+prerm:
-+	@echo "#!/bin/sh" > $(PRERM)
-+	@echo "killall -9 netperf > /dev/null 2>&1" >> $(PRERM)
-+	@echo "exit 0" >> $(PRERM)
-+
-+endif
 +
