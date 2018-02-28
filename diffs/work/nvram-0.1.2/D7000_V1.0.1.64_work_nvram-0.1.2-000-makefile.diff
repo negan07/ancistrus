@@ -1,6 +1,6 @@
-diff -urN work/nvram-0.1.0/Makefile work/nvram-0.1.0/Makefile
---- work/nvram-0.1.0/Makefile	2017-05-02 12:33:28.031781668 +0200
-+++ work/nvram-0.1.0/Makefile	2017-04-25 23:37:09.822096143 +0200
+diff -urN work/nvram-0.1.2/Makefile work/nvram-0.1.2/Makefile
+--- work/nvram-0.1.2/Makefile	2017-05-02 12:33:28.031781668 +0200
++++ work/nvram-0.1.2/Makefile	2017-04-25 23:37:09.822096143 +0200
 @@ -1,35 +1,45 @@
 -include ../../Rules.mak
 -CC=$(CROSS)gcc
