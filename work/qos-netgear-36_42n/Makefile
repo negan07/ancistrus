@@ -1,16 +1,16 @@
 include ../Rules.mak
 
-RC_QOS			:= rc_qos
+STARTUP			:= rc_qos
 
 all:
 	@echo "Nothing to do: run 'make install' to install."
 
 install: control
 	install -m 0755 -d $(APPDIR)
-	@if [ -f $(RC_QOS) ] && [ -x $(RC_QOS) ]; then \
-	$(SSTRIP) $(RC_QOS); \
-	install -m 0755 $(RC_QOS) $(APPDIR); \
-	ln -sf $(RC_QOS) $(APPDIR)/rc_buffer_bloat; \
+	@if [ -f $(STARTUP) ] && [ -x $(STARTUP) ]; then \
+	$(SSTRIP) $(STARTUP); \
+	install -m 0755 $(STARTUP) $(APPDIR); \
+	ln -sf $(STARTUP) $(APPDIR)/rc_buffer_bloat; \
 	fi
 
 clean: 
@@ -28,23 +28,23 @@ control: preinst postinst prerm postrm
 
 preinst:
 	@echo "#!/bin/sh" > $(PREINST)
-	@echo "$(RC) qos stop" >> $(PREINST)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) stop" >> $(PREINST)
 	@echo "exit 0" >> $(PREINST)
 
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
-	@echo "$(RC) qos restart" >> $(POSTINST)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
 prerm:
 	@echo "#!/bin/sh" > $(PRERM)
-	@echo "$(RC) qos stop" >> $(PRERM)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) stop" >> $(PRERM)
 	@echo "exit 0" >> $(PRERM)
 
 postrm:
 	@echo "#!/bin/sh" > $(POSTRM)
-	@echo "ln -sf $(TMPETC)/$(RCAPPSBIN) $(USRSBINRCAPP)/$(RC_QOS)" >> $(POSTRM)
-	@echo "$(RC) qos restart" >> $(POSTRM)
+	@echo "ln -sf $(TMPETC)/$(RCAPPSBIN) $(USRSBINRCAPP)/$(STARTUP)" >> $(POSTRM)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTRM)
 	@echo "exit 0" >> $(POSTRM)
 endif
 

@@ -1,7 +1,7 @@
 include ../Rules.mak
 
 QOS_KO			:= act_ipt.ko cls_flow.ko sch_fq_codel.ko sch_hfsc.ko
-RC_QOS			:= rc_qos
+STARTUP			:= rc_qos
 
 all:
 	@echo "Nothing to do: run 'make install' to install."
@@ -14,7 +14,7 @@ install: control
 	install -m 0644 *.conf $(ETCDIR)
 	@$(foreach Q, $(QOS_KO), install -m 0755 $(KERNEL_DIR)/net/sched/$(Q) $(MODDIR) || exit 1; $(STRIP) $(STRIPKOFLAGS) $(MODDIR)/$(Q);)
 	install -m 0755 *.qos $(SCRDIR)
-	install -m 0755 $(RC_QOS) $(APPDIR)
+	install -m 0755 $(STARTUP) $(APPDIR)
 
 clean: 
 	@echo "Nothing to clean"
@@ -31,24 +31,24 @@ control: preinst postinst prerm postrm
 
 preinst:
 	@echo "#!/bin/sh" > $(PREINST)
-	@echo "$(RC) qos stop" >> $(PREINST)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) stop" >> $(PREINST)
 	@echo "exit 0" >> $(PREINST)
 
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
-	@echo "$(RC) qos restart" >> $(POSTINST)
-	@echo "echo \"Type '$(USRSBINRCAPP)/$(RC_QOS) help' to see the options & settings\"" >> $(POSTINST)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTINST)
+	@echo "echo \"Type '$(USRSBINRCAPP)/$(STARTUP) help' to see the options & settings\"" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
 prerm:
 	@echo "#!/bin/sh" > $(PRERM)
-	@echo "$(RC) qos stop" >> $(PRERM)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) stop" >> $(PRERM)
 	@echo "exit 0" >> $(PRERM)
 
 postrm:
 	@echo "#!/bin/sh" > $(POSTRM)
-	@echo "ln -sf $(TMPETC)/$(RCAPPSBIN) $(USRSBINRCAPP)/$(RC_QOS)" >> $(POSTRM)
-	@echo "$(RC) qos restart" >> $(POSTRM)
+	@echo "ln -sf $(TMPETC)/$(RCAPPSBIN) $(USRSBINRCAPP)/$(STARTUP)" >> $(POSTRM)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTRM)
 	@echo "exit 0" >> $(POSTRM)
 endif
 
