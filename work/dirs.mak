@@ -18,7 +18,7 @@ DESC_$(NVRAM)		:= Enhanced shared libscnvram
 DIRLIST			+= $(NVRAM)
 # CORE
 CORE_WORK_NAME		:= $(PROJECT_NAME)-core
-VER_$(CORE_WORK_NAME)	:= 0.1.2
+VER_$(CORE_WORK_NAME)	:= 0.9.2
 CORE_WORK		:= $(CORE_WORK_NAME)-$(VER_$(CORE_WORK_NAME))
 NAME_$(CORE_WORK)	:= $(CORE_WORK_NAME)$(DBG)
 VER_$(CORE_WORK)	:= $(VER_$(CORE_WORK_NAME))
@@ -28,8 +28,8 @@ HOME_$(CORE_WORK)	:= $(GITHUB_DIR)
 LIC_$(CORE_WORK)	:= $(LICENSE_NAME)
 SEC_$(CORE_WORK)	:= thirdparty
 PRIO_$(CORE_WORK)	:= required
-DEP_$(CORE_WORK)	:= $(NAME_$(NVRAM))
-DESC_$(CORE_WORK)	:= Main work tool
+DEP_$(CORE_WORK)	:= 
+DESC_$(CORE_WORK)	:= Main work tool & enhanced nvram lib
 # UTELNETD
 UTELNETD_NAME		:= utelnetd
 VER_$(UTELNETD_NAME)	:= 0.1.11
@@ -90,8 +90,8 @@ HOME_$(NETWORKTEST)	:= https://github.com/richb-hanover/CeroWrtScripts
 LIC_$(NETWORKTEST)	:= GPLv2
 SEC_$(NETWORKTEST)	:= thirdparty
 PRIO_$(NETWORKTEST)	:= optional
-DEP_$(NETWORKTEST)	:= $(NAME_$(NETPERF))
-DESC_$(NETWORKTEST)	:= Enhanced network stress and network speed test scripts
+DEP_$(NETWORKTEST)	:= 
+DESC_$(NETWORKTEST)	:= Enhanced network stress & speed test scripts based on netperf
 # XDSL DRIVER ORIG
 XDSL_042N_NAME		:= xdsl-driver-orig
 VER_$(XDSL_042N_NAME)	:= 042n
@@ -146,7 +146,7 @@ HOME_$(QOS_SQM_OLD)	:= https://github.com/tohojo/sqm-scripts
 LIC_$(QOS_SQM_OLD)	:= GPLv2
 SEC_$(QOS_SQM_OLD)	:= thirdparty
 PRIO_$(QOS_SQM_OLD)	:= standard
-DEP_$(QOS_SQM_OLD)	:= $(NAME_$(NVRAM)),$(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
+DEP_$(QOS_SQM_OLD)	:= $(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
 DESC_$(QOS_SQM_OLD)	:= Quality Of Service CeroWrt old legacy script tool
 # QOS SQM
 QOS_SQM_NAME		:= qos-sqm
@@ -160,7 +160,7 @@ HOME_$(QOS_SQM)		:= https://github.com/guidosarducci/sqm-scripts
 LIC_$(QOS_SQM)		:= GPLv2
 SEC_$(QOS_SQM)		:= thirdparty
 PRIO_$(QOS_SQM)		:= standard
-DEP_$(QOS_SQM)		:= $(NAME_$(NVRAM)),$(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
+DEP_$(QOS_SQM)		:= $(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
 DESC_$(QOS_SQM)		:= Quality Of Service CeroWrt new fork script tool
 # OPENSSL (REDIRECT TO ORIG)
 OPENSSL_NAME		:= openssl
@@ -230,7 +230,7 @@ HOME_$(OPKG)		:= https://code.google.com/archive/p/opkg/
 LIC_$(OPKG)		:= GPLv2
 SEC_$(OPKG)		:= thirdparty
 PRIO_$(OPKG)		:= required
-DEP_$(OPKG)		:= zlib
+DEP_$(OPKG)		:= 
 DESC_$(OPKG)		:= Lightweight package management system
 DIRLIST			+= $(OPKG)
 TARLIST			+= $(OPKG)
@@ -310,7 +310,7 @@ HOME_$(OPEN_SSH)	:= https://www.openssh.com/
 LIC_$(OPEN_SSH)		:= BSD, ISC
 SEC_$(OPEN_SSH)		:= thirdparty
 PRIO_$(OPEN_SSH)	:= optional
-DEP_$(OPEN_SSH)		:= zlib
+DEP_$(OPEN_SSH)		:= $(NAME_$(ZLIB)),$(NAME_$(CORE_WORK))
 DESC_$(OPEN_SSH)	:= Free SSH protocol suite providing encryption for network services
 DIRLIST			+= $(OPEN_SSH)
 TARLIST			+= $(OPEN_SSH)
@@ -349,5 +349,5 @@ SUBDIRS			+= $(THIRDPARTYLIB)
 SUBDIRS			+= $(BUILTIN)
 SUBDIRS			+= $(THIRDPARTY)
 # SKIP FROM IPK CREATION
-PKG_RM_LIST		:= $(LIBARCHIVE) $(OPKG_UTILS) $(LZO) $(NETPERF)
+PKG_RM_LIST		:= $(NVRAM) $(LIBARCHIVE) $(OPKG_UTILS) $(LZO) $(NETPERF)
 

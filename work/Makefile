@@ -19,7 +19,9 @@ endif
 
 ifdef BUILD
 BUILD_DIR_PATH		:= $(GIT_ROOT)/$(OPKG_PKG_DIR)
-BUILD_TMP		:= $(BUILD_DIR_PATH)/tmp
+BUILD_TMP		:= $(BUILD_DIR_PATH)$(RCTMPDIR)
+BUILD_TARGET		:= $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)
+IMAGEDIR		:= $(SRC_PATH_NAME)/$(SRC_IMAGE_REL_DIR)
 CTRL_DIR_PATH		:= $(BUILD_TMP)/CONTROL
 CTRL			:= $(CTRL_DIR_PATH)/control
 CTRL_SCRIPTS		:= preinst postinst prerm postrm
@@ -50,14 +52,15 @@ opkg-local: creat_rules prepare
 	fi
 
 ifdef BUILD
+monolithic: build pre_inst opkg_inst post_inst
+
 build: prepare_package build_package build_index
 
 prepare_package: creat_rules
 	@[ -d $(BUILD_DIR_PATH) ] || mkdir -p -m 0755 $(BUILD_DIR_PATH) || exit 1;
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): prepare package \\e[36m$D \\e[0m"; \
 	rm -rf $(BUILD_DIR_PATH)/$(D) $(BUILD_TMP); \
-	mkdir -p -m 0755 $(BUILD_TMP) || exit 1; \
-	mkdir -p -m 0755 $(CTRL_DIR_PATH) || exit 1; \
+	mkdir -p -m 0755 $(BUILD_TMP) $(CTRL_DIR_PATH) || exit 1; \
 	echo "Package: $(NAME_$(D))"					> $(CTRL); \
 	echo "Version: $(VER_$(D))"					>> $(CTRL); \
 	echo "Depends: $(DEP_$(D))"					>> $(CTRL); \
@@ -92,31 +95,40 @@ build_index:
 	@cd $(BUILD_DIR_PATH); ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-make-index -a $(BUILD_DIR_PATH) > Packages || exit 1; \
 	gzip -qf Packages || exit 1; gzip -qt Packages.gz || exit 1;
 
-monolithic: build
-	@echo -e "\\e[35m$(CUR_REL_PATH): creating opkg info/status partition dir on \\e[36m$(SRC_PATH_NAME)/$(SRC_IMAGE_REL_DIR) \\e[0m"
-	@mkdir -p -m 777 $(SRC_PATH_NAME)/$(SRC_IMAGE_REL_DIR)/opkg || exit 1
-	@echo -e "\\e[35m$(CUR_REL_PATH): making FS modifications on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
-	@[ -x $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT) ] && echo >> $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT)
-	@echo "# $(PROJECT_NAME)" >> $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT)
-	@echo "$(RCRAMBOOTDIR)/$(RCAUX_NAME)" >> $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCBOOT)
-	@cp ../$(SCRIPTS_DIR)/$(RCAUX_NAME) $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCAUX) || exit 1
-	@mkdir -p -m 777 $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(OPKG_INFO_STATUS_DIR) || exit 1
-	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
+pre_inst:
+	@echo -e "\\e[35m$(CUR_REL_PATH): creating partition dir \\e[36m$(RCINITD) \\e[0m"
+	@mkdir -p -m 777 $(IMAGEDIR)/$(RCINITD) $(BUILD_TARGET)$(RCINITDIR) || exit 1
+	@echo -e "\\e[35m$(CUR_REL_PATH): creating partition dir \\e[36mopkg \\e[0m"
+	@mkdir -p -m 777 $(IMAGEDIR)/opkg $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR) || exit 1
+
+opkg_inst:
+	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(BUILD_TARGET) \\e[0m"
 	@[ -x $(GIT_ROOT)/$(LBIN_DIR)/opkg ] || exit 1
 	@[ -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf ] || exit 1
 	@$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf update || exit 1
 	@$(foreach P, $(SUBDIRS), echo "$(PKG_RM_LIST)" | grep "$(P)" > /dev/null 2>&1 || \
 	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf install $(NAME_$(P)) || exit 1;)
-	@echo -e "\\e[35m$(CUR_REL_PATH): making FS post install modifications on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
-	@[ ! -f $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(OPKG_INFO_STATUS_DIR)/info/zlib.control ] || \
-	rm $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCLDLIB)/libz.so.1.2.3 || exit 1
-	@[ ! -f $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCTMPDIR)/adsl_phy.bin ] || \
-	mv $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCTMPDIR)/adsl_phy.bin $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(RCADSLDIR)/ || exit 1
-	@[ ! -f $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(OPKG_INFO_STATUS_DIR)/info/xdsl-driver-new.control ] || \
+
+post_inst:
+	@echo -e "\\e[35m$(CUR_REL_PATH): making FS post install modifications on \\e[36m$(BUILD_TARGET) \\e[0m"
+	@[ ! -f $(BUILD_TARGET)$(RCTMPDIR)/adsl_phy.bin ] || mv $(BUILD_TARGET)$(RCTMPDIR)/adsl_phy.bin $(BUILD_TARGET)$(RCADSLDIR)/ || exit 1
+	@[ ! -f $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/info/xdsl-driver-new.control ] || \
 	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf remove xdsl-driver-new || exit 1
-	@echo -e "\\e[35m$(CUR_REL_PATH): moving opkg info/status dir and removing tmp on \\e[36m$(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR) \\e[0m"
-	@mv $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)$(OPKG_INFO_STATUS_DIR)/* $(SRC_PATH_NAME)/$(SRC_IMAGE_REL_DIR)/opkg || exit 1
-	@rm -rf $(SRC_PATH_NAME)/$(SRC_TARGET_REL_DIR)/tmp/*
+	@mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCBOOT_NAME) $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1
+	@mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCNVRAMSO) $(BUILD_TARGET)$(RCLDLIB)/ || exit 1
+	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBOOTDIR)/$(RCAPPSNAME) || exit 1
+	@mv $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMDBIN) || exit 1
+	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) || exit 1
+#	@echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mmain web pages \\e[0m"
+#	@$(foreach F, $(RCMAINWEB), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWDIR)/$(F) || exit 1;)
+#	@$(foreach F, $(RCCSSWEB), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWCSSDIR)/$(F) || exit 1;)
+	@echo -e "\\e[35m$(CUR_REL_PATH): old lib references removal on \\e[36m$(BUILD_TARGET) \\e[0m"
+	@[ ! -f $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/info/zlib.control ] || rm $(BUILD_TARGET)$(RCLDLIB)/libz.so.1.2.3 || exit 1
+	@echo -e "\\e[35m$(CUR_REL_PATH): moving $(RCINITD) & opkg dirs content from \\e[36m$(BUILD_TARGET) \\e[0m"
+	@mv $(BUILD_TARGET)$(RCINITDIR)/* $(IMAGEDIR)/$(RCINITD) || exit 1
+	@mv $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/* $(IMAGEDIR)/opkg || exit 1
+	@echo -e "\\e[35m$(CUR_REL_PATH): removing tmp files from \\e[36m$(BUILD_TARGET) \\e[0m"
+	@rm -rf $(BUILD_TARGET)$(RCTMPDIR)/*
 
 clean_build:
 	@if [ -d $(BUILD_DIR_PATH) ]; then \

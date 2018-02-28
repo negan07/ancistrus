@@ -3,8 +3,12 @@ export RCBIN		:= rc
 export RCAPP		:= rc_app
 export RCAPPSBIN	:= rc_apps
 export RCSSCR		:= rcS
-export RCSD		:= $(RCSSCR).d
 export INITD		:= init.d
+export RCSD		:= $(RCSSCR).d
+export RCPRE		:= rc.pre
+export RCPOST		:= rc.post
+export RCFW		:= rc.fw
+export RCSCH		:= rc.sch
 # RELEASE + DEBUG
 ifndef LOCAL
 PROFILE_ARCH		:= $(CPU_ARCH)
@@ -16,60 +20,72 @@ export USRDIR		:= /usr
 ifndef DEBUG
 # ROOT DIRS
 export LDLIB		:= /lib
-export NVRAMDIR		:= /config/nvram
-export TMPINSTDIR	:= $(PREFIX)$(TMPDIR)
+export CONFDIR		:= /config
+export NVRAMDIR		:= $(CONFDIR)/nvram
 export ETCADSL		:= $(TMPETC)/adsl
 export USRETC		:= $(USRDIR)$(TMPETC)
 export USRETCADSL	:= $(USRETC)/adsl
 export USRETCINITD	:= $(USRETC)/$(INITD)
 export USRETCINITDRCSD	:= $(USRETCINITD)/$(RCSD)
-export USRETCINITDPRE	:= $(USRETCINITD)/rc.pre
-export USRETCINITDPOST	:= $(USRETCINITD)/rc.post
+export USRETCINITDPRE	:= $(USRETCINITD)/$(RCPRE)
+export USRETCINITDPOST	:= $(USRETCINITD)/$(RCPOST)
+export USRETCINITDFW	:= $(USRETCINITD)/$(RCFW)
+export USRETCINITDSCH	:= $(USRETCINITD)/$(RCSCH)
 export USRSBIN		:= $(USRDIR)/sbin
 export USRSBINSCR	:= $(USRSBIN)/scripts
 export USRSBINRCAPP	:= $(USRSBIN)/$(RCAPP)
+export WWW		:= /www.eng
 # ROOT BINS
 export RC		:= $(USRSBIN)/$(RCBIN)
 export RCAPPS		:= $(USRSBINRCAPP)/$(RCAPPSBIN)
 # INSTALL DIRS
+export TMPINSTDIR	:= $(PREFIX)$(TMPDIR)
 export ETCDIR		:= $(PREFIX)$(USRETC)
 export ADSLDIR		:= $(ETCDIR)/adsl
 export INITDIR		:= $(ETCDIR)/$(INITD)
 export RCSDIR		:= $(INITDIR)/$(RCSD)
-export PREDIR		:= $(INITDIR)/rc.pre
-export POSTDIR		:= $(INITDIR)/rc.post
+export PREDIR		:= $(INITDIR)/$(RCPRE)
+export POSTDIR		:= $(INITDIR)/$(RCPOST)
+export FWDIR		:= $(INITDIR)/$(RCFW)
+export SCHDIR		:= $(INITDIR)/$(RCSCH)
 export BINDIR		:= $(PREFIX)$(USRSBIN)
 export APPDIR		:= $(BINDIR)/$(RCAPP)
 export SCRDIR		:= $(BINDIR)/scripts
 export LIBDIR		:= $(PREFIX)/$(LDLIB)
 export MODDIR		:= $(LIBDIR)/modules
-export WWWDIR		:= $(PREFIX)/www.eng
+export WWWDIR		:= $(PREFIX)$(WWW)
 # DEBUG
 else
 # ROOT DIRS
 export LDLIB		:= $(RECEIVE_DIR)
+export CONFDIR		:= $(RECEIVE_DIR)
 export NVRAMDIR		:= $(RECEIVE_DIR)
-export TMPINSTDIR	:= $(RECEIVE_DIR)
 export ETCADSL		:= $(RECEIVE_DIR)
 export USRETC		:= $(RECEIVE_DIR)
 export USRETCADSL	:= $(RECEIVE_DIR)
 export USRETCINITD	:= $(RECEIVE_DIR)/$(INITD)
 export USRETCINITDRCSD	:= $(USRETCINITD)/$(RCSD)
-export USRETCINITDPRE	:= $(USRETCINITD)/rc.pre
-export USRETCINITDPOST	:= $(USRETCINITD)/rc.post
+export USRETCINITDPRE	:= $(USRETCINITD)/$(RCPRE)
+export USRETCINITDPOST	:= $(USRETCINITD)/$(RCPOST)
+export USRETCINITDFW	:= $(USRETCINITD)/$(RCFW)
+export USRETCINITDSCH	:= $(USRETCINITD)/$(RCSCH)
 export USRSBIN		:= $(RECEIVE_DIR)
 export USRSBINSCR	:= $(RECEIVE_DIR)
 export USRSBINRCAPP	:= $(RECEIVE_DIR)
+export WWW		:= $(RECEIVE_DIR)/$(WWW)
 # ROOT BINS
 export RC		:= $(RECEIVE_DIR)/$(RCBIN)
 export RCAPPS		:= $(RECEIVE_DIR)/$(RCAPPSBIN)
 # INSTALL DIRS
+export TMPINSTDIR	:= $(PREFIX)
 export ETCDIR		:= $(PREFIX)
 export ADSLDIR		:= $(PREFIX)
 export INITDIR		:= $(PREFIX)
 export RCSDIR		:= $(PREFIX)
 export PREDIR		:= $(PREFIX)
 export POSTDIR		:= $(PREFIX)
+export FWDIR		:= $(PREFIX)
+export SCHDIR		:= $(PREFIX)
 export BINDIR		:= $(PREFIX)
 export APPDIR		:= $(PREFIX)
 export SCRDIR		:= $(PREFIX)
@@ -86,34 +102,40 @@ export TMPETC		:= $(TMPDIR)/etc
 export VARLIB		:= $(PREFIX)/var
 export USRDIR		:= $(PREFIX)/usr
 export LDLIB		:= $(PREFIX)/lib
-export NVRAMDIR		:= $(PREFIX)/config/nvram
-export TMPINSTDIR	:= $(TMPDIR)
+export CONFDIR		:= $(PREFIX)/config
+export NVRAMDIR		:= $(CONFDIR)/nvram
 export ETCADSL		:= $(TMPETC)/adsl
 export USRETC		:= $(USRDIR)/etc
 export USRETCADSL	:= $(USRETC)/adsl
 export USRETCINITD	:= $(USRETC)/$(INITD)
 export USRETCINITDRCSD	:= $(USRETCINITD)/$(RCSD)
-export USRETCINITDPRE	:= $(USRETCINITD)/rc.pre
-export USRETCINITDPOST	:= $(USRETCINITD)/rc.post
+export USRETCINITDPRE	:= $(USRETCINITD)/$(RCPRE)
+export USRETCINITDPOST	:= $(USRETCINITD)/$(RCPOST)
+export USRETCINITDFW	:= $(USRETCINITD)/$(RCFW)
+export USRETCINITDSCH	:= $(USRETCINITD)/$(RCSCH)
 export USRSBIN		:= $(USRDIR)/sbin
 export USRSBINSCR	:= $(USRSBIN)/scripts
 export USRSBINRCAPP	:= $(USRSBIN)/$(RCAPP)
+export WWW		:= $(PREFIX)/$(WWW)
 # ROOT BINS
 export RC		:= $(USRSBIN)/$(RCBIN)
 export RCAPPS		:= $(USRSBINRCAPP)/$(RCAPPSBIN)
 # INSTALL DIRS
+export TMPINSTDIR	:= $(TMPDIR)
 export ETCDIR		:= $(TMPETC)
 export ADSLDIR		:= $(TMPETC)/adsl
 export INITDIR		:= $(TMPETC)/$(INITD)
 export RCSDIR		:= $(INITDIR)/$(RCSD)
-export PREDIR		:= $(INITDIR)/rc.pre
-export POSTDIR		:= $(INITDIR)/rc.post
+export PREDIR		:= $(INITDIR)/$(RCPRE)
+export POSTDIR		:= $(INITDIR)/$(RCPOST)
+export FWDIR		:= $(INITDIR)/$(RCFW)
+export SCHDIR		:= $(INITDIR)/$(RCSCH)
 export BINDIR		:= $(USRSBIN)
 export APPDIR		:= $(BINDIR)/$(RCAPP)
 export SCRDIR		:= $(BINDIR)/scripts
 export LIBDIR		:= $(LDLIB)
 export MODDIR		:= $(LIBDIR)/modules
-export WWWDIR		:= $(PREFIX)/www.eng
+export WWWDIR		:= $(PREFIX)$(WWW)
 endif
 # SOURCE DIRS
 export SHARED_DIR 	:= $(SOURCE_PATH)/Source/shared
