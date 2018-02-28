@@ -1,17 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h>
 #include "nvram.h"
 #include "ancistrus.h"
 
-/*
- * NVRAM
- * Use the nvram shared obj lib routines: useful on bash scripts.
- * Act as /usr/sbin/nvram with some differences & all the enhancement modifications made on scnvram lib.
- */
-void nvram(MAINARGS);
-
-void nvram(MAINARGS) {
+int nvram(MAINARGS) {
 enum { HELP, SHOW, DEFSHOW, BCMSHOW, RGET, GET, BCMRGET, BCMGET, SET, BCMSET, UNSET, BCMUNSET, ADD, APPEND, DELETE, INSERT, CHANGE, RESET, INIT, COMMIT };
 OPTIONS = { {"show", 3, 0}, {"defshow", 3, 0}, {"bcmshow", 3, 0}, {"rget", 4, 1}, {"get", 4, 1}, {"bcmrget", 4, 1}, {"bcmget", 4, 1}, {"set", 5, 2}, {"bcmset", 5, 2}, {"unset", 4, 1}, {"bcmunset", 4, 1}, {"add", 5, 1}, {"append", 5, 1}, {"delete", 5, 1}, {"insert", 5, 1}, {"change", 6, 1}, {"reset", 3, 0}, {"init", 3, 0}, {"commit", 3, 0} };
 unsigned int i=0, j=0;
@@ -33,7 +27,7 @@ SEARCHOPT
 	puts(var);
 	SFREE(var);
 	break;
-	case GET:  //get a var series (name=val): output is ready for `eval` cmd
+	case GET:  //get a var series (name=val)
 	PARLOOP printf("%s=%s\n", PAR[j], NV_SGET(PAR[j]));
 	break;
 	case BCMRGET:  //get a bcmvar (in reentrant safe mode): no loop for this, use BCMGET instead
@@ -41,14 +35,14 @@ SEARCHOPT
 	puts(var);
 	SFREE(var);
 	break;
-	case BCMGET:  //eval get a bcmvar series (name=val): output is ready for `eval` cmd
+	case BCMGET:  //eval get a bcmvar series (name=val)
 	PARLOOP printf("%s=%s\n", PAR[j], NV_BSGET(PAR[j]));
 	break;
 	case SET:  //set vars (on ram only)
 	PARLOOP nvram_set(PAR[j], PAR[j+1]);  //if PAR[j+1]=="" set nvram value to void ('var=')
 	break;
 	case BCMSET:  //set bcmvars (on ram only)
-	PARLOOP nvram_set(PAR[j], PAR[j+1]);  //if PAR[j+1]=="" set nvram value to void ('var=')
+	PARLOOP nvram_bcm_set(PAR[j], PAR[j+1]);  //if PAR[j+1]=="" set nvram.bcm value to void ('var=')
 	break;
 	case UNSET:  //unset vars (on ram only)
 	PARLOOP nvram_unset(PAR[j]);
@@ -85,18 +79,35 @@ SEARCHOPT
 	default:  //show usage help (case 0:)
 	USAGE
 	}
+return i;
 }
 
-int main(int argc, const char** argv) {
-const struct {						//procedure list
-const char *NAME;					//name called as argv[x] string
-void (*PROC)(MAINARGS);					//prototype
-} OPT[] = { {"nvram", nvram} };
+int nvtotxt(int argc, char** argv) {
+char *nv, *s;
+
+if(argc<3) return 1;
+nv=NV_SGET(argv[2]);
+for(s=nv;*s;s++) if(*s==DIVISION_SYMBOL) *s=CR_SYMBOL;			//substitute 'division' with 'carriage return'
+if(*nv) puts(nv);
+return 0;
+}
+
+int main(int argc, char** argv) {
+const struct {
+const char *NAME;							//name called as argv[x] string
+int (*FUNC)(MAINARGS);							//prototype func (same as NAME without brackets)
+} OPT[] = { FUNCAVAIL };						//function list
+char *corename;
 unsigned int i;
 
+DBG("main(): my name is %s\n", argv[0]);
+corename=basename(argv[0]);
+//if(!strcmp(corename, CGI)) return i=cgi(argc, argv);			//core working as 'anc.cgi' web gui
+//if(!strcmp(corename+1, DSLCMD)) return i=dslctl(argc, argv);		//core working as 'adslctl' or 'xdslctl'
+//if(strcmp(corename, ME)) return i=rc_apps(argc, argv);			//core working as 'rc_apps'
 if(argc < 2) MAIN_USAGE(1)
 OPTLOOP if(!strcmp(argv[1], OPT[i-1].NAME)) break;
-if(i) OPT[i-1].PROC(argc, argv);			//reflection simulation: run argv[1]() procedure
+if(i) i=OPT[i-1].FUNC(argc, argv);					//reflection simulation: run argv[1]() func
 else MAIN_USAGE(2)
 return 0;
 }
