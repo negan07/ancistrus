@@ -79,7 +79,7 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
 +orig: clean_img clean_target pre_fs apps drivers prefs fs img
  
 -all: build_test
-+$(WORK_DIR_NAME): clean_img clean_target pre_fs apps drivers third-party prefs_$(WORK_DIR_NAME) prefs fs img
++$(WORK_DIR_NAME): clean_img clean_target pre_fs apps drivers third-party prefs fs img
  
 -build_test: pre_fs apps drivers prefs fs img
 +clean_all: clean_uclibc clean_apps clean_third-party clean_target clean_img
@@ -92,7 +92,7 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
  
  pre_fs:
  	rm -rf target
-@@ -94,263 +62,155 @@
+@@ -94,263 +62,163 @@
  	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
  	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
  	cd target/lib; ln -sf libscnvram.so libconfig.so
@@ -103,6 +103,17 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
 +	if [ -x $D/$$F ] && [ ! -d $D/$$F ] && [ ! -L $D/$$F ] && [ -z `echo $$F | grep "\.so"` ] && [ -z `echo $$F | grep "\.sh"` ]; then \
 +	$(SSTRIP) $D/$$F; fi; done;)
 +	$(SSTRIP) target/opt/rcagent/downloader
++	@echo -e "\\e[35mSOURCE: PRE_FS \\e[36mgarbage orphans cleanup\\e[0m"
++	-find $(FS_DIR) -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1
++	-@$(foreach F, "*.gz" "*DGND*.jpg" "rcS.MT" "telnetenabled" "vw_*" "vpn_*" "h_vpn*" "h_vauto*" "h_vman*" "index1.htm" "start1.htm" "*_demo.htm" "start_old_style.htm", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
++	mogrify -format jpg $(FS_DIR)/www.eng/image/apmodelink.jpg
++ifeq ($(ANNEX),A)
++	-@$(foreach D, "CSY" "TUR" , find $(FS_DIR) -type d -name $(D) -exec rm -rf '{}' \; > /dev/null 2>&1;)
++	-@$(foreach F, "Czech.js" , find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
++else
++	-@$(foreach D, "CHS" "ITA" "KOR" "ESP", find $(FS_DIR) -type d -name $(D) -exec rm -rf '{}' \; > /dev/null 2>&1;)
++	-@$(foreach F, "Chinese.js" "Italian.js" "Korean.js" "Spanish.js", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
++endif
  ifeq ($(ITUNES_SERVER),1)
 -	make -C uClibc-0.9.32/
 +	@echo -e "\\e[35mSOURCE: make \\e[36mUCLIBC \\e[0m"
@@ -172,30 +183,19 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
  ifeq ($(MTCODE),1)
 -IMG_NAME=$(IMAGE_DIR)/$(BOARD_ID)-V$(VER)_$(SUB_VER)_MT.img
 +IMG_NAME=$(BOARD_ID)-V$(VER)_$(SUB_VER)_MT.img
- endif
- 
++endif
++
 +WORK_PROJECT=$(shell cd ../..; basename -s .git `git config --get remote.origin.url` || basename `pwd` | tr -d -c [:alpha:];)
 +WORK_WWW=$(shell cd ../..; git config --get remote.origin.url || echo "local";)
 +WORK_AUTHOR=$(shell cd ../..; git log --max-count=1 --pretty='format:%an' || pwd | sed 's/\// /g' | awk '{printf $$2}';)
 +WORK_AUTHOR_EMAIL=$(shell cd ../..; git log --max-count=1 --pretty='format:%ae' || echo "email@void.com";)
 +WORK_VER=$(shell cd ../..; git rev-list --count HEAD || basename `pwd` | tr -d -c [:digit:];)
 +BUILDING_DATE=$(shell date -u '+%Y-%m-%d %H:%M')
-+GIT_INFO=$(FS_DIR)/usr/etc/$(WORK_PROJECT)_git.info
 +
 +ifneq ($(ORIG),1)
 +IMG_NAME=$(BOARD_ID)-$(VERSION)-$(WORK_PROJECT)_$(WORK_AUTHOR)-build-$(WORK_VER).img
-+endif
-+
-+prefs_$(WORK_DIR_NAME):
-+	echo Project Name: $(WORK_PROJECT) > $(GIT_INFO)
-+	echo Homepage: $(WORK_WWW) >> $(GIT_INFO)
-+	echo Revision Author: $(WORK_AUTHOR) - $(WORK_AUTHOR_EMAIL) >> $(GIT_INFO)
-+	echo Build Revision Author Number: $(WORK_VER) >> $(GIT_INFO)
-+	echo Building Date: $(BUILDING_DATE) UTC >> $(GIT_INFO)
-+	echo Model: $(BOARD_ID) >> $(GIT_INFO)
-+	echo Firmware: V$(VER)_$(SUB_VER) >> $(GIT_INFO)
-+	ln -sf /etc/$(WORK_PROJECT)_git.info $(FS_DIR)/www.eng/$(WORK_PROJECT)_git.info
-+
+ endif
+ 
  prefs:
  	# Generate version
 -	echo $(ETCVERSION) > $(FS_DIR)/usr/etc/version	
@@ -283,12 +283,23 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
 -	./gen_lang.sh ./UI/dgnd3700v2_genie/www.multi_v2.3/langs  || exit 1
 -else
 -	./gen_lang.sh ./UI/wnr2500_multi/www.multi_v2.3/langs  || exit 1
--endif
--
++ifneq ($(ORIG),1)
++	# $(WORK_PROJECT) $(SVN_INFO) additions...
++	echo "" >> $(SVN_INFO)
++	echo "# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #" >> $(SVN_INFO)
++	echo "" >> $(SVN_INFO)
++	echo "Project Name: $(WORK_PROJECT)" >> $(SVN_INFO)
++	echo "Homepage: $(WORK_WWW)" >> $(SVN_INFO)
++	echo "Revision Author: $(WORK_AUTHOR)" >> $(SVN_INFO)
++	echo "Email: $(WORK_AUTHOR_EMAIL)" >> $(SVN_INFO)
++	echo "Build Revision Author Number: $(WORK_VER)" >> $(SVN_INFO)
++	echo "Building Date: $(BUILDING_DATE) UTC" >> $(SVN_INFO)
+ endif
+ 
 -
 -# Geneate filesystem image from target
 -FAKEROOT_SH=$(ROOT)/fakeroot.sh
- 
+-
  fs:
  	$(STRIP) -d target/lib/modules/*.ko
  	@echo -e "\\e[35mSOURCE: make \\e[36mFS \\e[0m"	
@@ -317,9 +328,10 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
 -ifeq ($(ANNEX),B)	
 -	mkdir -p -m 777 $(FS_DIR)/config/language_CSY
 -	mkdir -p -m 777 $(FS_DIR)/config/language_TUR
-+	@$(foreach D, "factory" "nvram" "xxx", mkdir -p -m 777 $(FS_DIR)/config/$(D);)
++	@echo -e "\\e[35mSOURCE: FS \\e[36mcreating CONFIG dirs\\e[0m"
++	@$(foreach D, "factory" "nvram" "xxx", mkdir -p -m 755 $(FS_DIR)/config/$(D);)
 +ifeq ($(ANNEX),A)
-+	@$(foreach D, "ENU" "DEU" "RUS" "FRA" "NLD" "SVE" "CHS" "ITA" "KOR" "ESP", mkdir -p -m 777 $(FS_DIR)/config/language_$(D);)
++	@$(foreach D, "ENU" "DEU" "RUS" "FRA" "NLD" "SVE" "CHS" "ITA" "KOR" "ESP", mkdir -p -m 755 $(FS_DIR)/config/language_$(D);)
  else
 -	mkdir -p -m 777 $(FS_DIR)/config/language_CHS
 -	mkdir -p -m 777 $(FS_DIR)/config/language_ITA
@@ -327,9 +339,7 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
 -	mkdir -p -m 777 $(FS_DIR)/config/language_ESP
 -endif	
 -	mkdir -p -m 777 $(FS_DIR)/config/xxx
-+	@$(foreach D, "ENU" "DEU" "RUS" "FRA" "NLD" "SVE" "CSY" "TUR", mkdir -p -m 777 $(FS_DIR)/config/language_$(D);)
-+endif
- 	chmod 777 $(FS_DIR)/config
+-	chmod 777 $(FS_DIR)/config
 -#	chmod -w $(FS_DIR)/usr/etc/fstab
 -#	ls -l $(DPF)
 -#	cp -f $(DPF) $(FS_DIR)/.
@@ -346,14 +356,13 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
 -	$(HOSTTOOLS_DIR)/bcmImageBuilder --output $(IMAGE_DIR)/bcm963xx_fs_kernel --chip $(CHIP_ID) --board "963281TAN" --blocksize $(BLOCKSIZE) --image-version 4101GW0701531 --cfefile $(LOADER) --rootfsfile $(FS_NAME) --kernelfile $(KERNEL) 
 -#	$(HOSTTOOLS_DIR)/bcmImageBuilder --output $(IMAGE_DIR)/bcm963xx_fs_kernel --chip $(CHIP_ID) --board "9$(CHIP_ID)GW" --blocksize $(BLOCKSIZE) --cfefile $(LOADER) --rootfsfile $(FS_NAME) --kernelfile  $(KERNEL)
 -#	rm -f $(FS_NAME)
-+	@echo -e "\\e[35mSOURCE: FS \\e[36mgarbage orphans cleanup\\e[0m"
-+	-find $(FS_DIR) -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1
-+	@$(foreach F, "*.gz" "*DGND*.jpg" "rcS.MT" "telnetenabled", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
-+	mogrify -format jpg $(FS_DIR)/www.eng/image/apmodelink.jpg
++	@$(foreach D, "ENU" "DEU" "RUS" "FRA" "NLD" "SVE" "CSY" "TUR", mkdir -p -m 755 $(FS_DIR)/config/language_$(D);)
++endif
++	chmod 755 $(FS_DIR)/config
 +	@echo -e "\\e[35mSOURCE: FS \\e[36mcreated\\e[0m"
  endif
- 
 -
+ 
  img:
 -	@echo -e "\\e[35mSOURCE: make \\e[36mIMG \\e[0m"	
 +	@echo -e "\\e[35mSOURCE: make \\e[36mIMG \\e[0m"
@@ -368,10 +377,10 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
 -	@echo
 -	@echo -e "Done! Image $(BOARD_ID).img has been built in $(IMAGE_DIR)."
 +	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(FS_DIR) -o $(IMAGE_DIR)/rootfs.img -N $(TARGET_HOME)/nocomprlist
-+#	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/EMPTY -o $(IMAGE_DIR)/empty.img -N $(TARGET_HOME)/nocomprlist
-+#	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/languages -o $(IMAGE_DIR)/langpkg.img -N $(TARGET_HOME)/nocomprlist
 +ifneq ($(ORIG),1)
++	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/init.d -o $(IMAGE_DIR)/init.d.img -N $(TARGET_HOME)/nocomprlist
 +	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/opkg -o $(IMAGE_DIR)/opkg.img -N $(TARGET_HOME)/nocomprlist
++	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/EMPTY -o $(IMAGE_DIR)/xxx.img -N $(TARGET_HOME)/nocomprlist
 +	cp -f $(IMAGE_DIR)/$(BOARD_ID).par.$(WORK_DIR_NAME) $(IMAGE_DIR)/$(BOARD_ID).par
  else
 -#ifeq ($(FLASH),2M)
@@ -415,7 +424,6 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
 -	cd $(ZIP3G_DIR) && ./zip3g.sh
 +	rm $(TARGET_HOME)/nocomprlist
 +	cd $(IMAGE_DIR) ; ./bb $(BOARD_ID) || exit 1
-+#	cd $(IMAGE_DIR) ; ./bb_dual $(BOARD_ID)_dual || exit 1
 +	cd $(IMAGE_DIR) ; cp -f $(BOARD_ID).img ../../../$(IMG_NAME)
 +	@echo
 +	@echo -e "\\e[35mDone! Image \\e[36m$(IMG_NAME) has been built.\\e[0m"
@@ -447,5 +455,5 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
  
 +clean_img:
 +	@echo -e "\\e[35mIMG: \\e[36mclean \\e[0m"
-+	-rm -rf $(IMAGE_DIR)/opkg* $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/empty.img $(IMAGE_DIR)/langpkg.img $(IMAGE_DIR)/$(BOARD_ID).par $(IMAGE_DIR)/$(BOARD_ID).info $(IMAGE_DIR)/$(BOARD_ID).zip $(IMAGE_DIR)/$(BOARD_ID).bin $(IMAGE_DIR)/$(BOARD_ID)*.img
++	-rm -rf $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/init.d* $(IMAGE_DIR)/opkg* $(IMAGE_DIR)/empty.img $(IMAGE_DIR)/langpkg.img $(IMAGE_DIR)/$(BOARD_ID).par $(IMAGE_DIR)/$(BOARD_ID).info $(IMAGE_DIR)/$(BOARD_ID).zip $(IMAGE_DIR)/$(BOARD_ID).bin $(IMAGE_DIR)/$(BOARD_ID)*.img
 +
