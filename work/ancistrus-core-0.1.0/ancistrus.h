@@ -105,6 +105,11 @@ exit(3);													\
 #define LF_SYMBOL 13
 
 #define FUNCAVAIL							/* array of args functions */		\
+{"oldwanip", oldwanip},												\
+{"wanip", wanip},												\
+{"oldgateway", oldgateway},											\
+{"gateway", gateway},												\
+{"fw", fw},													\
 {"nvtotxt", nvtotxt},												\
 {"nvram", nvram}
 
@@ -131,7 +136,7 @@ int nvtotxt(MAINARGS);
  * Input: argc, argv .
  * Return: last executed cmd exit code or '1' in case of pre-script inhibition or RCAPPS exec fail.
  */
-//int rc_apps(MAINARGS);
+int rc_apps(MAINARGS);
 
 /*
  * GATEWAY
@@ -139,7 +144,7 @@ int nvtotxt(MAINARGS);
  * Input: argc, argv .
  * Return: '0' .
  */
-//int gateway(MAINARGS);
+int gateway(MAINARGS);
 
 /*
  * OLDGATEWAY
@@ -147,7 +152,7 @@ int nvtotxt(MAINARGS);
  * Input: argc, argv .
  * Return: '0' .
  */
-//int oldgateway(MAINARGS);
+int oldgateway(MAINARGS);
 
 /*
  * WANIP
@@ -155,7 +160,7 @@ int nvtotxt(MAINARGS);
  * Input: argc, argv .
  * Return: '0' .
  */
-//int wanip(MAINARGS);
+int wanip(MAINARGS);
 
 /*
  * OLDWANIP
@@ -163,7 +168,7 @@ int nvtotxt(MAINARGS);
  * Input: argc, argv .
  * Return: '0' .
  */
-//int oldwanip(MAINARGS);
+int oldwanip(MAINARGS);
 
 /*
  * FW
@@ -173,7 +178,7 @@ int nvtotxt(MAINARGS);
  * Input: argc, argv .
  * Return: '0' if success, '1' if error occurred.
  */
-//int fw(MAINARGS);
+int fw(MAINARGS);
 
 /*
  * DSLCTL
@@ -183,5 +188,5 @@ int nvtotxt(MAINARGS);
  * Input: argc, argv .
  * Return: '0' if cmd running success, '1' if error occurred.
  */
-//int dslctl(MAINARGS);
+int dslctl(MAINARGS);
 

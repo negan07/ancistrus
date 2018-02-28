@@ -103,8 +103,8 @@ unsigned int i;
 DBG("main(): my name is %s\n", argv[0]);
 corename=basename(argv[0]);
 //if(!strcmp(corename, CGI)) return i=cgi(argc, argv);			//core working as 'anc.cgi' web gui
-//if(!strcmp(corename+1, DSLCMD)) return i=dslctl(argc, argv);		//core working as 'adslctl' or 'xdslctl'
-//if(strcmp(corename, ME)) return i=rc_apps(argc, argv);			//core working as 'rc_apps'
+if(!strcmp(corename+1, DSLCMD)) return i=dslctl(argc, argv);		//core working as 'adslctl' or 'xdslctl'
+if(strcmp(corename, ME)) return i=rc_apps(argc, argv);			//core working as 'rc_apps'
 if(argc < 2) MAIN_USAGE(1)
 OPTLOOP if(!strcmp(argv[1], OPT[i-1].NAME)) break;
 if(i) i=OPT[i-1].FUNC(argc, argv);					//reflection simulation: run argv[1]() func
