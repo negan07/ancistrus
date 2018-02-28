@@ -1,0 +1,218 @@
+#!/bin/sh
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts:/usr/sbin/rc_app
+
+UTC=yes
+
+# Mount proc sys ram dev usb fs
+mount -n -t proc proc /proc
+mount -n -t sysfs sysfs /sys
+for M in home tmp mnt dev; do mount -n -t ramfs ramfs /${M}; done
+mkdir /dev/pts
+mount -t devpts devpts /dev/pts
+mount -t usbfs none /proc/bus/usb/
+
+# Mount Sercomm dirs
+mount -n -t jffs2 "mtd:factory" /config/factory
+mount -n -t jffs2 "mtd:scnvram" /config/nvram
+mount -n -t jffs2 "mtd:xxx" /config/xxx
+
+# Mount language dirs
+for L in ENU CHS RUS DEU FRA NLD SVE ITA KOR ESP; do mount -n -t jffs2 "mtd:language_${L}" /config/language_${L}; done
+
+# Mount init.d runlevel startup partition in place of annexB lang: "mtd:language_CSY"
+mount -n -t jffs2 mtd19 /usr/etc/init.d
+
+# Mount opkg info & status files partition in place of annexB lang: "mtd:language_TUR"
+mount -n -t jffs2 mtd20 /usr/lib/opkg
+
+# Build var & some etc directories
+mkdir -m 0777 /tmp/var /var/lock /var/log /var/run /var/tmp /var/w /tmp/etc /mnt/shares /var/run/bftpd /tmp/nv /tmp/w /tmp/itunes /var/run/dbus /var/run/down /var/run/lock 
+mkdir -m 0755 /etc/dnrd
+
+# Copy etc & dev dirtrees into ram
+cp -a /usr/etc/* /etc/
+cp -a /usr/dev/* /dev/
+
+# Insert main modules
+mount -t jffs2 "mtd:data" /data
+insmod /lib/modules/bdmf.ko bdmf_chrdev_major=215
+for M in rdpa_gpl rdpa rdpa_mw chipinfo bcmxtmrtdrv bcmxtmcfg pktflow pktrunner adsldd bcm_enet nciTMSkmod bcmvlan pwrmngtd rdpa_cmd_tm rdpa_cmd_spdsvc rdpa_cmd_ds_wan_udp_filter rdpa_cmd_drv; do insmod /lib/modules/${M}.ko; done
+
+# Insert led modules
+for M in led_pb_api led_hw; do insmod /lib/modules/${M}.ko; done
+
+# Disable Broadcom LED control
+echo 0300 > /proc/led
+
+# LED show we are booting...
+led_app on 71
+
+# Insert firewall modules
+for M in ipt_REJECT ipt_condition ipt_http_string ipt_dnshj ipt_DLOG xt_ct_dir cnapt_core cnapt cpt cpm calg cdmz cudp hairpin natlimit; do insmod /lib/modules/${M}.ko; done
+
+# Insert paragon ntfs module
+insmod /lib/modules/ufsd.ko
+
+# Insert ipv6 modules
+for M in ip6_tables ip6table_filter ip6table_raw ip6table_mangle nf_defrag_ipv6 nf_conntrack_ipv6; do insmod /lib/modules/${M}.ko; done
+
+# Insert SPI firewall modules
+/etc/do.sh
+
+# Add for vpn
+mknod /dev/spu c 233 0
+insmod /lib/modules/ipt_vpntrigger.ko
+spuctl start
+
+# Insert wifi modules
+for M in wfd wlcsm wlemf wl; do insmod /lib/modules/${M}.ko; done
+
+# Insert usb storage modules
+for M in libata libahci ahci bcm63xx_sata ahci_platform ehci-hcd ohci-hcd xhci-hcd bcm63xx_usb; do insmod /lib/modules/${M}.ko; done
+
+# Start brcm switch
+swmdk &
+sleep 2
+
+# Stamp lan start time
+cp /proc/uptime /tmp/lan_uptime
+
+# Loopback config
+ifconfig lo 127.0.0.1
+route add -net 127.0.0.0 netmask 255.0.0.0 lo
+
+# Force IGMP version 3
+echo "3" > /proc/sys/net/ipv4/conf/all/force_igmp_version
+
+# Various
+cp -f /usr/sbin/setupwizard.cgi /tmp/setupwizard.cgi
+klogd&
+cmd_agent_ap
+
+# IPV6
+echo 2 > /proc/sys/net/ipv6/conf/all/forwarding
+echo 1 > /proc/sys/net/ipv6/conf/all/autoconf
+echo 1 > /proc/sys/net/ipv6/conf/default/autoconf
+# Set default, do not autoconf with RA pinfo (prefix info)
+echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+echo 0 > /proc/sys/net/ipv6/conf/all/accept_ra_pinfo
+echo 0 > /proc/sys/net/ipv6/conf/default/accept_ra_pinfo
+
+# Mount from /etc/fstab if any
+mount -a
+sleep 1
+
+# Check if nvram partition is mounted correctly otherwise erase it and revert to default settings
+if [ ! -e '/config/nvram/ready' ]; then
+echo "mount scnvram failed, calling eraseall " > /dev/console
+umount /config/nvram
+flash_eraseall -j /dev/mtd3
+mount -n -t jffs2 "mtd:scnvram" /config/nvram
+touch /config/nvram/ready
+fi
+
+# Sanity check additional downloadable language partition: same as before
+if [ ! -e '/config/xxx/ready' ]; then
+umount /config/xxx
+flash_eraseall -j /dev/mtd8
+mount -n -t jffs2 "mtd:xxx" /config/xxx
+touch /config/xxx/ready
+fi
+echo "=============mount finished " > /dev/console
+
+# Switch setup
+I=0; while [ $I -le 3 ]; do ethswctl -c pause -p $I -v 1; let I++; done
+
+# Init services
+/usr/sbin/rc_app/rc_init
+scfgmgr&
+
+# Start services
+echo "=============rc start " > /dev/console
+rc start
+echo "=============rc finish " > /dev/console
+
+# Various
+rc upnp start
+crond &
+multi_pb_app 90 91 92 10 40&
+wlevt
+
+# Route add for upnpd
+route add -net 239.0.0.0 netmask 255.0.0.0 br0
+
+# Router
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+# Pppox
+echo 1 > /proc/sys/net/ipv4/ip_dynaddr
+
+# Arp ignore
+echo 1 > /proc/sys/net/ipv4/conf/all/arp_ignore
+
+# Add more conntrack
+echo 65536 > /proc/sys/net/nf_conntrack_max
+echo 16384 > /sys/module/nf_conntrack/parameters/hashsize
+echo 16384 > /proc/sys/net/netfilter/nf_conntrack_buckets
+echo 256 > /proc/sys/net/netfilter/nf_conntrack_expect_max
+
+# Extend port range
+echo 1025 65535 > /proc/sys/net/ipv4/ip_local_port_range
+
+# Ignore_all not yet used: this should be satisfactory
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+
+# Set to 1 for lan static route, when wan is not up and ip_forward is 0.
+echo 1 > /proc/sys/net/ipv4/conf/br0/forwarding
+echo 1 > /proc/sys/net/ipv4/conf/wlan0/forwarding
+echo 1 > /proc/sys/net/ipv4/conf/wlan0-va0/forwarding
+
+# Drop spoofed addr
+echo 1 > /proc/sys/net/ipv4/conf/eth1/rp_filter
+
+# Turn '0' for performance when fast_path is enabled
+echo 1 > /proc/sys/net/ipv4/conf/all/rp_filter
+
+# Do not honor source route flags
+echo 0 > /proc/sys/net/ipv4/conf/default/accept_source_route
+echo 0 > /proc/sys/net/ipv4/conf/all/accept_source_route
+
+# Netfilter timeouts
+echo 300 > /proc/sys/net/ipv4/netfilter/ip_conntrack_generic_timeout
+echo 300 > /proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout_stream
+echo 300 > /proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout
+echo 60 > /proc/sys/net/ipv4/netfilter/ip_conntrack_icmp_timeout
+echo 7440 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established
+echo 60 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_syn_sent
+echo 10 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_time_wait
+
+# Insert usb net modules
+for M in GPL_NetUSB NetUSB; do insmod /lib/modules/${M}.ko; done
+echo "insmod finish" > /dev/console
+sleep 5
+
+# Print server
+KC_BONJOUR &
+KC_PRINT &
+/etc/turn_on_printer_led
+
+# ancistrus
+# Vars
+RCDIR=/etc/init.d/rcS.d
+
+# Runlevel script section can be skipped with this flag
+eval `nvram get anc_boot_disable` > /dev/null 2>&1
+
+# Running the additional scripts at boot stage
+if [ -d ${RCDIR} -a "${anc_boot_disable}" != "1" ]; then
+
+# Decide if disabling K-scripts
+eval `nvram get anc_kscripts_disable` > /dev/null 2>&1
+# KILL scripts: check if the script is there then run 'script stop' (single runlevel so force this)
+[ "${anc_kscripts_disable}" != "1" ] && for I in ${RCDIR}/K[0-9][0-9]*; do [ -f $I ] && $I stop; done
+
+# Decide if disabling S-scripts
+eval `nvram get anc_sscripts_disable` > /dev/null 2>&1
+# START scripts: check if the script is there then run 'script start'
+[ "${anc_sscripts_disable}" != "1" ] && for I in ${RCDIR}/S[0-9][0-9]*; do [ -f $I ] && $I start; done
+fi

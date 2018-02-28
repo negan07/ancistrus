@@ -1,0 +1,65 @@
+#!/bin/sh
+
+store_old() {
+# Store $1 of $2 vlan ip address to delete cnapt rules on next reconnection
+OLDIP=`anc ${1}` >/dev/null 2>&1
+VLAN=$2
+
+[ -z "${OLDIP}" ] && return 1
+[ ${VLAN} -eq 1 ] && VLAN=
+
+anc nvram set old_${1}${VLAN} ${OLDIP}
+}
+
+run_fw_dir() {
+# Check if the script is there then run it
+for I in ${FWDIR}/F[0-9][0-9]*; do [ -f $I ] && $I "$@"; done
+}
+
+# Vars
+FWDIR=/etc/init.d/rc.fw
+
+# Debug purpose
+#FWDIR=/etc/ancdbg/init.d/rc.fw
+
+# Post firewall scripts can be skipped with this flag
+eval `nvram get anc_fw_disable` > /dev/null 2>&1
+[ ! -d ${FWDIR} -o -z "$1" -o "${anc_fw_disable}" = "1" ] && exit 1
+
+case $1 in
+init)					#rc_firewall init
+;;
+group)					#rc_firewall group [1-8]
+	case $2 in
+	[1-8])
+	store_old gateway $2
+	run_fw_dir fwup $2
+	;;
+	esac
+;;
+wan)					#rc_firewall wan [1-8] <init|deinit|up|demand_up|down>
+	case $2 in
+	[1-8])
+		case $3 in
+		init)
+		;;
+		deinit|down)
+		run_fw_dir fwdown $2
+		;;
+		up)
+		store_old gateway $2
+		store_old wanip $2
+		run_fw_dir fwup $2
+		;;
+		demand_up)
+		;;
+		esac
+	;;
+	esac
+;;
+remote)					#rc_firewall remote
+run_fw_dir remoteup
+;;
+esac
+
+exit 0
