@@ -19,7 +19,7 @@ diff -urN work/utelnetd-0.1.11/rc_debug_mode work/utelnetd-0.1.11/rc_debug_mode
 +#
 +
 +stop() {
-+    # Kill all clients...
++    # Kill all clients
 +    for PID in `pidof utelnetd`
 +    do
 +    [ -e /proc/${PID}/stat ] && kill -9 $PID
@@ -27,17 +27,17 @@ diff -urN work/utelnetd-0.1.11/rc_debug_mode work/utelnetd-0.1.11/rc_debug_mode
 +}
 +
 +start() {
-+    # Checking if the service is already running...
-+    [ ! -z `pidof utelnetd` ] && echo "telnet already running..." && exit 1
++    # Checking if the service is already running
++    [ ! -z "`pidof utelnetd`" ] && echo "telnet already running..." && exit 1
 +
 +    # Renew auth login
 +    eval `nvram get http_password` > /dev/null 2>&1
-+    echo "${USR}:${http_password}" | chpasswd > /dev/null 2>&1
++    echo "root:${http_password}" | chpasswd > /dev/null 2>&1
 +
-+    # Starting utelnetd...
++    # Starting utelnetd
 +    ${UTELNETD} -l ${BINDIR}/login -d
 +
-+    # Sanity check...
++    # Sanity check
 +    TELD_RC=$?
 +    [ $TELD_RC -ne 0 ] && echo "$0: Error $TELD_RC starting ${UTELNETD} ..." && exit $TELD_RC
 +}
