@@ -21,7 +21,7 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/image/D7000.par.orig D7000_V1.0.1.64_WW_
 diff -urN D7000_V1.0.1.64_WW_src/Source/image/D7000.par.work D7000_V1.0.1.64_WW_src/Source/image/D7000.par.work
 --- D7000_V1.0.1.64_WW_src/Source/image/D7000.par.work	2017-12-11 00:00:15.738980780 +0100
 +++ D7000_V1.0.1.64_WW_src/Source/image/D7000.par.work	2017-12-11 00:00:15.738980780 +0100
-@@ -0,0 +1,16 @@
+@@ -0,0 +1,17 @@
 +:D7000_boot.bin                      &00000000
 +:rootfs.img                             &00200000
 +:langpkg_ENU.img                        &02600000
