@@ -184,13 +184,13 @@ diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 +	@echo "ln -sf $(USRSBINRCAPP)/$(STARTUP) $(TMPETC)/$(INITD)/$(RCFW)/F$(PRIOF)sshd" >> $(POSTINST)
 +	@echo "chown root:root / $(CONFDIR) $(NVRAMDIR)" >> $(POSTINST)
 +	@echo "chmod 0755 $(CONFDIR) $(NVRAMDIR)" >> $(POSTINST)
-+	@echo "$(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTINST)
++	@echo "[ -z \"\`pidof sshd\`\" ] && $(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +
 +prerm:
 +	@echo "#!/bin/sh" > $(PRERM)
-+	@echo "$(USRSBINRCAPP)/$(STARTUP) stop" >> $(PRERM)
 +	@echo "rm -f $(TMPETC)/$(INITD)/$(RCSD)/S$(PRIOS)sshd $(TMPETC)/$(INITD)/$(RCFW)/F$(PRIOF)sshd" >> $(PRERM)
++	@echo "echo \"When finished, kill manually sshd typing: 'killall -9 sshd'\"" >> $(PRERM)
 +	@echo "exit 0" >> $(PRERM)
 +endif
 +
