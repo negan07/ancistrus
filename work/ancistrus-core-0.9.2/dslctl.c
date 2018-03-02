@@ -132,5 +132,5 @@ DBG("dslctl(): cmd is: %s\n", argv[0]);
 #endif
 	execvp(DSLBIN, (char**)args);
 	}
-return 1;											//here only on execvp() fail
+return 1;										//here only on execvp() fail
 }
