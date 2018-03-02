@@ -21,9 +21,11 @@ control: postinst
 
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
+	@echo "if [ -f $(TMPDIR)/$(DRV) ]; then" >> $(POSTINST)
 	@echo "echo \"Updating XDSL driver...\"" >> $(POSTINST)
 	@echo "cp -f $(TMPDIR)/$(DRV) $(USRETCADSL)/$(DRV)" >> $(POSTINST)
 	@echo "cp -f $(TMPDIR)/$(DRV) $(ETCADSL)/$(DRV)" >> $(POSTINST)
+	@echo "sync" >> $(POSTINST)
 	@echo "sleep 2" >> $(POSTINST)
 	@echo "echo" >> $(POSTINST)
 	@echo "echo \"XDSL driver updated\"" >> $(POSTINST)
@@ -36,6 +38,7 @@ postinst:
 	@echo "xdslctl connection --up" >> $(POSTINST)
 	@echo "echo" >> $(POSTINST)
 	@echo "echo \"This package can be removed now: type 'opkg remove xdsl-driver-new'\"" >> $(POSTINST)
+	@echo "fi" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 endif
 
