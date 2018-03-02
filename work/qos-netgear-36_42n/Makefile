@@ -28,23 +28,23 @@ control: preinst postinst prerm postrm
 
 preinst:
 	@echo "#!/bin/sh" > $(PREINST)
-	@echo "$(USRSBINRCAPP)/$(STARTUP) stop" >> $(PREINST)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PREINST)
 	@echo "exit 0" >> $(PREINST)
 
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
-	@echo "$(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTINST)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) start >/dev/null 2>&1" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
 prerm:
 	@echo "#!/bin/sh" > $(PRERM)
-	@echo "$(USRSBINRCAPP)/$(STARTUP) stop" >> $(PRERM)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PRERM)
 	@echo "exit 0" >> $(PRERM)
 
 postrm:
 	@echo "#!/bin/sh" > $(POSTRM)
 	@echo "ln -sf $(TMPETC)/$(RCAPPSBIN) $(USRSBINRCAPP)/$(STARTUP)" >> $(POSTRM)
-	@echo "$(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTRM)
+	@echo "$(USRSBINRCAPP)/$(STARTUP) start >/dev/null 2>&1" >> $(POSTRM)
 	@echo "exit 0" >> $(POSTRM)
 endif
 
