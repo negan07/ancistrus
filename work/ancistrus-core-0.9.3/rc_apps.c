@@ -81,6 +81,7 @@ pid_t p;
 	DBG("Unlocking fd: %d on child thread\n", fd);
 	unlock(fd, lock_path);							//unlock
 	execvp(RCAPPS, argv);							//exec RCAPPS
+	DBG("run(): child execvp() fail\n");
 	exit(1);
 	}
 }
@@ -101,6 +102,7 @@ DBG("rc_apps(): service is: %s\n", serv);
 	snprintf(lock_path, sizeof(lock_path), "/var/lock/%s.lock", serv);
 	if((fd=lock(lock_path))>=0) run(serv, argc, argv, fd, lock_path);	//run() also includes runprepost(), unlock(), unlink()
 	}
+DBG("rc_apps(): execvp() fail\n");
 return 1;									//here only on execvp() fail
 }
 

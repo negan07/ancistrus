@@ -2,12 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <errno.h>
 #include "nvram.h"
 #include "ancistrus.h"
 #include "common.h"
 #include "dslctl.h"
 
 /*
+XDSLCTL HELP
 xdslctl configure/configure1 
 [--mod <a|d|l|t|2|p|e|m|M3|M5|v>]
 [--lpair <(i)nner|(o)uter>] -
@@ -30,6 +33,8 @@ xdslctl configure/configure1
 [--maxDataRate <maxDsDataRateKbps maxUsDataRateKbps maxAggrDataRateKbps>] 
 [--forceJ43 <on|off>] 
 [--toggleJ43B43 <on|off>]
+
+XDSLCTL PROFILE --SHOW <NETGEAR'S DEFAULT>
 Modulations:
 	G.Dmt	Enabled
 	G.lite	Enabled
@@ -65,6 +70,45 @@ Capability:
 	dynamicD:	On
 	dynamicF:	Off
 	SOS:		On
+	Training Margin(Q4 in dB):	-1(DEFAULT)
+
+XDSLCTL PROFILE --SHOW <DRIVER'S DEFAULT> ( 'xdslctl --configure' )
+Modulations:
+	G.Dmt	Enabled
+	G.lite	Enabled
+	T1.413	Enabled
+	ADSL2	Enabled
+	AnnexL	Enabled
+	ADSL2+	Enabled
+	AnnexM	Disabled
+	VDSL2	Enabled
+VDSL2 profiles:
+	8a	Enabled
+	8b	Enabled
+	8c	Enabled
+	8d	Enabled
+	12a	Enabled
+	12b	Enabled
+	17a	Enabled
+	30a	Enabled
+	US0	Enabled
+Phone line pair:
+	Inner pair
+Capability:
+	bitswap		On
+	sra		Off
+	trellis		On
+	sesdrop		Off
+	CoMinMgn	Off
+	24k		On
+	phyReXmt(Us/Ds)	Off/On
+	Ginp(Us/Ds)	On/On
+	TpsTc		AvPvAa
+	monitorTone:	On
+	dynamicD:	On
+	dynamicF:	Off
+	SOS:		On
+	Training Margin(Q4 in dB):	-1(DEFAULT)
 */
 
 /*
@@ -108,29 +152,65 @@ else return "v";									//tweak for vdsl only: try to negotiate link faster
 }
 
 int dslctl(int argc UNUSED, char** argv) {
-int fd, i;
-enum { MOD=2, BITSWAP, SRA, SNR, TRELLIS, SESDROP, COMINMGN, SOS, DYNAMICD, DYNAMICF, I24K, MONITORTONE, PHYREXMT, GINP, TPSTC, PROFILE, US0 };
-char args[ARGNUM][PARBUF];
-const char *opt[]={ DSLBIN, "configure", "--lpair i --mod ", "--snr ", "--bitswap ", "--sra ", "--trellis ", "--sesdrop ", "--CoMinMgn ", "--SOS ", "--dynamicD ", "--dynamicF ", "--i24k ", "--monitorTone ", "--phyReXmt ", "--Ginp ", "--TpsTc ", "--profile ", "--us0 " }, *nvars[]={ "", "", "wan_dsl_mode", "snr", "bitswap", "sra", "trellis", "sesdrop", "cominmgn", "sos", "dynamicd", "dynamicf", "i24k", "monitortone", "phyrexmt", "ginp", "tpstc", "profile", "us0" }, *def[]={ "", "", "MMODE", "100", "on", "on", "on", "off", "off", "on", "on", "off", "on", "on", "1", "3", "14", "17a", "on" };
+int fd, i, j, pid;
+enum { LPAIR=2, MOD=4, BITSWAP=6, I24K=22, SNR=32, PROFILE=34, US0=36 };
+char **args;
+const char *opt[]={ DSLBIN, "configure", "--lpair", "i", "--mod", "MMODE", "--bitswap", "on", "--sra", "on", "--trellis", "on", "--sesdrop", "off", "--CoMinMgn", "off", "--SOS", "on", "--dynamicD", "on", "--dynamicF", "off", "--i24k", "on", "--monitorTone", "on", "--phyReXmt", "1", "--Ginp", "3", "--TpsTc", "14", "--snr", "100", "--profile", "17a", "--us0", "on", NULL }, *nvars[]={ "", "", "", "", "wan_dsl_mode", "", "bitswap", "", "sra", "", "trellis", "", "sesdrop", "", "cominmgn", "", "sos", "", "dynamicd", "", "dynamicf", "", "i24k", "", "monitortone", "", "phyrexmt", "", "ginp", "", "tpstc", "", "snr", "", "profile", "", "us0" };
 
 DBG("dslctl(): cmd is: %s\n", argv[0]);
 	if(argv[1]==NULL || strcmp(argv[1], "configure")) execvp(DSLBIN, argv);		//no parse
-	else if((fd=lock(LOCK_DSL))>=0) {						//parse: avoid race condition locking	
-	for(i=0;i<MOD;i++) snprintf(args[i], sizeof(args[i]), "%s", opt[i]);		//initialize args with cmd name and option
-	snprintf(args[MOD], sizeof(args[MOD]), "%s%s", opt[MOD], modparse(NV_SDGET(nvars[MOD], def[MOD])));		//mod setting
-	snprintf(args[SNR], sizeof(args[SNR]), "%s%d", opt[SNR], abssnr(NV_SDGET(nvars[SNR], def[SNR])));		//snr setting
-	for(i=BITSWAP;i<I24K;i++) snprintf(args[i], sizeof(args[i]), "%s%s", opt[i], NV_SDGET(nvars[i], def[i]));	//settings always added
-		if(*NV_SGET("anc_dsltweak_enable")=='1') {				//enable the other settings
-		for(;i<PROFILE;i++) snprintf(args[i], sizeof(args[i]), "%s%s", opt[i], NV_SDGET(nvars[i], def[i]));	//normal settings
-		if(!strcmp(NV_SGET("wan_traffic_type"), "ptm") && *NV_SGET("anc_dslprofile_enable")=='1')	//profile setting only for vdsl
-		for(;i<US0+1;i++) snprintf(args[i], sizeof(args[i]), "%s%s", opt[i], NV_SDGET(nvars[i], def[i]));
+	else if((fd=lock(LOCK_DSL))>=0) {						//parse: avoid race condition locking
+	DBG("dslctl(): dslconfprofile: %s\n", NV_SGET("anc_dslconfprofile"));
+	if((args=(char**)malloc(sizeof(char*)*ARGNUM))==NULL) return 98;
+	for(i=0;i<ARGNUM;i++) if((args[i]=(char*)malloc(sizeof(char)*PARBUF))==NULL) return 99;
+		if(!strcmp(NV_SGET("anc_dslconfprofile"), "own")) {			//own profile settings
+		for(i=0;i<MOD;i++) SETOPTIONNAME					//initialize args with cmd name option and lpair
+		snprintf(args[MOD], sizeof(char)*PARBUF, "%s", opt[MOD]);		//mod setting
+		SETMODULATIONVAL
+			for(i=BITSWAP;i<SNR;i+=2) {					//common settings
+			SETOPTIONNAME
+			snprintf(args[i+1], sizeof(char)*PARBUF, "%s", NV_SDGET(nvars[i], opt[i+1]));
+			}
+			if(*NV_SGET("anc_snrtweak_enable")=='1') {
+			snprintf(args[i], sizeof(char)*PARBUF, "%s", opt[SNR]);		//snr setting
+			snprintf(args[i+1], sizeof(char)*PARBUF, "%d", abssnr(NV_SDGET(nvars[i], opt[i+1])));
+			i+=2;
+			}
+			if(!strcmp(NV_SGET("wan_traffic_type"), "ptm") && *NV_SGET("anc_dslprofile_enable")=='1') {	//vdsl profile only
+				for(j=PROFILE;j<US0+1;j+=2) {
+				snprintf(args[i], sizeof(char)*PARBUF, "%s", opt[j]);
+				snprintf(args[i+1], sizeof(char)*PARBUF, "%s", NV_SDGET(nvars[j], opt[j+1]));
+				i+=2;
+				}
+			}
 		}
-	for(;i<ARGNUM;i++) memset(&args[i], 0, sizeof(args[i]));			//safe fill to 0 the remaining args
-	unlock(fd, LOCK_DSL);								//release lock
+		else if(!strcmp(NV_SGET("anc_dslconfprofile"), "broadcom")) 		//broadcom settings='xdslctl configure'
+		for(i=0;i<LPAIR;i++) SETOPTIONNAME
+		else {									//netgear settings as default
+		for(i=0;i<I24K;i++) SETOPTIONNAME					//fill all the interested args
+		SETMODULATIONVAL							//parse mod value only
+		}
+	for(;i<ARGNUM;i++) args[i]=NULL;						//set last args to NULL
 #if DEBUG
-	for(i=0;i<ARGNUM;i++) if(args[i][0]!='\0') DBG("dslctl() #%d: %s\n", i, args[i]);
+	for(i=0;i<ARGNUM;i++) if(args[i]!=NULL) DBG("dslctl() #%d: %s\n", i, args[i]);
 #endif
-	execvp(DSLBIN, (char**)args);
+		if((pid=fork())<0) {							//fork error
+		DBG("fork() error: unlocking fd %d\n", fd);
+		unlock(fd, LOCK_DSL);
+		exit(2);
+		}
+		else if(pid>0) {							//parent thread
+		while((waitpid(pid, NULL, 0)==-1) && (errno==EINTR)) ;			//safe-wait for child exit...
+		for(i=0;i<ARGNUM;i++) SFREE(args[i]);					//free args
+		SFREE(args);
+		DBG("dslctl(): free args\n");
+		exit(0);
+		}
+		else {									//child thread
+		unlock(fd, LOCK_DSL);							//release lock
+		execvp(DSLBIN, args);
+		}
 	}
+DBG("dslctl(): execvp() fail\n");
 return 1;										//here only on execvp() fail
 }

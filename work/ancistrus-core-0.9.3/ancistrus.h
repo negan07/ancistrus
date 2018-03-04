@@ -82,7 +82,7 @@ ERR(" > < val ... val >\n");											\
 exit(3);													\
 }
 
-#define SFREE(...) if(var) free(var)					/* sort of safe free() */
+#define SFREE(var) if(var) free(var)					/* sort of safe free() */
 
 #define NV_GET nvram_get						/* various nvram redefs */
 #define NV_SGET nvram_safe_get
