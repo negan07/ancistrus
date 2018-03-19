@@ -89,7 +89,33 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
  }
  
  int nvram_load(void)
-@@ -235,13 +235,19 @@
+@@ -230,18 +230,45 @@
+ 	return err;
+ }
+ 
++static int qram_load_unlock(char *querybuf, int size) {
++
++	if(querybuf==NULL) return NVRAM_DATA_ERR;
++
++	writeFileBin_unlock(QUERY_TMP_PATH, querybuf, size);
++	if(querybuf) free(querybuf);
++
++	return NVRAM_SUCCESS;
++}
++
++int qram_load(char *querybuf, int size) {
++	int tmp_lock = -1;
++	int err = 0;
++
++	tmp_lock = nvram_lock(QUERY_TMP_PATH);
++	err = qram_load_unlock(querybuf, size);
++	nvram_unlock(tmp_lock);
++
++	return err;
++}
++
+ static int nvram_commit_unlock(void)
+ {
  	int fd1 = -1;
  	char *data = NULL;
  	int len;
@@ -112,7 +138,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
  	}
  
  	header.magic=NVRAM_MAGIC;
-@@ -249,8 +255,9 @@
+@@ -249,8 +276,9 @@
  	header.len=len;
  
  	if((fd1=open(NVRAM_PATH,O_WRONLY | O_CREAT))<0) {
@@ -124,7 +150,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
  	}
  	write(fd1, &header,sizeof(nvram_header_t));
  	lseek(fd1,NVRAM_HEADER_SIZE,0);
-@@ -260,24 +267,19 @@
+@@ -260,24 +288,19 @@
  	lseek(fd1,NVRAM_HEADER_SIZE,0);
  	read(fd1, data,len);
  	if(header.crc!=crc32(data, len)){
@@ -154,11 +180,11 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
  }
  
  int nvram_commit(void)
-@@ -385,6 +387,24 @@
+@@ -385,6 +408,24 @@
  	return pt;
  }
  
-+/* reentrant version. caller is responsable to free the return buffer. */
++/* reentrant version. caller is responsible to free the return buffer. */
 +char* nvram_bcm_get_r(const char *name)
 +{	
 +	char *pt;
@@ -179,7 +205,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
  static int nvram_unset_func_unlock(const char* name,char *path)
  {
  	char *bufspace, *targetspace;
-@@ -508,22 +528,191 @@
+@@ -508,22 +549,191 @@
  {
  	return nvram_set_func(name,value,NVRAM_BCM_PATH);	
  }
@@ -276,7 +302,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
 +	if(!strcmp(old, "")) 
 +		err = nvram_set(name,value);
 +	else {
-+		size = sizeof(char)*(strlen(old) +strlen(value) +2);		/* old + \1 + value + \0 */
++		size = strlen(old) +strlen(value) +2;				/* old + \1 + value + \0 */
 +		if((new = (char*)malloc(size)) == NULL)
 +			err = NVRAM_SHADOW_ERR;
 +		else {
@@ -294,7 +320,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
 +int nvram_delete(const char* name,const char* value)
 +{
 +	int err;
-+	char *old, *s;
++	char *old, *s, *s_old;
 +	const char tag[] = {DIVISION_SYMBOL};
 +
 +	old = nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
@@ -302,7 +328,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
 +		err = NVRAM_DATA_ERR;
 +	else {
 +		err = nvram_set(name, "");					/* clear name var settings content */
-+		for(s=(char*)strtok(old, tag);s != NULL;s=(char*)strtok(NULL, tag)) {  /* tokenize old var string */
++		for(s=(char*)strtok_r(old, tag, &s_old);s != NULL;s=(char*)strtok_r(NULL, tag, &s_old)) {  /* tokenize old var string */
 +			if(strcmp(s, value)) 
 +				err = nvram_append(name, s);
 +		}
@@ -316,14 +342,14 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
 +int nvram_insert(const char* name,const char* value)
 +{
 +	int err;
-+	char *old, *s;
++	char *old, *s, *s_old;
 +	const char tag[] = {DIVISION_SYMBOL};
 +
 +	old = nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
 +	err = nvram_set(name, "");						/* clear name var settings content */
 +	err = nvram_set(name, value);						/* insert value as first */
 +
-+	for(s=(char*)strtok(old, tag);s != NULL;s=(char*)strtok(NULL, tag))	/* tokenize old var string */
++	for(s=(char*)strtok_r(old, tag, &s_old);s != NULL;s=(char*)strtok_r(NULL, tag, &s_old))	/* tokenize old var string */
 +		if(strcmp(s, value))						/* assure no identical (sub)values are stored */
 +			err = nvram_append(name, s);
 +	if(old) 
@@ -335,7 +361,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
 +int nvram_change(const char* name,const char* oldval,const char* newval)
 +{
 +	int err;
-+	char *old, *s;
++	char *old, *s, *s_old;
 +	const char tag[] = {DIVISION_SYMBOL};
 +
 +	if(!strcmp(oldval, newval) || !nvram_sub_find(name, oldval))		/* if old & new are equal or old missed no change */
@@ -343,7 +369,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
 +	else {
 +		old = nvram_safe_get_r(name);					/* safe reentrant version: no NULL and return must be free */
 +		err = nvram_set(name, "");					/* clear name var settings content */
-+		for(s=(char*)strtok(old, tag);s != NULL;s=(char*)strtok(NULL, tag)) {	/* tokenize old var string */
++		for(s=(char*)strtok_r(old, tag, &s_old);s != NULL;s=(char*)strtok_r(NULL, tag, &s_old)) {	/* tokenize old var string */
 +			if(!strcmp(s, newval))					/* assure no identical (sub)values are stored */
 +				continue;
 +			else if(!strcmp(s, oldval)) 
@@ -375,7 +401,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
  
  	return nvram_set_func( name, value, path);
  }
-@@ -531,17 +720,17 @@
+@@ -531,17 +741,17 @@
  
  int nv_setFX(const char* category, const char* key, int key_idx, const char *value_format, ...)
  {
@@ -399,7 +425,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
  	va_end(arg);
  	
  
-@@ -551,9 +740,9 @@
+@@ -551,9 +761,9 @@
  
  int nv_set_int(const char* category, const char* key, int key_idx, int value)
  {
@@ -411,7 +437,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
  
  	return nv_set(category, key, key_idx, value_str);
  }
-@@ -562,11 +751,11 @@
+@@ -562,11 +772,11 @@
  char* nv_get(const char* category, const char* key, int key_idx)
  {
      char *pt;
@@ -427,7 +453,7 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
  
  	if((pt=__nvram_get_func(name, path, 1))==NULL)
  		return NULL;
-@@ -586,11 +775,11 @@
+@@ -586,11 +796,11 @@
  char* nv_get_r(const char* category, const char* key, int key_idx)
  {
      char *pt;
@@ -445,8 +471,8 @@ diff -urN work/nvram-0.1.2/nvram.c work/nvram-0.1.2/nvram.c
  		return NULL;
 diff -urN work/nvram-0.1.2/nvram.h work/nvram-0.1.2/nvram.h
 --- work/nvram-0.1.2/nvram.h	2016-10-11 17:53:07.000000000 +0200
-+++ work/nvram-0.1.2/nvram.h	2017-02-05 18:35:43.645563433 +0100
-@@ -10,48 +10,62 @@
++++ work/nvram-0.1.2/nvram.h	2017-02-05 21:24:36.082726345 +0100
+@@ -10,48 +10,63 @@
  
  /* line terminator by 0x00 
   * data terminator by two 0x00
@@ -465,6 +491,7 @@ diff -urN work/nvram-0.1.2/nvram.h work/nvram-0.1.2/nvram.h
 +
 +#define NVRAM_TMP_PATH		"/tmp/nvram"			/* ex:  /tmp/nvram     */
 +#define NVRAM_BCM_PATH		"/tmp/nvram.bcm"
++#define QUERY_TMP_PATH		"/tmp/query"
 +#define NVRAM_DEFAULT		"/etc/default"			/* ex:  /etc/default   */
 +
 +/* local host debug purpose */
@@ -535,7 +562,22 @@ diff -urN work/nvram-0.1.2/nvram.h work/nvram-0.1.2/nvram.h
   * crc      = use crc-32                    
   * reserved = reserved 	                    
   */
-@@ -78,19 +92,29 @@
+@@ -71,6 +86,14 @@
+ int nvram_load(void);
+ 
+ 
++/* Copy data from dynamic query array to QUERY_TMP_PATH
++ * @param	querybuf	parsed & tokenized query container
++ * @param	size		size of the querybuf
++ * @return	0 on success and errorno on failure     
++ */
++int qram_load(char *querybuf, int size);
++
++
+ /*
+  * Write data from NVRAM_TMP_PATH to flash   
+  * @return	0 on success and errorno on failure     
+@@ -78,19 +101,33 @@
  int nvram_commit(void);
  
  /*
@@ -547,8 +589,10 @@ diff -urN work/nvram-0.1.2/nvram.h work/nvram-0.1.2/nvram.h
  char* nvram_get_func(const char *name,char *path);
  #define nvram_get_def(name) nvram_get_func(name,NVRAM_DEFAULT)
  #define nvram_bcm_get(name) nvram_get_func(name,NVRAM_BCM_PATH)
++#define qram_get(name) nvram_get_func(name,QUERY_TMP_PATH)
 +char* nvram_get(const char *name);
  #define nvram_safe_get(msg) (nvram_get(msg)?:"")
++#define qram_safe_get(msg) (qram_get(msg)?:"")
 +#define nvram_safedef_get(msg, def) (nvram_get(msg)?:def)
  #define nvram_bcm_safe_get(msg) (nvram_bcm_get(msg)?:"")
 -char* nvram_get(const char *name);
@@ -561,13 +605,15 @@ diff -urN work/nvram-0.1.2/nvram.h work/nvram-0.1.2/nvram.h
  char* nvram_get_func_r(const char *name,char *path);
  char* nvram_get_r(const char *name);
 +char* nvram_bcm_get_r(const char *name);
++#define qram_get_r(name) (nvram_get_func_r(const char *name,QUERY_TMP_PATH))
  #define nvram_safe_get_r(name) (nvram_get_r(name)?:strdup(""))
++#define qram_safe_get_r(name) (qram_get_r(name)?:strdup(""))
 +#define nvram_safedef_get_r(name, def) (nvram_get_r(name)?:strdup(def))
 +#define nvram_bcm_safe_get_r(name) (nvram_bcm_get_r(name)?:strdup(""))
  
  /*
   * Match an NVRAM variable
-@@ -122,11 +146,89 @@
+@@ -122,11 +159,89 @@
   * NOTE: use nvram_commit to commit this change to flash.
   */
  int nvram_set(const char* name,const char* value);
