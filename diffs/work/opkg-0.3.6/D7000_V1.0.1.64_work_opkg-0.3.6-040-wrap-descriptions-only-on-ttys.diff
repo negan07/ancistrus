@@ -1,15 +1,15 @@
-diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg_parse.c work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg_parse.c
---- work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg_parse.c	2016-12-22 18:38:14.000000000 +0100
-+++ work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg_parse.c	2017-03-24 22:30:50.254489817 +0100
+diff -urN work/opkg-0.3.6/opkg-0.3.6/libopkg/pkg_parse.c work/opkg-0.3.6/opkg-0.3.6/libopkg/pkg_parse.c
+--- work/opkg-0.3.6/opkg-0.3.6/libopkg/pkg_parse.c	2016-12-22 18:38:14.000000000 +0100
++++ work/opkg-0.3.6/opkg-0.3.6/libopkg/pkg_parse.c	2017-03-24 22:30:50.254489817 +0100
 @@ -21,6 +21,7 @@
  
  #include <stdio.h>
  #include <ctype.h>
 +#include <unistd.h>
- #include <malloc.h>
  #include <string.h>
  #include <stdlib.h>
-@@ -246,10 +247,16 @@
+ #include <errno.h>
+@@ -284,10 +285,16 @@
  
      case ' ':
          if ((mask & PFM_DESCRIPTION) && reading_description) {

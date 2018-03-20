@@ -1,7 +1,7 @@
-diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_cmd.c work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_cmd.c
---- work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_cmd.c	2016-12-22 18:38:14.000000000 +0100
-+++ work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_cmd.c	2017-03-24 22:57:03.946704785 +0100
-@@ -367,7 +367,7 @@
+diff -urN work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_cmd.c work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_cmd.c
+--- work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_cmd.c	2016-12-22 18:38:14.000000000 +0100
++++ work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_cmd.c	2017-03-24 22:57:03.946704785 +0100
+@@ -367,7 +331,7 @@
      for (i = 0; i < ordered->len; i++) {
          pkg = ordered->pkgs[i];
  
@@ -10,7 +10,7 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_cmd.c work/opkg-0.3.4/opkg-0.3
              continue;
  
          if (pkg->state_status == SS_UNPACKED) {
-@@ -503,7 +503,7 @@
+@@ -528,7 +492,7 @@
      for (i = 0; i < available->len; i++) {
          pkg = available->pkgs[i];
          /* if we have package name or pattern and pkg does not match, then skip it */
@@ -19,7 +19,7 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_cmd.c work/opkg-0.3.4/opkg-0.3
             (!use_desc || !pkg->description || fnmatch(pkg_name, pkg->description, 0)))
              continue;
          print_pkg(pkg);
-@@ -539,7 +539,7 @@
+@@ -564,7 +528,7 @@
      for (i = 0; i < available->len; i++) {
          pkg = available->pkgs[i];
          /* if we have package name or pattern and pkg does not match, then skip it */
@@ -28,7 +28,7 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_cmd.c work/opkg-0.3.4/opkg-0.3
              continue;
          print_pkg(pkg);
      }
-@@ -567,7 +567,7 @@
+@@ -592,7 +556,7 @@
      for (i = 0; i < available->len; i++) {
          pkg = available->pkgs[i];
          /* if we have package name or pattern and pkg does not match, then skip it */
@@ -37,7 +37,7 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_cmd.c work/opkg-0.3.4/opkg-0.3
              continue;
          if (nv_pair_list_empty(&pkg->conffiles))
              continue;
-@@ -632,7 +632,7 @@
+@@ -634,7 +598,7 @@
  
      for (i = 0; i < available->len; i++) {
          pkg = available->pkgs[i];
@@ -46,7 +46,7 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_cmd.c work/opkg-0.3.4/opkg-0.3
              continue;
          }
  
-@@ -843,7 +843,7 @@
+@@ -847,7 +811,7 @@
          for (j = 0; j < available_pkgs->len; j++) {
              pkg = available_pkgs->pkgs[j];
  
@@ -55,7 +55,7 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_cmd.c work/opkg-0.3.4/opkg-0.3
                  continue;
  
              depends_count = pkg->depends_count + pkg->pre_depends_count +
-@@ -1042,9 +1042,9 @@
+@@ -1046,9 +1010,9 @@
                  int count = pkg->provides_count;
                  for (k = 0; k < count; k++) {
                      abstract_pkg_t *apkg = pkg->provides[k];
@@ -67,18 +67,29 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_cmd.c work/opkg-0.3.4/opkg-0.3
                              opkg_msg(NOTICE, "\tprovides %s\n", apkg->name);
                          opkg_message(NOTICE, "\n");
                      }
-@@ -1087,7 +1087,7 @@
-         for (iter = str_list_first(installed_files); iter;
-                 iter = str_list_next(installed_files, iter)) {
-             installed_file = (char *)iter->data;
--            if (fnmatch(argv[0], installed_file, 0) == 0)
-+            if (fnmatch(argv[0], installed_file, opkg_config->nocase) == 0)
+@@ -1091,7 +1055,7 @@
+         for (iter = file_list_first(installed_files); iter;
+                 iter = file_list_next(installed_files, iter)) {
+             installed_file = (file_info_t *)iter->data;
+-            if (fnmatch(argv[0], installed_file->path, 0) == 0)
++            if (fnmatch(argv[0], installed_file->path, opkg_config->nocase) == 0)
                  print_pkg(pkg);
          }
  
-diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_conf.h work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_conf.h
---- work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_conf.h	2016-12-22 18:38:14.000000000 +0100
-+++ work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_conf.h	2017-03-24 22:39:25.908504113 +0100
+diff -urN work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_conf.c work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_conf.c
+--- work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_conf.c	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_conf.c	2018-03-19 23:02:24.135480676 +0100
+@@ -75,6 +75,7 @@
+     {"download_only", OPKG_OPT_TYPE_BOOL, &_conf.download_only},
+     {"download_first", OPKG_OPT_TYPE_BOOL, &_conf.download_first}, /* Not available on internal solver */
+     {"nodeps", OPKG_OPT_TYPE_BOOL, &_conf.nodeps},
++    {"nocase", OPKG_OPT_TYPE_BOOL, &_conf.nocase },
+     {"no_install_recommends", OPKG_OPT_TYPE_BOOL, &_conf.no_install_recommends},
+     {"offline_root", OPKG_OPT_TYPE_STRING, &_conf.offline_root},
+     {"overlay_root", OPKG_OPT_TYPE_STRING, &_conf.overlay_root},
+diff -urN work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_conf.h work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_conf.h
+--- work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_conf.h	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.3.6/opkg-0.3.6/libopkg/opkg_conf.h	2018-03-19 23:03:50.142966116 +0100
 @@ -20,6 +20,7 @@
  #define OPKG_CONF_H
  
@@ -95,21 +106,10 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_conf.h work/opkg-0.3.4/opkg-0.
      int no_install_recommends;
      char *offline_root;
      char *overlay_root;
-diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_conf.c
---- work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_conf.c	2016-12-22 18:38:14.000000000 +0100
-+++ work/opkg-0.3.4/opkg-0.3.4/libopkg/opkg_conf.c	2017-03-24 22:45:13.647709069 +0100
-@@ -76,6 +76,7 @@
-     {"download_only", OPKG_OPT_TYPE_BOOL, &_conf.download_only},
-     {"download_first", OPKG_OPT_TYPE_BOOL, &_conf.download_first}, /* Not available on internal solver */
-     {"nodeps", OPKG_OPT_TYPE_BOOL, &_conf.nodeps},
-+    {"nocase", OPKG_OPT_TYPE_BOOL, &_conf.nocase },
-     {"no_install_recommends", OPKG_OPT_TYPE_BOOL, &_conf.no_install_recommends},
-     {"offline_root", OPKG_OPT_TYPE_STRING, &_conf.offline_root},
-     {"overlay_root", OPKG_OPT_TYPE_STRING, &_conf.overlay_root},
-diff -urN work/opkg-0.3.4/opkg-0.3.4/src/opkg.c work/opkg-0.3.4/opkg-0.3.4/src/opkg.c
---- work/opkg-0.3.4/opkg-0.3.4/src/opkg.c	2017-03-24 21:16:05.567301733 +0100
-+++ work/opkg-0.3.4/opkg-0.3.4/src/opkg.c	2017-03-24 22:43:40.211423347 +0100
-@@ -55,6 +55,7 @@
+diff -urN work/opkg-0.3.6/opkg-0.3.6/src/opkg.c work/opkg-0.3.6/opkg-0.3.6/src/opkg.c
+--- work/opkg-0.3.6/opkg-0.3.6/src/opkg.c	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.3.6/opkg-0.3.6/src/opkg.c	2018-03-19 23:07:10.981458627 +0100
+@@ -54,6 +54,7 @@
      ARGS_OPT_NOACTION,
      ARGS_OPT_DOWNLOAD_ONLY,
      ARGS_OPT_NODEPS,
@@ -117,7 +117,7 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/src/opkg.c work/opkg-0.3.4/opkg-0.3.4/src/o
      ARGS_OPT_AUTOREMOVE,
      ARGS_OPT_VOLATILE_CACHE,
      ARGS_OPT_COMBINE,
-@@ -104,6 +105,7 @@
+@@ -103,6 +104,7 @@
      {"noaction", 0, 0, ARGS_OPT_NOACTION},
      {"download-only", 0, 0, ARGS_OPT_DOWNLOAD_ONLY},
      {"nodeps", 0, 0, ARGS_OPT_NODEPS},
@@ -125,16 +125,20 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/src/opkg.c work/opkg-0.3.4/opkg-0.3.4/src/o
      {"no-install-recommends", 0, 0, ARGS_OPT_NO_INSTALL_RECOMMENDS},
      {"offline", 1, 0, 'o'},
      {"offline-root", 1, 0, 'o'},
-@@ -133,7 +135,7 @@
-     char *solver_version = NULL;
+@@ -133,10 +135,10 @@
  
      while (1) {
+ #if HAVE_GETOPT_LONG_ONLY
 -        c = getopt_long_only(argc, argv, "Ad:f:no:p:l:t:vV::", long_options,
 +        c = getopt_long_only(argc, argv, "Ad:f:ino:p:l:t:vV::", long_options,
                               &option_index);
+ #else
+-        c = getopt_long(argc, argv, "Ad:f:no:p:l:t:vV::", long_options,
++        c = getopt_long(argc, argv, "Ad:f:ino:p:l:t:vV::", long_options,
+                              &option_index);
+ #endif
          if (c == -1)
-             break;
-@@ -148,6 +150,9 @@
+@@ -152,6 +154,9 @@
          case 'f':
              opkg_config->conf_file = xstrdup(optarg);
              break;
@@ -144,7 +148,7 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/src/opkg.c work/opkg-0.3.4/opkg-0.3.4/src/o
          case 'o':
              opkg_config->offline_root = xstrdup(optarg);
              break;
-@@ -216,6 +221,9 @@
+@@ -220,6 +225,9 @@
          case ARGS_OPT_NODEPS:
              opkg_config->nodeps = 1;
              break;
@@ -154,7 +158,17 @@ diff -urN work/opkg-0.3.4/opkg-0.3.4/src/opkg.c work/opkg-0.3.4/opkg-0.3.4/src/o
          case ARGS_OPT_ADD_ARCH:
          case ARGS_OPT_ADD_DEST:
              tuple = xstrdup(optarg);
-@@ -355,6 +363,7 @@
+@@ -270,6 +278,9 @@
+         }
+     }
+ 
++	if(!opkg_config->conf_file && !opkg_config->offline_root)
++		opkg_config->conf_file = xstrdup("/etc/opkg.conf");
++
+     if (parse_err)
+         return parse_err;
+     else
+@@ -356,6 +367,7 @@
      printf("\t--size                          Print package size when listing available packages\n");
      printf("\t--download-only                 No action -- download only\n");
      printf("\t--nodeps                        Do not follow dependencies\n");

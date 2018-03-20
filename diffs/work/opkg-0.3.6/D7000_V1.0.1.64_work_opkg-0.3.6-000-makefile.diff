@@ -1,6 +1,6 @@
-diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
---- work/opkg-0.3.4/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/opkg-0.3.4/Makefile	2017-03-23 20:35:42.745736890 +0100
+diff -urN work/opkg-0.3.6/Makefile work/opkg-0.3.6/Makefile
+--- work/opkg-0.3.6/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/opkg-0.3.6/Makefile	2017-03-23 20:35:42.745736890 +0100
 @@ -0,0 +1,152 @@
 +include ../Rules.mak
 +
@@ -37,10 +37,10 @@ diff -urN work/opkg-0.3.4/Makefile work/opkg-0.3.4/Makefile
 +endif
 +
 +configure-local:
-+	cd $(OPKG) && ./configure --build=$(BUILD_HOST) LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-larchive" CPPFLAGS="-I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --disable-gpg --disable-shared --with-static-libopkg --prefix=$(PREFIX_STATE_DIR) --localstatedir=$(PREFIX_STATE_DIR)
++	cd $(OPKG) && chmod 755 autogen.sh && ./autogen.sh && ./configure --build=$(BUILD_HOST) LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-larchive" CPPFLAGS="-I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --disable-gpg --disable-shared --with-static-libopkg --prefix=$(PREFIX_STATE_DIR) --localstatedir=$(PREFIX_STATE_DIR)
 +
 +configure-cross:
-+	cd $(OPKG) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -lssl -lcrypto" CURL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -lcurl" LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-lssl -lcrypto -lcurl -larchive" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include -I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/include -I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --disable-gpg --disable-shared --with-static-libopkg --prefix=$(PREFIX_STATE_DIR) --localstatedir=$(PREFIX_STATE_DIR)
++	cd $(OPKG) && chmod 755 autogen.sh && ./autogen.sh && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -lssl -lcrypto" CURL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -lcurl" LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/lib/.libs -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs" LIBS="-lssl -lcrypto -lcurl -larchive" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include -I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(CURL)/include -I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive" --disable-gpg --disable-shared --with-static-libopkg --prefix=$(PREFIX_STATE_DIR) --localstatedir=$(PREFIX_STATE_DIR)
 +
 +install-local: opkg_conf-local
 +	install -m 0755 -d $(GIT_ROOT_DIR)/$(LBIN_DIR)

@@ -1,7 +1,7 @@
-diff -urN work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg.c work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg.c
---- work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg.c	2016-12-22 18:38:14.000000000 +0100
-+++ work/opkg-0.3.4/opkg-0.3.4/libopkg/pkg.c	2017-03-22 00:12:25.566249000 +0100
-@@ -855,6 +855,7 @@
+diff -urN work/opkg-0.3.6/opkg-0.3.6/libopkg/pkg.c work/opkg-0.3.6/opkg-0.3.6/libopkg/pkg.c
+--- work/opkg-0.3.6/opkg-0.3.6/libopkg/pkg.c	2016-12-22 18:38:14.000000000 +0100
++++ work/opkg-0.3.6/opkg-0.3.6/libopkg/pkg.c	2017-03-22 00:12:25.566249000 +0100
+@@ -878,6 +878,7 @@
      pkg_formatted_field(file, pkg, "Package");
      pkg_formatted_field(file, pkg, "Version");
      pkg_formatted_field(file, pkg, "Depends");
