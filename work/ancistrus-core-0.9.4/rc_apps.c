@@ -20,7 +20,7 @@ PREPOST
  * Input: rel service name, PRE/POST flag.
  * Return: '0'=success, '1'=fail .
  */
-static int checkprepost(const char *serv, int prepost) {
+static int checkprepost(const char *serv, const int prepost) {
 char cmd[SCR_MAX_PATH];
 struct stat sb;
 
@@ -36,7 +36,7 @@ else return 1;									//fail
  * Input: rel service name, argc, argv, PRE/POST flag.
  * Return: if script checked, response of 'system(cmd)', otherwise 1 .
  */
-static int runprepost(char *serv, int argc, char **argv, int prepost) {
+static int runprepost(const char *serv, int argc, char **argv, const int prepost) {
 char cmd[SCRPAR_MAX_PATH];
 int err=1;
 
@@ -44,9 +44,8 @@ int err=1;
 	DBG("... success\n");
 	WRITEPREPOSTPATH									//prepare script path
 	for(;err<argc;err++) snprintf(cmd, sizeof(cmd), "%s \"%s\"", cmd, argv[err]);		//append argvs
-	DBG("Executing: %s\n", cmd);
-	err=system(cmd);
-	if(WIFEXITED(err)) err=WEXITSTATUS(err);						//grab system() '$?'
+	DBG("runprepost(): executing %s\n", cmd);
+	err=runsyscmd(cmd);
 	}
 DBG("\nrunprepost(): return code: %d\n", err);
 return err;
@@ -58,8 +57,8 @@ return err;
  * Input: rel service name, argc, argv, locked fd.
  * Exit: 2 if fork error - on parent thread: 1 if no POST script, waitpid errcode on waitpid error or runprepost() retval - on child thread 1 .
  */
-static void run(char *serv, int argc, char **argv ,int fd, char *lock_path) __attribute__ ((noreturn));
-static void run(char *serv, int argc, char **argv, int fd, char *lock_path) {
+static void run(const char *serv, int argc, char **argv ,int fd, const char *lock_path) __attribute__ ((noreturn));
+static void run(const char *serv, int argc, char **argv, int fd, const char *lock_path) {
 int pid, status, err=1;
 pid_t p;
 

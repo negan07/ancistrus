@@ -12,7 +12,6 @@
 #include "fw.h"
 
 FWARGS
-FWMAIN
 
 /*
  * GETIPADDR
@@ -75,7 +74,7 @@ return 0;
  * Input: argc, argv, FILE pointer to writing rule tmp file, wan ip, gateway ip, protocol tcp/udp.
  * Return: '0' success, '1' or more fail.
  */
-static int fwremadd(char** argv, FILE *FP, char* wan, char* lan, char* prot, int remtype) {
+static int fwremadd(char** argv, FILE *FP, const char* wan, const char* lan, const char* prot, const int remtype) {
 enum { SINGLE=1, RANGE, ALL, LIST };
 int i, err=1;
 char list[30], *ip1, *ip2;
@@ -139,13 +138,13 @@ return err;
  * Input: argc, argv, remote mode nat chain flag.
  * Return: '0' success, '1' or more fail.
  */
-static int fwrouter(int argc UNUSED, char** argv, int fwtype) {
+static int fwrouter(int argc UNUSED, char** argv, const int fwtype) {
 FILE *FP;
 int err=0;
 char gw[256], wan[256], *oldgw, *oldwan;
 
-	if((FP=(fopen(RULES, "w"))) == NULL) err=1;
-	else {									//*** DEL ***
+	SFPOPEN(FP, RULES, "w") err=1;
+	else {									//### DEL ###
 	oldgw=getoldgatewayip();						//obtain old wan ip and gw ip
 	oldwan=getoldwanip();
 	DBG("Old gateway ip: %s, old wan ip: %s\n", oldgw, oldwan);
@@ -165,7 +164,7 @@ char gw[256], wan[256], *oldgw, *oldwan;
 		getwanip(wan);
 		DBG("Gateway ip: %s, wan ip: %s\n", gw, wan);
 			if(!*gw || !*wan) err=1;				//avoid rule creation if no lan/wan ip is available
-			else {							//*** ADD ***
+			else {							//### ADD ###
 			fprintf(FP,						//create new chains
 			IPT " -t nat -N %s_NAT\n"
 			IPT " -t nat -A PREROUTING -j %s_NAT\n"
@@ -188,6 +187,7 @@ return err;
 }
 
 int fw(int argc, char** argv) {
+enum { ROUTER=0, REMOTE };
 int i=0, fd;
 
 if(argc!=9) return 1;								//arg num check
