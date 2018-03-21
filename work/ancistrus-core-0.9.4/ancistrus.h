@@ -46,11 +46,11 @@
 #define OPTION PAR[1]
 #define ACTION PAR[2]
 
-#define UNUSED __attribute((unused))				/* attributes */
+#define UNUSED __attribute((unused))					/* attributes */
 #define NORETURN __attribute__ ((noreturn)
 
-#define MAINARGS int PNUM, char** PAR				/* main() arguments */
-#define MAINUNUSEDARGS int PNUM UNUSED, char** PAR UNUSED	/* unused args */
+#define MAINARGS int PNUM, char** PAR					/* main() arguments */
+#define MAINUNUSEDARGS int PNUM UNUSED, char** PAR UNUSED		/* unused args */
 
 #define OPTIONS			/* option list: start from case 1, usage option case 0 (default) not needed */	\
 const struct {													\
@@ -64,7 +64,7 @@ OPT[]
 if(PNUM>2) OPTLOOP 												\
 if(!strcmp(ACTION, OPT[i-1].NAME) && (PNUM>=OPT[i-1].PMIN) && 							\
 (!OPT[i-1].PNUMFOREACH || !((PNUM-3)%OPT[i-1].PNUMFOREACH))) break;
-#define PARLOOP for(j=3;PAR[j]!=NULL;j+=OPT[i-1].PNUMFOREACH)	/* loop the params shifting for each block */
+#define PARLOOP for(j=3;PAR[j]!=NULL;j+=OPT[i-1].PNUMFOREACH)		/* loop the params shifting for each block */
 
 #define MAIN_USAGE(err)							/* show main() help usage */		\
 if(err) {													\
@@ -82,7 +82,19 @@ ERR(" > < val ... val >\n");											\
 exit(3);													\
 }
 
+#define CR_SYMBOL 10							/* ASCII symbols definitions */
+#define LF_SYMBOL 13
+
+#define PATH 								/* system PATH */			\
+"PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts:/usr/sbin/rc_app"
+
+#define SFDOPEN(fd, path, flags) if((fd=open(path, flags))<0)		/* sort of secure open() */
+#define SFDAOPEN(fd, path, flags, att) if((fd=open(path, flags, att))<0)/* same above with attribute permissions */
+#define SFPOPEN(FP, path, flags) if((FP=(fopen(path, flags)))==NULL)	/* sort of secure fopen() */
+#define SMALLOCSTR(data, size) if((data=(char*)malloc(size))==NULL)	/* sort of safe malloc() for strings */
 #define SFREE(var) if(var) free(var)					/* sort of safe free() */
+#define TYPE(text) write(1, text, strlen(text));			/* low-level write a text to stdout */
+#define NULLRED " >/dev/null 2>&1;"					/* null output redirections */
 
 #define NV_GET nvram_get						/* various nvram redefs */
 #define NV_SGET nvram_safe_get
@@ -98,11 +110,6 @@ exit(3);													\
 #define NV_INS nvram_insert
 #define NV_CHA nvram_change
 #define NV_SAVE nvram_commit
-
-#define NULLRED " >/dev/null 2>&1;"					/* null output redirections */
-
-#define CR_SYMBOL 10							/* ASCII symbols definitions */
-#define LF_SYMBOL 13
 
 #define FUNCAVAIL							/* array of args functions */		\
 {"oldwanip", oldwanip},												\
@@ -185,8 +192,16 @@ int fw(MAINARGS);
  * 'xdslctl.bin configure' options parser.
  * Other options remain unchanged.
  * It ends invoking 'xdslctl.bin' with the parsed/unparsed parameters.
- * Input: argc, argv .
- * Return: '0' if cmd running success, '1' if error occurred.
+ * Input: argv .
+ * Return: '0' if cmd running success, '1' if cmd exec error occurred.
  */
 int dslctl(MAINARGS);
 
+/*
+ * CGI
+ * Common Gateway Interface web parser.
+ * Print dynamic form based webpages, save settings and execute services.
+ * Input: void as arguments are env vars read directly by getenv() .
+ * Return: '0' or system() return value if success, != '0' if error occurred.
+ */
+//int cgi(void);

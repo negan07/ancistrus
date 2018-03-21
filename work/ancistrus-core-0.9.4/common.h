@@ -1,5 +1,6 @@
-#define LOCK_MAX_PATH 64
-#define LOCK_TIMEOUT 60
+#define LOCK_MAX_PATH		64
+#define LOCK_TIMEOUT		60
+#define ARGMAXNUM		40
 
 /*
  * LOCK
@@ -24,7 +25,7 @@ int unlock(int fd, const char *lock_path);
  * Input: value as string, start, end interval delimiters.
  * Return: '0' success, '1' fail.
  */
-int checknumrange(const char* value, int start, int end);
+int checknumrange(const char* value, const int start, const int end);
 
 /*
  * CHECKPORTRANGE
@@ -32,6 +33,22 @@ int checknumrange(const char* value, int start, int end);
  * Input: portrange value as string, delimiter character (eg '-').
  * Return: '0' success, '1' or '2' fail.
  */
-int checkportrange(char* portrange, char separator) UNUSED;
-#define checkport(value) checknumrange(value, 1, 65534)
+int checkportrange(const char* portrange, const char separator) UNUSED;
+#define checkport(value) checknumrange(value, 1024, 65534)
 
+/*
+ * RUNEXECVE
+ * Run a cmd string with execve().
+ * Create the vector of arguments (tokenizing blanks) and run execve() including PATH envp.
+ * Input: cmd string.
+ * Return: no return on execve() success, '1' on null/void cmd string or execve() failure.
+ */
+int runexecve(char *cmd);
+
+/*
+ * RUNSYSCMD
+ * Run a cmd string with system().
+ * Input: cmd string.
+ * Return: system() exit code on success, '1' on null/void cmd string.
+ */
+int runsyscmd(const char *cmd);
