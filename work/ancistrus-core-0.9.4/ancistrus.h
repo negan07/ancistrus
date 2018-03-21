@@ -195,7 +195,7 @@ int fw(MAINARGS);
  * Input: argv .
  * Return: '0' if cmd running success, '1' if cmd exec error occurred.
  */
-int dslctl(MAINARGS);
+int dslctl(char** argv);
 
 /*
  * CGI

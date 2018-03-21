@@ -151,66 +151,35 @@ else if(!strcmp(nvmod, "GDMT")) return "dmv";						//vdsl & adsl
 else return "v";									//tweak for vdsl only: try to negotiate link faster
 }
 
-int dslctl(int argc UNUSED, char** argv) {
-int fd, i, j, pid;
-enum { LPAIR=2, MOD=4, BITSWAP=6, I24K=22, SNR=32, PROFILE=34, US0=36 };
-char **args;
-const char *opt[]={ DSLBIN, "configure", "--lpair", "i", "--mod", "MMODE", "--bitswap", "on", "--sra", "on", "--trellis", "on", "--sesdrop", "off", "--CoMinMgn", "off", "--SOS", "on", "--dynamicD", "on", "--dynamicF", "off", "--i24k", "on", "--monitorTone", "on", "--phyReXmt", "1", "--Ginp", "3", "--TpsTc", "14", "--snr", "100", "--profile", "17a", "--us0", "on", NULL }, *nvars[]={ "", "", "", "", "wan_dsl_mode", "", "bitswap", "", "sra", "", "trellis", "", "sesdrop", "", "cominmgn", "", "sos", "", "dynamicd", "", "dynamicf", "", "i24k", "", "monitortone", "", "phyrexmt", "", "ginp", "", "tpstc", "", "snr", "", "profile", "", "us0" };
+int dslctl(char** argv) {
+enum { MOD=0, BITSWAP=1, I24K=9, SNR=14, PROFILE=15, END=17 };
+int fd, i;
+char *profile, cmd[DSLCMDBUF]=DSLBIN " configure --lpair i";
+const char 
+*opt[]={ "--mod", "--bitswap", "--sra", "--trellis", "--sesdrop", "--CoMinMgn", "--SOS", "--dynamicD", "--dynamicF", "--i24k", "--monitorTone", "--phyReXmt", "--Ginp", "--TpsTc", "--snr", "--profile", "--us0" }, 
+*nvar[]={ "wan_dsl_mode", "bitswap", "sra", "trellis", "sesdrop", "cominmgn", "sos", "dynamicd", "dynamicf", "i24k", "monitortone", "phyrexmt", "ginp", "tpstc", "snr", "profile", "us0" }, 
+*def[]={ "MMODE", "on", "on", "on", "off", "off", "on", "on", "off", "on", "on", "1", "3", "14", "100", "17a", "on" };
 
 DBG("dslctl(): cmd is: %s\n", argv[0]);
 	if(argv[1]==NULL || strcmp(argv[1], "configure")) execvp(DSLBIN, argv);		//no parse
 	else if((fd=lock(LOCK_DSL))>=0) {						//parse: avoid race condition locking
-	DBG("dslctl(): dslconfprofile: %s\n", NV_SGET("anc_dslconfprofile"));
-	if((args=(char**)malloc(sizeof(char*)*ARGNUM))==NULL) return 98;
-	for(i=0;i<ARGNUM;i++) if((args[i]=(char*)malloc(sizeof(char)*PARBUF))==NULL) return 99;
-		if(!strcmp(NV_SGET("anc_dslconfprofile"), "own")) {			//own profile settings
-		for(i=0;i<MOD;i++) SETOPTIONNAME					//initialize args with cmd name option and lpair
-		snprintf(args[MOD], sizeof(char)*PARBUF, "%s", opt[MOD]);		//mod setting
-		SETMODULATIONVAL
-			for(i=BITSWAP;i<SNR;i+=2) {					//common settings
-			SETOPTIONNAME
-			snprintf(args[i+1], sizeof(char)*PARBUF, "%s", NV_SDGET(nvars[i], opt[i+1]));
-			}
-			if(*NV_SGET("anc_snrtweak_enable")=='1') {
-			snprintf(args[i], sizeof(char)*PARBUF, "%s", opt[SNR]);		//snr setting
-			snprintf(args[i+1], sizeof(char)*PARBUF, "%d", abssnr(NV_SDGET(nvars[i], opt[i+1])));
-			i+=2;
-			}
-			if(!strcmp(NV_SGET("wan_traffic_type"), "ptm") && *NV_SGET("anc_dslprofile_enable")=='1') {	//vdsl profile only
-				for(j=PROFILE;j<US0+1;j+=2) {
-				snprintf(args[i], sizeof(char)*PARBUF, "%s", opt[j]);
-				snprintf(args[i+1], sizeof(char)*PARBUF, "%s", NV_SDGET(nvars[j], opt[j+1]));
-				i+=2;
-				}
-			}
+	profile=NV_SGET("anc_dslconfprofile");
+	DBG("dslctl(): dslconfprofile: %s\n", profile);
+		if(!strcmp(profile, "own")) {						//own profile settings
+		SETMODULATIONVAL							//modulation setting
+		for(i=BITSWAP;i<SNR;i++) SETOPTIONVAL					//common setting
+		if(*NV_SGET("anc_snrtweak_enable")=='1') SETSNRVAL			//snr setting
+		if(!strcmp(NV_SGET("wan_traffic_type"), "ptm") && *NV_SGET("anc_dslprofile_enable")=='1') for(i=PROFILE;i<END;i++) SETOPTIONVAL
 		}
-		else if(!strcmp(NV_SGET("anc_dslconfprofile"), "broadcom")) 		//broadcom settings='xdslctl configure'
-		for(i=0;i<LPAIR;i++) SETOPTIONNAME
+		else if(!strcmp(profile, "broadcom")) snprintf(cmd, sizeof(cmd), "%s configure", DSLBIN);//broadcom setting (xdslctl configure)
 		else {									//netgear settings as default
-		for(i=0;i<I24K;i++) SETOPTIONNAME					//fill all the interested args
-		SETMODULATIONVAL							//parse mod value only
+		SETMODULATIONVAL
+		for(i=BITSWAP;i<I24K;i++) SETOPTIONVAL
 		}
-	for(;i<ARGNUM;i++) args[i]=NULL;						//set last args to NULL
-#if DEBUG
-	for(i=0;i<ARGNUM;i++) if(args[i]!=NULL) DBG("dslctl() #%d: %s\n", i, args[i]);
-#endif
-		if((pid=fork())<0) {							//fork error
-		DBG("fork() error: unlocking fd %d\n", fd);
-		unlock(fd, LOCK_DSL);
-		exit(2);
-		}
-		else if(pid>0) {							//parent thread
-		while((waitpid(pid, NULL, 0)==-1) && (errno==EINTR)) ;			//safe-wait for child exit...
-		for(i=0;i<ARGNUM;i++) SFREE(args[i]);					//free args
-		SFREE(args);
-		DBG("dslctl(): free args\n");
-		exit(0);
-		}
-		else {									//child thread
-		unlock(fd, LOCK_DSL);							//release lock
-		execvp(DSLBIN, args);
-		}
+	DBG("dslctl(): cmd to exec: %s\ndslctl(): cmd length: %d\n", cmd, strlen(cmd));
+	unlock(fd, LOCK_DSL);								//release lock
+	runexecve(cmd);									//run parsed xdslctl command
 	}
-DBG("dslctl(): execvp() fail\n");
-return 1;										//here only on execvp() fail
+DBG("dslctl(): execvp(e)() fail\n");
+return 1;										//here only on execvp(e)() fail
 }
