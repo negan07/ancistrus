@@ -32,7 +32,7 @@ diff -urN work/opkg-utils-0.3.6/Makefile work/opkg-utils-0.3.6/Makefile
 -all: $(UTILS) $(MANPAGES)
 +prepare:
 +	install -m 0755 -d $(DESTDIR)
-+	install -m 755 $(UTILS) $(DESTDIR)
++	install -m 0755 $(UTILS) $(DESTDIR)
  
 -install: all
 -	install -d $(DESTDIR)$(bindir)
