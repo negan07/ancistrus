@@ -37,7 +37,7 @@ preinst:
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
 	@echo "$(USRSBINRCAPP)/$(STARTUP) start >/dev/null 2>&1" >> $(POSTINST)
-	@echo "echo \"Type '$(USRSBINRCAPP)/$(STARTUP) help' to see the options & settings\"" >> $(POSTINST)
+	@echo "[ -n \"\$$SHELL\" ] && echo \"Type '$(USRSBINRCAPP)/$(STARTUP) help' to see the options & settings\"" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
 prerm:
