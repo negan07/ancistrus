@@ -148,7 +148,8 @@ if(nvmod==NULL || !*nvmod || !strcmp(nvmod, "MMODE")) return "dlt2pemv";		//no s
 else if(!strcmp(nvmod, "A2PMOD")) return "vp";						//vdsl & adsl2+
 else if(!strcmp(nvmod, "A2MOD")) return "2v";						//vdsl & adsl2
 else if(!strcmp(nvmod, "GDMT")) return "dmv";						//vdsl & adsl
-else return "v";									//tweak for vdsl only: try to negotiate link faster
+else if(!strcmp(NV_SGET("wan_traffic_type"), "ptm")) return "v";			//tweak for vdsl only: try to negotiate link faster
+else return "dlt2pemv";
 }
 
 int dslctl(char** argv) {
