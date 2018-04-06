@@ -1,6 +1,6 @@
-diff -urN work/nvram-0.1.3/nvram.c work/nvram-0.1.3/nvram.c
---- work/nvram-0.1.3/nvram.c	2016-10-11 17:53:07.000000000 +0200
-+++ work/nvram-0.1.3/nvram.c	2017-02-05 21:24:36.082726345 +0100
+diff -urN work/nvram-0.1.4/nvram.c work/nvram-0.1.4/nvram.c
+--- work/nvram-0.1.4/nvram.c	2016-10-11 17:53:07.000000000 +0200
++++ work/nvram-0.1.4/nvram.c	2017-02-05 21:24:36.082726345 +0100
 @@ -7,12 +7,17 @@
  #include <unistd.h>
  #include <sys/ioctl.h>
@@ -480,9 +480,9 @@ diff -urN work/nvram-0.1.3/nvram.c work/nvram-0.1.3/nvram.c
  
  	if((pt=__nvram_get_func(name, path, 0))==NULL)
  		return NULL;
-diff -urN work/nvram-0.1.3/nvram.h work/nvram-0.1.3/nvram.h
---- work/nvram-0.1.3/nvram.h	2016-10-11 17:53:07.000000000 +0200
-+++ work/nvram-0.1.3/nvram.h	2017-02-05 21:24:36.082726345 +0100
+diff -urN work/nvram-0.1.4/nvram.h work/nvram-0.1.4/nvram.h
+--- work/nvram-0.1.4/nvram.h	2016-10-11 17:53:07.000000000 +0200
++++ work/nvram-0.1.4/nvram.h	2017-02-05 21:24:36.082726345 +0100
 @@ -10,48 +10,63 @@
  
  /* line terminator by 0x00 
@@ -715,9 +715,9 @@ diff -urN work/nvram-0.1.3/nvram.h work/nvram-0.1.3/nvram.h
  	get or set the value of a key
  */
  int nv_set(const char* category, const char* key, int key_idx, const char* value);
-diff -urN work/nvram-0.1.3/nvram_lock.c work/nvram-0.1.3/nvram_lock.c
---- work/nvram-0.1.3/nvram_lock.c	2016-10-11 17:53:07.000000000 +0200
-+++ work/nvram-0.1.3/nvram_lock.c	2017-01-26 22:29:06.100722779 +0100
+diff -urN work/nvram-0.1.4/nvram_lock.c work/nvram-0.1.4/nvram_lock.c
+--- work/nvram-0.1.4/nvram_lock.c	2016-10-11 17:53:07.000000000 +0200
++++ work/nvram-0.1.4/nvram_lock.c	2017-01-26 22:29:06.100722779 +0100
 @@ -13,9 +13,13 @@
  	char lock_path[PATH_MAX];
  	char *p;
