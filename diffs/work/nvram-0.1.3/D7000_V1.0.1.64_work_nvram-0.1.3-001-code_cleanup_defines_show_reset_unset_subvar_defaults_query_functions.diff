@@ -180,6 +180,15 @@ diff -urN work/nvram-0.1.3/nvram.c work/nvram-0.1.3/nvram.c
  }
  
  int nvram_commit(void)
+@@ -363,7 +386,7 @@
+ 	return pt;
+ }
+ 
+-/* reentrant version. caller is responsable to free the return buffer. */
++/* reentrant version. caller is responsible to free the return buffer. */
+ char* nvram_get_r(const char *name)
+ {	
+ 	char *pt;
 @@ -385,6 +408,24 @@
  	return pt;
  }
@@ -205,7 +214,7 @@ diff -urN work/nvram-0.1.3/nvram.c work/nvram-0.1.3/nvram.c
  static int nvram_unset_func_unlock(const char* name,char *path)
  {
  	char *bufspace, *targetspace;
-@@ -508,22 +549,191 @@
+@@ -508,22 +549,188 @@
  {
  	return nvram_set_func(name,value,NVRAM_BCM_PATH);	
  }
@@ -321,14 +330,13 @@ diff -urN work/nvram-0.1.3/nvram.c work/nvram-0.1.3/nvram.c
 +{
 +	int err;
 +	char *old, *s, *s_old;
-+	const char tag[] = {DIVISION_SYMBOL};
 +
 +	old = nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
 +	if(!strcmp(old, "")) 
 +		err = NVRAM_DATA_ERR;
 +	else {
 +		err = nvram_set(name, "");					/* clear name var settings content */
-+		for(s=(char*)strtok_r(old, tag, &s_old);s != NULL;s=(char*)strtok_r(NULL, tag, &s_old)) {  /* tokenize old var string */
++		for(s=(char*)strtok_r(old, "\1", &s_old);s != NULL;s=(char*)strtok_r(NULL, "\1", &s_old)) {  /* tokenize old var string */
 +			if(strcmp(s, value)) 
 +				err = nvram_append(name, s);
 +		}
@@ -343,13 +351,12 @@ diff -urN work/nvram-0.1.3/nvram.c work/nvram-0.1.3/nvram.c
 +{
 +	int err;
 +	char *old, *s, *s_old;
-+	const char tag[] = {DIVISION_SYMBOL};
 +
 +	old = nvram_safe_get_r(name);						/* safe reentrant version: no NULL and return must be free */
 +	err = nvram_set(name, "");						/* clear name var settings content */
 +	err = nvram_set(name, value);						/* insert value as first */
 +
-+	for(s=(char*)strtok_r(old, tag, &s_old);s != NULL;s=(char*)strtok_r(NULL, tag, &s_old))	/* tokenize old var string */
++	for(s=(char*)strtok_r(old, "\1", &s_old);s != NULL;s=(char*)strtok_r(NULL, "\1", &s_old))	/* tokenize old var string */
 +		if(strcmp(s, value))						/* assure no identical (sub)values are stored */
 +			err = nvram_append(name, s);
 +	if(old) 
@@ -362,14 +369,13 @@ diff -urN work/nvram-0.1.3/nvram.c work/nvram-0.1.3/nvram.c
 +{
 +	int err;
 +	char *old, *s, *s_old;
-+	const char tag[] = {DIVISION_SYMBOL};
 +
 +	if(!strcmp(oldval, newval) || !nvram_sub_find(name, oldval))		/* if old & new are equal or old missed no change */
 +		err = NVRAM_DATA_ERR;
 +	else {
 +		old = nvram_safe_get_r(name);					/* safe reentrant version: no NULL and return must be free */
 +		err = nvram_set(name, "");					/* clear name var settings content */
-+		for(s=(char*)strtok_r(old, tag, &s_old);s != NULL;s=(char*)strtok_r(NULL, tag, &s_old)) {	/* tokenize old var string */
++		for(s=(char*)strtok_r(old, "\1", &s_old);s != NULL;s=(char*)strtok_r(NULL, "\1", &s_old)) {	/* tokenize old var string */
 +			if(!strcmp(s, newval))					/* assure no identical (sub)values are stored */
 +				continue;
 +			else if(!strcmp(s, oldval)) 
@@ -401,7 +407,7 @@ diff -urN work/nvram-0.1.3/nvram.c work/nvram-0.1.3/nvram.c
  
  	return nvram_set_func( name, value, path);
  }
-@@ -531,17 +741,17 @@
+@@ -531,17 +738,17 @@
  
  int nv_setFX(const char* category, const char* key, int key_idx, const char *value_format, ...)
  {
@@ -425,7 +431,7 @@ diff -urN work/nvram-0.1.3/nvram.c work/nvram-0.1.3/nvram.c
  	va_end(arg);
  	
  
-@@ -551,9 +761,9 @@
+@@ -551,9 +758,9 @@
  
  int nv_set_int(const char* category, const char* key, int key_idx, int value)
  {
@@ -437,7 +443,7 @@ diff -urN work/nvram-0.1.3/nvram.c work/nvram-0.1.3/nvram.c
  
  	return nv_set(category, key, key_idx, value_str);
  }
-@@ -562,11 +772,11 @@
+@@ -562,11 +769,11 @@
  char* nv_get(const char* category, const char* key, int key_idx)
  {
      char *pt;
@@ -453,7 +459,12 @@ diff -urN work/nvram-0.1.3/nvram.c work/nvram-0.1.3/nvram.c
  
  	if((pt=__nvram_get_func(name, path, 1))==NULL)
  		return NULL;
-@@ -586,11 +796,11 @@
+@@ -582,15 +789,15 @@
+ 	return pt;
+ }
+ 
+-/* reentrant version. caller is responsable to free the return buffer. */
++/* reentrant version. caller is responsible to free the return buffer. */
  char* nv_get_r(const char* category, const char* key, int key_idx)
  {
      char *pt;
