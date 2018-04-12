@@ -3,8 +3,10 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
     <title>{{ site.title | default: site.github.repository_name }} by {{ site.github.owner_name }}</title>
+  {% seo %}
   </head>
 
   <body>
@@ -49,12 +51,10 @@
 	<p>telnet the router</p>
 	<p>login: 'admin' or 'root' on older firmwares</p>
 	<p>password: if asked, same as web interface</p>
-<span class="blank">
 	<p><i>$ cd /etc</i></p>
 	<p><i>$ curl -k -O https://raw.githubusercontent.com/negan07/ancistrus/master/scripts/startup.sh</i></p>
 	<p><i>$ chmod 755 startup.sh</i></p>
 	<p><i>$ ./startup.sh</i></p>
-</span>
 	<p>Follow the instructions on terminal.</p>
         {% if site.show_downloads %}
         <p align="center">
