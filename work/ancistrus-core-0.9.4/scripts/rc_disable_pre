@@ -11,7 +11,7 @@
 #
 # 'rc_${SERV}' service inhibition script.
 #
-# Usage: $0 (<disable>)
+# Usage: $0 (<enable|disable>)
 #
 # ${SERV} is a service run by 'rc_apps' through symlink 'rc_${SERV}' .
 # Services that can be disabled are present as symlink named '${INITD}/${SERV}_pre' pointing to this script.
@@ -19,13 +19,12 @@
 # Not all services can be disabled because essentials.
 # This script can be skipped with 'nvram set anc_boot_disable=1' .
 #
-# Typing:
-# 'rc $SERV disable'
-# the service will be inhibited by 'anc' ('rc_apps') from running at all.
+# Typing: 'rc $SERV disable' the service will be inhibited by 'anc' ('rc_apps') from running at all.
+# Typing: 'rc $SERV enable' the service inhibition will be removed and service will be available again.
 #
 
 eval `nvram get anc_boot_disable` > /dev/null 2>&1
-[ "${anc_boot_disable}" = "1" ] && exit 1		#skip flag
+[ "${anc_boot_disable}" = "1" ] && exit 1							#skip flag
 
 TAG=_pre
 RCAPPDIR=/usr/sbin/rc_app
@@ -33,17 +32,20 @@ SERV=`basename $0`
 SERV=${SERV%${TAG}}
 
 case "$1" in
-enable)							#enable service (remove inhibition)
-nvram unset ${SERV}_disable
-${RCAPPDIR}/rc_${SERV} start
+enable)												#enable service (remove inhibition)
+nvram set ${SERV}_disable=0
+${RCAPPDIR}/rc_${SERV} start > /dev/null 2>&1
+exit 127
 ;;
-disable)						#disable service (add/enable inhibition)
-${RCAPPDIR}/rc_${SERV} stop
+disable)											#disable service (add/enable inhibition)
+${RCAPPDIR}/rc_${SERV} stop > /dev/null 2>&1
 nvram set ${SERV}_disable=1
+exit 127
+;;
+*)
+eval `nvram get ${SERV}_disable` > /dev/null 2>&1
+[ "`eval echo '$'${SERV}_disable`" = "1" ] && exit 127						#no exec cmd exit code
+exit 0												#no inhibition
 ;;
 esac
 
-eval `nvram get ${SERV}_disable` > /dev/null 2>&1
-[ "`eval echo '$'${SERV}_disable`" = "1" ] && exit 127	#no exec cmd exit code
-
-exit 0							#no inhibition
