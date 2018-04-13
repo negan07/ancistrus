@@ -53,7 +53,7 @@ echo "Cleaning up some garbage/orphan dirs & files..."
 for D in "/opt" "${WWW}/cgi-bin"; do find $D -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1; done
 for D in "CSY" "TUR"; do find ${LANGSDIR} -type d -name $D -exec rm -rf '{}' \; > /dev/null 2>&1; done
 find ${LANGSDIR} -type f -name *.gz -exec rm -f '{}' \; > /dev/null 2>&1
-rm -f ${OPKG} ${CONF} ${ARC} ${USRETCDIR}/rcS.MT ${BINDIR}/reaim ${BINDIR}/telnetenabled ${WWW}/language/Czech.js ${WWW}/*DGND*.jpg ${WWW}/vw_* ${WWW}/vpn_* ${WWW}/h_vpn* ${WWW}/h_vauto* ${WWW}/h_vman* ${WWW}/index1.htm ${WWW}/start1.htm ${WWW}/*_demo.htm ${WWW}/start_old_style.htm
+rm -f ${OPKG} ${CONF} ${ARC} ${USRETCDIR}/rcS.MT ${BINDIR}/reaim ${BINDIR}/telnetenabled ${WWW}/language/Czech.js ${WWW}/*DGND*.jpg ${WWW}/vw_* ${WWW}/vpn_* ${WWW}/h_vpn* ${WWW}/h_vauto* ${WWW}/h_vman* ${WWW}/index1.htm ${WWW}/start1.htm ${WWW}/*_demo.htm ${WWW}/start_old_style.htm ${WWW}/ORG-RST_status.htm ${WWW}/DSL_PRO_config.html
 sync
 echo
 echo "Downloading & extracting: ${ARC} ..."
