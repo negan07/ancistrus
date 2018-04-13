@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8">
+<link rel="stylesheet" href="style/advanced.css">
+<script language=javascript type=text/javascript src=funcs.js></script>
+<script language=javascript type=text/javascript src=region_class.js></script>
+<script language=javascript type=text/javascript src=anc.js></script>
+<script language=javascript type=text/javascript src=top.js></script>
+<script language=javascript type=text/javascript src=string.js></script>
+<script language=javascript type=text/javascript>
+<!--
+var type="anc";
+var help_info="_index";
+var gui_region="English";
+var region_class;
+var item_focus=false;
+var setup_open=0;
+var admin_open=0;
+var net_open=0;
+var storage_open=0;
+var misc_open=0;
+
+function loadvalue() {
+	change_size();
+	region_class=initClass(gui_region);
+	menu_color_change('home');
+}
+
+function linksetup(name, type) {
+	var cgilink='anc.cgi?next_file=';
+
+	if(type=='ipk') cgilink+=name;
+	else cgilink+='anc_'+name;
+	cgilink+='.htm';
+	if(name=='home') cgilink+='&job='+name+'&todo=/usr/sbin/scripts/guiinfo.sh >/dev/null';
+
+	goto_formframe(cgilink);
+	menu_color_change(name);
+	change_menu_height();
+}
+
+function AncLinks() {
+	var links=["wiki", "", "projects/1", "issues", "releases"], txt=["Wiki Board", "View on GitHub", "State of Art", "Issue Report", "Monolithic Firmware"], out="";
+
+	for(var i=0;i<5;i++) out+='<a target="_blank" href="https://github.com/negan07/ancistrus/'+links[i]+'">'+txt[i]+'</a> | ';
+	out+='<a target="_blank" href="https://raw.githubusercontent.com/negan07/ancistrus/master/DISCLAIMER">DISCLAIMER</a> | ';
+	out+='<a target="_blank" href="./GPL_rev1.htm">GPL</a>';
+	document.write(out);
+}
+
+function focus_stat(obj, tf) {
+	if(obj.name=="search") item_focus=tf;
+}
+
+// -->
+</script>
+<title>NETGEAR Router D7000</title><meta http-equiv=content-type content='text/html; charset=UTF-8'>
+<meta content="MSHTML 6.00.2800.1141" name="GENERATOR"></head>
+<body onload="loadvalue();" onResize="change_size();">
+<form onsubmit="return false">
+<div id="top">
+	<iframe name="topframe" id="topframe" src="top.html" allowtransparency="true" scrolling="no" height="100%" width="100%" frameborder="0"></iframe>
+</div>
+<div id="container" class="container_center">
+<div id="middle">
+<div id="menu">
+<div id="home" class="advanced_purple_button" onclick="linksetup('home', 'core')"><b><span>ANCISTRUS Home</span></b></div>
+<div id="opkg" class="advanced_black_button" onclick="linksetup('opkg', 'ipk')"><b><span>Package Manager</span></b></div>
+<div id="setup_bt" class="advanced_white_close_button" onclick="open_or_close_sub('setup'); setup_open++;"><b><span>Core Setup</span></b></div>
+	<div id="setup_sub" class="sub_men" style="display: none">
+	<dl>
+		<dt id="dsltweak" class="sub_back"><a target="formframe" onclick="linksetup('dsltweak', 'core')"><b><span>DSL Tweak</span></b></a></dt>
+		<dt id="inhibit" class="sub_back"><a target="formframe" onclick="linksetup('inhibit', 'core')"><b><span>Service Inhibitions</span></b></a></dt>
+		<dt id="sched" class="sub_back"><a target="formframe" onclick="linksetup('sched', 'core')"><b><span>Schedule Events</span></b></a></dt>
+		<dt id="pers" class="sub_back"><a target="formframe" onclick="linksetup('pers', 'core')"><b><span>Personal Instructions</span></b></a></dt>
+	</dl>
+	</div>
+	<div id="admin_bt" class="advanced_white_close_button" onclick="open_or_close_sub('admin'); admin_open++;"><b><span>Management</span></b></div>
+	<div id="admin_sub" class="sub_men" style="display: none">	
+	<dl>
+		<script>populate_submenu("admin");</script>
+	</dl>
+	</div>
+	<div id="net_bt" class="advanced_white_close_button" onclick="open_or_close_sub('net'); net_open++;"><b><span>Networking</span></b></div>
+	<div id="net_sub" class="sub_men" style="display: none">
+	<dl>
+		<script>populate_submenu("net");</script>
+	</dl>
+	</div>
+	<div id="storage_bt" class="advanced_white_close_button" onclick="open_or_close_sub('storage'); storage_open++;"><b><span>Storage</span></b></div>
+	<div id="storage_sub" class="sub_men" style="display: none">
+	<dl>
+		<script>populate_submenu("storage");</script>
+	</dl>
+	</div>
+	<div id="misc_bt" class="advanced_white_close_button" onclick="open_or_close_sub('misc'); misc_open++;"><b><span>General</span></b></div>
+	<div id="misc_sub" class="sub_men" style="display: none">
+	<dl>
+		<script>populate_submenu("misc");</script>
+	</dl>
+	</div>
+</div>
+<div id="formframe_div">
+		<iframe name="formframe" id="formframe" src="anc.cgi?next_file=anc_home.htm&job=home&todo=/usr/sbin/scripts/guiinfo.sh >/dev/null" allowtransparency="true" height="100%" width="100%" scrolling="auto" frameborder="0">
+		</iframe>
+</div>
+<div id="footer" class="footer">
+	<img class="footer_img" src="image/footer/footer.gif">
+<div id="support">
+	<b languageCode="3012">HELP & SUPPORT</b> &nbsp;<script>AncLinks()</script>
+</div>
+<div id="search" align=right>
+	<b languageCode="3014">SEARCH HELP</b>
+	<input type="text" name="search" value="Enter Search Item" onKeyPress="detectEnter('num',event);" onBlur="focus_stat(this, false);" onFocus="focus_stat(this, true);this.select();" languageCode="3063" >
+	<input id="search_button" class="search_button" type="button" name="dosearch" value="GO" onClick="do_search();" languageCode="3015">
+</div></div></div></div></form>
+<script language=javascript type=text/javascript src=langs.js></script></body></html>

@@ -1,0 +1,181 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+function varInit() {
+	var cf=document.forms[0];
+	AncdataToVisible(document.forms[0]);
+		if(cf.h_anc_sch_disable.value=="1" || cf.h_schedule_disable.value=="1") {
+		allToDisabled(cf);
+		alert("Warning! Schedule service disabled: page locked !\n");
+		}
+}
+
+function createCron() {
+	var cf=document.forms[0], msg="", s, weekdays;
+
+		if(cf.mins.value.indexOf("-")>-1) {
+		s=cf.mins.value.split('-');
+		cf.begin.value=s[0];
+		cf.end.value=s[1];
+		if(s.length>2) msg+="Minute Range must be: Start-End\n";
+		else if(isNumeric(cf.begin, 59)) msg+="Invalid Minute Start Range (0 - 59)\n";
+		else if(isNumeric(cf.end, 59)) msg+="Invalid Minute End Range (0 - 59)\n";
+		else if(cf.begin.value>=cf.end.value) msg+="Minute End Range must be > Start Range\n";
+		}
+		else if(cf.mins.value!="*" && isNumeric(cf.mins, 59)) msg+="Invalid Minutes (0 - 59)\n";
+		if(cf.hour.value.indexOf("-")>-1) {
+		s=cf.hour.value.split('-');
+		cf.begin.value=s[0];
+		cf.end.value=s[1];
+		if(s.length>2) msg+="Hour Range must be: Start-End\n";
+		else if(isNumeric(cf.begin, 23)) msg+="Invalid Hour Start Range (0 - 23)\n";
+		else if(isNumeric(cf.end, 23)) msg+="Invalid Hour End Range (0 - 23)\n";
+		else if(cf.begin.value>=cf.end.value) msg+="Hour End Range must be > Start Range\n";
+		}
+		else if(cf.hour.value!="*" && isNumeric(cf.hour, 23)) msg+="Invalid Hour (0 - 23)\n";
+		if(optionSelected(cf.day)) {
+		if(cf.day.options[0].selected) weekdays=cf.day.options[0].value;
+		else weekdays=AncgetMultiSelected(cf.day, ",", 1);
+		}
+		else msg+="No Weekday selected !\n";
+		msg+=checkBlank(cf.cmd, "Cronjob Event Command");
+
+		if(msg.length>1) {
+		alert(msg);
+		return false;
+		}
+
+	cf.anc_sch_opt.value+=cf.mins.value+" "+cf.hour.value+" * * "+weekdays+" root "+cf.cmd.value;
+	return addCronjob('list_anc_sch_opt', cf.anc_sch_opt);
+}
+
+function addCronjob(cjname, cj) {
+	var cf=document.forms[0];
+	var msg="";
+
+	msg+=printable_ch_chk(cj.value);
+		if(msg.length>1) {
+		alert(msg);
+		return false;
+		}
+
+	msg+=checkBlank(cj, "Cronjob");
+	cj.focus();
+		if(msg.length>1) {
+		alert(msg);
+		return false;
+		}
+
+	cf.add.value=cjname;
+	AncstdAction(cf,'anc_sched.htm','','add','/usr/sbin/rc schedule start');
+	return true;
+}
+
+function delCronjob(cjname, cj) {
+	var cf=document.forms[0];
+
+		if(optionSelected(cj)) {
+		cf.selected.value=AncgetMultiSelected(cj, "\3", 0);
+		cf.del.value=cjname;
+		AncstdAction(cf,'anc_sched.htm','','del','/usr/sbin/rc schedule start');
+		return true;
+		}
+		else {
+		alert("No Cronjob selected !\n");
+		return false;
+		}
+}
+
+//-->
+</script></head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
+<form name="ssh" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<div><a class="page_title" href="javascript:gotoWiki('Schedule-Events/');">Schedule Events</a></div>
+<div class="fix_button"><table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
+&nbsp;
+<input type="button" class="common_bt" value="Show Crontab" onClick="this.form.pipe_cmd.value='/bin/cat /etc/crontab';AncstdAction(this.form,'anc_run.htm','anc_sched.htm','pipe','');">
+</td></tr></table></div>
+<div id="main" class="main_top_button">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Schedule-Events#add-a-personal-cronjob-trigger-event')" tabindex="-1"><b>Type Personal Cronjob Event here</b></a></td></tr>
+<tr><td colspan="2" align="center">
+<b>Min:</b><input type="text" name="mins" value="" size=2 maxlength=5>&nbsp;&nbsp;
+<b>Hour:</b><input type="text" name="hour" value="" size=2 maxlength=5>&nbsp;&nbsp;
+<b>Weekday:</b>
+	<select name="day" size=8 multiple>
+		<option value="*">All</option>
+		<option value="0">Sunday</option>
+		<option value="1">Monday</option>
+		<option value="2">Tuesday</option>
+		<option value="3">Wednesday</option>
+		<option value="4">Thursday</option>
+		<option value="5">Friday</option>
+		<option value="6">Saturday</option>
+	</select>&nbsp;&nbsp;
+<b>Command:</b><input type="text" name="cmd" value="" size=40 maxlength=320>
+</td></tr>
+<tr><td colspan="2" align="center"><input class="long_add_bt" type="button" value="Add Cronjob" onClick="createCron()"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Schedule-Events#add-a-personal-cronjob-trigger-event')" tabindex="-1"><b>Personal Cronjob Events List</b></a></td></tr>
+<tr><td colspan="2" align="center">
+	<select name="list_anc_sch_opt" size="3" multiple>
+	@list_anc_sch_opt#
+	</select>
+</td></tr>
+<tr><td colspan="2" align="center">
+<input class="block_delete_bt" type="button" value="Delete Cronjob" onClick="delCronjob('list_anc_sch_opt',list_anc_sch_opt)">
+&nbsp;
+<input class="common_bt" type="button" value="Clear List" onClick="this.form.clear.value='list_anc_sch_opt';AncstdAction(this.form,'anc_sched.htm','','clear','/usr/sbin/rc schedule start');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Schedule-Events#disable-an-original-cronjob-service-event')" tabindex="-1"><b>Type Original Cronjob Event to Disable here</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="text" name="anc_sch_rem" size="20" maxlength="40" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="long_add_bt" type="button" value="Add Disabled Cronjob" onClick="addCronjob('list_anc_sch_rem',anc_sch_rem)"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Schedule-Events#disable-an-original-cronjob-service-event')" tabindex="-1"><b>Original Disabled Cronjob Events List</b></a></td></tr>
+<tr><td colspan="2" align="center">
+	<select name="list_anc_sch_rem" size="3" multiple>
+	@list_anc_sch_rem#
+	</select>
+</td></tr>
+<tr><td colspan="2" align="center">
+<input class="block_delete_bt" type="button" value="Remove Disabled" onClick="delCronjob('list_anc_sch_rem',list_anc_sch_rem)">
+&nbsp;
+<input class="common_bt" type="button" value="Clear List" onClick="this.form.clear.value='list_anc_sch_rem';AncstdAction(this.form,'anc_sched.htm','','clear','/usr/sbin/rc schedule start');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="">
+<input type="hidden" name="todo" value="">
+<input type="hidden" name="next_file" value="anc_sched.htm">
+<input type="hidden" name="old_file" value="">
+<input type="hidden" name="pipe_cmd" value="">
+<input type="hidden" name="add" value="">
+<input type="hidden" name="del" value="">
+<input type="hidden" name="clear" value="">
+<input type="hidden" name="selected" value="">
+<input type="hidden" name="begin" value="">
+<input type="hidden" name="end" value="">
+<input type="hidden" name="anc_sch_opt" value="">
+<input type="hidden" name="h_schedule_disable" value="@h_schedule_disable#">
+<input type="hidden" name="h_anc_sch_disable" value="@h_anc_sch_disable#">
+</div>
+</form>
+<script>printHelp();</script>
+</body></html>

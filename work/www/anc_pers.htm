@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+function varInit() {
+	var cf=document.forms[0];
+	AncdataToVisible(document.forms[0]);
+		if(cf.h_anc_boot_disable.value=="1") {
+		allToDisabled(cf);
+		alert("Warning! Runlevel Boot Stage disabled: page locked !\n");
+		return false;
+		}
+		if(cf.h_anc_kscripts_disable.value=="1") {
+		cf.anc_kill_opt.disabled=true;
+		cf.list_anc_kill_opt.disabled=true;
+		cf.kadd.disabled=true;
+		cf.kdel.disabled=true;
+		cf.kclear.disabled=true;
+		alert("Warning! Runlevel Kill Boot Stage disabled !\n");
+		}
+		if(cf.h_anc_sscripts_disable.value=="1") {
+		cf.anc_startup_opt.disabled=true;
+		cf.list_anc_startup_opt.disabled=true;
+		cf.sadd.disabled=true;
+		cf.sdel.disabled=true;
+		cf.sclear.disabled=true;
+		alert("Warning! Runlevel Startup Boot Stage disabled !\n");
+		}
+}
+
+function addCmd(cjname, cj) {
+	var cf=document.forms[0];
+	var msg="";
+
+	msg+=printable_ch_chk(cj.value);
+		if(msg.length>1) {
+		alert(msg);
+		return false;
+		}
+
+	msg+=checkBlank(cj, "Command");
+	cj.focus();
+		if(msg.length>1) {
+		alert(msg);
+		return false;
+		}
+
+	cf.add.value=cjname;
+	AncstdAction(cf,'anc_pers.htm','','add','');
+	return true;
+}
+
+function delCmd(cjname, cj) {
+	var cf=document.forms[0];
+
+		if(optionSelected(cj)) {
+		cf.selected.value=AncgetMultiSelected(cj, "\3", 0);
+		cf.del.value=cjname;
+		AncstdAction(cf,'anc_pers.htm','','del','');
+		return true;
+		}
+		else {
+		alert("No Command selected !\n");
+		return false;
+		}
+}
+
+//-->
+</script></head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
+<form name="ssh" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<div><a class="page_title" href="javascript:gotoWiki('Personal-instructions/');">Personal Instructions</a></div>
+<div class="fix_button"><table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
+&nbsp;
+<input class="common_bt" type="button" value="Restart Wifi" onClick="if(confirm('Warning! Now restarting wifi connection: proceed ?')) AncstdAction(this.form,'anc_pers.htm','','','/usr/sbin/rc wlan start');">
+</td></tr></table></div>
+<div id="main" class="main_top_button">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Personal-instructions#personal-post-wifi-commands')" tabindex="-1"><b>Type Personal Post Wifi Command here</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="text" name="anc_wlan_opt" size="40" maxlength="80" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="long_add_bt" type="button" value="Add Wifi Command" onClick="addCmd('list_anc_wlan_opt',anc_wlan_opt)"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Personal-instructions#personal-post-wifi-commands')" tabindex="-1"><b>Personal Wifi Command List</b></a></td></tr>
+<tr><td colspan="2" align="center">
+	<select name="list_anc_wlan_opt" size="3" multiple>
+	@list_anc_wlan_opt#
+	</select>
+</td></tr>
+<tr><td colspan="2" align="center">
+<input class="block_delete_bt" type="button" value="Delete Command" onClick="delCmd('list_anc_wlan_opt',list_anc_wlan_opt)">
+&nbsp;
+<input class="common_bt" type="button" value="Clear List" onClick="this.form.clear.value='list_anc_wlan_opt';AncstdAction(this.form,'anc_pers.htm','','clear','');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Personal-instructions#runlevel-scripts')" tabindex="-1"><b>RunLevel Boot Stage Commands</b></a></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Personal-instructions#k-runlevel')" tabindex="-1"><b>Type Personal RunLevel Boot Stage Kill Command here</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="text" name="anc_kill_opt" size="40" maxlength="80" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="long_add_bt" type="button" name="kadd" value="Add RunLevel Kill" onClick="addCmd('list_anc_kill_opt',anc_kill_opt)"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Personal-instructions#k-runlevel')" tabindex="-1"><b>Personal Kill Command List</b></a></td></tr>
+<tr><td colspan="2" align="center">
+	<select name="list_anc_kill_opt" size="3" multiple>
+	@list_anc_kill_opt#
+	</select>
+</td></tr>
+<tr><td colspan="2" align="center">
+<input class="block_delete_bt" type="button" name="kdel" value="Delete Command" onClick="delCmd('list_anc_kill_opt',list_anc_kill_opt)">
+&nbsp;
+<input class="common_bt" type="button" name="kclear" value="Clear List" onClick="this.form.clear.value='list_anc_kill_opt';AncstdAction(this.form,'anc_pers.htm','','clear','');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Personal-instructions#s-runlevel')" tabindex="-1"><b>Type Personal RunLevel Boot Stage Startup Command here</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="text" name="anc_startup_opt" size="40" maxlength="80" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="long_add_bt" type="button" name="sadd" value="Add RunLevel Startup" onClick="addCmd('list_anc_startup_opt',anc_startup_opt)"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Personal-instructions#s-runlevel')" tabindex="-1"><b>Personal Startup Command List</b></a></td></tr>
+<tr><td colspan="2" align="center">
+	<select name="list_anc_startup_opt" size="3" multiple>
+	@list_anc_startup_opt#
+	</select>
+</td></tr>
+<tr><td colspan="2" align="center">
+<input class="block_delete_bt" type="button" name="sdel" value="Delete Command" onClick="delCmd('list_anc_startup_opt',list_anc_startup_opt)">
+&nbsp;
+<input class="common_bt" type="button" name="sclear" value="Clear List" onClick="this.form.clear.value='list_anc_startup_opt';AncstdAction(this.form,'anc_pers.htm','','clear','');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="">
+<input type="hidden" name="todo" value="">
+<input type="hidden" name="next_file" value="anc_pers.htm">
+<input type="hidden" name="old_file" value="">
+<input type="hidden" name="add" value="">
+<input type="hidden" name="del" value="">
+<input type="hidden" name="clear" value="">
+<input type="hidden" name="selected" value="">
+<input type="hidden" name="h_anc_boot_disable" value="@h_anc_boot_disable#">
+<input type="hidden" name="h_anc_kscripts_disable" value="@h_anc_kscripts_disable#">
+<input type="hidden" name="h_anc_sscripts_disable" value="@h_anc_sscripts_disable#">
+</div>
+</form>
+<script>printHelp();</script>
+</body></html>

@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+</head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="document.forms[0].elements[0].focus();">
+<form name="pipe" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<div class="page_title">Output Results</div>
+<div class="fix_button">
+<table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="back" value="Back" onClick="location.href='anc.cgi?next_file=@old_file#'">
+</td></tr></table>
+</div>
+<div id="main" class="main_top_button">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td colspan="2" align="center" class="text">
+<textarea name="text" class="text" rows="32" style="width: 100%; min-width: 600px;">@pipe_output#</textarea>
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="pipe">
+<input type="hidden" name="todo" value="pipe">
+<input type="hidden" name="next_file" value="@next_file#">
+<input type="hidden" name="old_file" value="@old_file#">
+<input type="hidden" name="pipe_cmd" value="@pipe_cmd#">
+</div>
+</form>
+<script>printHelp();</script>
+</body></html>
