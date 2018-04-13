@@ -1,7 +1,7 @@
 diff -urN work/opkg-0.3.6/Makefile work/opkg-0.3.6/Makefile
 --- work/opkg-0.3.6/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/opkg-0.3.6/Makefile	2017-03-23 20:35:42.745736890 +0100
-@@ -0,0 +1,152 @@
+@@ -0,0 +1,151 @@
 +include ../Rules.mak
 +
 +ifdef DEBUG
@@ -14,8 +14,10 @@ diff -urN work/opkg-0.3.6/Makefile work/opkg-0.3.6/Makefile
 +OPKG_CONF_PATH		:= $(OPKG)/utils
 +OPKG_CONF_NAME		:= opkg.conf
 +OPKG_CONF 		:= $(OPKG_CONF_PATH)/$(OPKG_CONF_NAME)
++OPKG_TMPDIR		:= $(TMPDIR)/opkg
 +OPKGLANGPART		:= /config/language_TUR
 +OPKGPART		:= mtd20
++WEB			:= ../www/opkg.htm ../www/opkg_select.htm
 +
 +all: config
 +	$(MAKE) -C $(OPKG)
@@ -49,10 +51,13 @@ diff -urN work/opkg-0.3.6/Makefile work/opkg-0.3.6/Makefile
 +
 +install-cross: opkg_conf control
 +	$(SSTRIP) $(OPKG)/src/opkg
-+	install -m 0755 -d $(ETCDIR)
-+	install -m 0755 -d $(BINDIR)
++	for D in $(ETCDIR) $(BINDIR) $(WWWDIR); do install -m 0755 -d $$D; done
 +	install -m 0644 $(OPKG_CONF) $(ETCDIR)
 +	install -m 0755 $(OPKG)/src/opkg $(BINDIR)
++	install -m 0664 $(WEB) $(WWWDIR)
++	ln -sf $(OPKG_INFO_STATUS_DIR)/status $(WWWDIR)/opkgstatus
++	ln -sf $(OPKG_TMPDIR)/lists/$(OPKG_REP_NAME) $(WWWDIR)/opkglist
++	ln -sf $(OPKG_TMPDIR)/list-upgradable $(WWWDIR)/opkglistupgr
 +
 +man-install:
 +	cd $(OPKG)/man && $(MAKE) install
@@ -111,9 +116,8 @@ diff -urN work/opkg-0.3.6/Makefile work/opkg-0.3.6/Makefile
 +CONFFILES		:= $(CTRL_DIR)/conffiles
 +PREINST			:= $(CTRL_DIR)/preinst
 +POSTINST		:= $(CTRL_DIR)/postinst
-+POSTRM			:= $(CTRL_DIR)/postrm
 +
-+control: conffiles preinst postinst postrm
++control: conffiles preinst postinst
 +
 +conffiles:
 +	@echo "$(USRETC)/$(OPKG_CONF_NAME)" > $(CONFFILES)
@@ -137,7 +141,7 @@ diff -urN work/opkg-0.3.6/Makefile work/opkg-0.3.6/Makefile
 +	@echo "#!/bin/sh" > $(POSTINST)
 +	@echo "cp -f $(USRETC)/$(OPKG_CONF_NAME) $(TMPETC)" >> $(POSTINST)
 +	@echo "echo" >> $(POSTINST)
-+	@echo "echo \"$(OPKG) configuration on: $(TMPETC)/$(OPKG_CONF_NAME)\"" >> $(POSTINST)
++	@echo "echo \"$(OPKG) configuration on: $(USRETC)/$(OPKG_CONF_NAME)\"" >> $(POSTINST)
 +	@echo "echo" >> $(POSTINST)
 +	@echo "echo \"Type: 'opkg update' to update packages list\"" >> $(POSTINST)
 +	@echo "echo \"Type: 'opkg list' to see the list of the available packages\"" >> $(POSTINST)
@@ -147,10 +151,5 @@ diff -urN work/opkg-0.3.6/Makefile work/opkg-0.3.6/Makefile
 +	@echo "echo" >> $(POSTINST)
 +	@echo "echo \"Example: 'opkg install qos-sqm' to install qos-sqm scripts package\"" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
-+
-+postrm:
-+	@echo "#!/bin/sh" > $(POSTRM)
-+	@echo "rm -rf $(TMPDIR)/opkg" >> $(POSTRM)
-+	@echo "exit 0" >> $(POSTRM)
 +endif
 +
