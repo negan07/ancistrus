@@ -202,4 +202,4 @@ int dslctl(char** argv);
  * Input: void as arguments come from stdin or env vars read by getenv() .
  * Return: '0', 'void' (exec()) or system() return value if success, != '0' if error occurred.
  */
-//int cgi(void);
+int cgi(void);

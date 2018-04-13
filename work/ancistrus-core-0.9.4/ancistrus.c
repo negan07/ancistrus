@@ -102,7 +102,7 @@ unsigned int i;
 
 DBG("main(): my name is %s\n", argv[0]);
 corename=basename(argv[0]);
-//if(!strcmp(corename, CGI)) return i=cgi();			//core working as 'anc.cgi' web gui
+if(!strcmp(corename, CGI)) return i=cgi();			//core working as 'anc.cgi' web gui
 if(!strcmp(corename+1, DSLCMD)) return i=dslctl(argv);		//core working as 'adslctl' or 'xdslctl'
 if(strcmp(corename, ME)) return i=rc_apps(argc, argv);		//core working as 'rc_apps'
 if(argc < 2) MAIN_USAGE(1)

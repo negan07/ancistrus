@@ -2,19 +2,15 @@ include ../Rules.mak
 
 BINS			:= $(PROJ_TAG)
 CGI			:= $(BINS).cgi
-DSLCMD			:= xdslctl
-DSLCMDBIN		:= $(DSLCMD).bin
-NVRAMLIB		:= libscnvram.so
+DSLINFO			:= $(PROJ_TAG)dslinfo
 CONF			:= profile
 SCRRCSRAM		:= $(TMPETC)/$(RCSSCR)
-OBJS			:= $(GIT_NAME).o common.o $(RCAPPSBIN).o fw.o dslctl.o
+OBJS			:= $(GIT_NAME).o common.o $(RCAPPSBIN).o fw.o dslctl.o cgi.o
 SCRIPTSDIR		:= scripts
-HTMDIR			:= www
+HTMDIR			:= ../www
 INITDLANGPART		:= /config/language_CSY
 INITDPART		:= mtd19
-MAINWEB			:= top.js advanced.js top.html adv_index.htm
-MAINCSS			:= top.css
-COREWEB			:= $(PROJ_TAG)_index.htm $(PROJ_TAG)_home.htm
+COREWEB			:= $(PROJ_TAG)*
 
 CFLAGS			+= -W -Wall -Werror -Wbad-function-cast -Wcast-align -Wcast-qual -Wmissing-prototypes -Wstrict-prototypes -Wnested-externs -Wpointer-arith -Wredundant-decls -Wshadow -Winline
 LDFLAGS			:= -L../$(NVRAM)
@@ -30,26 +26,26 @@ endif
 
 ifdef DEBUG
 DEFS			+= -DDEBUG=1 -DTMPETC=\"$(RECEIVE_DIR)\"
+COREWEB			+= openssh.htm qos-sqm.htm opkg.htm opkg_select.htm
 endif
 
 all: $(BINS)
 
 $(BINS): $(OBJS)
 	$(CC) $^ $(CFLAGS) $(LDFLAGS) $(LIBS) $(CPPFLAGS) $(DEFS) -o $@
-
 %.o : %.c
 	$(CC) -c $< $(CFLAGS) -Wno-cast-align $(LDFLAGS) $(LIBS) $(CPPFLAGS) $(DEFS) -o $@
 
 install: control
 	$(SSTRIP) $(BINS)
-	for D in $(TMPINSTDIR) $(ETCDIR) $(BINDIR); do install -m 0755 -d $$D; done
-#	for D in $(TMPINSTDIR) $(ETCDIR) $(BINDIR) $(WWWDIR); do install -m 0755 -d $$D; done
-	install -m 0755 ../$(NVRAM)/$(NVRAMLIB) $(TMPINSTDIR)
+	for D in $(TMPINSTDIR) $(ETCDIR) $(BINDIR) $(WWWDIR); do install -m 0755 -d $$D; done
+	install -m 0755 ../$(NVRAM)/$(RCNVRAMSO) $(TMPINSTDIR)
 	install -m 0755 $(BINS) $(BINDIR)
 	$(MAKE) -C $(SCRIPTSDIR) install || exit 1
-#	cd $(HTMDIR); install -m 0664 $(MAINWEB) $(MAINCSS) $(TMPINSTDIR); install -m 0664 $(COREWEB) $(WWWDIR); cd ..
-#	ln -sf $(USRSBIN)/$(PROJ_TAG) $(ETCDIR)/$(CGI)
-#	ln -sf $(TMPETC)/$(CGI) $(WWWDIR)/$(CGI)
+	cd $(HTMDIR); install -m 0664 $(RCMAINWEB) $(RCMAINCSS) $(TMPINSTDIR); install -m 0664 $(COREWEB) $(WWWDIR); cd ..
+	ln -sf $(USRSBIN)/$(PROJ_TAG) $(ETCDIR)/$(CGI)
+	ln -sf $(TMPETC)/$(CGI) $(WWWDIR)/$(CGI)
+	ln -sf $(TMPDIR)/$(DSLINFO) $(WWWDIR)/$(DSLINFO)
 
 clean:
 	rm -f *~ *.o *.so $(BINS)
@@ -87,24 +83,24 @@ postinst:
 	@echo "[ \$$? -ne 0 ] && echo \"Problem has occurred: boot script not updated.\" && exit 1" >> $(POSTINST)
 	@echo "mv -f $(TMPDIR)/$(RCBOOT_NAME) $(RCBOOT)" >> $(POSTINST)
 	@echo "fi" >> $(POSTINST)
-	@echo "if [ -f $(TMPDIR)/$(NVRAMLIB) ]; then" >> $(POSTINST)
-	@echo "echo \"Updating $(NVRAMLIB) ...\"" >> $(POSTINST)
-	@echo "cp -f $(LDLIB)/$(NVRAMLIB) $(TMPDIR)/$(NVRAMLIB).old" >> $(POSTINST)
-	@echo "mv -f $(TMPDIR)/$(NVRAMLIB) $(LDLIB)/$(NVRAMLIB)" >> $(POSTINST)
+	@echo "if [ -f $(TMPDIR)/$(RCNVRAMSO) ]; then" >> $(POSTINST)
+	@echo "echo \"Updating $(RCNVRAMSO) ...\"" >> $(POSTINST)
+	@echo "cp -f $(LDLIB)/$(RCNVRAMSO) $(TMPDIR)/$(RCNVRAMSO).old" >> $(POSTINST)
+	@echo "mv -f $(TMPDIR)/$(RCNVRAMSO) $(LDLIB)/$(RCNVRAMSO)" >> $(POSTINST)
 	@echo "echo -n \"Testing nvram basic functionality...\"" >> $(POSTINST)
 	@echo "nvram set libnvram=working" >> $(POSTINST)
 	@echo "eval \`nvram get libnvram\`" >> $(POSTINST)
 	@echo "	if [ \"\$$libnvram\" != \"working\" ]; then" >> $(POSTINST)
-	@echo "	echo \" something wrong: reverting to original $(NVRAMLIB) ...\"" >> $(POSTINST)
-	@echo "	mv -f $(TMPDIR)/$(NVRAMLIB).old $(LDLIB)/$(NVRAMLIB)" >> $(POSTINST)
+	@echo "	echo \" something wrong: reverting to original $(RCNVRAMSO) ...\"" >> $(POSTINST)
+	@echo "	mv -f $(TMPDIR)/$(RCNVRAMSO).old $(LDLIB)/$(RCNVRAMSO)" >> $(POSTINST)
 	@echo "	exit 1" >> $(POSTINST)
 	@echo "	else" >> $(POSTINST)
 	@echo "	nvram unset libnvram" >> $(POSTINST)
-	@echo "	rm -f $(TMPDIR)/$(NVRAMLIB).old" >> $(POSTINST)
+	@echo "	rm -f $(TMPDIR)/$(RCNVRAMSO).old" >> $(POSTINST)
 	@echo "	echo \" looking good\"" >> $(POSTINST)
 	@echo "	fi" >> $(POSTINST)
 	@echo "fi" >> $(POSTINST)
-	@echo "echo \"Copying conf files & $(INITD) runlevel dirtree on ram...\"" >> $(POSTINST)
+	@echo "echo \"Copying $(INITD) runlevel dirtree & conf files on ram...\"" >> $(POSTINST)
 	@echo "cp -rf $(USRETCINITD) $(USRETC)/$(CONF) $(TMPETC)/" >> $(POSTINST)
 	@echo "echo \"Linking rc services to core on ram...\"" >> $(POSTINST)
 	@echo "ln -sf $(USRSBIN)/$(PROJ_TAG) $(TMPETC)/$(RCAPPSBIN)" >> $(POSTINST)
@@ -123,26 +119,27 @@ postinst:
 	@echo "echo \"Linking rc services to core on flash...\"" >> $(POSTINST)
 	@echo "ln -sf $(USRSBIN)/$(PROJ_TAG) $(USRETC)/$(RCAPPSBIN)" >> $(POSTINST)
 	@echo "fi" >> $(POSTINST)
-	@echo "if [ ! -x $(USRSBIN)/$(DSLCMDBIN) ]; then" >> $(POSTINST)
-	@echo "echo \"Linking $(DSLCMD) to core on flash...\"" >> $(POSTINST)
-	@echo "mv -f $(USRSBIN)/$(DSLCMD) $(USRSBIN)/$(DSLCMDBIN)" >> $(POSTINST)
-	@echo "	if [ ! -x $(USRSBIN)/$(DSLCMDBIN) ]; then" >> $(POSTINST)
-	@echo "	echo \"Something wrong: $(DSLCMDBIN) not present...\"" >> $(POSTINST)
+	@echo "if [ ! -x $(USRSBIN)/$(RCDSLCMDBIN) ]; then" >> $(POSTINST)
+	@echo "echo \"Linking $(RCDSLCMD) to core on flash...\"" >> $(POSTINST)
+	@echo "mv -f $(USRSBIN)/$(RCDSLCMD) $(USRSBIN)/$(RCDSLCMDBIN)" >> $(POSTINST)
+	@echo "	if [ ! -x $(USRSBIN)/$(RCDSLCMDBIN) ]; then" >> $(POSTINST)
+	@echo "	echo \"Something wrong: $(RCDSLCMDBIN) not present...\"" >> $(POSTINST)
 	@echo "	exit 1" >> $(POSTINST)
 	@echo "	else" >> $(POSTINST)
-	@echo "	ln -sf $(USRSBIN)/$(PROJ_TAG) $(USRSBIN)/$(DSLCMD)" >> $(POSTINST)
+	@echo "	ln -sf $(USRSBIN)/$(PROJ_TAG) $(USRSBIN)/$(RCDSLCMD)" >> $(POSTINST)
 	@echo "	fi" >> $(POSTINST)
 	@echo "fi" >> $(POSTINST)
-#	@echo "echo \"Updating main web pages & styles...\"" >> $(POSTINST)
-#	@echo "for F in $(MAINWEB); do [ -f $(TMPDIR)/\$$F ] && mv -f $(TMPDIR)/\$$F $(WWW)/\$$F; done" >> $(POSTINST)
-#	@echo "for F in $(MAINCSS); do [ -f $(TMPDIR)/\$$F ] && mv -f $(TMPDIR)/\$$F $(RCWWWCSSDIR)/\$$F; done" >> $(POSTINST)
+	@echo "echo \"Updating main web pages & styles...\"" >> $(POSTINST)
+	@echo "for F in $(RCMAINWEB); do [ -f $(TMPDIR)/\$$F ] && mv -f $(TMPDIR)/\$$F $(WWW)/\$$F; done" >> $(POSTINST)
+	@echo "for F in $(RCMAINCSS); do [ -f $(TMPDIR)/\$$F ] && mv -f $(TMPDIR)/\$$F $(RCWWWCSSDIR)/\$$F; done" >> $(POSTINST)
+	@echo "ln -sf $(USRSBIN)/$(PROJ_TAG) $(TMPETC)/$(CGI)" >> $(POSTINST)
 	@echo "sync" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
 postrm:
 	@echo "#!/bin/sh" > $(POSTRM)
-	@echo "echo \"Reverting to original $(DSLCMD) ...\"" >> $(POSTRM)
-	@echo "mv -f $(USRSBIN)/$(DSLCMDBIN) $(USRSBIN)/$(DSLCMD)" >> $(POSTRM)
+	@echo "echo \"Reverting to original $(RCDSLCMD) ...\"" >> $(POSTRM)
+	@echo "mv -f $(USRSBIN)/$(RCDSLCMDBIN) $(USRSBIN)/$(RCDSLCMD)" >> $(POSTRM)
 	@echo "echo \"Reverting to original $(RCAPPSBIN) ...\"" >> $(POSTRM)
 	@echo "ln -sf $(RCSBINDIR)/$(RCAPP)/$(RCAPPSBIN) $(USRETC)/$(RCAPPSBIN)" >> $(POSTRM)
 	@echo "ln -sf $(RCSBINDIR)/$(RCAPP)/$(RCAPPSBIN) $(TMPETC)/$(RCAPPSBIN)" >> $(POSTRM)
