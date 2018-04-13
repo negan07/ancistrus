@@ -36,7 +36,7 @@ ADDR=192.168.0.7							# local host ip (development pc machine i386)
 RDIR=/tmp/etc								# this script location
 WWW=/www.eng								# www dir
 DBGDIR=${RDIR}/${NAME}dbg						# debug dir
-BINLIST="profile libscnvram.so $NAME led.sh dslreconfig.sh"		# core main files
+BINLIST="profile libscnvram.so $NAME led.sh guiinfo.sh"			# core main files
 KINITLIST="kernelprocskill.sh printserverkill.sh Kopt.sh"		# core kinit files
 SINITLIST="Sopt.sh"							# core sinit files
 FINITLIST="Fopt.sh"							# core fw services
@@ -44,12 +44,15 @@ CINITLIST=""								# core schedule services
 PRELIST="rc_disable_pre debug_mode_pre"					# core pre files
 POSTLIST="wan_post schedule_post wlan_post firewall_post"		# core post files
 SERVLIST="apple check_conn check_fw dnrd dnshj iserver led_ctrl ntp potcounter printk schedule show_mem_log syslogd xCloud" # inhibit services
-WWWMAINLIST="top.html adv_index.htm top.js advanced.js"			# main webpages
+WWWMAINLIST="top.js funcs.js linux.js top.html adv_index.htm GPL_rev1.htm"			# main webpages
 WWWCSSLIST="top.css"							# main css
-WWWLIST="${NAME}_index.htm ${NAME}_home.htm"				# common webpages
+WWWLIST="${NAME}_index.htm ${NAME}_home.htm ${NAME}_help.htm ${NAME}_editfile.htm ${NAME}_run.htm ${NAME}.js ${NAME}_dsltweak.htm ${NAME}_inhibit.htm ${NAME}_sched.htm ${NAME}_pers.htm openssh.htm qos-sqm.htm opkg.htm opkg_select.htm"
 KOLIST="sch_fq_codel.ko act_ipt.ko cls_flow.ko sch_hfsc.ko"		# kernel modules
 QOSLIST="functions.qos legacy_funcs.qos qdisc_funcs.qos qos_funcs.qos qos-sqm.conf rc_qos"	# qos scripts and configs
 SSHLIST="rc_ssh sshd_config sshd ssh-keygen scp"			# openssh bins scripts and configs
+DSLLIBLIST="libbcm_crc.so libseltctl.so libbcm_flashutil.so"		# dsldrv shared libs list
+DSLKORMMLIST="adsldd.ko pktrunner.ko pktflow.ko bcmxtmcfg.ko bcmxtmrtdrv.ko"			# dsl rmmod kernel modules
+DSLKOINSLIST="bcmxtmrtdrv.ko bcmxtmcfg.ko pktflow.ko pktrunner.ko adsldd.ko"			# dsl insmod kernel modules
 
 
 DIRMAKE() {								# create the work bindir
@@ -80,7 +83,24 @@ cd $DBGDIR
 THISLNK
 }
 
-[ $# -ne 1 ] && echo "Usage: $0 <core> <ko> <qos> <ssh> <www> <del> <*anyfiledir*>" && exit 1
+DSLUP() {								# load .ko modules, start driver, configure & turn dsl connection up
+for M in ${DSLKOINSLIST}; do insmod /lib/modules/${M}; done
+xdslctl start
+sleep 2
+xdslctl configure
+sleep 2
+xdslctl connection --up
+}
+
+DSLDOWN() {								# turn dsl connection down, stop driver, unload .ko modules
+xdslctl connection --down
+sleep 2
+xdslctl stop
+sleep 2
+for M in ${DSLKORMMLIST}; do rmmod /lib/modules/${M}; done
+}
+
+[ $# -ne 1 ] && echo "Usage: $0 <core> <ko> <qos> <ssh> <www> <dsldrv> <del> <<delwww> <deldsldrv> *anyfiledir*>" && exit 1
 
 export LD_LIBRARY_PATH=$DBGDIR
 
@@ -112,7 +132,7 @@ export LD_LIBRARY_PATH=$DBGDIR
 	ln -sf ${DBGDIR}/rc_ssh ${DBGDIR}/init.d/rc.fw/F10ssh
 	;;
 	www)
-	for G in $BINLIST $WWWMAINLIST $WWWCSSLIST $CSSLIST $WWWLIST; do GETLIST $G; done	
+	for G in $BINLIST $WWWMAINLIST $WWWCSSLIST $WWWLIST; do GETLIST $G; done	
 	mkdir -p -m 0755 ${DBGDIR}${WWW}
 	mv -f $WWWMAINLIST $WWWCSSLIST $WWWLIST ${DBGDIR}${WWW}/
 	for F in ${WWWMAINLIST}; do [ -f ${WWW}/${F}.orig ] && continue; mv -f ${WWW}/${F} ${WWW}/${F}.orig; ln -sf ${DBGDIR}${WWW}/${F} ${WWW}/${F}; done
@@ -120,16 +140,48 @@ export LD_LIBRARY_PATH=$DBGDIR
 	for F in ${WWWLIST}; do [ -f ${WWW}/${F} ] && continue; ln -sf ${DBGDIR}${WWW}/${F} ${WWW}/${F}; done
 	ln -sf ${DBGDIR}/${NAME} ${RDIR}/${CGI} > /dev/null 2>&1
 	[ ! -f ${WWW}/${CGI} ] && ln -sf ${RDIR}/${CGI} ${WWW}/${CGI} > /dev/null 2>&1
+	[ ! -f ${WWW}/ancdslinfo ] && ln -sf /tmp/ancdslinfo ${WWW}/ancdslinfo > /dev/null 2>&1
+	[ ! -f ${WWW}/ssh.zip ] && ln -sf /tmp/ssh.zip ${WWW}/ssh.zip > /dev/null 2>&1
+	[ ! -f ${WWW}/opkgstatus ] && ln -sf /usr/lib/opkg/status ${WWW}/opkgstatus > /dev/null 2>&1
+	[ ! -f ${WWW}/opkglist ] && ln -sf /tmp/opkg/lists/ancistrus-arm-D7000 ${WWW}/opkglist > /dev/null 2>&1
+	[ ! -f ${WWW}/opkglistupgr ] && ln -sf /tmp/opkg/list-upgradable ${WWW}/opkglistupgr > /dev/null 2>&1
+	;;
+	dsldrv)
+	GETLIST $DSLLIBLIST $DSLKOINSLIST adsl_phy.bin xdslctl
+	DSLDOWN
+	for L in ${DSLLIBLIST}; do [ ! -f /lib/${L}.orig ] && mv -f /lib/${L} /lib/${L}.orig; mv -f $L /lib/; done
+	for M in ${DSLKOINSLIST}; do [ ! -f /lib/modules/${M}.orig ] && mv -f /lib/modules/${M} /lib/modules/${M}.orig; mv -f $M /lib/modules/; done
+	[ ! -f /etc/adsl/adsl_phy.bin.orig ] && mv -f /etc/adsl/adsl_phy.bin /etc/adsl/adsl_phy.bin.orig && mv -f adsl_phy.bin /etc/adsl/
+	[ ! -f /usr/etc/adsl/adsl_phy.bin.orig ] && mv -f /usr/etc/adsl/adsl_phy.bin /usr/etc/adsl/adsl_phy.bin.orig && mv -f adsl_phy.bin /usr/etc/adsl/
+	[ ! -f /usr/sbin/xdslctl.bin.orig ] && mv -f /usr/sbin/xdslctl.bin /usr/sbin/xdslctl.bin.orig && mv -f xdslctl /usr/sbin/xdslctl.bin
+	sync
+	DSLUP
 	;;
 	del)
 	cd $RDIR
 	rm -rf $DBGDIR
 	pidof sshd > /dev/null 2>&1 || rm -rf /var/ssh
-	mv -f ${RDIR}/sshd_config.old ${RDIR}/sshd_config > /dev/null 2>&1
+	[ -f ${RDIR}/sshd_config.old ] && mv -f ${RDIR}/sshd_config.old ${RDIR}/sshd_config > /dev/null 2>&1
 	[ -x /usr/sbin/${NAME} ] && ln -sf /usr/sbin/${NAME} ${RDIR}/rc_apps > /dev/null 2>&1 || ln -sf /usr/sbin/rc_app/rc_apps ${RDIR}/rc_apps > /dev/null 2>&1
+	;;
+	delwww)
+	cd $RDIR
+	rm -rf ${DBGDIR}${WWW}
 	for F in ${WWWMAINLIST}; do [ -f ${WWW}/${F}.orig ] && mv -f ${WWW}/${F}.orig ${WWW}/${F}; done
 	for F in ${WWWCSSLIST}; do [ -f ${WWW}/style/${F}.orig ] && mv -f ${WWW}/style/${F}.orig ${WWW}/style/${F}; done
-	for F in ${WWWLIST}; do [ -f ${WWW}/${F} ] && rm -f ${WWW}/${F}; done
+	for F in ${WWWLIST}; do rm -f ${WWW}/${F}; done
+	rm -f ${WWW}/ssh.zip ${WWW}/opkg* ${WWW}/anc*
+	;;
+	deldsldrv)
+	if [ -f /lib/modules/adsldd.ko.orig ]; then
+	DSLDOWN
+	for L in ${DSLLIBLIST}; do rm -f /lib/${L}; done
+	for M in ${DSLKOINSLIST}; do [ -f /lib/modules/${M}.orig ] && mv -f /lib/modules/${M}.orig /lib/modules/${M}; done
+	[ -f /etc/adsl/adsl_phy.bin.orig ] && mv -f /etc/adsl/adsl_phy.bin.orig /etc/adsl/adsl_phy.bin
+	[ -f /usr/sbin/xdslctl.bin.orig ] && mv -f /usr/sbin/xdslctl.bin.orig /usr/sbin/xdslctl.bin
+	sync
+	DSLUP
+	fi
 	;;
 	*)
 	DIRMAKE
