@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript" src="anc.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+function loadPackageList(file) {
+	var pkg="Package: ";
+	var ver="Version: ";
+	var xmlhttp=readFileTags(file);
+
+	if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+	var str=xmlhttp.responseText;
+	var line=str.split('\n');
+	var linelen=line.length;
+	document.write("<tr><td colspan='2' align='center'><a href='javascript:gotoWiki(\"opkg-package/\");' tabindex='-1'><b>Select a Package to @opkg_job# then click Apply</b></a></td></tr><tr><td colspan='2'><table class='tables' border='1' cellpadding='2' cellspacing='0' width='60%' text-align='left' align='center'><tr class='table_header'><td nowrap width='10%' align='left'><span class='thead'><b>Select</b></span></td><td nowrap width='60%' align='left'><span class='thead'><b>Package Name</b></span></td><td nowrap width='30%' align='left'><span class='thead'><b>Version</b></span></td></tr>");
+		for(var i=0;i<linelen;i++) {
+			if(line[i].length>1 && (line[i].indexOf(pkg)>-1 || file=="opkglistupgr")) {
+				if(line[i].indexOf(pkg)>-1) {
+				var pkgname=line[i++].replace(pkg, "");
+				var vernum=line[i].replace(ver, "");
+				}
+				else {
+				var word=line[i].split(" - ");
+				var pkgname=word[0];
+				var vernum=word[1]+" ---> "+word[2];
+				}
+			var opt="<tr><td nowrap width='10%' align='left'><input type=radio name=pkg_select value='"+pkgname+"'></td><td nowrap width='60%' align='left'><span class='thead' value='"+pkgname+"'><b>"+pkgname+"</b></span></td><td nowrap width='30%' align='left'><span class='thead' value='"+vernum+"'><b>"+vernum+"</b></span></td></tr>\n";
+			document.write(opt);
+			}
+		}
+	document.write("</table></td></tr>");
+	}
+}
+
+function runOpkgCmd() {
+	var cf=document.forms[0];
+	var msg="";
+
+	if(cf.pkg_select.value.length<1) msg+="Select a Package first\n";
+
+	if(msg.length>1) {
+	alert(msg);
+	return false;
+	}
+
+	cf.pipe_cmd.value="/usr/sbin/opkg "+cf.opkg_job.value+" "+cf.pkg_select.value;
+	AncstdAction(cf,'anc_run.htm','opkg.htm','pipe','');
+	return true;
+}
+
+//-->
+</script></head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="AncdataToVisible(document.forms[0]);document.forms[0].elements[0].focus();">
+<form name="opkg_select" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<div><a class="page_title" href="javascript:gotoWiki('opkg-package/');">@opkg_act_name#</a></div>
+<div class="fix_button">
+<table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="back" value="Back" onClick="location.href='anc.cgi?next_file=@old_file#'">
+&nbsp;
+<input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return runOpkgCmd();">
+</td></tr></table>
+</div>
+<div id="main" class="main_top_button">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<script>loadPackageList('@opkg_act#');</script>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="">
+<input type="hidden" name="todo" value="">
+<input type="hidden" name="pipe_cmd" value="">
+<input type="hidden" name="opkg_job" value="@opkg_job#">
+<input type="hidden" name="next_file" value="@next_file#">
+<input type="hidden" name="old_file" value="@old_file#">
+</div>
+</form>
+<script>printHelp();</script>
+</body></html>
