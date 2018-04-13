@@ -25,7 +25,7 @@ xdslctl configure/configure1
 [--Ginp <0xBitMap-UsDs>] 
 [--TpsTc <0xBitMap-AvPvAaPa>] 
 [--monitorTone <on|off>] *
-[--profile <0x00 - 0xFF>|<"8a |8b |8c |8d |12a |12b |17a |30a (|35b)">] *
+[--profile <0x00 - 0xFF>|<"8a |8b |8c |8d |12a |12b |17a |30a (|35b/BrcmPriv1)">] *
 [--us0 <on|off>]
 [--dynamicD <on|off>] *
 [--dynamicF <on|off>] *

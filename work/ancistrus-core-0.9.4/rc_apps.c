@@ -62,12 +62,12 @@ static void run(const char *serv, int argc, char **argv, int fd, const char *loc
 int pid, status, err=1;
 pid_t p;
 
-	if((pid=fork())<0) {	//fork error
+	if((pid=fork())<0) {							//fork error
 	DBG("fork() error: unlocking fd %d\n", fd);
 	unlock(fd, lock_path);
 	exit(2);
 	}
-	else if(pid>0) {	//parent thread
+	else if(pid>0) {							//parent thread
 	while(((p=waitpid(pid, &status, 0))==-1) && (errno==EINTR)) ;		//safe-wait for child exit...
 	DBG("%d child exited: waitpid() released, status: %d\n", pid, status);
 		if(p>=0) {							//try to run the post script
@@ -76,7 +76,7 @@ pid_t p;
 		}
 	exit(err);
 	}
-	else {			//child thread
+	else {									//child thread
 	DBG("Unlocking fd: %d on child thread\n", fd);
 	unlock(fd, lock_path);							//unlock
 	execvp(RCAPPS, argv);							//exec RCAPPS
@@ -88,7 +88,7 @@ pid_t p;
 /*
  * MAIN RC_APPS
  */
-int rc_apps(int argc, char **argv) {
+int rc_apps(MAINARGS) {
 int fd;
 char *serv, lock_path[LOCK_MAX_PATH];
 

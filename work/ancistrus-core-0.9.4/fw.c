@@ -79,8 +79,8 @@ enum { SINGLE=1, RANGE, ALL, LIST };
 int i, err=1;
 char list[30], *ip1, *ip2;
 
-		switch(remtype ? atoi(NV_SGET("fw_remote_type")) : ALL) {		//remote management type
-		case SINGLE:  								//single ip address has remote access
+		switch(remtype ? atoi(NV_SGET("fw_remote_type")) : ALL) {	//remote management type
+		case SINGLE:  							//single ip address has remote access
 		ip1=NV_SGET("fw_remote_single");
 			if(*ip1) {
 			err=0;
@@ -91,7 +91,7 @@ char list[30], *ip1, *ip2;
 			, argv[NAME], lan, prot, prot, argv[LOCPORT]);
 			}
 		break;
-		case RANGE:								//range ip interval has remote access
+		case RANGE:							//range ip interval has remote access
 		ip1=NV_SGET("fw_remote_range_start");
 		ip2=NV_SGET("fw_remote_range_end");
 			if(*ip1 && *ip2) {
@@ -103,7 +103,7 @@ char list[30], *ip1, *ip2;
 			, argv[NAME], lan, prot, prot, argv[LOCPORT]);
 			}
 		break;
-		case ALL:								//all remote ip have remote access (default)
+		case ALL:							//all remote ip have remote access (default)
 		err=0;
 		fprintf(FP,
 		IPT " -t nat -A %s_NAT -d %s/32 -p %s -m %s --dport %s -j DNAT --to-destination %s:%s\n"
@@ -111,7 +111,7 @@ char list[30], *ip1, *ip2;
 		, argv[NAME], wan, prot, prot, argv[REMPORT], lan, argv[LOCPORT]
 		, argv[NAME], lan, prot, prot, argv[LOCPORT]);
 		break;
-		case LIST:								//discret ip list
+		case LIST:							//discret ip list
 			for(i=1;i<10;i++) {
 			snprintf(list, sizeof(list), "fw_remote_list1_ip%d", i);
 			ip1=NV_SGET(list);
@@ -126,7 +126,7 @@ char list[30], *ip1, *ip2;
 		IPT " -A %s -d %s/32 -p %s -m %s --dport %s -j ACCEPT\n"
 		, argv[NAME], lan, prot, prot, argv[LOCPORT]);
 		break;
-		default:								//no valid parameter
+		default:							//no valid parameter
 		break;
 		}
 return err;
@@ -138,7 +138,7 @@ return err;
  * Input: argc, argv, remote mode nat chain flag.
  * Return: '0' success, '1' or more fail.
  */
-static int fwrouter(int argc UNUSED, char** argv, const int fwtype) {
+static int fwrouter(char** argv, const int fwtype) {
 FILE *FP;
 int err=0;
 char gw[256], wan[256], *oldgw, *oldwan;
@@ -183,10 +183,11 @@ char gw[256], wan[256], *oldgw, *oldwan;
 		}
 	}
 fclose(FP);
+DBG("fwrouter(): return code %d\n", err);
 return err;
 }
 
-int fw(int argc, char** argv) {
+int fw(MAINARGS) {
 enum { ROUTER=0, REMOTE };
 int i=0, fd;
 
@@ -213,12 +214,11 @@ DBG("fw() main:%s addrm:%s type:%s name:%s prot:%s remport:%s locport:%s\n", arg
 	}
 if(i>argc) return 1;
 	if((fd=lock(LOCK_FW))>=0) {						//avoid race condition locking
-	if(!strcmp(argv[MAIN], "router")) i=fwrouter(argc, argv, ROUTER);
-	else i=fwrouter(argc, argv, REMOTE);
-	DBG("fwrouter(): return code %d\n", i);
-	if(!i) system(". " RULES NULLRED);					//if no error above execute the created rulescript
+	(!strcmp(argv[MAIN], "router") ? (i=fwrouter(argv, ROUTER)) : (i=fwrouter(argv, REMOTE)));
+	if(!i) runsyscmd(". " RULES NULLRED);					//if no error above execute the created rulescript
 	unlock(fd, LOCK_FW);							//release lock
 	}
+
 #ifdef DEBUG
 system("cat " RULES ";cat /proc/cnapt_serv");
 #endif
