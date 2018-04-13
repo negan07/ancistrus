@@ -1,6 +1,6 @@
 #!/bin/sh
 # Optional firewall rules
-# Called by 'firewall_post -> run_fw_dir() "$@"'
+# Called by 'firewall_post -> run_fw_dir() "$@"' ($@=<fwup|fwdown|remoteup>)
 
 # Vars
 TMPSCR=/tmp/ancfw

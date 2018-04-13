@@ -12,6 +12,6 @@ BIN=/usr/sbin/anc
 if [ -n "`${BIN} nvram rget anc_kill_opt`" ]; then
 echo "#!/bin/sh" > ${TMPSCR}
 ${BIN} nvtotxt anc_kill_opt >> ${TMPSCR}
-. ${TMPSCR}
+. ${TMPSCR} >/dev/null 2>&1
 rm -f ${TMPSCR}
 fi
