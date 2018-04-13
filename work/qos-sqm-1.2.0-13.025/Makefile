@@ -2,19 +2,18 @@ include ../Rules.mak
 
 QOS_KO			:= act_ipt.ko cls_flow.ko sch_fq_codel.ko sch_hfsc.ko
 STARTUP			:= rc_qos
+WEB			:= ../www/qos-sqm.htm
 
 all:
 	@echo "Nothing to do: run 'make install' to install."
 
 install: control
-	install -m 0755 -d $(ETCDIR)
-	install -m 0755 -d $(MODDIR)
-	install -m 0755 -d $(SCRDIR)
-	install -m 0755 -d $(APPDIR)
+	for D in $(ETCDIR) $(MODDIR) $(SCRDIR) $(APPDIR) $(WWWDIR); do install -m 0755 -d $$D; done
 	install -m 0644 *.conf $(ETCDIR)
 	@$(foreach Q, $(QOS_KO), install -m 0755 $(KERNEL_DIR)/net/sched/$(Q) $(MODDIR) || exit 1; $(STRIP) $(STRIPKOFLAGS) $(MODDIR)/$(Q);)
 	install -m 0755 *.qos $(SCRDIR)
 	install -m 0755 $(STARTUP) $(APPDIR)
+	install -m 0664 $(WEB) $(WWWDIR)
 
 clean: 
 	@echo "Nothing to clean"

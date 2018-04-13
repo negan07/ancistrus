@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+function setDefs() {
+	var cf=document.forms[0];
+
+	if(cf.qos_enable.value=="") cf.qos_enable.checked=false;
+	if(cf.qos_uplink_rate.value=="") cf.qos_uplink_rate.value="512";
+	if(cf.qos_dwlink_rate.value=="") cf.qos_dwlink_rate.value="";
+		if(cf.h_qos_llayer.value=="") {
+		if(cf.h_wan_traffic_type.value=="ptm") cf.qos_llayer.value="ethernet";
+		else if(cf.h_wan_traffic_type.value=="atm") cf.qos_llayer.value="atm";
+		else cf.qos_llayer.value="none";
+		}
+	if(cf.h_qos_disc.value=="") cf.qos_disc.value="fq_codel";
+	if(cf.h_qos_shaper.value=="") cf.qos_shaper.value="htb";
+	if(cf.qos_script.value=="") cf.qos_script.value="";
+	if(cf.h_qos_ignore_dscp_egress.value=="") cf.qos_ignore_dscp_egress.value="1";
+	if(cf.h_qos_ignore_dscp_ingress.value=="") cf.qos_ignore_dscp_ingress.value="0";
+	if(cf.h_qos_dserv_egress.value=="") cf.qos_dserv_egress.value="diffserv3";
+	if(cf.h_qos_dserv_ingress.value=="") cf.qos_dserv_ingress.value="diffserv3";
+	if(cf.h_qos_eecn.value=="") cf.qos_eecn.value="ECN";
+	if(cf.h_qos_iecn.value=="") cf.qos_iecn.value="ECN";
+}
+
+function loadCheck() {
+	var cf=document.forms[0];
+
+		if(cf.qos_disc.value!="fq_codel") {
+		cf.qos_eecn.disabled=true;
+		cf.qos_iecn.disabled=true;
+		}
+		else {
+		cf.qos_eecn.disabled=false;
+		cf.qos_iecn.disabled=false;
+		}
+		if(cf.qos_shaper.value=="tbf") {
+		cf.qos_dserv_egress.value="shaper";
+		cf.qos_dserv_egress[1].disabled=true;
+		cf.qos_dserv_egress[2].disabled=true;
+		cf.qos_dserv_ingress.value="shaper";
+		cf.qos_dserv_ingress[1].disabled=true;
+		cf.qos_dserv_ingress[2].disabled=true;
+		}
+		else {
+		cf.qos_dserv_egress[1].disabled=false;
+		cf.qos_dserv_egress[2].disabled=false;
+		cf.qos_dserv_ingress[1].disabled=false;
+		cf.qos_dserv_ingress[2].disabled=false;
+		}
+	if(cf.qos_dserv_egress.value=="shaper") cf.qos_ignore_dscp_egress.disabled=true;
+	else cf.qos_ignore_dscp_egress.disabled=false;
+	if(cf.qos_dserv_ingress.value=="shaper") cf.qos_ignore_dscp_ingress.disabled=true;
+	else cf.qos_ignore_dscp_ingress.disabled=false;
+}
+
+function varInit() {
+
+	AncdataToVisible(document.forms[0]);
+	setDefs();
+	loadCheck();
+}
+
+function checkData() {
+	var cf=document.forms[0];
+	var msg="";
+
+	msg+=checkBW(cf.qos_uplink_rate, "Uplink bandwidth", 0, "Kbps", false);
+	msg+=checkBW(cf.qos_dwlink_rate, "Downlink bandwidth", 0, "Kbps", false);
+		if(cf.qos_script.value!="") {
+		if(cf.qos_script.value.indexOf(".sqm")<0) msg+="Invalid qos script name: it must have \".sqm\" extension\n";
+		if(!checkInvalidChars(cf.qos_script.value, invalid_folder_char)) msg+="Invalid qos script name: characters not allowed\n";
+		}
+
+	if(msg.length>1) {
+	alert(msg);
+	return false;
+	}
+	AncdataToHidden(cf);
+	return true;
+}
+
+//-->
+</script></head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
+<form name="ssh" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<div><a class="page_title" href="javascript:gotoWiki('qos-sqm-package/');">QOS SQM</a></div>
+<div class="fix_button">
+<table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
+&nbsp;
+<input type="button" class="common_bt" value="Show Stats" onClick="this.form.pipe_cmd.value='/usr/sbin/rc_app/rc_qos stats';AncstdAction(this.form,'anc_run.htm','qos-sqm.htm','pipe','');">
+&nbsp;
+<input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return checkData()">
+</td></tr></table>
+</div>
+<div id="main" class="main_top_button">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td nowrap colspan="2"><input type="checkbox" name="qos_enable" value="@h_qos_enable#"><a href="javascript:gotoWiki('qos-sqm-package#qos_enable');"><b>Turn QOS Service On</b></a></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('qos-sqm-package#qos_uplink_rate');"><b>Uplink Bandwidth</b></a></td>
+<td nowrap align="right"><input type="text" class="num" name="qos_uplink_rate" value="@qos_uplink_rate#" size=6 maxlength=6>
+&nbsp;<span>Kbps</span>
+</td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('qos-sqm-package#qos_dwlink_rate');"><b>Downlink Bandwidth</b></a></td>
+<td nowrap align="right"><input type="text" class="num" name="qos_dwlink_rate" value="@qos_dwlink_rate#" size=6 maxlength=6>
+&nbsp;<span>Kbps</span>
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_llayer');"><b>Dsl Link Layer</b></a></span></td>
+	<td align="right"><select name="qos_llayer" size=1>
+		<option value="ethernet">VDSL</option>
+		<option value="atm">ADSL</option>
+		<option value="none">Other (DEF)</option>
+	</select>
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_disc');"><b>Disc Algorithm</b></a></span></td>
+	<td align="right"><select name="qos_disc" onChange="loadCheck()" size=1>
+		<option value="fq_codel">Fq_Codel (DEF)</option>
+		<option value="sfq">Sfq</option>
+	</select>
+</td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_shaper');"><b>Shaper Algorithm</b></a></span></td>
+	<td align="right"><select name="qos_shaper" onChange="loadCheck()" size=1>
+		<option value="htb">Htb (DEF)</option>
+		<option value="hfsc">Hfsc</option>
+		<option value="tbf">Tbf</option>
+	</select>
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('qos-sqm-package#qos_script');"><b>Personal QOS Script</b></a></td>
+<td nowrap align="right"><input type="text" class="text" name="qos_script" value="@qos_script#" size=20 maxlength=20></td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_dserv_egress');"><b>Uplink Prioritization Scheme</b></a></span></td>
+	<td align="right"><select name="qos_dserv_egress" onChange="loadCheck()" size=1>
+			<option value="shaper">Shaper Only</option>
+			<option value="classful">Classfull</option>
+			<option value="diffserv3">Diffserv (DEF)</option>
+	</select>
+</td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_dserv_ingress');"><b>Downlink Prioritization Scheme</b></a></span></td>
+	<td align="right"><select name="qos_dserv_ingress" onChange="loadCheck()" size=1>
+			<option value="shaper">Shaper Only</option>
+			<option value="classful">Classfull</option>
+			<option value="diffserv3">Diffserv (DEF)</option>
+	</select>
+</td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_ignore_dscp_egress');"><b>DSCP Uplink Filtering Classification</b></a></span></td>
+	<td align="right"><select name="qos_ignore_dscp_egress" size=1>
+			<option value="1">Undifferentiated Priority (DEF)</option>
+			<option value="0">N-Tier Priority</option>
+	</select>
+</td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_ignore_dscp_ingress');"><b>DSCP Downlink Filtering Classification</b></a></span></td>
+	<td align="right"><select name="qos_ignore_dscp_ingress" size=1>
+			<option value="1">Undifferentiated Priority</option>
+			<option value="0">N-Tier Priority (DEF)</option>
+	</select>
+</td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_eecn');"><b>Uplink Explicit Congestion Notification</b></a></span></td>
+	<td align="right"><select name="qos_eecn" size=1>
+			<option value="ECN">ECN On (DEF)</option>
+			<option value="NOECN">ECN Off</option>
+	</select>
+</td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_iecn');"><b>Downlink Explicit Congestion Notification</b></a></span></td>
+	<td align="right"><select name="qos_iecn" size=1>
+			<option value="ECN">ECN On (DEF)</option>
+			<option value="NOECN">ECN Off</option>
+	</select>
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="save">
+<input type="hidden" name="todo" value="/usr/sbin/rc qos start">
+<input type="hidden" name="next_file" value="qos-sqm.htm">
+<input type="hidden" name="old_file" value="">
+<input type="hidden" name="pipe_cmd" value="">
+<input type="hidden" name="h_qos_enable" value="@h_qos_enable#">
+<input type="hidden" name="h_qos_llayer" value="@h_qos_llayer#">
+<input type="hidden" name="h_qos_disc" value="@h_qos_disc#">
+<input type="hidden" name="h_qos_shaper" value="@h_qos_shaper#">
+<input type="hidden" name="h_qos_dserv_egress" value="@h_qos_dserv_egress#">
+<input type="hidden" name="h_qos_dserv_ingress" value="@h_qos_dserv_ingress#">
+<input type="hidden" name="h_qos_ignore_dscp_egress" value="@h_qos_ignore_dscp_egress#">
+<input type="hidden" name="h_qos_ignore_dscp_ingress" value="@h_qos_ignore_dscp_ingress#">
+<input type="hidden" name="h_qos_eecn" value="@h_qos_eecn#">
+<input type="hidden" name="h_qos_iecn" value="@h_qos_iecn#">
+<input type="hidden" name="h_wan_traffic_type" value="@h_wan_traffic_type#">
+</div>
+</form>
+<script>printHelp();</script>
+</body></html>
