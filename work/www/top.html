@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><link rel="stylesheet" href="style/top.css">
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="top.js"></script>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript">
+var type = parent.type;
+var dis_lang_crl = "1";
+var jp_multiPPPoE = "0";
+var wan_status = "1";
+var config_status = 9999;
+var updateFirmware = 1;
+var updateLanguage = 0;
+
+function checkData()
+{
+    var cf = document.forms[0];
+    var language_var = getSelected(cf.language_sel);
+    if(language_var != cf.h_language_sel.value) {
+        dataToHidden(cf);
+        top.formframe.location.href="RST_reload.htm";
+        // can not POST here. id may have been out of date.
+        location.href="setup.cgi?todo=changelanguage&h_language_sel=" + cf.h_language_sel.value;
+    	return true;
+    }
+    else {
+        return false;
+    }
+}
+
+window.onresize = function(){
+	load_top_value();
+}
+</script>
+<title>NETGEAR Router @model_name#</title>
+<meta http-equiv=content-type content='text/html; charset=UTF-8'>
+<meta content="MSHTML 6.00.2800.1141" name="GENERATOR">
+</head>
+
+<body onload="load_top_value();dataToVisible(document.forms[0]);">
+
+<form method="POST" action="setup.cgi">
+
+<div id="logo"></div>
+<div id="logout" class="logout_bt" onclick='top.location.href="setup.cgi?todo=logout";'><b languageCode = "336">Logout</b></div>
+<div id="router-name">@model_name#</div>
+@lan_port_being_used_s#
+<div id="port_warning"><b>Note:</b><span languageCode = "10810">You have assigned Port4 as an IPTV port, even including Port2/Port3. Please go to IPTV subpage of Internet Setup to modify the setting if you would like to recover those Ports as LAN ports.</span></div>
+@lan_port_being_used_e#
+<div id="labels">
+	<div id="basic_label" class="label_unclick" onclick="goto_top('index.htm');"><b><span languageCode = "3024">BASIC</span></b></div>
+	<div id="space_label"></div>
+	<div id="advanced_label" class="label_unclick" onclick="goto_top('adv_index.htm');"><b><span languageCode = "3103">ADVANCED</span></b></div>
+	<div id="space_label"></div>
+	<div id="anc_label" class="label_unclick" onclick="goto_top('anc_index.htm');"><b><span languageCode = "">ANCISTRUS</span></b></div>
+</div>
+<div id="firm_version"><span languageCode = "346">Firmware Version</span><br />@fw_version#</div>
+@new_fw_s#
+<div id="update_info" class="update_info_down" onclick="firmwareUpgrade();">
+	<div id="update_info_left"></div>
+	<div id="update_info_middle"><i languageCode = "3026">A new firmware upgrade is available. Click here to get it.</i></div>
+	<div id="update_info_right"></div>
+</div>
+@new_fw_e#
+<div id="select_language" align=right>
+    <select name="language_sel" id="lang_sel" onchange="return checkData()">
+	            <option value="Auto" languageCode = "736">Auto</option>
+	            <option value="English">English</option>
+	            <option value="German">Deutsch</option>
+	            <option value="Chinese">中文</option>
+	            <option value="Korean">한국어</option>
+	            <option value="Russian">Русский</option>
+	            <option value="Spanish">Español</option>
+	            <option value="Polish">Polski</option>
+	            <option value="French">Français</option>
+	            <option value="Italian">Italiano</option>
+	            <option value="Swedish">Svenska</option>
+	            <option value="Danish">Dansk</option>
+	            <option value="Dutch">Nederlands</option>
+	            <option value="Greek">Ελληνικά</option>
+	            <option value="Norwegian">Norsk</option>
+	            <!-- option value="Czech">Čeština</option -->
+	            <option value="Slovenian">Slovenščina</option>
+	            <option value="Portuguese">Português</option>
+	            <option value="Hungarian">Magyar</option>
+	            <option value="Romanian">Română</option>
+	            <option value="Finnish">Suomi</option>
+	            <option value="Slovak">Slovenčin</option>
+	            <!-- option value="Turkish">Turkish</option -->
+	</select>
+</div>
+
+<input type="hidden" name="todo" value="changelanguage">
+<input type="hidden" name="this_file" value="top.html">
+<input type="hidden" name="next_file" value="index.htm">
+<input type="hidden" name="SID" value="@SID#">
+<input type="hidden" name="h_language_sel" value="@h_language_sel#">
+</form>
+
+<script language="javascript" type="text/javascript" src="langs.js"></script>
+
+</body>
+</html>
+
