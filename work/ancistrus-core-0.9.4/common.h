@@ -1,6 +1,6 @@
 #define LOCK_MAX_PATH		64
 #define LOCK_TIMEOUT		60
-#define ARGMAXNUM		40
+#define ARGNUMMAX		40
 
 /*
  * LOCK
@@ -20,12 +20,21 @@ int lock(const char *lock_path);
 int unlock(int fd, const char *lock_path);
 
 /*
+ * PARTFREEPERC
+ * Obtain partition percentage used space.
+ * Input: mount path, destination string (caller must take care of dest allocation).
+ * Return: '0' on success, '1' on failure.
+ */
+int partperc(const char *path, char *dest);
+
+/*
  * CHECKNUMRANGE
  * Check if a numeric value belong to an interval.
  * Input: value as string, start, end interval delimiters.
  * Return: '0' success, '1' fail.
  */
 int checknumrange(const char* value, const int start, const int end);
+#define checkport(value) checknumrange(value, 1, 65534)
 
 /*
  * CHECKPORTRANGE
@@ -34,7 +43,14 @@ int checknumrange(const char* value, const int start, const int end);
  * Return: '0' success, '1' or '2' fail.
  */
 int checkportrange(const char* portrange, const char separator) UNUSED;
-#define checkport(value) checknumrange(value, 1024, 65534)
+
+/*
+ * RUNPIPE
+ * pipe(), fork() & read & write from pipe.
+ * Input: cmd string.
+ * Return: '0' on success, '1' on null/void cmd string or pipe()/fork() error.
+ */
+int runpipe(char *cmd);
 
 /*
  * RUNEXECVE
