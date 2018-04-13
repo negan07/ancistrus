@@ -8,8 +8,8 @@
 <title>NETGEAR Router D7000</title>
 <link rel="stylesheet" href="style/form.css">
 <style type="text/javascript">
-	classes.num.all.fontFamily = "Courier";
-	classes.num.all.fontSize = "10pt" ;
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
 </style>
 <script language="javascript" type="text/javascript" src="string.js"></script>
 <script language="javascript" type="text/javascript" src="funcs.js"></script>
@@ -21,9 +21,9 @@
 function setDefs() {
 	var cf=document.forms[0];
 
-	if(cf.ssh_enable.value=='') cf.ssh_enable.checked=false;
-	if(cf.ssh_remote_enable.value=='') cf.ssh_remote_enable.checked=false;
-	if(cf.ssh_remote_port.value=='') cf.ssh_remote_port.value="";
+	if(cf.ssh_enable.value=="") cf.ssh_enable.checked=false;
+	if(cf.ssh_remote_enable.value=="") cf.ssh_remote_enable.checked=false;
+	if(cf.ssh_remote_port.value=="") cf.ssh_remote_port.value="";
 }
 
 function loadCheck() {
@@ -33,14 +33,21 @@ function loadCheck() {
 	else cf.ssh_remote_enable.disabled=true;
 }
 
+function varInit() {
+
+	AncdataToVisible(document.forms[0]);
+	setDefs();
+	loadCheck();
+}
+
 function checkData() {
 	var cf=document.forms[0];
 	var msg="";
 
 	if(cf.ssh_remote_enable.checked || cf.ssh_remote_port.value!="") 
-		msg+=checkInt(cf.ssh_remote_port, "SSH remote port number", 1024, 65534, true);
+	msg+=checkInt(cf.ssh_remote_port, "SSH remote port number", 1024, 65534, true);
 
-	if(msg.length > 1) {
+	if(msg.length>1) {
 	alert(msg);
 	return false;
 	}
@@ -52,7 +59,7 @@ function enableChk() {
 	var cf=document.forms[0];
 
 	if(cf.ssh_enable.checked==false) {
-	alert("SSH daemon must be enabled first: tick \"Turn SSH Daemon On\" then click \"Apply\"");
+	alert("SSH daemon must be enabled first: tick \"Turn SSH Daemon On\" then click \"Apply\"\n");
 	return false;
 	}
 	return true;
@@ -62,12 +69,12 @@ var msg_regkeys = "Warning! New encryption keys are being created and olds are d
 
 //-->
 </script></head>
-<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="AncdataToVisible(document.forms[0]);setDefs();loadCheck();document.forms[0].elements[0].focus();">
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
 <form name="ssh" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
-<div><a class="page_title" href="" onClick="gotoWiki('openssh-package/');">SSH Management</a></div>
+<div><a class="page_title" href="javascript:gotoWiki('openssh-package/');">SSH Management</a></div>
 <div class="fix_button">
-<table width="100%" border="0" cellpadding="0" cellspacing="2"><tr><td nowrap colspan="2" align="center">
-<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('AncdataToVisible(document.forms[0])',250)">
+<table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
 &nbsp;
 <input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return checkData()">
 </td></tr></table>
@@ -75,30 +82,30 @@ var msg_regkeys = "Warning! New encryption keys are being created and olds are d
 <div id="main" class="main_top_button">
 <table border="0" cellpadding="0" cellspacing="3" width="100%">
 <tr><td nowrap colspan="2"><input type="checkbox" name="ssh_enable" value="@h_ssh_enable#" onClick="loadCheck()">
-<a href="" onClick="gotoWiki('openssh-package#sshd');"><b>Turn SSH Daemon On</b></a>
+<a href="javascript:gotoWiki('openssh-package#sshd');"><b>Turn SSH Daemon On</b></a>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td nowrap colspan="2"><input type="checkbox" name="ssh_remote_enable" value="@h_ssh_remote_enable#" onClick="loadCheck()"><a href="" onClick="gotoWiki('openssh-package#activate-remote-access');"><b>Turn SSH remote access On</b></a></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="ssh_remote_enable" value="@h_ssh_remote_enable#" onClick="loadCheck()"><a href="javascript:gotoWiki('openssh-package#activate-remote-access');"><b>Turn SSH remote access On</b></a></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td nowrap><a href="" onClick="gotoWiki('openssh-package#activate-remote-access');"><b>SSH remote port number:</b></a></td>
+<tr><td nowrap><a href="javascript:gotoWiki('openssh-package#activate-remote-access');"><b>SSH remote port number:</b></a></td>
 <td nowrap align="right"><input type="text" class="num" name="ssh_remote_port" value="@ssh_remote_port#" size=6 maxlength=5></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td colspan="2" align="center">
-<input type="button" class="long_common_bt" value="Select Remote Access Type" onClick="goto_formframe('FW_remote.htm&todo=cfg_init');">
-<input type="button" class="long_common_bt" value="Modify SSH Daemon Config" onClick="this.form.old_file.value='openssh.htm';this.form.edit_file.value='/usr/etc/sshd_config';AncstdAction(this.form,'anc_editfile.htm','edit','');">
+<input class="long_common_bt" type="button" value="Select Remote Access Type" onClick="goto_formframe('FW_remote.htm&todo=cfg_init');">
+<input class="long_common_bt" type="button" value="Modify SSH Daemon Config" onClick="this.form.edit_file.value='/usr/etc/sshd_config';AncstdAction(this.form,'anc_editfile.htm','openssh.htm','edit','');">
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td colspan="2" align="center">
-<input type="button" class="common_bt" value="Keys Regeneration" onClick="if(confirm(msg_regkeys)) AncstdAction(this.form,'openssh.htm','run','/usr/sbin/rc_app/rc_ssh regenkeys');">
-<input type="button" class="common_bt" value="Download Keys" onclick="if(!enableChk()) return false;window.location.href='anc.cgi?gen_file=ssh.zip&next_file=openssh.htm&job=generate&todo=/usr/sbin/rc_app/rc_ssh zipkeys';">
+<input class="common_bt" type="button" value="Keys Regeneration" onClick="if(confirm(msg_regkeys)) AncstdAction(this.form,'openssh.htm','openssh.htm','','/usr/sbin/rc_app/rc_ssh regenkeys');">
+<input class="common_bt" type="button" value="Download Keys" onclick="if(!enableChk()) return false;window.location.href='anc.cgi?gen_file=ssh.zip&next_file=openssh.htm&job=upload&todo=/usr/sbin/rc_app/rc_ssh zipkeys';">
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 </table>
 <input type="hidden" name="job" value="save">
 <input type="hidden" name="todo" value="/usr/sbin/rc ssh start">
 <input type="hidden" name="next_file" value="openssh.htm">
-<input type="hidden" name="old_file" value="openssh.htm">
-<input type="hidden" name="edit_file" value="/usr/etc/sshd_config">
+<input type="hidden" name="old_file" value="">
+<input type="hidden" name="edit_file" value="">
 <input type="hidden" name="h_ssh_enable" value="@h_ssh_enable#">
 <input type="hidden" name="h_ssh_remote_enable" value="@h_ssh_remote_enable#">
 </div>
