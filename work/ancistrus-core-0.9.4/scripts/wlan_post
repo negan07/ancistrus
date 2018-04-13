@@ -1,3 +1,19 @@
 #!/bin/sh
+# Optional post wlan commands
+
+# Vars
+TMPSCR=/tmp/wlanpost
+BIN=/usr/sbin/anc
+
+# Debug purpose
+#BIN=/etc/ancdbg/anc
+
+# Copy optional post wlan commands from nvram to a temporary file then run it
+if [ -n "`${BIN} nvram rget anc_wlan_opt`" ]; then
+echo "#!/bin/sh" > ${TMPSCR}
+${BIN} nvtotxt anc_wlan_opt >> ${TMPSCR}
+. ${TMPSCR} >/dev/null 2>&1
+rm -f ${TMPSCR}
+fi
 
 exit 0
