@@ -13,101 +13,101 @@ char *var;
 
 SEARCHOPT
 	switch(i) {
-	case SHOW:  //nvram name=value list & status
+	case SHOW:						//nvram name=value list & status
 	nvram_tmp_show();
 	break;
-	case DEFSHOW:  //default nvram name=value list
+	case DEFSHOW:						//default nvram name=value list
 	nvram_def_show();
 	break;
-	case BCMSHOW:  //nvram.bcm name=value list
+	case BCMSHOW:						//nvram.bcm name=value list
 	nvram_bcm_show();
 	break;
-	case RGET:  //get a var (in reentrant safe mode): no loop for this, use GET instead
-	var=NV_SGETR(PAR[3]);
+	case RGET:						//get a var (in reentrant safe mode): no loop for this, use GET instead
+	var=NV_SGETR(argv[3]);
 	puts(var);
 	SFREE(var);
 	break;
-	case GET:  //get a var series (name=val)
-	PARLOOP printf("%s=%s\n", PAR[j], NV_SGET(PAR[j]));
+	case GET:						//get a var series (name=val)
+	PARLOOP printf("%s=%s\n", argv[j], NV_SGET(argv[j]));
 	break;
-	case BCMRGET:  //get a bcmvar (in reentrant safe mode): no loop for this, use BCMGET instead
-	var=NV_BSGETR(PAR[3]);
+	case BCMRGET:						//get a bcmvar (in reentrant safe mode): no loop for this, use BCMGET instead
+	var=NV_BSGETR(argv[3]);
 	puts(var);
 	SFREE(var);
 	break;
-	case BCMGET:  //eval get a bcmvar series (name=val)
-	PARLOOP printf("%s=%s\n", PAR[j], NV_BSGET(PAR[j]));
+	case BCMGET:						//eval get a bcmvar series (name=val)
+	PARLOOP printf("%s=%s\n", argv[j], NV_BSGET(argv[j]));
 	break;
-	case SET:  //set vars (on ram only)
-	PARLOOP nvram_set(PAR[j], PAR[j+1]);  //if PAR[j+1]=="" set nvram value to void ('var=')
+	case SET:						//set vars (on ram only)
+	PARLOOP nvram_set(argv[j], argv[j+1]);			//if argv[j+1]=="" set nvram value to void ('var=')
 	break;
-	case BCMSET:  //set bcmvars (on ram only)
-	PARLOOP nvram_bcm_set(PAR[j], PAR[j+1]);  //if PAR[j+1]=="" set nvram.bcm value to void ('var=')
+	case BCMSET:						//set bcmvars (on ram only)
+	PARLOOP nvram_bcm_set(argv[j], argv[j+1]);		//if argv[j+1]=="" set nvram.bcm value to void ('var=')
 	break;
-	case UNSET:  //unset vars (on ram only)
-	PARLOOP nvram_unset(PAR[j]);
+	case UNSET:						//unset vars (on ram only)
+	PARLOOP nvram_unset(argv[j]);
 	break;
-	case BCMUNSET:  //unset bcmvars (on ram only)
-	PARLOOP nvram_bcm_unset(PAR[j]);
+	case BCMUNSET:						//unset bcmvars (on ram only)
+	PARLOOP nvram_bcm_unset(argv[j]);
 	break;
-	case ADD:  //append a subvar (on ram only): if var not existing, create it, if val already existing shift at last
+	case ADD:		//append a subvar (on ram only): if var not existing, create it, if val already existing shift at last
 	case APPEND:
-	PARLOOP if(PAR[j+1]!=NULL) nvram_append(PAR[3], PAR[j+1]);
+	PARLOOP if(argv[j+1]!=NULL) nvram_append(argv[3], argv[j+1]);
 	break;
-	case DELETE:  //delete a subvar (on ram only): if not existing, do nothing
-	PARLOOP if(PAR[j+1]!=NULL) nvram_delete(PAR[3], PAR[j+1]);
+	case DELETE:		//delete a subvar (on ram only): if not existing, do nothing
+	PARLOOP if(argv[j+1]!=NULL) nvram_delete(argv[3], argv[j+1]);
 	break;
-	case INSERT:  //insert a subvar (on ram only): if var not existing, create it, if val already existing, shift as first
-	PARLOOP if(PAR[j+1]!=NULL) nvram_insert(PAR[3], PAR[j+1]);
+	case INSERT:		//insert a subvar (on ram only): if var not existing, create it, if val already existing, shift as first
+	PARLOOP if(argv[j+1]!=NULL) nvram_insert(argv[3], argv[j+1]);
 	break;
-	case CHANGE:  //change a subvar with a new one (on ram only): if var or val1 not existing or val1==val2, do nothing
+	case CHANGE:		//change a subvar with a new one (on ram only): if var or val1 not existing or val1==val2, do nothing
 		PARLOOP {
-		if(PAR[j+1]!=NULL && PAR[j+2]!=NULL) nvram_change(PAR[3], PAR[j+1], PAR[j+2]);
+		if(argv[j+1]!=NULL && argv[j+2]!=NULL) nvram_change(argv[3], argv[j+1], argv[j+2]);
 		else break;
 		j++;
 		}
 	break;
-	case RESET:  //reset to default settings (on ram only)
+	case RESET:		//reset to default settings (on ram only)
 	nvram_reset();
 	break;
-	case INIT:  //load nvram from flash: use with caution, will delete all settings not already committed
+	case INIT:		//load nvram from flash: use with caution, will delete all settings not already committed
 	nvram_load();
 	break;
-	case COMMIT:  //commit nvram to flash
+	case COMMIT:		//commit nvram to flash
 	nvram_commit();
 	break;
-	default:  //show usage help (case 0:)
+	default:		//show usage help (case 0:)
 	USAGE
 	}
 return i;
 }
 
-int nvtotxt(int argc, char** argv) {
+int nvtotxt(MAINARGS) {
 char *nv, *s;
 
 if(argc<3) return 1;
 nv=NV_SGET(argv[2]);
-for(s=nv;*s;s++) if(*s==DIVISION_SYMBOL) *s=CR_SYMBOL;			//substitute 'division' with 'carriage return'
+for(s=nv;*s;s++) if(*s==DIVISION_SYMBOL) *s=CR_SYMBOL;		//substitute 'division' with 'carriage return'
 if(*nv) puts(nv);
 return 0;
 }
 
-int main(int argc, char** argv) {
+int main(MAINARGS) {
 const struct {
-const char *NAME;							//name called as argv[x] string
-int (*FUNC)(MAINARGS);							//prototype func (same as NAME without brackets)
-} OPT[] = { FUNCAVAIL };						//function list
+const char *name;						//name called as argv[x] string
+int (*func)(MAINARGS);						//prototype function (same as 'name' without brackets)
+} opt[] = { FUNCAVAIL };					//function list
 char *corename;
 unsigned int i;
 
 DBG("main(): my name is %s\n", argv[0]);
 corename=basename(argv[0]);
-//if(!strcmp(corename, CGI)) return i=cgi(argc, argv);			//core working as 'anc.cgi' web gui
-if(!strcmp(corename+1, DSLCMD)) return i=dslctl(argv);			//core working as 'adslctl' or 'xdslctl'
-if(strcmp(corename, ME)) return i=rc_apps(argc, argv);			//core working as 'rc_apps'
+//if(!strcmp(corename, CGI)) return i=cgi();			//core working as 'anc.cgi' web gui
+if(!strcmp(corename+1, DSLCMD)) return i=dslctl(argv);		//core working as 'adslctl' or 'xdslctl'
+if(strcmp(corename, ME)) return i=rc_apps(argc, argv);		//core working as 'rc_apps'
 if(argc < 2) MAIN_USAGE(1)
-OPTLOOP if(!strcmp(argv[1], OPT[i-1].NAME)) break;
-if(i) i=OPT[i-1].FUNC(argc, argv);					//reflection simulation: run argv[1]() func
+OPTLOOP if(!strcmp(argv[1], opt[i-1].name)) break;
+if(i) i=opt[i-1].func(argc, argv);				//reflection simulation: run argv[1]() function
 else MAIN_USAGE(2)
 return 0;
 }

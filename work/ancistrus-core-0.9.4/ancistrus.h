@@ -32,44 +32,38 @@
 #define DBG(...)
 #endif
 
-#define ME "anc"
+#define ME "anc"							/* some alias redefs */
 #define CGI ME ".cgi"
 #define DSLCMD "dslctl"
 
-#define NAME name
-#define FUNC function
-#define OPT action_struct
-#define PNUM parameters_number
-#define PMIN minimal_parameters_number
-#define PAR cmd_line_parameter
-#define EXECNAME PAR[0]
-#define OPTION PAR[1]
-#define ACTION PAR[2]
+#define EXECNAME argv[0]
+#define OPTION argv[1]
+#define ACTION argv[2]
 
 #define UNUSED __attribute((unused))					/* attributes */
 #define NORETURN __attribute__ ((noreturn)
 
-#define MAINARGS int PNUM, char** PAR					/* main() arguments */
-#define MAINUNUSEDARGS int PNUM UNUSED, char** PAR UNUSED		/* unused args */
+#define MAINARGS int argc, char** argv					/* main() arguments */
+#define MAINUNUSEDARGS int argc UNUSED, char** argv UNUSED		/* unused args */
 
 #define OPTIONS			/* option list: start from case 1, usage option case 0 (default) not needed */	\
 const struct {													\
-const char *NAME;							/* function option name */		\
-const int PMIN;								/* min num of param needed */		\
-const int PNUMFOREACH;							/* num of param needed when looping */	\
+const char *name;							/* function option name */		\
+const int pmin;								/* min num of param needed */		\
+const int FOREACHARGC;							/* num of param needed when looping */	\
 }														\
-OPT[]
-#define OPTLOOP for(i=sizeof(OPT)/sizeof(OPT[0]);i;i--)			/* loop from end to begin */
+opt[]
+#define OPTLOOP for(i=sizeof(opt)/sizeof(opt[0]);i;i--)			/* loop from end to begin */
 #define SEARCHOPT							/* search for a func option */		\
-if(PNUM>2) OPTLOOP 												\
-if(!strcmp(ACTION, OPT[i-1].NAME) && (PNUM>=OPT[i-1].PMIN) && 							\
-(!OPT[i-1].PNUMFOREACH || !((PNUM-3)%OPT[i-1].PNUMFOREACH))) break;
-#define PARLOOP for(j=3;PAR[j]!=NULL;j+=OPT[i-1].PNUMFOREACH)		/* loop the params shifting for each block */
+if(argc>2) OPTLOOP 												\
+if(!strcmp(ACTION, opt[i-1].name) && (argc>=opt[i-1].pmin) && 							\
+(!opt[i-1].FOREACHARGC || !((argc-3)%opt[i-1].FOREACHARGC))) break;
+#define PARLOOP for(j=3;argv[j]!=NULL;j+=opt[i-1].FOREACHARGC)		/* loop the params shifting for each block */
 
 #define MAIN_USAGE(err)							/* show main() help usage */		\
 if(err) {													\
 ERR("%sUsage: %s <", COPYRIGHT, argv[0]);									\
-OPTLOOP ERR(" %s", OPT[i-1].NAME);										\
+OPTLOOP ERR(" %s", opt[i-1].name);										\
 ERR(" >\n");													\
 exit(err);													\
 }
@@ -77,7 +71,7 @@ exit(err);													\
 #define USAGE								/* show function help usage */		\
 if(3) {														\
 ERR("Usage: %s %s <", EXECNAME, OPTION);									\
-OPTLOOP ERR(" %s", OPT[i-1].NAME);										\
+OPTLOOP ERR(" %s", opt[i-1].name);										\
 ERR(" > < val ... val >\n");											\
 exit(3);													\
 }
@@ -93,7 +87,10 @@ exit(3);													\
 #define SFPOPEN(FP, path, flags) if((FP=(fopen(path, flags)))==NULL)	/* sort of secure fopen() */
 #define SMALLOCSTR(data, size) if((data=(char*)malloc(size))==NULL)	/* sort of safe malloc() for strings */
 #define SFREE(var) if(var) free(var)					/* sort of safe free() */
+#define READCH(ch) read(0, &ch, 1);					/* low-level read a single char from stdin */
+#define TYPECH(ch) write(1, &ch, 1);					/* low-level write a single char to stdout */
 #define TYPE(text) write(1, text, strlen(text));			/* low-level write a text to stdout */
+#define TOKENIZE(str, tag, s_str) for(s=(char*)strtok_r(str, tag, &s_str);s!=NULL;s=(char*)strtok_r(NULL, tag, &s_str))	/* tokenizer loop */
 #define NULLRED " >/dev/null 2>&1;"					/* null output redirections */
 
 #define NV_GET nvram_get						/* various nvram redefs */
@@ -201,7 +198,8 @@ int dslctl(char** argv);
  * CGI
  * Common Gateway Interface web parser.
  * Print dynamic form based webpages, save settings and execute services.
- * Input: void as arguments are env vars read directly by getenv() .
- * Return: '0' or system() return value if success, != '0' if error occurred.
+ * Methods available: GET, POST.
+ * Input: void as arguments come from stdin or env vars read by getenv() .
+ * Return: '0', 'void' (exec()) or system() return value if success, != '0' if error occurred.
  */
 //int cgi(void);
