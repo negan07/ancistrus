@@ -21,9 +21,20 @@ var storage_open=0;
 var misc_open=0;
 
 function loadvalue() {
+	//document.getElementById('topframe').contentDocument.location.reload(true);
 	change_size();
 	region_class=initClass(gui_region);
 	menu_color_change('home');
+}
+
+function opkgMenuSet() {
+	var txt="<div id='opkg' class='advanced_black_button' onclick='linksetup(\"opkg\", \"ipk\")'";
+	var xmlhttp=readFileTags("opkgstatus");
+
+	if(xmlhttp.readyState==4 && xmlhttp.status==200 && xmlhttp.responseText.indexOf("Package: opkg")>-1) txt+=">";
+	else txt+="style='display: none'>";
+	txt+="<b><span>Package Manager</span></b></div>";
+	document.write(txt);
 }
 
 function linksetup(name, type) {
@@ -65,7 +76,7 @@ function focus_stat(obj, tf) {
 <div id="middle">
 <div id="menu">
 <div id="home" class="advanced_purple_button" onclick="linksetup('home', 'core')"><b><span>ANCISTRUS Home</span></b></div>
-<div id="opkg" class="advanced_black_button" onclick="linksetup('opkg', 'ipk')"><b><span>Package Manager</span></b></div>
+<script>opkgMenuSet()</script>
 <div id="setup_bt" class="advanced_white_close_button" onclick="open_or_close_sub('setup'); setup_open++;"><b><span>Core Setup</span></b></div>
 	<div id="setup_sub" class="sub_men" style="display: none">
 	<dl>
