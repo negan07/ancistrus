@@ -20,7 +20,9 @@ xdslctl info --version 2>/tmp/ancdslinfo			#redirect stderr to tmp file
 xdslctl info --vendor >>/tmp/ancdslinfo				#append vendor
 xdslctl info --vectoring | grep Vectoring >>/tmp/ancdslinfo	#vectoring state
 xdslctl info --show | grep Profile >>/tmp/ancdslinfo		#vdsl profile
-opkg update >/dev/null 2>&1					#opkg not creating a list-upgradable file
-opkg list-upgradable >/tmp/opkg/list-upgradable
-
+eval `nvram get anc_upgr_disable` >/dev/null 2>&1
+	if [ "$anc_upgr_disable" != "1" ]; then			#update rep
+	opkg update >/dev/null 2>&1
+	opkg list-upgradable >/tmp/opkg/list-upgradable		#opkg not creating a file list-upgradable
+	fi
 exit 0
