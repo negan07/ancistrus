@@ -20,6 +20,7 @@ export USRDIR		:= /usr
 ifndef DEBUG
 # ROOT DIRS
 export LDLIB		:= /lib
+export LDLIBMOD		:= $(LDLIB)/modules
 export CONFDIR		:= /config
 export NVRAMDIR		:= $(CONFDIR)/nvram
 export ETCADSL		:= $(TMPETC)/adsl
@@ -58,6 +59,7 @@ export WWWDIR		:= $(PREFIX)$(WWW)
 else
 # ROOT DIRS
 export LDLIB		:= $(RECEIVE_DIR)
+export LDLIBMOD		:= $(RECEIVE_DIR)
 export CONFDIR		:= $(RECEIVE_DIR)
 export NVRAMDIR		:= $(RECEIVE_DIR)
 export ETCADSL		:= $(RECEIVE_DIR)
@@ -102,6 +104,7 @@ export TMPETC		:= $(TMPDIR)/etc
 export VARLIB		:= $(PREFIX)/var
 export USRDIR		:= $(PREFIX)/usr
 export LDLIB		:= $(PREFIX)/lib
+export LDLIBMOD		:= $(LDLIB)/modules
 export CONFDIR		:= $(PREFIX)/config
 export NVRAMDIR		:= $(CONFDIR)/nvram
 export ETCADSL		:= $(TMPETC)/adsl

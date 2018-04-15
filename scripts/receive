@@ -44,15 +44,14 @@ CINITLIST=""								# core schedule services
 PRELIST="rc_disable_pre debug_mode_pre"					# core pre files
 POSTLIST="wan_post schedule_post wlan_post firewall_post"		# core post files
 SERVLIST="apple check_conn check_fw dnrd dnshj iserver led_ctrl ntp potcounter printk schedule show_mem_log syslogd xCloud" # inhibit services
-WWWMAINLIST="top.js funcs.js linux.js top.html adv_index.htm GPL_rev1.htm"			# main webpages
+WWWMAINLIST="top.js linux.js top.html adv_index.htm GPL_rev1.htm"	# main webpages
 WWWCSSLIST="top.css"							# main css
 WWWLIST="${NAME}_index.htm ${NAME}_home.htm ${NAME}_help.htm ${NAME}_editfile.htm ${NAME}_run.htm ${NAME}.js ${NAME}_dsltweak.htm ${NAME}_inhibit.htm ${NAME}_sched.htm ${NAME}_pers.htm openssh.htm qos-sqm.htm opkg.htm opkg_select.htm"
 KOLIST="sch_fq_codel.ko act_ipt.ko cls_flow.ko sch_hfsc.ko"		# kernel modules
 QOSLIST="functions.qos legacy_funcs.qos qdisc_funcs.qos qos_funcs.qos qos-sqm.conf rc_qos"	# qos scripts and configs
 SSHLIST="rc_ssh sshd_config sshd ssh-keygen scp"			# openssh bins scripts and configs
-DSLLIBLIST="libbcm_crc.so libseltctl.so libbcm_flashutil.so"		# dsldrv shared libs list
-DSLKORMMLIST="adsldd.ko pktrunner.ko pktflow.ko bcmxtmcfg.ko bcmxtmrtdrv.ko"			# dsl rmmod kernel modules
-DSLKOINSLIST="bcmxtmrtdrv.ko bcmxtmcfg.ko pktflow.ko pktrunner.ko adsldd.ko"			# dsl insmod kernel modules
+DSLLIBLIST="libbcm_crc.so libseltctl.so libbcm_flashutil.so"		# xdslctl shared libs
+DSLKOLIST="adsldd.ko pktrunner.ko pktflow.ko bcmxtmcfg.ko bcmxtmrtdrv.ko"			# dsl kernel modules
 
 
 DIRMAKE() {								# create the work bindir
@@ -81,23 +80,6 @@ cd $DBGDIR
 	GET $I
 	done
 THISLNK
-}
-
-DSLUP() {								# load .ko modules, start driver, configure & turn dsl connection up
-for M in ${DSLKOINSLIST}; do insmod /lib/modules/${M}; done
-xdslctl start
-sleep 2
-xdslctl configure
-sleep 2
-xdslctl connection --up
-}
-
-DSLDOWN() {								# turn dsl connection down, stop driver, unload .ko modules
-xdslctl connection --down
-sleep 2
-xdslctl stop
-sleep 2
-for M in ${DSLKORMMLIST}; do rmmod /lib/modules/${M}; done
 }
 
 [ $# -ne 1 ] && echo "Usage: $0 <core> <ko> <qos> <ssh> <www> <dsldrv> <del> <<delwww> <deldsldrv> *anyfiledir*>" && exit 1
@@ -147,15 +129,14 @@ export LD_LIBRARY_PATH=$DBGDIR
 	[ ! -f ${WWW}/opkglistupgr ] && ln -sf /tmp/opkg/list-upgradable ${WWW}/opkglistupgr > /dev/null 2>&1
 	;;
 	dsldrv)
-	GETLIST $DSLLIBLIST $DSLKOINSLIST adsl_phy.bin xdslctl
-	DSLDOWN
+	GETLIST $DSLLIBLIST $DSLKOLIST adsl_phy.bin xdslctl.bin
 	for L in ${DSLLIBLIST}; do [ ! -f /lib/${L}.orig ] && mv -f /lib/${L} /lib/${L}.orig; mv -f $L /lib/; done
-	for M in ${DSLKOINSLIST}; do [ ! -f /lib/modules/${M}.orig ] && mv -f /lib/modules/${M} /lib/modules/${M}.orig; mv -f $M /lib/modules/; done
+	for M in ${DSLKOLIST}; do [ ! -f /lib/modules/${M}.orig ] && mv -f /lib/modules/${M} /lib/modules/${M}.orig; mv -f $M /lib/modules/; done
 	[ ! -f /etc/adsl/adsl_phy.bin.orig ] && mv -f /etc/adsl/adsl_phy.bin /etc/adsl/adsl_phy.bin.orig && mv -f adsl_phy.bin /etc/adsl/
 	[ ! -f /usr/etc/adsl/adsl_phy.bin.orig ] && mv -f /usr/etc/adsl/adsl_phy.bin /usr/etc/adsl/adsl_phy.bin.orig && mv -f adsl_phy.bin /usr/etc/adsl/
-	[ ! -f /usr/sbin/xdslctl.bin.orig ] && mv -f /usr/sbin/xdslctl.bin /usr/sbin/xdslctl.bin.orig && mv -f xdslctl /usr/sbin/xdslctl.bin
+	[ ! -f /usr/sbin/xdslctl.bin.orig ] && mv -f /usr/sbin/xdslctl.bin /usr/sbin/xdslctl.bin.orig && mv -f xdslctl.bin /usr/sbin/
 	sync
-	DSLUP
+	echo "now reboot"
 	;;
 	del)
 	cd $RDIR
@@ -173,15 +154,14 @@ export LD_LIBRARY_PATH=$DBGDIR
 	rm -f ${WWW}/ssh.zip ${WWW}/opkg* ${WWW}/anc*
 	;;
 	deldsldrv)
-	if [ -f /lib/modules/adsldd.ko.orig ]; then
-	DSLDOWN
-	for L in ${DSLLIBLIST}; do rm -f /lib/${L}; done
-	for M in ${DSLKOINSLIST}; do [ -f /lib/modules/${M}.orig ] && mv -f /lib/modules/${M}.orig /lib/modules/${M}; done
-	[ -f /etc/adsl/adsl_phy.bin.orig ] && mv -f /etc/adsl/adsl_phy.bin.orig /etc/adsl/adsl_phy.bin
-	[ -f /usr/sbin/xdslctl.bin.orig ] && mv -f /usr/sbin/xdslctl.bin.orig /usr/sbin/xdslctl.bin
-	sync
-	DSLUP
-	fi
+		if [ -f /lib/modules/adsldd.ko.orig ]; then
+		for L in ${DSLLIBLIST}; do rm -f /lib/${L}; done
+		for M in ${DSLKOLIST}; do [ -f /lib/modules/${M}.orig ] && mv -f /lib/modules/${M}.orig /lib/modules/${M}; done
+		[ -f /etc/adsl/adsl_phy.bin.orig ] && mv -f /etc/adsl/adsl_phy.bin.orig /etc/adsl/adsl_phy.bin
+		[ -f /usr/sbin/xdslctl.bin.orig ] && mv -f /usr/sbin/xdslctl.bin.orig /usr/sbin/xdslctl.bin
+		sync
+		echo "now reboot"
+		fi
 	;;
 	*)
 	DIRMAKE
