@@ -1,7 +1,7 @@
 diff -urN work/openvpn-2.4.4/Makefile work/openvpn-2.4.4/Makefile
 --- work/openvpn-2.4.4/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/openvpn-2.4.4/Makefile	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,61 @@
+@@ -0,0 +1,67 @@
 +include ../Rules.mak
 +
 +#USROVPNDIR 		:= $(BINDIR)/../openvpn
@@ -49,8 +49,9 @@ diff -urN work/openvpn-2.4.4/Makefile work/openvpn-2.4.4/Makefile
 +else
 +PREINST			:= $(CTRL_DIR)/preinst
 +POSTINST		:= $(CTRL_DIR)/postinst
++PRERM			:= $(CTRL_DIR)/prerm
 +
-+control: preinst postinst
++control: preinst postinst prerm
 +
 +preinst:
 +	@echo "#!/bin/sh" > $(PREINST)
@@ -61,5 +62,10 @@ diff -urN work/openvpn-2.4.4/Makefile work/openvpn-2.4.4/Makefile
 +	@echo "#!/bin/sh" > $(POSTINST)
 +	@echo "$(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
++
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop" >> $(PRERM)
++	@echo "exit 0" >> $(PRERM)
 +endif
 +
