@@ -22,11 +22,7 @@ control: postinst
 
 postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
-	@echo "echo \"Stopping XDSL connection...\"" >> $(POSTINST)
-	@echo "$(RCDSLCMD) connection --down" >> $(POSTINST)
-	@echo "$(RCDSLCMD) stop" >> $(POSTINST)
-	@echo "sleep 2" >> $(POSTINST)
-	@echo "echo" >> $(POSTINST)
+	@echo "[ ! -f $(TMPDIR)/$(RCDSLCMDBIN) ] && exit 0" >> $(POSTINST)
 	@echo "echo \"Restoring original XDSL driverset...\"" >> $(POSTINST)
 	@echo "for F in $(RCDSLKO); do [ -f $(TMPDIR)/\$$F ] && echo \"Restoring XDSL kodrv: \$$F ...\" && cp -f $(TMPDIR)/\$$F $(LDLIBMOD)/; done" >> $(POSTINST)
 	@echo "for F in $(RCDSLDRV); do [ -f $(TMPDIR)/\$$F ] && echo \"Restoring XDSL drv: \$$F ...\" && cp -f $(TMPDIR)/\$$F $(USRETCADSL)/ && cp -f $(TMPDIR)/\$$F $(ETCADSL)/; done" >> $(POSTINST)
@@ -38,7 +34,7 @@ postinst:
 	@echo "echo \"Original XDSL driverset restored\"" >> $(POSTINST)
 	@echo "echo" >> $(POSTINST)
 	@echo "echo \"This package can be removed now\"" >> $(POSTINST)
-	@echo "echo \"This package requires also a reboot: type 'opkg remove xdsl-driver-full-orig && reboot'\"" >> $(POSTINST)
+	@echo "echo \"This package requires also a reboot: type 'opkg remove $(XDSL_042N_D26B_NAME) && reboot'\"" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 endif
 

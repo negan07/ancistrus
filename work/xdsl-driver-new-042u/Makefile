@@ -37,7 +37,7 @@ postinst:
 	@echo "sleep 2" >> $(POSTINST)
 	@echo "xdslctl connection --up" >> $(POSTINST)
 	@echo "echo" >> $(POSTINST)
-	@echo "echo \"This package can be removed now: type 'opkg remove xdsl-driver-new'\"" >> $(POSTINST)
+	@echo "echo \"This package can be removed now: type 'opkg remove $(XDSL_042U_NAME)'\"" >> $(POSTINST)
 	@echo "fi" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 endif

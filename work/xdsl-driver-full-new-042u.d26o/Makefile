@@ -34,7 +34,7 @@ postinst:
 	@echo "echo \"XDSL driverset updated\"" >> $(POSTINST)
 	@echo "echo" >> $(POSTINST)
 	@echo "echo \"This package can be removed now\"" >> $(POSTINST)
-	@echo "echo \"This package requires also a reboot: type 'opkg remove xdsl-driver-full-42new && reboot'\"" >> $(POSTINST)
+	@echo "echo \"This package requires also a reboot: type 'opkg remove $(XDSL_042U_D26O_NAME) && reboot'\"" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 endif
 
