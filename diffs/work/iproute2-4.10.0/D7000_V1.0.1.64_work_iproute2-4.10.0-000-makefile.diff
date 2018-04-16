@@ -74,7 +74,7 @@ diff -urN work/iproute2-4.10.0/Makefile work/iproute2-4.10.0/Makefile
  
  snapshot:
  	echo "static const char SNAPSHOT[] = \""`date +%y%m%d`"\";" \
-@@ -105,4 +102,23 @@
+@@ -105,4 +102,17 @@
  cscope:
  	cscope -b -q -R -Iinclude -sip -slib -smisc -snetem -stc
  
@@ -82,19 +82,13 @@ diff -urN work/iproute2-4.10.0/Makefile work/iproute2-4.10.0/Makefile
 +control:
 +else
 +POSTINST		:= $(CTRL_DIR)/postinst
-+PRERM			:= $(CTRL_DIR)/prerm
 +
-+control: postinst prerm
++control: postinst
 +
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
 +	@echo "cp -rf $(USRETC)/iproute2 $(TMPETC)/iproute2" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
-+
-+prerm:
-+	@echo "#!/bin/sh" > $(PRERM)
-+	@echo "echo \"iproute2 builtin required: cannot uninstall...\"" >> $(PRERM)
-+	@echo "exit 1" >> $(PRERM)
 +endif
 +
  .EXPORT_ALL_VARIABLES:

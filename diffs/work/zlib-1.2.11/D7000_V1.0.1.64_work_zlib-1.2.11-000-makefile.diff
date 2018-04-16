@@ -1,7 +1,7 @@
 diff -urN work/zlib-1.2.11/Makefile work/zlib-1.2.11/Makefile
 --- work/zlib-1.2.11/Makefile	2017-04-06 18:00:46.662292000 +0200
 +++ work/zlib-1.2.11/Makefile	2017-04-06 18:01:08.566300143 +0200
-@@ -0,0 +1,62 @@
+@@ -0,0 +1,55 @@
 +include ../Rules.mak
 +
 +LIBSNAME		:= libz.so
@@ -46,21 +46,14 @@ diff -urN work/zlib-1.2.11/Makefile work/zlib-1.2.11/Makefile
 +control:
 +else
 +PREINST			:= $(CTRL_DIR)/preinst
-+PRERM			:= $(CTRL_DIR)/prerm
 +
-+control: preinst prerm
++control: preinst
 +
 +preinst:
 +	@echo "#!/bin/sh" > $(PREINST)
 +	@echo "echo \"Removing old zlib ver & symlinks...\"" >> $(PREINST)
 +	@echo "rm -f $(LDLIB)/$(LIBSNAME)*" >> $(PREINST)
 +	@echo "exit 0" >> $(PREINST)
-+
-+prerm:
-+	@echo "#!/bin/sh" > $(PRERM)
-+	@echo "echo \"$(LIBS) builtin required: cannot uninstall...\"" >> $(PRERM)
-+	@echo "echo" >> $(PRERM)
-+	@echo "exit 1" >> $(PRERM)
 +endif
 +endif
 +

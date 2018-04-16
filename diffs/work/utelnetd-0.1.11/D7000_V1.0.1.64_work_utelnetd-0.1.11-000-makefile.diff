@@ -1,7 +1,7 @@
 diff -urN work/utelnetd-0.1.11/Makefile work/utelnetd-0.1.11/Makefile
 --- work/utelnetd-0.1.11/Makefile	2008-08-11 11:44:01.000000000 +0200
 +++ work/utelnetd-0.1.11/Makefile	2017-03-04 14:43:44.182317642 +0100
-@@ -1,63 +1,59 @@
+@@ -1,63 +1,45 @@
 -# Makefile for utelnetd
 -# 
 -# Configure this with the following environment variables:
@@ -30,17 +30,17 @@ diff -urN work/utelnetd-0.1.11/Makefile work/utelnetd-0.1.11/Makefile
 -endif
 -
 -# nothing to configure below this line... ---8<---8<---8<---
--
++LOGIN	:= $(USRSBIN)/login
+ 
 -PROGS     = utelnetd
--
++CFLAGS	+= -Os -I. -pipe -DSHELLPATH=\"$(LOGIN)\" -Wall
+ 
 -INSTMODE  = 0755
 -INSTOWNER = root
 -INSTGROUP = root
-+LOGIN	:= $(USRSBIN)/login
- 
+-
 -OBJS      = utelnetd.o
-+CFLAGS	+= -Os -I. -pipe -DSHELLPATH=\"$(LOGIN)\" -Wall
- 
+-
 -CC        = $(CROSS_COMPILE)gcc
 -INSTALL   = install
 -
@@ -79,7 +79,7 @@ diff -urN work/utelnetd-0.1.11/Makefile work/utelnetd-0.1.11/Makefile
 -install: $(PROGS)
 -	$(INSTALL) -d $(DESTDIR)$(INSTDIR)
 -	$(INSTALL) -m $(INSTMODE) -o $(INSTOWNER) -g $(INSTGROUP) $(PROGS) $(DESTDIR)$(INSTDIR)
-+install: control
++install:
 +	$(SSTRIP) $(BINS)
 +	install -m 0755 -d $(BINDIR)
 +	install -m 0755 -d $(APPDIR)
@@ -90,18 +90,4 @@ diff -urN work/utelnetd-0.1.11/Makefile work/utelnetd-0.1.11/Makefile
  clean:
 -	rm -f $(PROGS) *.o $(CORE)
 +	rm -f *.o $(BINS)
-+
-+ifndef BUILD
-+control:
-+else
-+PRERM := $(CTRL_DIR)/prerm
-+
-+control: prerm
-+
-+prerm:
-+	@echo "#!/bin/sh" > $(PRERM)
-+	@echo "echo \"$(BINS) builtin required: cannot uninstall...\"" >> $(PRERM)
-+	@echo "echo" >> $(PRERM)
-+	@echo "exit 1" >> $(PRERM)
-+endif
 +
