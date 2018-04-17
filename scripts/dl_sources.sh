@@ -70,7 +70,7 @@ ERR=$?
 		if [ ! -f $SRCFILE ]; then						#avoid dir overwritings
 		echo "$SRCFILE not present"
 			case $URL in
-			http*)								#download from web
+			http*|ftp*|sftp*)						#download from http/ftp
 			echo "Downloading: ${URL}/${SRCFILE} ..."
 			wget ${URL}/${SRCFILE}						#set error flag on download error
 			ERR=$?
