@@ -111,14 +111,19 @@ opkg_inst:
 
 post_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): making FS post install modifications on \\e[36m$(BUILD_TARGET) \\e[0m"
-	@[ ! -f $(BUILD_TARGET)$(RCTMPDIR)/adsl_phy.bin ] || mv $(BUILD_TARGET)$(RCTMPDIR)/adsl_phy.bin $(BUILD_TARGET)$(RCADSLDIR)/ || exit 1
-	@[ ! -f $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/info/xdsl-driver-new.control ] || \
-	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf remove xdsl-driver-new || exit 1
 	@mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCBOOT_NAME) $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1
 	@mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCNVRAMSO) $(BUILD_TARGET)$(RCLDLIB)/ || exit 1
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBOOTDIR)/$(RCAPPSNAME) || exit 1
 	@mv $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMDBIN) || exit 1
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) || exit 1
+	@if [ -f $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/info/$(XDSL_042U_D26O_NAME).control ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
+	for F in $(RCDSLKO); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCLDLIBMOD)/ || exit 1; done; \
+	for F in $(RCDSLDRV); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCADSLDIR)/ || exit 1; done; \
+	for F in $(RCDSLSO); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; done; \
+	for F in $(RCDSLBINS); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; done; \
+	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf remove $(XDSL_042U_D26O_NAME) || exit 1; \
+	fi
 	@echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mmain web pages \\e[0m"
 	@$(foreach F, $(RCMAINWEB), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWDIR)/$(F) || exit 1;)
 	@$(foreach F, $(RCMAINCSS), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWCSSDIR)/$(F) || exit 1;)
