@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+function setDefs() {
+	var cf=document.forms[0];
+
+	if(cf.minisnmpd_enable.value=="") cf.minisnmpd_enable.checked=false;
+	if(cf.minisnmpd_prot.value=="") cf.minisnmpd_prot.value="udp";
+	if(cf.minisnmpd_port.value=="") cf.minisnmpd_port.value="161";
+	if(cf.minisnmpd_community.value=="") cf.minisnmpd_community.value="public";
+	if(cf.minisnmpd_description.value=="") cf.minisnmpd_description.value="router";
+	if(cf.minisnmpd_vendor.value=="") cf.minisnmpd_vendor.value=".1.3.6.1.4.1";
+	if(cf.minisnmpd_location.value=="") cf.minisnmpd_location.value="here";
+	if(cf.minisnmpd_contact.value=="") cf.minisnmpd_contact.value="";
+	if(cf.minisnmpd_remote_enable.value=="") cf.minisnmpd_remote_enable.checked=false;
+	if(cf.minisnmpd_remote_prot.value=="") cf.minisnmpd_remote_prot.value="udp";
+	if(cf.minisnmpd_remote_port.value=="") cf.minisnmpd_remote_port.value="";
+}
+
+function loadCheck() {
+	var cf=document.forms[0];
+
+	if(cf.minisnmpd_enable.checked) cf.minisnmpd_remote_enable.disabled=false;
+	else cf.minisnmpd_remote_enable.disabled=true;
+}
+
+function varInit() {
+
+	AncdataToVisible(document.forms[0]);
+	setDefs();
+	loadCheck();
+}
+
+function checkData() {
+	var cf=document.forms[0];
+	var msg="";
+
+	msg+=checkInt(cf.minisnmpd_port, "SNMP port number", 1, 65534, true);
+	if(cf.minisnmpd_vendor.value=="") msg+="Vendor cannot be void\n";
+	if(cf.minisnmpd_remote_enable.checked || cf.minisnmpd_remote_port.value!="") 
+	msg+=checkInt(cf.minisnmpd_remote_port, "SNMP remote port number", 1, 65534, true);
+
+	if(msg.length>1) {
+	alert(msg);
+	return false;
+	}
+	AncdataToHidden(cf);
+	return true;
+}
+
+//-->
+</script></head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
+<form name="minisnmpd" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<div><a class="page_title" href="javascript:gotoWiki('mini-snmpd-package/');">MINI SNMPD</a></div>
+<div class="fix_button">
+<table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
+&nbsp;
+<input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return checkData()">
+</td></tr></table>
+</div>
+<div id="main" class="main_top_button">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td nowrap colspan="2"><input type="checkbox" name="minisnmpd_enable" value="@h_minisnmpd_enable#" onClick="loadCheck()">
+<a href="javascript:gotoWiki('mini-snmpd-package#mini-snmpd');"><b>Turn Mini SNMP Daemon On</b></a>
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('mini-snmpd-package#connection-protocol');"><b>Select SNMP Connection Protocol</b></a></span></td>
+	<td align="right"><select name="minisnmpd_prot" size=1>
+		<option value="udp">UDP (DEF)</option>
+		<option value="tcp">TCP</option>
+	</select>
+</td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('mini-snmpd-package#connection-port');"><b>SNMP Connection port number:</b></a></td>
+<td nowrap align="right"><input type="text" class="num" name="minisnmpd_port" value="@minisnmpd_port#" size=6 maxlength=5></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('mini-snmpd-package#community');"><b>SNMP Community:</b></a></span></td>
+	<td align="right"><select name="minisnmpd_community" size=1>
+		<option value="public">Public (DEF)</option>
+		<option value="private">Private</option>
+	</select>
+</td>
+<tr><td nowrap><a href="javascript:gotoWiki('mini-snmpd-package#description');"><b>SNMP Description:</b></a></td>
+<td nowrap align="right"><input type="text" name="minisnmpd_description" value="@minisnmpd_description#" size=20 maxlength=40></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('mini-snmpd-package#vendor');"><b>SNMP Vendor:</b></a></td>
+<td nowrap align="right"><input type="text" name="minisnmpd_vendor" value="@minisnmpd_vendor#" size=20 maxlength=80></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('mini-snmpd-package#location');"><b>SNMP Location:</b></a></td>
+<td nowrap align="right"><input type="text" name="minisnmpd_location" value="@minisnmpd_location#" size=20 maxlength=40></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('mini-snmpd-package#contact');"><b>SNMP Contact:</b></a></td>
+<td nowrap align="right"><input type="text" name="minisnmpd_contact" value="@minisnmpd_contact#" size=20 maxlength=40></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="minisnmpd_remote_enable" value="@h_minisnmpd_remote_enable#" onClick="loadCheck()"><a href="javascript:gotoWiki('mini-snmpd-package#activate-remote-access');"><b>Turn SNMP remote access On</b></a></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('mini-snmpd-package#activate-remote-access');"><b>Select SNMP Remote Connection Protocol</b></a></span></td>
+	<td align="right"><select name="minisnmpd_remote_prot" size=1>
+		<option value="udp">UDP (DEF)</option>
+		<option value="tcp">TCP</option>
+	</select>
+</td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('mini-snmpd-package#activate-remote-access');"><b>SNMP remote port number:</b></a></td>
+<td nowrap align="right"><input type="text" class="num" name="minisnmpd_remote_port" value="@minisnmpd_remote_port#" size=6 maxlength=5></td></tr>
+<tr><td colspan="2" align="center">
+<input class="long_common_bt" type="button" value="Select Remote Access Type" onClick="goto_formframe('FW_remote.htm&todo=cfg_init');">
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="save">
+<input type="hidden" name="todo" value="/usr/sbin/rc snmp start">
+<input type="hidden" name="next_file" value="mini-snmpd.htm">
+<input type="hidden" name="h_minisnmpd_enable" value="@h_minisnmpd_enable#">
+<input type="hidden" name="h_minisnmpd_prot" value="@h_minisnmpd_prot#">
+<input type="hidden" name="h_minisnmpd_community" value="@h_minisnmpd_community#">
+<input type="hidden" name="h_minisnmpd_remote_enable" value="@h_minisnmpd_remote_enable#">
+<input type="hidden" name="h_minisnmpd_remote_prot" value="@h_minisnmpd_remote_prot#">
+</div>
+</form>
+<script>printHelp();</script>
+</body></html>

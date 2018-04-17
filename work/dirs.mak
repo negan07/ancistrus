@@ -342,6 +342,22 @@ DEP_$(OPEN_SSH)			:= $(NAME_$(ZLIB)),$(NAME_$(CORE_WORK))
 DESC_$(OPEN_SSH)		:= Free SSH protocol suite providing encryption for network services
 DIRLIST				+= $(OPEN_SSH)
 TARLIST				+= $(OPEN_SSH)
+# MINI_SNMPD
+MINI_SNMPD_NAME			:= mini-snmpd
+VER_$(MINI_SNMPD_NAME)		:= 1.4
+MINI_SNMPD			:= $(MINI_SNMPD_NAME)-$(VER_$(MINI_SNMPD_NAME))
+NAME_$(MINI_SNMPD)		:= $(MINI_SNMPD_NAME)$(DBG)
+VER_$(MINI_SNMPD)		:= $(VER_$(MINI_SNMPD_NAME))
+DL_$(MINI_SNMPD)		:= ftp://ftp.troglobit.com/mini-snmpd
+TAR_$(MINI_SNMPD)		:= $(MINI_SNMPD).tar.gz
+HOME_$(MINI_SNMPD)		:= http://troglobit.com/projects/mini-snmpd/
+LIC_$(MINI_SNMPD)		:= GPLv2
+SEC_$(MINI_SNMPD)		:= general
+PRIO_$(MINI_SNMPD)		:= optional
+DEP_$(MINI_SNMPD)		:= $(NAME_$(CORE_WORK))
+DESC_$(MINI_SNMPD)		:= SNMP server for small and embedded systems
+DIRLIST				+= $(MINI_SNMPD)
+TARLIST				+= $(MINI_SNMPD)
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
@@ -371,6 +387,7 @@ THIRDPARTY			+= $(OPKG_UTILS)
 THIRDPARTY			+= $(OPKG)
 THIRDPARTY			+= $(SMONTOOLS)
 THIRDPARTY			+= $(OPEN_SSH)
+THIRDPARTY			+= $(MINI_SNMPD)
 endif
 # SUM OF THE ABOVES
 SUBDIRS				:=

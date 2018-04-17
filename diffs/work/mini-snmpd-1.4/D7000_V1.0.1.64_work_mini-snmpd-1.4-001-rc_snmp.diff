@@ -1,0 +1,142 @@
+diff -urN work/mini-snmpd-1.4/rc_snmp work/mini-snmpd-1.4/rc_snmp
+--- work/mini-snmpd-1.4/rc_snmp	1970-01-01 01:00:00.000000000 +0100
++++ work/mini-snmpd-1.4/rc_snmp	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,138 @@
++#!/bin/sh
++#
++# ancistrus
++#
++# Netgear's D7000 Nighthawk Router Experience Distributed Project
++#
++# https://github.com/negan07/ancistrus
++#
++# License: GPLv2
++#
++#
++# Rc script for mini-snmpd daemon.
++#
++# Usage: $0 < start restart startforced restartforced stop fwup remoteup fwdown remotedown > (<debug>)
++#
++# <debug> runs daemon in foreground mode with pedantic debug messages.
++#
++
++stop() {
++	# Kill all clients
++	for PID in `pidof ${DAEMON}`
++	do
++	[ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
++	done
++
++	# Stop remote service
++	remotedown
++}
++
++start() {
++	# Checking if service is enabled
++	eval `nvram get minisnmpd_enable` >/dev/null 2>&1
++	[ "${minisnmpd_enable}" = "1" ] || [ ! -z "$1" ] || return 1
++
++	# Checking if the service is already running
++	[ ! -z "`pidof ${DAEMON}`" ] && echo "${DAEMON} already running..." && exit 1
++
++	# Configuring
++	#-p nnn, --udp-port=nnn
++	#The UDP port where the program listens (default is 161)
++	#-P nnn, --tcp-port=nnn
++	#The TCP port where the program listens (default is 161)
++	eval `nvram get minisnmpd_prot` >/dev/null 2>&1
++	[ "${minisnmpd_prot}" = "tcp" ] && minisnmpd_prot="-P" || minisnmpd_prot="-p"
++	eval `nvram get minisnmpd_port` >/dev/null 2>&1
++	[ -z "${minisnmpd_port}" ] && minisnmpd_port="161"
++	#-c nnn, --community=nnn
++	#The value of the SNMP community string (default is "public")
++	eval `nvram get minisnmpd_community` >/dev/null 2>&1
++	[ -z "${minisnmpd_community}" ] && minisnmpd_community="public"
++	#-D nnn, --description=nnn
++	#The description of the device (default is empty)
++	eval `nvram get minisnmpd_description` >/dev/null 2>&1
++	[ -z "${minisnmpd_description}" ] && minisnmpd_description="router"
++	#-V nnn, --vendor=nnn
++	#The OID of the device vendor, this MUST be changed to your own organization's OID (default is .1.3.6.1.4.1)
++	eval `nvram get minisnmpd_vendor` >/dev/null 2>&1
++	[ -z "${minisnmpd_vendor}" ] && minisnmpd_vendor=".1.3.6.1.4.1"
++	#-L nnn, --location=nnn
++	#The location of the device (default is empty)
++	eval `nvram get minisnmpd_location` >/dev/null 2>&1
++	[ -z "${minisnmpd_location}" ] && minisnmpd_location="here"
++	#-C nnn, --contact=nnn
++	#The contact address of the device administrator (default is empty)
++	eval `nvram get minisnmpd_contact` >/dev/null 2>&1
++	[ -z "${minisnmpd_contact}" ] && minisnmpd_contact=""
++	#-i nnn, --interfaces=nnn
++	#The list of network interfaces (default is empty)
++	eval `nvram get wan_ifname` >/dev/null 2>&1
++	eval `nvram get lan_if` >/dev/null 2>&1
++	minisnmpd_interfaces="${wan_ifname},${lan_if}"
++	#-d nnn, --disks=nnn
++	#The list of disk mountpoints (default is empty)
++	minisnmpd_disks="/mnt/shares"
++
++	# Starting daemon
++	$BIN ${minisnmpd_prot} ${minisnmpd_port} -c ${minisnmpd_community} -D ${minisnmpd_description} -V ${minisnmpd_vendor} -L ${minisnmpd_location} -C ${minisnmpd_contact} -i ${minisnmpd_interfaces} -d ${minisnmpd_disks}
++
++	# Sanity check
++	BIN_RC=$?
++	[ $BIN_RC -ne 0 ] && echo "$0: Error ${BIN_RC} starting ${BIN}..." && exit $BIN_RC
++
++	# Starting remote service
++	remoteup
++}
++
++remotedown() {
++	# Stopping remote service
++	eval `nvram get minisnmpd_remote_port` >/dev/null 2>&1
++	eval `nvram get minisnmpd_remote_prot` >/dev/null 2>&1
++	[ ! -z "${minisnmpd_remote_port}" ] && [ ! -z "${minisnmpd_remote_prot}" ] && ${ANC} fw remote del ls MINI-SNMPD ${minisnmpd_remote_prot} ${minisnmpd_remote_port} 161
++}
++
++remoteup() {
++	# Checking if remote service is enabled
++	eval `nvram get minisnmpd_remote_enable` >/dev/null 2>&1
++	eval `nvram get minisnmpd_remote_port` >/dev/null 2>&1
++	eval `nvram get minisnmpd_remote_prot` >/dev/null 2>&1
++	[ ! -z "`pidof ${DAEMON}`" ] && [ "${minisnmpd_remote_enable}" = "1" ] && [ ! -z "${minisnmpd_remote_port}" ] && [ ! -z "${minisnmpd_remote_prot}" ] && ${ANC} fw remote add ls MINI-SNMPD ${minisnmpd_remote_prot} ${minisnmpd_remote_port} 161
++}
++
++# Dirs
++BINDIR=/usr/sbin
++
++# Debug purpose
++#BINDIR=/tmp/etc/ancdbg
++
++# Names
++DAEMON=mini_snmpd
++BIN=${BINDIR}/${DAEMON}
++ANC=${BINDIR}/anc
++
++# Debug running
++[ "${2}" = "debug" ] && BIN="${BINDIR}/${DAEMON} -v -n"
++
++case $1 in
++start|restart)
++stop
++start
++;;
++startforced|restartforced)
++stop
++start $1
++;;
++stop)
++stop
++;;
++fwup|remoteup)
++remotedown
++remoteup
++;;
++fwdown|remotedown)
++remotedown
++;;
++*)
++echo "Usage: $0 < start restart startforced restartforced stop fwup remoteup fwdown remotedown > (<debug>)"
++;;
++esac
