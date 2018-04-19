@@ -178,18 +178,18 @@ DEP_$(QOS_SQM_OLD)		:= $(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
 DESC_$(QOS_SQM_OLD)		:= Quality Of Service CeroWrt old legacy script tool
 # QOS SQM
 QOS_SQM_NAME			:= qos-sqm
-VER_$(QOS_SQM_NAME)		:= 1.2.0-13.025
+VER_$(QOS_SQM_NAME)		:= 1.2.0-13.027
 QOS_SQM				:= $(QOS_SQM_NAME)-$(VER_$(QOS_SQM_NAME))
 NAME_$(QOS_SQM)			:= $(QOS_SQM_NAME)$(DBG)
 VER_$(QOS_SQM)			:= $(VER_$(QOS_SQM_NAME))
 DL_$(QOS_SQM)			:= void
 TAR_$(QOS_SQM)			:= void
-HOME_$(QOS_SQM)			:= https://github.com/guidosarducci/sqm-scripts
+HOME_$(QOS_SQM)			:= https://github.com/tohojo/sqm-scripts
 LIC_$(QOS_SQM)			:= GPLv2
 SEC_$(QOS_SQM)			:= net
 PRIO_$(QOS_SQM)			:= standard
 DEP_$(QOS_SQM)			:= $(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
-DESC_$(QOS_SQM)			:= Quality Of Service CeroWrt new fork script tool
+DESC_$(QOS_SQM)			:= Quality Of Service CeroWrt script tool
 # OPENSSL (REDIRECT TO ORIG)
 OPENSSL_NAME			:= openssl
 VER_$(OPENSSL_NAME)		:= 1.0.0r
