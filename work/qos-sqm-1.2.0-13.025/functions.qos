@@ -107,6 +107,20 @@ undo_modules() {
     done
 }
 
+# Write a state file to the filename given as $1. This version will extract all
+# variable names previoulsy defined in qos-sqm.conf and since it should contain all
+# used variables in addition to $ALL_MODULES & $SQM_CHECK_QDISCS this should be the complete set.
+write_defaults_vars_to_state_file() {
+    local filename=$1
+    shift
+    #write var=val couples to $filename
+    write_state_file ${filename} "$@"
+    #add included modules
+    echo "ALL_MODULES=\"${ALL_MODULES}\"" >> ${filename}
+    #add check modules
+    echo "SQM_CHECK_QDISCS=\"${SQM_CHECK_QDISCS}\"" >> ${filename}
+}
+
 # Write a state file to the filename given as $1. The remaining arguments are
 # variable names that should be written to the state file.
 write_state_file() {
@@ -115,7 +129,7 @@ write_state_file() {
     for var in "$@"; do
         val=$(eval echo '$'$var)
         echo "$var=\"$val\""
-    done > $filename
+    done > ${filename}
 }
 
 

@@ -73,11 +73,7 @@ shift
 done
 
 # These are the modules that do_modules() will attempt to load
-#ALL_MODULES="act_ipt sch_$QDISC sch_ingress act_mirred cls_fw cls_flow cls_u32 sch_htb sch_$SHAPER"
 [ -z "$ALL_MODULES" ] && ALL_MODULES="act_ipt sch_$QDISC cls_flow sch_$SHAPER"
-
-# This is the shaper/leaf list
-[ -z "$SQM_CHECK_QDISCS" ] && SQM_CHECK_QDISCS="fq_codel sfq htb tbf hfsc"
 }
 
 logging_setup() {
@@ -165,7 +161,7 @@ if [ -n "${SCRIPT}" ]; then
     fi
 fi
 
-sqm_start && write_state_file ${STATE_FILE} ${SQM_VARS} && sqm_log "SQM was started on ${IFACE} successfully"
+sqm_start && write_defaults_vars_to_state_file ${STATE_FILE} ${SQM_VARS} && sqm_log "SQM was started on ${IFACE} successfully"
 
 return 0
 }
