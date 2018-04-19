@@ -43,13 +43,16 @@ function setDefs() {
 function loadCheck() {
 	var cf=document.forms[0];
 
-		if(cf.qos_disc.value!="fq_codel") {
-		cf.qos_eecn.disabled=true;
-		cf.qos_iecn.disabled=true;
-		}
-		else {
+		if(cf.qos_disc.value=="fq_codel") {
 		cf.qos_eecn.disabled=false;
 		cf.qos_iecn.disabled=false;
+		if(cf.qos_shaper.value=="hfsc") cf.qos_shaper.value="htb";
+		cf.qos_shaper[1].disabled=true;
+		}
+		else {
+		cf.qos_eecn.disabled=true;
+		cf.qos_iecn.disabled=true;
+		cf.qos_shaper[1].disabled=false;
 		}
 		if(cf.qos_shaper.value=="tbf") {
 		cf.qos_dserv_egress.value="shaper";
