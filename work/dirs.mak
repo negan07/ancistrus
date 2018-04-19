@@ -284,11 +284,11 @@ DIRLIST				+= $(LZO)
 TARLIST				+= $(LZO)
 # OPENVPN
 OPEN_VPN_NAME			:= openvpn
-VER_$(OPEN_VPN_NAME)		:= 2.4.4
+VER_$(OPEN_VPN_NAME)		:= 2.4.5
 OPEN_VPN			:= $(OPEN_VPN_NAME)-$(VER_$(OPEN_VPN_NAME))
 NAME_$(OPEN_VPN)		:= $(OPEN_VPN_NAME)$(DBG)
 VER_$(OPEN_VPN)			:= $(VER_$(OPEN_VPN_NAME))
-DL_$(OPEN_VPN)			:= https://swupdate.openvpn.org/community/releases
+DL_$(OPEN_VPN)			:= https://build.openvpn.net/downloads/releases/
 TAR_$(OPEN_VPN)			:= $(OPEN_VPN).tar.gz
 HOME_$(OPEN_VPN)		:= https://www.openvpn.net/
 LIC_$(OPEN_VPN)			:= GPLv2
