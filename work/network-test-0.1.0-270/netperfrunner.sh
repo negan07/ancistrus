@@ -1,7 +1,8 @@
 #!/bin/sh
 # Netperfrunner.sh - a shell script that runs several netperf commands simultaneously.
-# This mimics the stress test of netperf-wrapper from Toke <toke@toke.dk> 
-# but doesn't have the nice GUI result. This can live in /usr/lib/sqm within CeroWrt
+# This mimics the stress test of Flent (www.flent.org - formerly, "netperf-wrapper") 
+# from Toke <toke@toke.dk> but doesn't have the nice GUI result. 
+# This can live in /usr/lib/OpenWrtScripts
 # 
 # When you start this script, it concurrently uploads and downloads multiple
 # streams (files) to a server on the Internet. This places a heavy load 
@@ -89,16 +90,12 @@ TESTPROTO=-4
 
 DATE=`date "+%Y-%m-%d_%H:%M:%S"`
 # Create temp files for netperf up/download results
-#ULFILE=`mktemp /tmp/netperfUL.XXXXXX` || exit 1
-#DLFILE=`mktemp /tmp/netperfDL.XXXXXX` || exit 1
-#PINGFILE=`mktemp /tmp/measurepings.XXXXXX` || exit 1
 ULFILE=/tmp/netperfUL.${DATE}
 DLFILE=/tmp/netperfDL.${DATE}
 PINGFILE=/tmp/measurepings.${DATE}
 touch $ULFILE || exit 1
 touch $DLFILE || exit 1
 touch $PINGFILE || exit 1
-# echo $ULFILE $DLFILE $PINGFILE
 
 # read the options
 
@@ -207,10 +204,6 @@ do
 done
 
 # Wait until each of the background netperf processes completes 
-# echo "Process is $$"
-# echo `pgrep -P $$ netperf `
-
-#for i in `pgrep -P $$ netperf`		# get a list of PIDs for child processes named 'netperf'
 for i in `pidof netperf`		# gets a list of PIDs for processes named 'netperf'
 do
 	#echo "Waiting for $i"

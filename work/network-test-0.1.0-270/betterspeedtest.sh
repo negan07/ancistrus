@@ -63,40 +63,13 @@ summarize_pings() {
 		 }'
 }
 
-# Print a line of dots as a progress indicator.
-
-#print_dots() {
-#	while : ; do
-#		printf "."
-#		sleep 1s
-#	done
-#}
-
-# Stop the current print_dots() process
-
-#kill_dots() {
-	# echo "Pings: $ping_pid Dots: $dots_pid"
-#	kill -9 $dots_pid
-#	wait $dots_pid 2>/dev/null
-#	dots_pid=0
-#}
-
 # Stop the current ping process
-
 kill_pings() {
 	# echo "Pings: $ping_pid Dots: $dots_pid"
 	kill -9 $ping_pid 
 	wait $ping_pid 2>/dev/null
 	ping_pid=0
 }
-
-# Stop the current pings and dots, and exit
-# ping command catches (and handles) first Ctrl-C, so you have to hit it again...
-#kill_pings_and_dots_and_exit() {
-#	kill_dots
-#	echo "\nStopped"
-#	exit 1
-#}
 
 # ------------ Measure speed and ping latency for one direction ----------------
 #
@@ -106,22 +79,14 @@ kill_pings() {
 measure_direction() {
 
 	# Create temp files
-#	PINGFILE=`mktemp /tmp/measurepings.XXXXXX` || exit 1
-#	SPEEDFILE=`mktemp /tmp/netperfUL.XXXXXX` || exit 1
 	PINGFILE=/tmp/measurepings.${DATE}
 	SPEEDFILE=/tmp/netperfUL.${DATE}
 	touch $PINGFILE || exit 1
 	touch $SPEEDFILE || exit 1
 	DIRECTION=$1
 
-	# Start dots
-#	print_dots &
-#	dots_pid=$!
-	# echo "Dots PID: $dots_pid"
-
 	# Start Ping
-	if [ $TESTPROTO -eq "-4" ]
-	then
+	if [ $TESTPROTO -eq "-4" ]; then
 		ping $PINGHOST > $PINGFILE &
 	else
 		ping6 $PINGHOST > $PINGFILE &
@@ -148,10 +113,6 @@ measure_direction() {
 	done
 	
 	# Wait until each of the background netperf processes completes 
-	# echo "Process is $$"
-	# echo `pgrep -P $$ netperf `
-
-#	for i in `pgrep -P $$ netperf `		# gets a list of PIDs for child processes named 'netperf'
 	for i in `pidof netperf`		# gets a list of PIDs for processes named 'netperf'
 	do
 		#echo "Waiting for $i"
@@ -164,7 +125,6 @@ measure_direction() {
 
 	# When netperf completes, stop the dots and the pings
 	kill_pings
-#	kill_dots
 
 	# Summarize the ping data
 #	summarize_pings $PINGFILE
@@ -223,8 +183,7 @@ done
 
 # Start the main test
 
-if [ $TESTPROTO -eq "-4" ]
-then
+if [ $TESTPROTO -eq "-4" ]; then
 	PROTO="ipv4"
 else
 	PROTO="ipv6"
