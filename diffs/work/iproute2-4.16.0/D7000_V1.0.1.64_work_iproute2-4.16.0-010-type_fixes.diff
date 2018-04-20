@@ -1,32 +1,6 @@
-diff -urN work/iproute2-4.10.0/include/iptables_common.h work/iproute2-4.10.0/include/iptables_common.h
---- work/iproute2-4.10.0/include/iptables_common.h	2017-02-20 17:47:52.000000000 +0100
-+++ work/iproute2-4.10.0/include/iptables_common.h	2017-04-01 14:21:08.395831969 +0200
-@@ -2,6 +2,8 @@
- #define _IPTABLES_COMMON_H
- /* Shared definitions between ipv4 and ipv6. */
- 
-+#include <stdint.h>
-+
- enum exittype {
- 	OTHER_PROBLEM = 1,
- 	PARAMETER_PROBLEM,
-@@ -43,9 +45,9 @@
-   extern void init_extensions(void);
- #endif
- 
--#define __be32	u_int32_t
--#define __le32	u_int32_t
--#define __be16	u_int16_t
--#define __le16	u_int16_t
-+#define __be32	uint32_t
-+#define __le32	uint32_t
-+#define __be16	uint16_t
-+#define __le16	uint16_t
- 
- #endif /*_IPTABLES_COMMON_H*/
-diff -urN work/iproute2-4.10.0/include/netinet/tcp.h work/iproute2-4.10.0/include/netinet/tcp.h
---- work/iproute2-4.10.0/include/netinet/tcp.h	2017-02-20 17:47:52.000000000 +0100
-+++ work/iproute2-4.10.0/include/netinet/tcp.h	1970-01-01 01:00:00.000000000 +0100
+diff -urN work/iproute2-4.16.0/include/netinet/tcp.h work/iproute2-4.16.0/include/netinet/tcp.h
+--- work/iproute2-4.16.0/include/netinet/tcp.h	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.16.0/include/netinet/tcp.h	1970-01-01 01:00:00.000000000 +0100
 @@ -1,231 +0,0 @@
 -/*
 - * Copyright (c) 1982, 1986, 1993
@@ -259,10 +233,11 @@ diff -urN work/iproute2-4.10.0/include/netinet/tcp.h work/iproute2-4.10.0/includ
 -#endif /* Misc.  */
 -
 -#endif /* netinet/tcp.h */
-diff -urN work/iproute2-4.10.0/lib/dnet_ntop.c work/iproute2-4.10.0/lib/dnet_ntop.c
---- work/iproute2-4.10.0/lib/dnet_ntop.c	2017-02-20 17:47:52.000000000 +0100
-+++ work/iproute2-4.10.0/lib/dnet_ntop.c	2017-04-01 14:28:56.479716934 +0200
-@@ -1,24 +1,25 @@
+diff -urN work/iproute2-4.16.0/lib/dnet_ntop.c work/iproute2-4.16.0/lib/dnet_ntop.c
+--- work/iproute2-4.16.0/lib/dnet_ntop.c	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.16.0/lib/dnet_ntop.c	2018-04-20 21:49:10.427566080 +0200
+@@ -1,25 +1,26 @@
+ /* SPDX-License-Identifier: GPL-2.0 */
  #include <errno.h>
  #include <string.h>
 +#include <stdint.h>
@@ -294,7 +269,7 @@ diff -urN work/iproute2-4.10.0/lib/dnet_ntop.c work/iproute2-4.10.0/lib/dnet_nto
  
  	if (*pos == len)
  		return 1;
-@@ -36,7 +37,7 @@
+@@ -37,7 +38,7 @@
  
  static const char *dnet_ntop1(const struct dn_naddr *dna, char *str, size_t len)
  {
@@ -303,10 +278,11 @@ diff -urN work/iproute2-4.10.0/lib/dnet_ntop.c work/iproute2-4.10.0/lib/dnet_nto
  	size_t pos = 0;
  	int started = 0;
  
-diff -urN work/iproute2-4.10.0/lib/dnet_pton.c work/iproute2-4.10.0/lib/dnet_pton.c
---- work/iproute2-4.10.0/lib/dnet_pton.c	2017-02-20 17:47:52.000000000 +0100
-+++ work/iproute2-4.10.0/lib/dnet_pton.c	2017-04-01 14:28:57.483709004 +0200
-@@ -1,23 +1,24 @@
+diff -urN work/iproute2-4.16.0/lib/dnet_pton.c work/iproute2-4.16.0/lib/dnet_pton.c
+--- work/iproute2-4.16.0/lib/dnet_pton.c	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.16.0/lib/dnet_pton.c	2018-04-20 21:50:28.875325503 +0200
+@@ -1,24 +1,25 @@
+ /* SPDX-License-Identifier: GPL-2.0 */
  #include <errno.h>
  #include <string.h>
 +#include <stdint.h>
@@ -336,7 +312,7 @@ diff -urN work/iproute2-4.10.0/lib/dnet_pton.c work/iproute2-4.10.0/lib/dnet_pto
  {
  	int rv = 0;
  	int tmp;
-@@ -38,9 +39,9 @@
+@@ -39,9 +40,9 @@
  
  static int dnet_pton1(const char *src, struct dn_naddr *dna)
  {
