@@ -186,9 +186,9 @@ diff -urN D7000_V1.0.1.64_WW_src/Source/Makefile D7000_V1.0.1.64_WW_src/Source/M
 +endif
 +
 +WORK_PROJECT=$(shell cd ../..; basename -s .git `git config --get remote.origin.url` || basename `pwd` | tr -d -c [:alpha:];)
-+WORK_WWW=$(shell cd ../..; git config --get remote.origin.url || echo "local";)
-+WORK_AUTHOR=$(shell cd ../..; git log --max-count=1 --pretty='format:%an' || pwd | sed 's/\// /g' | awk '{printf $$2}';)
-+WORK_AUTHOR_EMAIL=$(shell cd ../..; git log --max-count=1 --pretty='format:%ae' || echo "email@void.com";)
++WORK_WWW=$(shell cd ../..; git config --get remote.origin.url || echo "localhost";)
++WORK_AUTHOR=$(shell [ -n "$${SUDO_USER}" ] && echo $${SUDO_USER} || echo $${USERNAME})
++WORK_AUTHOR_EMAIL=$(shell cd ../..; MAIL=`git log --max-count=1 --pretty='format:%ae' | grep $(WORK_AUTHOR)`; [ -n "$${MAIL}" ] && echo $${MAIL} || echo "email@void.com";)
 +WORK_VER=$(shell cd ../..; git rev-list --count HEAD || basename `pwd` | tr -d -c [:digit:];)
 +BUILDING_DATE=$(shell date -u '+%Y-%m-%d %H:%M')
 +
