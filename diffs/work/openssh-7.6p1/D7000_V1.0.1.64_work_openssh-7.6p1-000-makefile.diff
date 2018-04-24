@@ -1,18 +1,17 @@
 diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 --- work/openssh-7.6p1/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/openssh-7.6p1/Makefile	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,199 @@
+@@ -0,0 +1,198 @@
 +include ../Rules.mak
 +
 +BINS			:= $(OPEN_SSH)/sshd $(OPEN_SSH)/ssh-keygen $(OPEN_SSH)/scp
 +STARTUP			:= rc_ssh
-+SCRIPTS			:= $(STARTUP)
 +PRIOS			:= 10
 +PRIOF			:= 10
++WEB			:= ../www/openssh.htm
 +SSHD_CONF		:= sshd_config
 +SSHD_KEYS_DIR		:= $(NVRAMDIR)/ssh
 +SSHD_CONF_INST_DIR	:= $(ETCDIR)
-+WEB			:= ../www/openssh.htm
 +
 +all: config
 +	$(MAKE) -C $(OPEN_SSH)
@@ -156,7 +155,7 @@ diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 +	for D in $(SSHD_CONF_INST_DIR) $(BINDIR) $(APPDIR) $(RCSDIR) $(FWDIR) $(WWWDIR); do install -m 0755 -d $$D; done
 +	install -m 0644 $(SSHD_CONF) $(SSHD_CONF_INST_DIR)
 +	install -m 0755 $(BINS) $(BINDIR)
-+	install -m 0755 $(SCRIPTS) $(APPDIR)
++	install -m 0755 $(STARTUP) $(APPDIR)
 +	install -m 0664 $(WEB) $(WWWDIR)
 +	ln -sf $(USRSBINRCAPP)/$(STARTUP) $(RCSDIR)/S$(PRIOS)sshd
 +	ln -sf $(USRSBINRCAPP)/$(STARTUP) $(FWDIR)/F$(PRIOF)sshd
