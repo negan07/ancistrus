@@ -58,7 +58,7 @@ build: prepare_package build_package build_index
 
 prepare_package: creat_rules
 	@[ -d $(BUILD_DIR_PATH) ] || mkdir -p -m 0755 $(BUILD_DIR_PATH) || exit 1;
-	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): prepare package \\e[36m$D \\e[0m"; \
+	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): prepare package \\e[36m$D$(SUBVER_$D) \\e[0m"; \
 	rm -rf $(BUILD_DIR_PATH)/$(D) $(BUILD_TMP); \
 	mkdir -p -m 0755 $(BUILD_TMP) $(CTRL_DIR_PATH) || exit 1; \
 	echo "Package: $(NAME_$(D))"					> $(CTRL); \
@@ -75,18 +75,18 @@ prepare_package: creat_rules
 	echo "Priority: $(PRIO_$(D))"					>> $(CTRL); \
 	$(MAKE) -j$(NUMTHREAD) -C $D install || exit 1; \
 	$(foreach S, $(CTRL_SCRIPTS), chmod -f 755 $(CTRL_DIR_PATH)/$(S);) \
-	mv -f $(BUILD_TMP) $(BUILD_DIR_PATH)/$(D);)
+	mv -f $(BUILD_TMP) $(BUILD_DIR_PATH)/$(D)$(SUBVER_$D);)
 	@echo -e "\\e[35m$(CUR_REL_PATH): cleanup void \\e[36mPackages \\e[0m";
 	@$(foreach R, $(PKG_RM_LIST), rm -rf $(BUILD_DIR_PATH)/$(R);)
 
 build_package:
 	@[ -d $(BUILD_DIR_PATH) ] && [ -x ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build ]
-	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): build package \\e[36m$D \\e[0m"; \
-	echo "$(PKG_RM_LIST)" | grep "$(D)" > /dev/null 2>&1 || [ -d $(BUILD_DIR_PATH)/$(D) ] || exit 1; \
+	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): build package \\e[36m$D$(SUBVER_$D) \\e[0m"; \
+	echo "$(PKG_RM_LIST)" | grep "$(D)" > /dev/null 2>&1 || [ -d $(BUILD_DIR_PATH)/$(D)$(SUBVER_$D) ] || exit 1; \
 	if [ ! -z $(MONOLITHIC) ]; then echo "$(PKG_RM_LIST)" | grep "$(D)" > /dev/null 2>&1 || \
-	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1; \
+	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -o root -g root $(BUILD_DIR_PATH)/$(D)$(SUBVER_$D) $(BUILD_DIR_PATH) || exit 1; \
 	else echo "$(PKG_RM_LIST)" | grep "$(D)" > /dev/null 2>&1 || \
-	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D) $(BUILD_DIR_PATH) || exit 1; \
+	../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build -T $(TCHAIN_PATH) -o root -g root $(BUILD_DIR_PATH)/$(D)$(SUBVER_$D) $(BUILD_DIR_PATH) || exit 1; \
 	fi;)
 
 build_index:
