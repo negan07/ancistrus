@@ -8,10 +8,10 @@ clean:
 
 install: control
 	install -m 0755 -d $(TMPINSTDIR)
-	for F in $(RCDSLKO); do [ -f $$F ] && $(STRIP) $(STRIPFLAGS) $$F && install -m 0644 $$F $(TMPINSTDIR); done
+	for F in $(RCDSLKO); do [ -f $$F ] && $(STRIP) $(STRIPFLAGS) $$F; done
 	for F in $(RCDSLKO) $(RCDSLDRV); do [ -f $$F ] && install -m 0644 $$F $(TMPINSTDIR); done
-	for F in $(RCDSLBINS); do [ -f $$F ] && $(SSTRIP) $$F && install -m 0644 $$F $(TMPINSTDIR); done
-	for F in $(RCDSLBINS); do [ -f $$F ] && install -m 0755 $$F $(TMPINSTDIR); done
+	for F in $(RCDSLBINS); do [ -f $$F ] && $(SSTRIP) $$F; done
+	for F in lib$(RCDSLCMD).so $(RCDSLBINS); do [ -f $$F ] && install -m 0755 $$F $(TMPINSTDIR); done
 
 ifndef BUILD
 control:
@@ -24,10 +24,11 @@ postinst:
 	@echo "#!/bin/sh" > $(POSTINST)
 	@echo "[ ! -f $(TMPDIR)/$(RCDSLCMDBIN) ] && exit 0" >> $(POSTINST)
 	@echo "echo \"Restoring original XDSL driverset...\"" >> $(POSTINST)
-	@echo "for F in $(RCDSLKO); do [ -f $(TMPDIR)/\$$F ] && echo \"Restoring XDSL kodrv: \$$F ...\" && cp -f $(TMPDIR)/\$$F $(LDLIBMOD)/; done" >> $(POSTINST)
-	@echo "for F in $(RCDSLDRV); do [ -f $(TMPDIR)/\$$F ] && echo \"Restoring XDSL drv: \$$F ...\" && cp -f $(TMPDIR)/\$$F $(USRETCADSL)/ && cp -f $(TMPDIR)/\$$F $(ETCADSL)/; done" >> $(POSTINST)
-	@echo "for F in $(RCDSLSO); do [ -f $(TMPDIR)/\$$F ] && echo \"Removing XDSL orphan solib: \$$F ...\" && rm -f $(LDLIB)/\$$F; done" >> $(POSTINST)
-	@echo "for F in $(RCDSLBINS); do [ -f $(TMPDIR)/\$$F ] && echo \"Restoring XDSL bin: \$$F ...\" && cp -f $(TMPDIR)/\$$F $(USRSBIN)/; done" >> $(POSTINST)
+	@echo "for F in $(RCDSLKO); do [ -f $(TMPDIR)/\$$F ] && echo \"Restoring XDSL kodrv: \$$F ...\" && mv -f $(TMPDIR)/\$$F $(LDLIBMOD)/; done" >> $(POSTINST)
+	@echo "for F in $(RCDSLDRV); do [ -f $(TMPDIR)/\$$F ] && echo \"Restoring XDSL drv: \$$F ...\" && cp -f $(TMPDIR)/\$$F $(USRETCADSL)/ && mv -f $(TMPDIR)/\$$F $(ETCADSL)/; done" >> $(POSTINST)
+	@echo "for F in $(RCDSLSO); do [ -f $(TMPDIR)/\$$F ] && [ \"\$$F\"!=\"lib$(RCDSLCMD).so\" ] && echo \"Removing XDSL orphan solib: \$$F ...\" && rm -f $(LDLIB)/\$$F; done" >> $(POSTINST)
+	@echo "[ -f $(TMPDIR)/lib$(RCDSLCMD).so ] && echo \"Restoring XDSL solib: lib$(RCDSLCMD).so ...\" && mv -f $(TMPDIR)/lib$(RCDSLCMD).so $(LDLIB)/; done" >> $(POSTINST)
+	@echo "for F in $(RCDSLBINS); do [ -f $(TMPDIR)/\$$F ] && echo \"Restoring XDSL bin: \$$F ...\" && mv -f $(TMPDIR)/\$$F $(USRSBIN)/; done" >> $(POSTINST)
 	@echo "[ ! -h $(USRSBIN)/$(RCDSLCMD) ] && [ -f $(USRSBIN)/$(RCDSLCMDBIN) ] && mv -f $(USRSBIN)/$(RCDSLCMDBIN) $(USRSBIN)/$(RCDSLCMD)" >> $(POSTINST)
 	@echo "sync" >> $(POSTINST)
 	@echo "echo" >> $(POSTINST)
