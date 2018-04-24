@@ -1,12 +1,11 @@
 diff -urN work/mini-snmpd-1.4/Makefile work/mini-snmpd-1.4/Makefile
 --- work/mini-snmpd-1.4/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/mini-snmpd-1.4/Makefile	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,57 @@
+@@ -0,0 +1,56 @@
 +include ../Rules.mak
 +
 +BINS			:= $(MINI_SNMPD)/mini_snmpd
 +STARTUP			:= rc_snmp
-+SCRIPTS			:= $(STARTUP)
 +PRIOS			:= 11
 +PRIOF			:= 11
 +WEB			:= ../www/$(MINI_SNMPD_NAME).htm
