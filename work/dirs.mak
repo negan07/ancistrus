@@ -98,8 +98,8 @@ SEC_$(NETWORKTEST)		:= base
 PRIO_$(NETWORKTEST)		:= optional
 DEP_$(NETWORKTEST)		:= 
 DESC_$(NETWORKTEST)		:= Enhanced network stress & speed test scripts based on netperf
-# XDSL DRIVER FULL ORIG
-XDSL_042N_D26B_NAME		:= xdsl-driver-full-orig
+# XDSL DRIVER ORIG
+XDSL_042N_D26B_NAME		:= xdsl-driver-orig
 VER_$(XDSL_042N_D26B_NAME)	:= 042n.d26b
 XDSL_042N_D26B			:= $(XDSL_042N_D26B_NAME)-$(VER_$(XDSL_042N_D26B_NAME))
 NAME_$(XDSL_042N_D26B)		:= $(XDSL_042N_D26B_NAME)$(DBG)
@@ -111,14 +111,29 @@ HOME_$(XDSL_042N_D26B)		:= http://www.broadcom.com
 LIC_$(XDSL_042N_D26B)		:= Broadcom inc
 SEC_$(XDSL_042N_D26B)		:= dsl
 PRIO_$(XDSL_042N_D26B)		:= required
-DEP_$(XDSL_042N_D26B)		:= -001
-DESC_$(XDSL_042N_D26B)		:= Install the full original XDSL driverset version A2pvbH$(VER_$(XDSL_042N_D26B_NAME))
-# XDSL DRIVER FULL NEW
-XDSL_042U_D26O_NAME		:= xdsl-driver-full-new
+DEP_$(XDSL_042N_D26B)		:= 
+DESC_$(XDSL_042N_D26B)		:= Install the original XDSL driverset version A2pvbH$(VER_$(XDSL_042N_D26B_NAME))
+# XDSL DRIVER DLINK 5592
+XDSL_042P_D26L_NAME		:= xdsl-driver-dlink
+VER_$(XDSL_042P_D26L_NAME)	:= 042p.d26l
+XDSL_042P_D26L			:= $(XDSL_042P_D26L_NAME)-$(VER_$(XDSL_042P_D26L_NAME))
+NAME_$(XDSL_042P_D26L)		:= $(XDSL_042P_D26L_NAME)$(DBG)
+SUBVER_$(XDSL_042P_D26L)	:= 
+VER_$(XDSL_042P_D26L)		:= $(VER_$(XDSL_042P_D26L_NAME))$(SUBVER_$(XDSL_042P_D26L))
+DL_$(XDSL_042P_D26L)		:= void
+TAR_$(XDSL_042P_D26L)		:= void
+HOME_$(XDSL_042P_D26L)		:= http://www.broadcom.com
+LIC_$(XDSL_042P_D26L)		:= Broadcom inc
+SEC_$(XDSL_042P_D26L)		:= dsl
+PRIO_$(XDSL_042P_D26L)		:= required
+DEP_$(XDSL_042P_D26L)		:= 
+DESC_$(XDSL_042P_D26L)		:= Install the Dlink 5592 XDSL driverset version A2pvbH$(VER_$(XDSL_042P_D26L_NAME))
+# XDSL DRIVER AGEV DGA4130
+XDSL_042U_D26O_NAME		:= xdsl-driver-agev
 VER_$(XDSL_042U_D26O_NAME)	:= 042u.d26o
 XDSL_042U_D26O			:= $(XDSL_042U_D26O_NAME)-$(VER_$(XDSL_042U_D26O_NAME))
 NAME_$(XDSL_042U_D26O)		:= $(XDSL_042U_D26O_NAME)$(DBG)
-SUBVER_$(XDSL_042U_D26O)	:= -001
+SUBVER_$(XDSL_042U_D26O)	:= 
 VER_$(XDSL_042U_D26O)		:= $(VER_$(XDSL_042U_D26O_NAME))$(SUBVER_$(XDSL_042U_D26O))
 DL_$(XDSL_042U_D26O)		:= void
 TAR_$(XDSL_042U_D26O)		:= void
@@ -127,7 +142,7 @@ LIC_$(XDSL_042U_D26O)		:= Broadcom inc
 SEC_$(XDSL_042U_D26O)		:= dsl
 PRIO_$(XDSL_042U_D26O)		:= required
 DEP_$(XDSL_042U_D26O)		:= 
-DESC_$(XDSL_042U_D26O)		:= Install the full updated XDSL driverset version A2pvbH$(VER_$(XDSL_042U_D26O_NAME))
+DESC_$(XDSL_042U_D26O)		:= Install the Agev DGA4130 XDSL driverset version A2pvbH$(VER_$(XDSL_042U_D26O_NAME))
 # QOS NG
 QOS_NG_NAME			:= qos-netgear
 VER_$(QOS_NG_NAME)		:= 36_42n
@@ -376,6 +391,7 @@ THIRDPARTY			+= $(OPEN_SSH)
 THIRDPARTY			+= $(MINI_SNMPD)
 ifndef MONOLITHIC
 BUILTIN				+= $(XDSL_042N_D26B)
+BUILTIN				+= $(XDSL_042P_D26L)
 BUILTIN				+= $(XDSL_042U_D26O)
 THIRDPARTY			+= $(QOS_NG)
 THIRDPARTY			+= $(QOS_SQM_OLD)
