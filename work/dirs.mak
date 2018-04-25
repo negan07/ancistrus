@@ -129,7 +129,7 @@ PRIO_$(XDSL_042P_D26L)		:= required
 DEP_$(XDSL_042P_D26L)		:= 
 DESC_$(XDSL_042P_D26L)		:= Install the Dlink 5592 XDSL driverset version A2pvbH$(VER_$(XDSL_042P_D26L_NAME))
 # XDSL DRIVER AGEV DGA4130
-XDSL_042U_D26O_NAME		:= xdsl-driver-agev
+XDSL_042U_D26O_NAME		:= xdsl-driver-agtef
 VER_$(XDSL_042U_D26O_NAME)	:= 042u.d26o
 XDSL_042U_D26O			:= $(XDSL_042U_D26O_NAME)-$(VER_$(XDSL_042U_D26O_NAME))
 NAME_$(XDSL_042U_D26O)		:= $(XDSL_042U_D26O_NAME)$(DBG)
@@ -142,7 +142,7 @@ LIC_$(XDSL_042U_D26O)		:= Broadcom inc
 SEC_$(XDSL_042U_D26O)		:= dsl
 PRIO_$(XDSL_042U_D26O)		:= required
 DEP_$(XDSL_042U_D26O)		:= 
-DESC_$(XDSL_042U_D26O)		:= Install the Agev DGA4130 XDSL driverset version A2pvbH$(VER_$(XDSL_042U_D26O_NAME))
+DESC_$(XDSL_042U_D26O)		:= Install the Agtef DGA4130 XDSL driverset version A2pvbH$(VER_$(XDSL_042U_D26O_NAME))
 # QOS NG
 QOS_NG_NAME			:= qos-netgear
 VER_$(QOS_NG_NAME)		:= 36_42n
