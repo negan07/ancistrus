@@ -100,6 +100,8 @@ pre_inst:
 	@mkdir -p -m 777 $(IMAGEDIR)/$(RCINITD) $(BUILD_TARGET)$(RCINITDIR) || exit 1
 	@echo -e "\\e[35m$(CUR_REL_PATH): creating partition dir \\e[36mopkg \\e[0m"
 	@mkdir -p -m 777 $(IMAGEDIR)/opkg $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR) || exit 1
+	echo -e "\\e[35m$(CUR_REL_PATH): removing old $(NAME_$(ZLIB)) reference on \\e[36m$(BUILD_TARGET) \\e[0m"
+	rm $(BUILD_TARGET)$(RCLDLIB)/libz.so* || exit 1
 
 opkg_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(BUILD_TARGET) \\e[0m"
@@ -116,19 +118,19 @@ post_inst:
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBOOTDIR)/$(RCAPPSNAME) || exit 1
 	@mv $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMDBIN) || exit 1
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) || exit 1
-	@if [ -f $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/info/$(XDSL_042U_D26O_NAME).control ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep xdsl-driver`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
 	for F in $(RCDSLKO); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCLDLIBMOD)/ || exit 1; done; \
 	for F in $(RCDSLDRV); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCADSLDIR)/ || exit 1; done; \
 	for F in $(RCDSLSO); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; done; \
 	for F in $(RCDSLBINS); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; done; \
-	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf remove $(XDSL_042U_D26O_NAME) || exit 1; \
+	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf remove `cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep "Package: xdsl-driver" | sed 's/Package: //'` || exit 1; \
 	fi
+	@echo -e "\\e[35m$(CUR_REL_PATH): parsing \\e[36m$(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status \\e[0m"
+	@sed -i 's/Status: install user unpacked/Status: install user installed/g' $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status || exit 1
 	@echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mmain web pages \\e[0m"
 	@$(foreach F, $(RCMAINWEB), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWDIR)/$(F) || exit 1;)
 	@$(foreach F, $(RCMAINCSS), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWCSSDIR)/$(F) || exit 1;)
-	@echo -e "\\e[35m$(CUR_REL_PATH): old lib references removal on \\e[36m$(BUILD_TARGET) \\e[0m"
-	@[ ! -f $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/info/zlib.control ] || rm $(BUILD_TARGET)$(RCLDLIB)/libz.so.1.2.3 || exit 1
 	@echo -e "\\e[35m$(CUR_REL_PATH): moving $(RCINITD) & opkg dirs content from \\e[36m$(BUILD_TARGET) \\e[0m"
 	@mv $(BUILD_TARGET)$(RCINITDIR)/* $(IMAGEDIR)/$(RCINITD) || exit 1
 	@mv $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/* $(IMAGEDIR)/opkg || exit 1
