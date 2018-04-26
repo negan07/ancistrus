@@ -8,10 +8,10 @@ clean:
 
 install: control
 	install -m 0755 -d $(TMPINSTDIR)
-	for F in $(RCDSLKO); do [ -f $$F ] && $(STRIP) $(STRIPFLAGS) $$F; done
-	for F in $(RCDSLKO) $(RCDSLDRV); do [ -f $$F ] && install -m 0644 $$F $(TMPINSTDIR); done
-	for F in $(RCDSLBINS); do [ -f $$F ] && $(SSTRIP) $$F; done
-	for F in lib$(RCDSLCMD).so $(RCDSLBINS); do [ -f $$F ] && install -m 0755 $$F $(TMPINSTDIR); done
+	for F in $(RCDSLKO); do [ -f $$F ] && $(STRIP) $(STRIPFLAGS) $$F && install -m 0644 $$F $(TMPINSTDIR); done
+	for F in $(RCDSLDRV); do [ -f $$F ] && install -m 0644 $$F $(TMPINSTDIR); done
+	for F in $(RCDSLBINS); do [ -f $$F ] && $(SSTRIP) $$F && install -m 0755 $$F $(TMPINSTDIR); done
+	for F in lib$(RCDSLCMD).so; do [ -f $$F ] && install -m 0755 $$F $(TMPINSTDIR); done
 
 ifndef BUILD
 control:
