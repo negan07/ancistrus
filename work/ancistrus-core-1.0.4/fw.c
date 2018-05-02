@@ -176,7 +176,7 @@ char gw[256], wan[256], *oldgw, *oldwan;
 				err+=fwremadd(argv, FP, wan, gw, "tcp", fwtype);
 				}
 				else err+=fwremadd(argv, FP, wan, gw, argv[PROT], fwtype);
-			if(!err) fprintf(FP,					//add napt rule to /proc/napt_serv
+			if(!err) fprintf(FP,					//add napt rule to /proc/cnapt_serv
 			CPM " add %s:1:%s:%s:%s-%s:%s:%s-%s\n"
 			, argv[TYPE], argv[PROT], gw, argv[LOCPORT], argv[LOCPORT], wan, argv[REMPORT], argv[REMPORT]);
 			}

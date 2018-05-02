@@ -65,7 +65,7 @@ function upgdivSetup(name, styleflag) {
 }
 
 function loadOpkgUpdate() {
-	if("@anc_upgr_disable#"=="1") return;
+	if("@h_anc_upgr_disable#"=="1") return;
 	var upflag, str="";
 	var xmlhttp=readFileTags("opkglistupgr");
 
@@ -75,7 +75,7 @@ function loadOpkgUpdate() {
 }
 
 function loadMonolUpdate(ver) {
-	if("@anc_upgr_disable#"=="1") return;
+	if("@h_anc_upgr_disable#"=="1") return;
 	var xmlhttp=readFileTags("https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/RELEASE");
 		if(xmlhttp.readyState==4 && xmlhttp.status==200) {
 		var newverstr=xmlhttp.responseText.replace("\n", "");
@@ -90,13 +90,13 @@ function setCarry(line, tagup, tagdown) {
 
 	var carry=line.replace(tagup, "");
 	var carryupdown=carry.split(',');
-	carryret[0]=carryupdown[0];
-	carryret[1]=carryupdown[1].replace(tagdown, "");
+	carryret[1]=carryupdown[0];
+	carryret[0]=carryupdown[1].replace(tagdown, "");
 	return carryret;
 }
 
 function readInfo() {
-	var releaseurl="https://github.com/negan07/ancistrus/releases", xmlhttp, txt="", monfound=0, profile="", vectoring="", carrymax=["", ""], carryb0=["", ""], carryb1=["", ""];
+	var releaseurl="https://github.com/negan07/ancistrus/releases", xmlhttp, txt="", monfound=0, profile="", vectoring="", carrymax=["0", "0"], carryb0=["0", "0"], dslver="", vendorid="", vendorver="", profile="", vectoring="", attn="0.0 / 0.0", snr="0.0 / 0.0", pwr="0.0 / 0.0", ancver="", opkgver="";
 
 	xmlhttp=readFileTags("svn.info")
 	if(xmlhttp.readyState==4 && xmlhttp.status==200) {
@@ -134,21 +134,20 @@ function readInfo() {
 	line=str.split('\n');
 	len=line.length;
 		for(i=0;i<len;i++) {
-		if(line[i].indexOf("ADSL PHY: AnnexA version - ")>-1) var dslver=line[i].replace("ADSL PHY: AnnexA version - ", "");
+		if(line[i].indexOf("ADSL PHY: AnnexA version - ")>-1) dslver=line[i].replace("ADSL PHY: AnnexA version - ", "");
 			else if(line[i].indexOf("Max:	Upstream rate = ")>-1) carrymax=setCarry(line[i], "Max:	Upstream rate = ", " Downstream rate = ");
 			else if(line[i].indexOf("Bearer:	0, Upstream rate = ")>-1) carryb0=setCarry(line[i], "Bearer:	0, Upstream rate = ", " Downstream rate = ");
-			else if(line[i].indexOf("Bearer:	1, Upstream rate = ")>-1) carryb1=setCarry(line[i], "Bearer:	1, Upstream rate = ", " Downstream rate = ");
 			else if(line[i].indexOf("ChipSet Vendor Id:	")>-1) {
 			var vendor=line[i].replace("ChipSet Vendor Id:	", "");
 			var vendoridver=vendor.split(':');
-			var vendorid=vendoridver[0];
-			var vendorver=vendoridver[1];
+			vendorid=vendoridver[0];
+			vendorver=parseInt(vendoridver[1].substring(0, 4))+"."+parseInt(vendoridver[1].substring(4), 16);
 			}
-			else if("@wan_traffic_type#"=="ptm" && line[i].indexOf("VDSL2 Profile:		Profile ")>-1) {
-			var profile=line[i].replace("VDSL2 Profile:		Profile ", "");
+			else if("@h_wan_traffic_type#"=="ptm" && line[i].indexOf("VDSL2 Profile:		Profile ")>-1) {
+			profile=line[i].replace("VDSL2 Profile:		Profile ", "");
 			if(profile=="BrcmPriv1") profile="35b";
 			}
-			else if("@wan_traffic_type#"=="ptm" && line[i].indexOf("Vectoring state: ")>-1) {
+			else if("@h_wan_traffic_type#"=="ptm" && line[i].indexOf("Vectoring state: ")>-1) {
 			var vectstate=line[i].replace("Vectoring state: ", "");
 			var vectcode=parseInt(vectstate);
 				switch(vectcode) {
@@ -160,6 +159,18 @@ function readInfo() {
 				default: vectoring="Wait for config"; break;
 				}
 			}
+			else if(line[i].indexOf("SNR (dB):	")>-1) {
+			var snrdsus=line[i].replace("SNR (dB):	", "");
+			snr=snrdsus.replace("		", " / ");
+			}
+			else if(line[i].indexOf("Attn(dB):	")>-1) {
+			var attndsus=line[i].replace("Attn(dB):	", "");
+			attn=attndsus.replace("		", " / ");
+			}
+			else if(line[i].indexOf("Pwr(dBm):	")>-1) {
+			var pwrdsus=line[i].replace("Pwr(dBm):	", "");
+			pwr=pwrdsus.replace("		", " / ");
+			}
 		}
 	}
 	xmlhttp=readFileTags("opkgstatus");
@@ -170,32 +181,35 @@ function readInfo() {
 	var numpack=0, opkgfound=0;
 		for(i=0;i<len;i++) {
 			if(line[i].indexOf("Package: ancistrus-core")>-1) {
-			var ancver=line[++i].replace("Version: ", "");
+			ancver=line[++i].replace("Version: ", "");
 			numpack++;
 			}
 			else if(line[i].indexOf("Package: opkg")>-1) {
-			var opkgver=line[++i].replace("Version: ", "");
+			opkgver=line[++i].replace("Version: ", "");
 			numpack++;
 			opkgfound=1;
 			}
 			else if(line[i].indexOf("Package: ")>-1) numpack++;
 		}
 	}
-	var varname=["DSL driver version number:", "Chipset vendor ID:", "Chipset version number:", "Vdsl2 profile:", "Vectoring state:", "Max upstream rate:", "Max downstream rate:", "Bearer 0 upstream rate:", "Bearer 0 downstream rate:", "Bearer 1 upstream rate:", "Bearer 1 downstream rate:", "Web-GUI core version number:", "Opkg package manager version number:", "Number of packages installed:", "Rootfs partition space used:", "Runlevel boot partition space used:", "Opkg package manager partition space used:"];
-	var varval=[dslver, vendorid, vendorver, profile, vectoring, carrymax[0], carrymax[1], carryb0[0], carryb0[1], carryb1[0], carryb1[1], ancver, opkgver, numpack, "@part_/#", "@part_/usr/etc/init.d#", "@part_/usr/lib/opkg#"];
-		for(i=14;i<varval.length;i++) {
-		if(parseInt(varval[i])>97) varval[i]="<font color='red'><b>"+varval[i]+"</b></font>";
-		else if(parseInt(varval[i])>90) varval[i]="<font color='orange'><b>"+varval[i]+"</b></font>";
-		else varval[i]="<font color='green'><b>"+varval[i]+"</b></font>";
-		}
+	var varname=["DSL Driver version number:", "Chipset Vendor ID:", "Chipset Vendor version number:", "Vdsl2 Profile:", "Vectoring state:", "Max Downstream Data Rate:", "Max Upstream Data Rate:", "Current Downstream Data Rate:", "Current Upstream Data Rate:", "Line Attenuation (DS / US):", "SNR Margin (DS / US):", "Current Aggregate Tx Power (DS / US):", "Web-GUI core version number:", "Opkg package manager version number:", "Number of packages installed:", "Rootfs partition space used:", "Runlevel boot partition space used:", "Opkg package manager partition space used:"];
+	var varval=[dslver, vendorid, vendorver, profile, vectoring, carrymax[0], carrymax[1], carryb0[0], carryb0[1], attn, snr, pwr, ancver, opkgver, numpack, "@part_/#", "@part_/usr/etc/init.d#", "@part_/usr/lib/opkg#"];
+	var uom=[" dB", " dB", " dBm"];
 	txt+="<tr></tr>";
 	for(i=0;i<3;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
-	if("@wan_traffic_type#"=="ptm") for(i=3;i<5;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
+	if("@h_wan_traffic_type#"=="ptm") for(i=3;i<5;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
 	txt+="<tr><td colspan='2' background='liteblue.gif' height='12'></td></tr>";
-	for(i=5;i<11;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
+	for(i=5;i<9;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
+	for(i=9;i<12;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+uom[i-9]+"</td></tr><tr></tr>";
 	txt+="<tr><td colspan='2' background='liteblue.gif' height='12'></td></tr>";
 		if(opkgfound) {
-		for(i=11;i<varval.length;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
+		for(i=12;i<15;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
+			for(i=15;i<varval.length;i++) {
+			if(parseInt(varval[i])>97) varval[i]="<font color='red'><b>"+varval[i]+"</b></font>";
+			else if(parseInt(varval[i])>90) varval[i]="<font color='orange'><b>"+varval[i]+"</b></font>";
+			else varval[i]="<font color='green'><b>"+varval[i]+"</b></font>";
+			txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
+			}
 		txt+="<tr><td colspan='2' background='liteblue.gif' height='12'></td></tr>";
 		}
 	document.write(txt);
@@ -224,6 +238,8 @@ function readInfo() {
 <input type="hidden" name="opkg_job" value="">
 <input type="hidden" name="opkg_act_name" value="">
 <input type="hidden" name="opkg_act" value="">
+<input type="hidden" name="h_wan_traffic_type" value="@h_wan_traffic_type#">
+<input type="hidden" name="h_anc_upgr_disable" value="@h_anc_upgr_disable#">
 </div>
 </form>
 <script>printHelp();</script>
