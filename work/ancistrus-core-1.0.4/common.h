@@ -1,6 +1,6 @@
 #define LOCK_MAX_PATH		64
 #define LOCK_TIMEOUT		60
-#define ARGNUMMAX		40
+#define ARGNUMMAX		48
 
 /*
  * LOCK

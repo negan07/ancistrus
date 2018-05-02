@@ -153,13 +153,13 @@ else return "dlt2pemv";
 }
 
 int dslctl(char** argv) {
-enum { MOD=0, BITSWAP=1, I24K=9, SNR=14, PROFILE=15, END=17 };
-int fd, i;
+enum { MOD=0, BITSWAP=1, I24K=9, SNR=14, MAXDR=15, PROFILE=17, END=19 };
+int fd, i, maxdrsum;
 char *profile, cmd[DSLCMDBUF]=DSLBIN " configure --lpair i";
 const char 
-*opt[]={ "--mod", "--bitswap", "--sra", "--trellis", "--sesdrop", "--CoMinMgn", "--SOS", "--dynamicD", "--dynamicF", "--i24k", "--monitorTone", "--phyReXmt", "--Ginp", "--TpsTc", "--snr", "--profile", "--us0" }, 
-*nvar[]={ "wan_dsl_mode", "bitswap", "sra", "trellis", "sesdrop", "cominmgn", "sos", "dynamicd", "dynamicf", "i24k", "monitortone", "phyrexmt", "ginp", "tpstc", "snr", "profile", "us0" }, 
-*def[]={ "MMODE", "on", "on", "on", "off", "off", "on", "on", "off", "on", "on", "1", "3", "14", "100", "17a", "on" };
+*opt[]={ "--mod", "--bitswap", "--sra", "--trellis", "--sesdrop", "--CoMinMgn", "--SOS", "--dynamicD", "--dynamicF", "--i24k", "--monitorTone", "--phyReXmt", "--Ginp", "--TpsTc", "--snr", "--maxDataRate", "", "--profile", "--us0" }, 
+*nvar[]={ "wan_dsl_mode", "bitswap", "sra", "trellis", "sesdrop", "cominmgn", "sos", "dynamicd", "dynamicf", "i24k", "monitortone", "phyrexmt", "ginp", "tpstc", "snr", "maxdataratedl", "maxdatarateul", "profile", "us0" }, 
+*def[]={ "MMODE", "on", "on", "on", "off", "off", "on", "on", "off", "on", "on", "1", "3", "14", "100", "0", "0", "17a", "on" };
 
 DBG("dslctl(): cmd is: %s\n", argv[0]);
 	if(argv[1]==NULL || strcmp(argv[1], "configure")) execvp(DSLBIN, argv);		//no parse
@@ -170,7 +170,13 @@ DBG("dslctl(): cmd is: %s\n", argv[0]);
 		SETMODULATIONVAL							//modulation setting
 		for(i=BITSWAP;i<SNR;i++) SETOPTIONVAL					//common setting
 		if(*NV_SGET("anc_snrtweak_enable")=='1') SETSNRVAL			//snr setting
-		if(!strcmp(NV_SGET("wan_traffic_type"), "ptm") && *NV_SGET("anc_dslprofile_enable")=='1') for(i=PROFILE;i<END;i++) SETOPTIONVAL
+			if(!strcmp(NV_SGET("wan_traffic_type"), "ptm")) {		//vdsl settings
+				if(*NV_SGET("anc_maxdataratetweak_enable")=='1') {	//maxdatarate settings
+				maxdrsum=atoi(NV_SDGET(nvar[MAXDR], def[MAXDR]))+atoi(NV_SDGET(nvar[MAXDR+1], def[MAXDR+1]));
+				SETMAXDRVALS
+				}
+			if(*NV_SGET("anc_dslprofile_enable")=='1') for(i=PROFILE;i<END;i++) SETOPTIONVAL	//profile settings
+			}
 		}
 		else if(!strcmp(profile, "broadcom")) snprintf(cmd, sizeof(cmd), "%s configure", DSLBIN);//broadcom setting (xdslctl configure)
 		else {									//netgear settings as default

@@ -26,6 +26,9 @@ function setDefs() {
 	cf.wan_dsl_mode.value="MMODE";
 	if(cf.anc_snrtweak_enable.value=="") cf.anc_snrtweak_enable.checked=false;
 	if(cf.snr.value=="") cf.snr.value="";
+	if(cf.anc_maxdataratetweak_enable.value=="") cf.anc_maxdataratetweak_enable.checked=false;
+	if(cf.maxdataratedl.value=="") cf.maxdataratedl.value="0";
+	if(cf.maxdatarateul.value=="") cf.maxdatarateul.value="0";
 	if(cf.h_bitswap.value=="") cf.bitswap.value="on";
 	if(cf.h_sra.value=="") cf.sra.value="on";
 	if(cf.h_trellis.value=="") cf.trellis.value="on";
@@ -52,11 +55,15 @@ function loadCheck() {
 		notbuttonToDisabled(cf);
 		cf.anc_dslconfprofile.disabled=false;
 		cf.snr.disabled=false;
+		cf.maxdataratedl.disabled=false;
+		cf.maxdatarateul.disabled=false;
 		}
 		else {
 		notbuttonToDisabled(cf);
 		cf.anc_dslconfprofile.disabled=false;
 		cf.snr.disabled=false;
+		cf.maxdataratedl.disabled=false;
+		cf.maxdatarateul.disabled=false;
 		cf.wan_dsl_mode.disabled=false;
 		}
 }
@@ -71,19 +78,23 @@ function dslModeCheck() {
 		}
 }
 
-function vdslCheck() {
-	var cf=document.forms[0];
+function VdslDivSetup(name) {
+	var div_obj=document.getElementById(name);
 
-		if(cf.anc_dslprofile_enable.checked && cf.h_wan_traffic_type.value!="ptm") {
-		cf.anc_dslprofile_enable.checked=false;
-		alert("These settings are effective on VDSL connection only !");
-		return false;
-		}
+	((div_obj!=null && "@h_wan_traffic_type#"=="ptm") ? div_obj.style.display="inline" : div_obj.style.display="none");
+}
+
+function vdslLineSep() {
+
+	if("@h_wan_traffic_type#"!="ptm") return;
+	document.write("<tr><td colspan='2' background='liteblue.gif' height='12'></td></tr>");
 }
 
 function varInit() {
+	var prof=["vdslinfos", "profinfos", "profile_flag", "profile_text", "profile_list", "profile_us0_text", "profile_us0_list", "maxdatarate_flag", "maxdatarate_dl", "maxdatarate_dlval", "maxdatarate_ul", "maxdatarate_ulval"];
 
 	AncdataToVisible(document.forms[0]);
+	for(var i=0;i<prof.length;i++) VdslDivSetup(prof[i]);
 	setDefs();
 	loadCheck();
 }
@@ -98,6 +109,10 @@ function checkData() {
 			if(isNaN(abssnr) || abssnr>136) msg+="SNR Ratio is out of range: -136 ~ 250";
 			}
 			else msg+=checkInt(cf.snr, "SNR Ratio", -136, 250, true);
+		}
+		if(cf.anc_maxdataratetweak_enable.checked || cf.maxdatarateul.value!="" || cf.maxdataratedl.value!="") {
+		msg+=checkInt(cf.maxdataratedl, "Max Data Rate Dwlink", 0, 400000, true);
+		msg+=checkInt(cf.maxdatarateul, "Max Data Rate Uplink", 0, 400000, true);
 		}
 
 	if(msg.length>1) {
@@ -119,10 +134,14 @@ function checkData() {
 <table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
 <input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
 &nbsp;
-<input class="common_bt" type="button" value="Show Line Infos" onClick="this.form.pipe_cmd.value='/usr/sbin/xdslctl info --show';AncstdAction(this.form,'anc_run.htm','anc_dsltweak.htm','pipe','');">
+<input class="common_bt" type="button" value="Show Line Stats" onClick="this.form.pipe_cmd.value='/usr/sbin/xdslctl info --stats';AncstdAction(this.form,'anc_run.htm','anc_dsltweak.htm','pipe','');">
 &nbsp;
-<input class="common_bt" type="button" value="Show Profile Infos" onClick="this.form.pipe_cmd.value='/usr/sbin/xdslctl profile --show';AncstdAction(this.form,'anc_run.htm','anc_dsltweak.htm','pipe','');">
+<div id="vdslinfos"><input class="common_bt" type="button" value="Show VDSL Infos" onClick="this.form.pipe_cmd.value='/usr/sbin/xdslctl info --pbParams';AncstdAction(this.form,'anc_run.htm','anc_dsltweak.htm','pipe','');">
 &nbsp;
+</div>
+<div id="profinfos"><input class="common_bt" type="button" value="Show Profile Infos" onClick="this.form.pipe_cmd.value='/usr/sbin/xdslctl profile --show';AncstdAction(this.form,'anc_run.htm','anc_dsltweak.htm','pipe','');">
+&nbsp;
+</div>
 <input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return checkData()">
 </td></tr></table>
 </div>
@@ -247,9 +266,19 @@ function checkData() {
 	</select>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td nowrap colspan="2"><input type="checkbox" name="anc_dslprofile_enable" value="@h_anc_dslprofile_enable#" onClick="vdslCheck()"><a href="javascript:gotoWiki('Dsl-Tweaking#vdsl-profile');"><b>Turn VDSL Profile Tweak On</b></a></td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#vdsl-profile');"><b>VDSL Profile</b></a></span></td>
-	<td align="right">
+<tr><td nowrap colspan="2"><div id="maxdatarate_flag"><input type="checkbox" name="anc_maxdataratetweak_enable" value="@h_anc_maxdataratetweak_enable#"><a href="javascript:gotoWiki('Dsl-Tweaking#max-data-rate-limiter');"><b>Turn VDSL Data Rate Limiter Tweak On</b></a></div></td></tr>
+<tr><td nowrap><div id="maxdatarate_dl"><a href="javascript:gotoWiki('Dsl-Tweaking#max-data-rate-limiter');"><b>Limit Downlink Data Rate to:</b></a></div></td>
+<td nowrap align="right"><div id="maxdatarate_dlval"><input type="text" class="num" name="maxdataratedl" value="@maxdataratedl#" size=6 maxlength=6>
+&nbsp;<span>Kbps</span></div>
+</td></tr>
+<tr><td nowrap><div id="maxdatarate_ul"><a href="javascript:gotoWiki('Dsl-Tweaking#max-data-rate-limiter');"><b>Limit Uplink Data Rate to:</b></a></div></td>
+<td nowrap align="right"><div id="maxdatarate_ulval"><input type="text" class="num" name="maxdatarateul" value="@maxdatarateul#" size=6 maxlength=6>
+&nbsp;<span>Kbps</span></div>
+</td></tr>
+<script>vdslLineSep()</script>
+<tr><td nowrap colspan="2"><div id="profile_flag"><input type="checkbox" name="anc_dslprofile_enable" value="@h_anc_dslprofile_enable#"><a href="javascript:gotoWiki('Dsl-Tweaking#vdsl-profile');"><b>Turn VDSL Profile Tweak On</b></a></div></td></tr>
+<tr><td align="left"><div id="profile_text"><span><a href="javascript:gotoWiki('Dsl-Tweaking#vdsl-profile');"><b>VDSL Profile</b></a></span></div></td>
+	<td align="right"><div id="profile_list">
 	<select name="profile" onChange="if(this.selectedIndex==8) alert('Warning ! This option requires new dsl driver !\n');" size=1>
 		<option value="8a">8a</option>
 		<option value="8a">8b</option>
@@ -261,15 +290,15 @@ function checkData() {
 		<option value="30a">30a</option>
 		<option value="BrcmPriv1">35b</option>
 	</select>
-	</td>
+	</div></td>
 </tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#vdsl-profile');"><b>US0</b></a></span></td>
-	<td align="right"><select name="us0" size=1>
+<tr><td align="left"><div id="profile_us0_text"><span><a href="javascript:gotoWiki('Dsl-Tweaking#vdsl-profile');"><b>US0</b></a></span></div></td>
+	<td align="right"><div id="profile_us0_list"><select name="us0" size=1>
 		<option value="on">On (DEF)</option>
 		<option value="off">Off</option>
 	</select>
-</td></tr>
-<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</div></td></tr>
+<script>vdslLineSep()</script>
 </table>
 <input type="hidden" name="job" value="save">
 <input type="hidden" name="todo" value="/usr/sbin/xdslctl configure">
@@ -293,6 +322,7 @@ function checkData() {
 <input type="hidden" name="h_ginp" value="@h_ginp#">
 <input type="hidden" name="h_tpstc" value="@h_tpstc#">
 <input type="hidden" name="h_wan_traffic_type" value="@h_wan_traffic_type#">
+<input type="hidden" name="h_anc_maxdataratetweak_enable" value="@h_anc_maxdataratetweak_enable#">
 <input type="hidden" name="h_anc_dslprofile_enable" value="@h_anc_dslprofile_enable#">
 <input type="hidden" name="h_profile" value="@h_profile#">
 <input type="hidden" name="h_us0" value="@h_us0#">
