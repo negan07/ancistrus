@@ -15,41 +15,80 @@
 <script language="javascript" type="text/javascript" src="funcs.js"></script>
 <script language="javascript" type="text/javascript" src="utility.js"></script>
 <script language="javascript" type="text/javascript" src="linux.js"></script>
-</head>
+<script language="javascript" type="text/javascript">
+<!--
+
+function check_maninst() {
+	var cf=document.forms['maninst'];
+	var filename="";
+	var destdir="/tmp/";
+	var a;
+	var IEPlfm = /MSIE [67]/g;
+	var diskprefix = /^.:\\/g;
+
+		if(typeof cf.download.files[0]!='undefined') filename=cf.download.files[0].name;
+		else {
+		alert(getErrorMsgByVar("gsm_msg_bku_no_blank_filename"));
+		return false;
+		}
+		if(IEPlfm.test(navigator.userAgent) && !diskprefix.test(filename)) {
+		alert(getErrorMsgByVar("gsm_msg_upg_inv_file_type")+"ipk");
+		return false;
+		}
+	if(filename.split) a=filename.split(".");
+	else a=cdisplit(filename,".");
+		if((a.length<2) || (a[0]=="") || (a[a.length-1].toLowerCase()!="ipk")) {
+		alert(getErrorMsgByVar("gsm_msg_upg_inv_file_type")+"ipk");
+		return false;
+		}
+
+	if(!confirm("Installing "+filename+" : proceed ?")) return false;
+	cf.pipe_cmd.value="/usr/sbin/opkg install "+destdir+filename;
+	cf.pipe_output.value=cf.pipe_cmd.value;
+	AncstdAction(cf,'anc_run.htm','opkg.htm','pipemp','');
+	return true;
+}
+
+//-->
+</script></head>
 <body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="AncdataToVisible(document.forms[0]);document.forms[0].elements[0].focus();">
-<form name="opkg" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
 <div><a class="page_title" href="javascript:gotoWiki('opkg-package/');">Package Manager</a></div>
 <div id="main" class="main_top_button">
+<form name="opkg" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
 <table border="0" cellpadding="0" cellspacing="3" width="100%">
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" align="center">
-<input type="button" class="long_common_bt" value="Upgrade / Install a Package" onClick="this.form.opkg_job.value='install';this.form.opkg_help.value='upgrade--install-a-package';this.form.opkg_act_name.value='Package Upgrade / Installation';this.form.opkg_act.value='opkglist';AncstdAction(this.form,'opkg_select.htm','opkg.htm','opkg','/usr/sbin/opkg update >/dev/null 2>&1');">
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('opkg-package#upgrade--install-a-package')" tabindex="-1"><b>Upgrade or Install a Package</b></a></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><input type="button" class="long_common_bt" value="Upgrade / Install a Package" onClick="this.form.opkg_job.value='install';this.form.opkg_help.value='upgrade--install-a-package';this.form.opkg_act_name.value='Package Upgrade / Installation';this.form.opkg_act.value='opkglist';AncstdAction(this.form,'opkg_select.htm','opkg.htm','opkg','/usr/sbin/opkg update >/dev/null 2>&1');">
 </td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" align="center">
-<input type="button" class="long_common_bt" value="Force Reinstall a Package" onClick="this.form.opkg_job.value='install --force-reinstall';this.form.opkg_help.value='force-reinstall-a-package';this.form.opkg_act_name.value='Package Force Reinstall';this.form.opkg_act.value='opkglist';AncstdAction(this.form,'opkg_select.htm','opkg.htm','opkg','/usr/sbin/opkg update >/dev/null 2>&1');">
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('opkg-package#force-reinstall-a-package')" tabindex="-1"><b>Force the Reinstallation of a Package</b></a></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><input type="button" class="long_common_bt" value="Force Reinstall a Package" onClick="this.form.opkg_job.value='install --force-reinstall';this.form.opkg_help.value='force-reinstall-a-package';this.form.opkg_act_name.value='Package Force Reinstall';this.form.opkg_act.value='opkglist';AncstdAction(this.form,'opkg_select.htm','opkg.htm','opkg','/usr/sbin/opkg update >/dev/null 2>&1');">
 </td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" align="center">
-<input type="button" class="long_common_bt" value="Remove a Package" onClick="this.form.opkg_job.value='remove';this.form.opkg_help.value='remove-a-package';this.form.opkg_act_name.value='Package Removal';this.form.opkg_act.value='opkgstatus';AncstdAction(this.form,'opkg_select.htm','opkg.htm','opkg_remove','');">
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('opkg-package#remove-a-package')" tabindex="-1"><b>Remove a Package</b></a></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><input type="button" class="long_common_bt" value="Remove a Package" onClick="this.form.opkg_job.value='remove';this.form.opkg_help.value='remove-a-package';this.form.opkg_act_name.value='Package Removal';this.form.opkg_act.value='opkgstatus';AncstdAction(this.form,'opkg_select.htm','opkg.htm','opkg_remove','');">
 </td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" align="center">
-<input type="button" class="long_common_bt" value="Show list of Upgradable Packages" onClick="this.form.opkg_job.value='install';this.form.opkg_help.value='show-list-of-upgradable-packages';this.form.opkg_act_name.value='List of upgradable Packages';this.form.opkg_act.value='opkglistupgr';AncstdAction(this.form,'opkg_select.htm','opkg.htm','opkg','/usr/sbin/opkg update >/dev/null 2>&1 && /usr/sbin/opkg list-upgradable >/tmp/opkg/list-upgradable');">
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('opkg-package#show-list-of-upgradable-packages')" tabindex="-1"><b>Show the list of the Upgradable Packages</b></a></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><input type="button" class="long_common_bt" value="Show Upgradable Packages" onClick="this.form.opkg_job.value='install';this.form.opkg_help.value='show-list-of-upgradable-packages';this.form.opkg_act_name.value='List of upgradable Packages';this.form.opkg_act.value='opkglistupgr';AncstdAction(this.form,'opkg_select.htm','opkg.htm','opkg','/usr/sbin/opkg update >/dev/null 2>&1 && /usr/sbin/opkg list-upgradable >/tmp/opkg/list-upgradable');">
 </td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" align="center">
-<input type="button" class="long_common_bt" value="Upgrade All Installed Packages" onClick="if(confirm('Warning! this action will upgrade all the installed packages to their latest available version: proceed ?')) {this.form.pipe_cmd.value='/usr/sbin/opkg update && /usr/sbin/opkg upgrade';AncstdAction(this.form,'anc_run.htm','opkg.htm','pipe','');}">
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('opkg-package#upgrade--install-a-package')" tabindex="-1"><b>Upgrade all the Installed Packages</b></a></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><input type="button" class="long_common_bt" value="Upgrade all Packages" onClick="if(confirm('Warning! This action will upgrade all the installed packages to their latest available version: proceed ?')) {this.form.pipe_cmd.value='/usr/sbin/opkg update && /usr/sbin/opkg upgrade';AncstdAction(this.form,'anc_run.htm','opkg.htm','pipe','');}">
 </td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" align="center">
-<input type="button" class="long_common_bt" value="Modify Package Manager Config" onClick="this.form.edit_file.value='/usr/etc/opkg.conf';AncstdAction(this.form,'anc_editfile.htm','opkg.htm','edit','');">
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('opkg-package#modify-opkg-config')" tabindex="-1"><b>Modify the Package Manager Configuration</b></a></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><input type="button" class="long_common_bt" value="Edit Package Manager Config" onClick="this.form.edit_file.value='/usr/etc/opkg.conf';AncstdAction(this.form,'anc_editfile.htm','opkg.htm','edit','');">
 </td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" align="center">
-<input type="button" class="long_common_bt" value="Clean Package Manager Cache" onClick="AncstdAction(this.form,'opkg.htm','opkg.htm','opkg','/usr/sbin/opkg clean >/dev/null 2>&1;/usr/sbin/rm -rf /tmp/opkg');">
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('opkg-package#clean-opkg-cache')" tabindex="-1"><b>Clean Package Manager internal Cache</b></a></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><input type="button" class="long_common_bt" value="Clean Package Manager Cache" onClick="AncstdAction(this.form,'opkg.htm','opkg.htm','opkg','/usr/sbin/opkg clean >/dev/null 2>&1;/usr/sbin/rm -rf /tmp/opkg* /tmp/*.ipk');">
 </td></tr>
-<tr></tr><tr></tr><tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('opkg-package#erase-all-package-reference-infos--status')" tabindex="-1"><b>Erase all Package reference Informations</b></a></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><input type="button" class="long_common_bt" value="Erase Package Informations" onClick="if(confirm('Warning! This action will erase all the installed packages references infos & status; no package files will be removed: proceed ?')) AncstdAction(this.form,'opkg.htm','opkg.htm','opkg','/usr/sbin/opkg clean >/dev/null 2>&1;/usr/sbin/rm -rf /usr/lib/opkg/* /tmp/opkg* /tmp/*.ipk');">
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 </table>
 <input type="hidden" name="job" value="">
 <input type="hidden" name="todo" value="">
@@ -62,7 +101,19 @@
 <input type="hidden" name="opkg_act_name" value="">
 <input type="hidden" name="opkg_act" value="">
 <input type="hidden" name="pkg_select" value="">
-</div>
 </form>
+<form name="maninst" method="POST" action="anc.cgi" enctype="multipart/form-data" onSubmit="buttonToDisabled(document.forms[0])">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('opkg-package#manually-install-a-package')" tabindex="-1"><b>Manually Install a Package</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="FILE" name="download" size="40" maxlength="128" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="apply_bt" type="submit" name="install" value="Install" onClick="return check_maninst();"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr></table>
+<input type="hidden" name="job" value="pipemp">
+<input type="hidden" name="todo" value="">
+<input type="hidden" name="next_file" value="anc_run.htm">
+<input type="hidden" name="old_file" value="">
+<input type="hidden" name="pipe_cmd" value="">
+<input type="hidden" name="pipe_output" value="">
+</form></div>
 <script>printHelp();</script>
 </body></html>
