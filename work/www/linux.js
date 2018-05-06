@@ -12,7 +12,7 @@ function radioTable(fObj,radioObj,act_str)
 function AncradioTable(fObj, radioObj, act_str)
 {
 	if (radioSelectedIndex(radioObj)>-1)
-			AncstdAction(fObj, act_str);
+			AncstdAction(fObj, file_str, old_file_str, job_str, act_str);
 	else alert(getErrorMsgByVar("gsm_msg_fw_no_select"));
 }
 
@@ -472,22 +472,21 @@ function notbuttonToDisabled(form_obj) {
 
 /* All things disabled */
 function allToDisabled(form_obj) {
-
 	var form_size=form_obj.elements.length;
+
 	for(var i=0;i<form_size;i++) form_obj.elements[i].disabled=true;
 }
 
 /* All things enabled */
 function allToEnabled(form_obj) {
-
 	var form_size=form_obj.elements.length;
+
 	for(var i=0;i<form_size;i++) form_obj.elements[i].disabled=false;
 }
 
 /* Redirect to wiki page sections */
 function gotoWiki(section) {
 	var wikiurl='https://github.com/negan07/ancistrus/wiki/';
-	
 	var url=wikiurl+section;
 
 	window.open(url);
