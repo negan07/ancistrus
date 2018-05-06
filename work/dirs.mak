@@ -85,7 +85,7 @@ DIRLIST				+= $(NETPERF)
 TARLIST				+= $(NETPERF)
 # NETWORK TEST
 NETWORKTEST_NAME		:= network-test
-VER_$(NETWORKTEST_NAME)		:= 0.1.0-270
+VER_$(NETWORKTEST_NAME)		:= 0.3.0-270
 NETWORKTEST			:= $(NETWORKTEST_NAME)-$(VER_$(NETWORKTEST_NAME))
 NAME_$(NETWORKTEST)		:= $(NETWORKTEST_NAME)$(DBG)
 SUBVER_$(NETWORKTEST)		:= 
@@ -94,10 +94,10 @@ DL_$(NETWORKTEST)		:= void
 TAR_$(NETWORKTEST)		:= void
 HOME_$(NETWORKTEST)		:= https://github.com/richb-hanover/CeroWrtScripts
 LIC_$(NETWORKTEST)		:= GPLv2
-SEC_$(NETWORKTEST)		:= base
+SEC_$(NETWORKTEST)		:= net
 PRIO_$(NETWORKTEST)		:= optional
 DEP_$(NETWORKTEST)		:= 
-DESC_$(NETWORKTEST)		:= Enhanced network stress & speed test scripts based on netperf
+DESC_$(NETWORKTEST)		:= Enhanced network speed & stress test script based on netperf
 # XDSL DRIVER ORIG
 XDSL_042N_D26B_NAME		:= xdsl-driver-orig
 VER_$(XDSL_042N_D26B_NAME)	:= 042n.d26b
@@ -374,6 +374,7 @@ THIRDPARTY			+= $(OPKG)
 THIRDPARTY			+= $(SMONTOOLS)
 THIRDPARTY			+= $(OPEN_SSH)
 THIRDPARTY			+= $(MINI_SNMPD)
+# EXCLUDED FROM MONOLITHIC
 ifndef MONOLITHIC
 BUILTIN				+= $(XDSL_042N_D26B)
 BUILTIN				+= $(XDSL_042U_D26O)
