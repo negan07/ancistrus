@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+function runEdit() {
+	var cf=document.forms[0];
+	var msg="";
+
+	msg+=printable_ch_chk(cf.absfilename.value);
+	if(cf.absfilename.value[0]!='/') msg+="File name must have absolute path\n";
+		if(msg.length>1) {
+		alert(msg);
+		return false;
+		}
+
+	cf.edit_file.value=cf.absfilename.value;
+	if(!confirm("Warning! Editing a binary file or doing an incorrect file modification can bring to system failure: proceed ?")) return false;
+	AncstdAction(cf,'anc_editfile.htm','anc_utils.htm','edit','');
+	return true;
+}
+
+function check_restore() {
+	var cf=document.forms['nvramrestore'];
+	var filename="";
+
+		if(typeof cf.download.files[0]!='undefined') filename=cf.download.files[0].name;
+		else {
+		alert(getErrorMsgByVar("gsm_msg_bku_no_blank_filename"));
+		return false;
+		}
+		if(filename!="nvram") {
+		alert("Invalid file name\nFile must be named \"nvram\"\n");
+		return false;
+		}
+	if(!confirm(getErrorMsgByVar("gsm_msg_bku_cfm_restore"))) return false;
+	return true;
+}
+
+//-->
+</script></head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="document.forms[0].elements[0].focus();">
+<div><a class="page_title" href="javascript:gotoWiki('Utilities/');">Utilities</a></div>
+<div class="fix_button"><table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)"></td></tr></table></div>
+<div id="main" class="main_top_button">
+<form name="utils" method="POST" action="anc.cgi" onSubmit="return false">
+<table border="0" cellpadding="0" cellspacing="3" width="100%"><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><span><a href="javascript:gotoWiki('Utilities#router-infos');"><b>Router Infos</b></a></span></td></tr>
+<tr><td colspan="2" align="center"><select name="infocmd" size=1>
+	<option value="/bin/ps">Process list (ps)</option>
+	<option value="/bin/top -n 1 -b">CPU usage task list (top)</option>
+	<option value="/bin/cat /proc/meminfo">RAM Memory Usage (cat /proc/meminfo)</option>
+	<option value="/bin/dmesg">Kernel Log (dmesg)</option>
+	<option value="/bin/cat /proc/net/nf_conntrack">Conntracks (cat /proc/net/nf_conntrack)</option>
+	<option value="/bin/cat /proc/cnapt_serv">Napt Rules (cat /proc/cnapt_serv)</option>
+	<option value="/bin/nvram show">Settings (nvram show)</option>
+</select></td></tr>
+<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Show" onclick="this.form.pipe_cmd.value=infocmd.value;AncstdAction(this.form,'anc_run.htm','anc_utils.htm','pipe','');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Utilities#file-editing')" tabindex="-1"><b>Edit a File</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="text" name="absfilename" size="40" maxlength="128" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Edit File" onClick="runEdit()"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Utilities#download-nvram-settings')" tabindex="-1"><b>Download Nvram Settings</b></a></td></tr>
+<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Download" onclick="window.location.href='anc.cgi?gen_file=nvram&next_file=anc_utils.htm&job=upload';"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="">
+<input type="hidden" name="todo" value="">
+<input type="hidden" name="next_file" value="anc_utils.htm">
+<input type="hidden" name="old_file" value="">
+<input type="hidden" name="edit_file" value="">
+<input type="hidden" name="pipe_cmd" value="">
+</form>
+<form name="nvramrestore" method="POST" action="anc.cgi" enctype="multipart/form-data" onSubmit="buttonToDisabled(document.forms[0])">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Utilities#restore-nvram-settings')" tabindex="-1"><b>Restore Nvram Settings</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="FILE" name="download" size="40" maxlength="128" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="apply_bt" type="submit" name="nvram" value="Restore" onClick="return check_restore();"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr></table>
+<input type="hidden" name="job" value="nvram">
+<input type="hidden" name="todo" value="">
+<input type="hidden" name="next_file" value="anc_utils.htm">
+</form></div>
+<script>printHelp();</script>
+</body></html>
