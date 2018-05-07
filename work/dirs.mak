@@ -143,21 +143,6 @@ SEC_$(QOS_NG)			:= base
 PRIO_$(QOS_NG)			:= standard
 DEP_$(QOS_NG)			:= 
 DESC_$(QOS_NG)			:= Quality Of Service tool from Netgear firmware 36_42n
-# QOS SQM OLDLEGACY
-QOS_SQM_OLD_NAME		:= qos-sqm-oldlegacy
-VER_$(QOS_SQM_OLD_NAME)		:= 0.1.1
-QOS_SQM_OLD			:= $(QOS_SQM_OLD_NAME)-$(VER_$(QOS_SQM_OLD_NAME))
-NAME_$(QOS_SQM_OLD)		:= $(QOS_SQM_OLD_NAME)$(DBG)
-SUBVER_$(QOS_SQM_OLD)		:= 
-VER_$(QOS_SQM_OLD)		:= $(VER_$(QOS_SQM_OLD_NAME))$(SUBVER_$(QOS_SQM_OLD))
-DL_$(QOS_SQM_OLD)		:= void
-TAR_$(QOS_SQM_OLD)		:= void
-HOME_$(QOS_SQM_OLD)		:= https://github.com/tohojo/sqm-scripts
-LIC_$(QOS_SQM_OLD)		:= GPLv2
-SEC_$(QOS_SQM_OLD)		:= legacy
-PRIO_$(QOS_SQM_OLD)		:= standard
-DEP_$(QOS_SQM_OLD)		:= $(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
-DESC_$(QOS_SQM_OLD)		:= Quality Of Service CeroWrt old legacy script tool
 # QOS SQM
 QOS_SQM_NAME			:= qos-sqm
 VER_$(QOS_SQM_NAME)		:= 1.2.0-13.027
@@ -379,7 +364,6 @@ ifndef MONOLITHIC
 BUILTIN				+= $(XDSL_042N_D26B)
 BUILTIN				+= $(XDSL_042U_D26O)
 THIRDPARTY			+= $(QOS_NG)
-THIRDPARTY			+= $(QOS_SQM_OLD)
 endif
 # SUM OF THE ABOVES
 SUBDIRS				:=
