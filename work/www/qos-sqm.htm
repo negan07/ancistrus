@@ -23,7 +23,9 @@ function setDefs() {
 
 	if(cf.qos_enable.value=="") cf.qos_enable.checked=false;
 	if(cf.qos_uplink_rate.value=="") cf.qos_uplink_rate.value="512";
-	if(cf.qos_dwlink_rate.value=="") cf.qos_dwlink_rate.value="";
+	if(cf.qos_rate_unit.value=="") cf.qos_rate_unit.value="Kbps";
+	if(cf.qos_dwlink_rate.value=="") cf.qos_dwlink_rate.value="0";
+	if(cf.qos_rate_unit_dw.value=="") cf.qos_rate_unit_dw.value="Kbps";
 		if(cf.h_qos_llayer.value=="") {
 		if(cf.h_wan_traffic_type.value=="ptm") cf.qos_llayer.value="ethernet";
 		else if(cf.h_wan_traffic_type.value=="atm") cf.qos_llayer.value="atm";
@@ -81,12 +83,28 @@ function varInit() {
 	loadCheck();
 }
 
+function rateUlChange() {
+	var cf=document.forms[0];
+
+	if(cf.qos_uplink_rate.value=="") cf.qos_uplink_rate.value="0";
+	else if(cf.qos_rate_unit.value=="Mbps") cf.qos_uplink_rate.value=Math.floor(parseInt(cf.qos_uplink_rate.value)/1024);
+	else cf.qos_uplink_rate.value=Math.floor(parseInt(cf.qos_uplink_rate.value)*1024);
+}
+
+function rateDlChange() {
+	var cf=document.forms[0];
+
+	if(cf.qos_dwlink_rate.value=="") cf.qos_dwlink_rate.value="0";
+	else if(cf.qos_rate_unit_dw.value=="Mbps") cf.qos_dwlink_rate.value=Math.floor(parseInt(cf.qos_dwlink_rate.value)/1024);
+	else cf.qos_dwlink_rate.value=Math.floor(parseInt(cf.qos_dwlink_rate.value)*1024);
+}
+
 function checkData() {
 	var cf=document.forms[0];
 	var msg="";
 
-	msg+=checkBW(cf.qos_uplink_rate, "Uplink bandwidth", 0, "Kbps", false);
-	msg+=checkBW(cf.qos_dwlink_rate, "Downlink bandwidth", 0, "Kbps", false);
+	msg+=checkBW(cf.qos_uplink_rate, "Uplink bandwidth", 0, cf.qos_rate_unit.value, true);
+	msg+=checkBW(cf.qos_dwlink_rate, "Downlink bandwidth", 0, cf.qos_rate_unit_dw.value, true);
 		if(cf.qos_script.value!="") {
 		if(cf.qos_script.value.indexOf(".sqm")<0) msg+="Invalid qos script name: it must have \".sqm\" extension\n";
 		if(!checkInvalidChars(cf.qos_script.value, invalid_folder_char)) msg+="Invalid qos script name: characters not allowed\n";
@@ -120,11 +138,17 @@ function checkData() {
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td nowrap><a href="javascript:gotoWiki('qos-sqm-package#qos_uplink_rate');"><b>Uplink Bandwidth</b></a></td>
 <td nowrap align="right"><input type="text" class="num" name="qos_uplink_rate" value="@qos_uplink_rate#" size=6 maxlength=6>
-&nbsp;<span>Kbps</span>
+&nbsp;	<select name="qos_rate_unit" onChange="rateUlChange()" size=1>
+		<option value="Kbps">Kbps</option>
+		<option value="Mbps">Mbps</option>
+	</select>
 </td></tr>
 <tr><td nowrap><a href="javascript:gotoWiki('qos-sqm-package#qos_dwlink_rate');"><b>Downlink Bandwidth</b></a></td>
 <td nowrap align="right"><input type="text" class="num" name="qos_dwlink_rate" value="@qos_dwlink_rate#" size=6 maxlength=6>
-&nbsp;<span>Kbps</span>
+&nbsp;	<select name="qos_rate_unit_dw" onChange="rateDlChange()" size=1>
+		<option value="Kbps">Kbps</option>
+		<option value="Mbps">Mbps</option>
+	</select>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_llayer');"><b>Dsl Link Layer</b></a></span></td>
@@ -197,6 +221,8 @@ function checkData() {
 <input type="hidden" name="old_file" value="">
 <input type="hidden" name="pipe_cmd" value="">
 <input type="hidden" name="h_qos_enable" value="@h_qos_enable#">
+<input type="hidden" name="h_qos_rate_unit" value="@h_qos_rate_unit#">
+<input type="hidden" name="h_qos_rate_unit_dw" value="@h_qos_rate_unit_dw#">
 <input type="hidden" name="h_qos_llayer" value="@h_qos_llayer#">
 <input type="hidden" name="h_qos_disc" value="@h_qos_disc#">
 <input type="hidden" name="h_qos_shaper" value="@h_qos_shaper#">

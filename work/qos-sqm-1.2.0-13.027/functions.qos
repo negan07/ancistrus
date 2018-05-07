@@ -102,7 +102,7 @@ do_modules() {
 }
 
 undo_modules() {
-    for MOD in $ALL_MODULES; do
+    for MOD in $ALL_UNDO_MODULES; do
         [ -d /sys/module/${MOD} ] && ${RMMOD} ${LIBDIR}/${MOD}.ko 2>>${OUTPUT_TARGET}
     done
 }
@@ -115,6 +115,8 @@ write_defaults_vars_to_state_file() {
     shift
     #write var=val couples to $filename
     write_state_file ${filename} "$@"
+    #add undo modules
+    echo "ALL_UNDO_MODULES=\"${ALL_UNDO_MODULES}\"" >> ${filename}
     #add included modules
     echo "ALL_MODULES=\"${ALL_MODULES}\"" >> ${filename}
     #add check modules

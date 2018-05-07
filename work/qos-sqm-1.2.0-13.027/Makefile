@@ -2,7 +2,7 @@ include ../Rules.mak
 
 QOS_KO			:= act_ipt.ko cls_flow.ko sch_fq_codel.ko sch_hfsc.ko
 STARTUP			:= rc_qos
-WEB			:= ../www/qos-sqm.htm
+WEB			:= ../www/$(QOS_SQM_NAME).htm
 
 all:
 	@echo "Nothing to do: run 'make install' to install."

@@ -17,7 +17,7 @@
 # License: GPLv2
 #
 #
-# Startup rc for qos-sqm-scripts
+# Startup rc for qos-sqm
 #
 # Usage: $0 < start restart startforced restartforced stop show stats version > (< debug_mode >) (< verbose_mode >)
 #
@@ -71,6 +71,13 @@ VAL=$(eval echo '$'${SET})
 	fi
 shift
 done
+
+# Convert ul/dw rate values from mbps to kbps to mantain compatibility
+[ "${UP_RATE_UNIT}" = "Mbps" ] && UPLINK=$(( ${UPLINK} * 1024 )) && UP_RATE_UNIT="Kbps"
+[ "${DW_RATE_UNIT}" = "Mbps" ] && DOWNLINK=$(( ${DOWNLINK} * 1024 )) && DW_RATE_UNIT="Kbps"
+
+# These are the modules that undo_modules() will attempt to unload
+[ -z "$ALL_UNDO_MODULES" ] && ALL_UNDO_MODULES="sch_$SHAPER cls_flow sch_$QDISC act_ipt sc_track_ftp sc_priority"
 
 # These are the modules that do_modules() will attempt to load
 [ -z "$ALL_MODULES" ] && ALL_MODULES="act_ipt sch_$QDISC cls_flow sch_$SHAPER"
@@ -241,12 +248,26 @@ qos_enable
 (Default: 0).
 
 qos_uplink_rate
-Real upload bandwidth in kbps (no bearer, no max): it can be discovered with 'speedtest' or with network-test package 'betterspeedtest.sh' script. It is the most important parameter, bad setting may bring to qos failure.
+Real upload bandwidth (no bearer, no max): it can be discovered with 'speedtest' or with network-test package 'betterspeedtest.sh' script. It is the most important parameter, bad setting may bring to qos failure.
 (Default: 512).
 
+qos_rate_unit
+Upload rate unit. Note that Mbps=1024*Kbps.
+Options
+'Kbps': kilobits per second.
+'Mbps': megabits per second.
+(Default: Kbps).
+
 qos_dwlink_rate
-Real download bandwidth in kbps: as before. 
+Real download bandwidth: as before.
 (Default: 0 = download qos disabled).
+
+qos_rate_unit_dw
+Download rate unit. Note that Mbps=1024*Kbps.
+Options
+'Kbps': kilobits per second.
+'Mbps': megabits per second.
+(Default: Kbps).
 
 qos_llayer
 Adsl link layer.
