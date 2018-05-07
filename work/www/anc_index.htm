@@ -37,6 +37,13 @@ function opkgMenuSet() {
 	document.write(txt);
 }
 
+function coreMenuSet() {
+	var txt="", pagename=["dsltweak", "inhibit", "sched", "pers", "utils"], menuname=["DSL Tweak", "Service Inhibitions", "Schedule Events", "Personal Instructions", "Utilities"];
+
+	for(var i=0;i<pagename.length;i++) txt+="<dt id='"+pagename[i]+"' class='sub_back'><a target='formframe' onclick='linksetup(\""+pagename[i]+"\", \"core\")'><b><span>"+menuname[i]+"</span></b></a></dt>";
+	document.write(txt);
+}
+
 function linksetup(name, type) {
 	var cgilink='anc.cgi?next_file=';
 
@@ -51,12 +58,12 @@ function linksetup(name, type) {
 }
 
 function AncLinks() {
-	var links=["wiki", "", "projects/1", "issues", "releases"], txt=["Wiki Board", "View on GitHub", "State of Art", "Issue Report", "Monolithic Firmware"], out="";
+	var txt="", lnk=["wiki", "", "projects/1", "issues", "releases"], namelnk=["Wiki Board", "View on GitHub", "State of Art", "Issue Report", "Monolithic Firmware"];
 
-	for(var i=0;i<5;i++) out+='<a target="_blank" href="https://github.com/negan07/ancistrus/'+links[i]+'">'+txt[i]+'</a> | ';
-	out+='<a target="_blank" href="https://raw.githubusercontent.com/negan07/ancistrus/master/DISCLAIMER">DISCLAIMER</a> | ';
-	out+='<a target="_blank" href="./GPL_rev1.htm">GPL</a>';
-	document.write(out);
+	for(var i=0;i<lnk.length;i++) txt+='<a target="_blank" href="https://github.com/negan07/ancistrus/'+lnk[i]+'">'+namelnk[i]+'</a> | ';
+	txt+='<a target="_blank" href="https://raw.githubusercontent.com/negan07/ancistrus/master/DISCLAIMER">DISCLAIMER</a> | ';
+	txt+='<a target="_blank" href="./GPL_rev1.htm">GPL</a>';
+	document.write(txt);
 }
 
 function focus_stat(obj, tf) {
@@ -80,10 +87,7 @@ function focus_stat(obj, tf) {
 <div id="setup_bt" class="advanced_white_close_button" onclick="open_or_close_sub('setup'); setup_open++;"><b><span>Core Setup</span></b></div>
 	<div id="setup_sub" class="sub_men" style="display: none">
 	<dl>
-		<dt id="dsltweak" class="sub_back"><a target="formframe" onclick="linksetup('dsltweak', 'core')"><b><span>DSL Tweak</span></b></a></dt>
-		<dt id="inhibit" class="sub_back"><a target="formframe" onclick="linksetup('inhibit', 'core')"><b><span>Service Inhibitions</span></b></a></dt>
-		<dt id="sched" class="sub_back"><a target="formframe" onclick="linksetup('sched', 'core')"><b><span>Schedule Events</span></b></a></dt>
-		<dt id="pers" class="sub_back"><a target="formframe" onclick="linksetup('pers', 'core')"><b><span>Personal Instructions</span></b></a></dt>
+		<script>coreMenuSet()</script>
 	</dl>
 	</div>
 	<div id="admin_bt" class="advanced_white_close_button" onclick="open_or_close_sub('admin'); admin_open++;"><b><span>Management</span></b></div>
