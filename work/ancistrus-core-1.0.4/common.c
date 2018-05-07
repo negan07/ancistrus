@@ -84,7 +84,7 @@ char c;
 		if((pid=fork())<0) exit(1);							//fork error
 	        else if(pid>0) {								//parent thread
 		close(fd[1]);									//close output side of pipe
-		while(read(fd[0], &c, 1)) TYPECH(c)						//read from the pipe and write to stdout
+		while(read(fd[0], &c, 1)) TYPECH(c);						//read from the pipe and write to stdout
 		err=0;
 		}
 		else {										//child thread

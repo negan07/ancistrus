@@ -1,7 +1,10 @@
 #define HEADER				"Content-type: text/html; charset=utf-8\n\n"		//html header
 //#define HEADER			"Content-type: text/html; charset=iso-8859-1\n\n"
 //#define HEADER			"Content-type: text/html\n\n"
-#define CONTENT_TYPE			"application/x-www-form-urlencoded"			//content type fixed
+
+#define URLENC_TYPE			"application/x-www-form-urlencoded"			//urlencoded content type (default)
+#define MP_CONTENTDISP			"Content-Disposition: form-data; name=\""		//multipart url var fetch tag
+#define EOV				"\r\n\r\n"						//multipart url end of var tag
 
 #ifdef DEBUG
 #define CGIDBG(format, ...)		fprintf(FPTTYP, format, ##__VA_ARGS__)			//console format output message

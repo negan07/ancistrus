@@ -58,13 +58,13 @@ return size;											//return new parsed query size
 static int parsequerypost(char **query, int size) {
 char c, hex[2], *e;
 
-if(!size || strcmp(getenv("CONTENT_TYPE"), CONTENT_TYPE)) return 0;				//size & content type check
+if(!size) return 0;										//size check (content type checked by caller)
 CGIDBG("parsequerypost(): unparsed query length: %d\nparsequerypost(): ", size);
 SMALLOCSTR(*query, (size+=2)) return 0;								//allocate memory for parsed query
-	for(e=*query;read(0, &c, 1);e++) {							//read each single query character from stdin
+	for(e=*query;READCH(c);e++) {								//read each single query character from stdin
 	CGIDBG("%c", c);
 		if(c == '%') {									//hex-encoded char founded
-		read(0, hex, sizeof(hex));							//read hex code from stdin
+		READ(hex);									//read hex code from stdin
 		CGIDBG("%s", hex);
 		*e=QUERYFORMATCONV;								//format hex code conversion
 		size-=2;									//final size 2 chars less because of conversion
@@ -80,11 +80,73 @@ return size;											//return new parsed query size
 }
 
 /*
+ * QRAWSTDINGET
+ * Obtain query var from stdin multipart/form data.
+ * Input: variable name, value buffer (caller must take care of buffer allocation, if buf NULL no val stored).
+ * Return: '0' on success, '2' on NULL/void var, '3' on var overflow, '4' on val overflow, '5' on var not found.
+ */
+static int qrawstdinget(const char *var, char *val) {
+const char *s;
+char c;
+unsigned int i=0;
+
+	CGIDBG("qrawstdinget(): var: %s\n", var);
+	if(var==NULL || !*var) return 2;
+	else if(strlen(var)>=2*VARBUF) return 3;
+	for(s=var;READCH(c);) {									//find var data begin tag
+	if(c==*s) s++;
+	else s=var;										//tag not found: reset counter
+		if(*s=='\0') {									//tag found
+		if(val==NULL) return 0;								//no var fill
+		for(i=0;READCH(c) && c!=LF_SYMBOL && c!=DQUOTE_SYMBOL && i<2*VARBUF;i++) val[i]=c;
+		if(i>=2*VARBUF) return 4;
+		val[i]='\0';
+		CGIDBG("qrawstdinget(): val: %s\n", val);
+		return 0;									//var filled
+		}
+	}
+return 5;											//var not found
+}
+
+/*
+ * POSTQUERYFILECONTENT
+ * POST multipart/form data method downloading file from stdin and writing into /tmp/ dir.
+ * Input: void (stdin).
+ * Return: '0' on success, '1' on file open error, '2' on NULL/void fetching var, '3' on var overflow, '4' on val overflow, '5' on missing var.
+ */
+static int postqueryfilecontent(void) {
+char c, bounds[2*VARBUF]="\r\n", bounde[2*VARBUF], filename[2*VARBUF+VARBUF/4]="/tmp/";
+int fd, err;
+unsigned int i, j=2;
+
+i=strlen(filename);
+while(READCH(c) && c!=LF_SYMBOL) bounds[j++]=c;							//fetch boundary tag
+CGIDBG("postqueryfilecontent(): boundary: %s\n", bounds);
+if((err=qrawstdinget(MP_CONTENTDISP "download\"; filename=\"", &filename[i]))) return err;	//fetch filename:'file' name must be 'download'
+CGIDBG("postqueryfilecontent(): filename: %s\n", filename);
+if((err=qrawstdinget(EOV, NULL))) return err;							//fetch file data begin tag 'LFCRLFCR'
+SFDAOPEN(fd, filename, O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) return 1;//open/create file with attr default: 0755
+	for(i=0;READCH(c);) {									//write file data
+	CGIDBG("%c", c);
+		if(c==bounds[i]) bounde[i++]=c;							//search for boundary (file end)
+		else {										//boundary not found: reset counter
+		if(i) write(fd, bounde, i);							//if bound not found write prev stored data
+		write(fd, &c, 1);
+		i=0;
+		}
+	if(i==j) break;										//exit loop on boundary match
+	}
+close(fd);
+CGIDBG("\n");
+return err;
+}
+
+/*
  * READQUERY
  * Obtain request method & query from http daemon env vars: then parse and tokenize query.
  * Resultant query as '/tmp/query' file with the same structure of '/tmp/nvram' file.
  * Input: void.
- * Return: 'GET/POST' ('0/1') & '/tmp/query' file on success, '2' on no method, '3' on invalid method, '4' on parse/load error & no query file.
+ * Return: 'GET/POST/POSTMP' ('0/1/2') & '/tmp/query' file on success, '3' no method, '4' invalid method, '5' parse/load error & no query file.
  */
 static int readquery(void) {
 const char *methodstr;
@@ -93,13 +155,18 @@ int size;
 
 methodstr=getenv("REQUEST_METHOD");								//obtain method string from env variable
 CGIDBG("\nreadquery(): request method: %s\n", methodstr);
-if(methodstr == NULL) return 2;									//not running through a web server
-else if(!strcmp(methodstr, "GET"))								//'0' <==> GET
-{if((size=parsequeryget(&query, getenv("QUERY_STRING"))) && !qram_load(query, size)) return 0;}
-else if(!strcmp(methodstr, "POST"))								//'1' <==> POST
-{if((size=parsequerypost(&query, atoi(getenv("CONTENT_LENGTH")))) && !qram_load(query, size)) return 1;}
-else return 3;											//invalid form method
-return 4;											//bad parsing error
+	if(methodstr == NULL) return 3;								//not running through a web server
+	else if(!strcmp(methodstr, "GET")) {							//'0' <==> GET
+	if((size=parsequeryget(&query, getenv("QUERY_STRING"))) && !qram_load(query, size)) return 0;
+	}
+	else if(!strcmp(methodstr, "POST")) {							//'1' <==> POST
+		if(!strcmp(getenv("CONTENT_TYPE"), URLENC_TYPE)) {
+		if((size=parsequerypost(&query, atoi(getenv("CONTENT_LENGTH")))) && !qram_load(query, size)) return 1;
+		}
+		else if(!(size=postqueryfilecontent())) return 2;				//'2' <==> POSTMP
+	}
+	else return 4;										//invalid/unrecognized form method
+return 5;											//bad parsing error
 }
 
 /*
@@ -127,7 +194,7 @@ return 0;
  */
 static int addjs(const char *var) {
 if(var==NULL || !*var) return 1;
-TYPE("<script>location.href='")TYPE(var)TYPE("';AncdataToVisible(document.forms[0]);</script>")
+TYPE("<script>location.href='");TYPE(var);TYPE("';AncdataToVisible(document.forms[0]);</script>");
 return 0;
 }
 
@@ -141,7 +208,7 @@ static int getnvlist(char *list) {
 char *s, *s_list;
 
 if(list==NULL || !*list) return 1;
-TOKENIZE(list, "\1", s_list) {TYPE("<option value=\"")TYPE(s)TYPE("\">")TYPE(s)TYPE("</option>")}//chop div separator & create options
+TOKENIZE(list, "\1", s_list) {TYPE("<option value=\"");TYPE(s);TYPE("\">");TYPE(s);TYPE("</option>");}//chop div separator & create options
 return 0;
 }
 
@@ -163,12 +230,12 @@ if(nvar==NULL || !*nvar) return 1;
 	else if(!strncmp(nvar, "part_", 5)) {							//flash partition for % used space
 	partperc(nvar+5, perc);
 	CGIDBG("getnvar():      perc  %s\n", perc);
-	TYPE(perc)
+	TYPE(perc);
 	}
 	else {											//normal variable
 	val=NV_SGET(nvar);
 	CGIDBG("getnvar():      val   %s\n", val);
-	TYPE(val)
+	TYPE(val);
 	}
 return 0;
 }
@@ -192,7 +259,7 @@ if(raw==NULL) return 15;									//raw array cannot be null
 	CGIDBG("fetchformvar(): raw   %s\n", raw);
 	}
 	else {											//each '@' must be followed by '#'
-	CGIDBG("fetchformvar(): %s webpage malformed\n", QSGET("next_file"));
+	CGIDBG("fetchformvar(): webpage malformed\n");
 	return 20;
 	}
 	if(nvar!=NULL) {									//fill name of nvram var skipping the raw tags
@@ -205,6 +272,29 @@ return 0;
 }
 
 /*
+ * FETCHFORMMPVAR
+ * Fetch variables from a web multipart/form.
+ * Input: raw var (mandatory), nvram var.
+ * Return: '0' on success, '1' on pipe() error, '2' on NULL/void var, '3' on var ovflow, '4' on val ovflow, '5' on miss var, '15' on miss raw.
+ */
+static int fetchformmpvar(const char *raw, const char *nvar) {
+char buf[2*VARBUF];
+int err=0;
+
+if(raw==NULL) return 15;									//raw array cannot be null
+	if(!strcmp(raw, "pipe_cmd")) {								//retrieve pipe_cmd to show refresh gui button
+	if((err=qrawstdinget(MP_CONTENTDISP "pipe_cmd\"" EOV, buf))) return err;
+	TYPE(buf);
+	}
+	else if(!strcmp(raw, "pipe_output")) {							//execute pipe command
+	if((err=qrawstdinget(MP_CONTENTDISP "pipe_output\"" EOV, buf))) return err;
+	if((err=runpipe(buf))) return err;
+	}
+	else getnvar(nvar);
+return err;
+}
+
+/*
  * POPULATEPAGE
  * Populate webpage.
  * Preliminarly run a system() cmd if needed before printing page, then print page, then execute some instructions if needed
@@ -212,7 +302,7 @@ return 0;
  * Return: '0' on success, '1' on pipe()/system() error, '10' on open() error, '15' on missing raw string, '20' on malformed webpage content.
  */
 static int populatepage(const int fd, const char *job, const char *todo) {
-enum { ADD=0, DELETE=1};
+enum { ADD=0, DELETE=1 };
 const char *val;
 char c, raw[VARBUF], nvar[VARBUF];
 int fde, err;
@@ -225,7 +315,7 @@ if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *
 			else if(!strcmp(job, "save")) {						//### POST METHOD - SAVE ###
 			if(*(val=QSGET(raw))!='@') NV_SET(nvar, val);				//if not unassigned set value to nvram
 			CGIDBG("populatepage(): ----------------------------------------> anc nvram set %s \"%s\"\n", nvar, val);
-			TYPE(val)								//refresh webpage with queryval in place of raw
+			TYPE(val);								//refresh webpage with queryval in place of raw
 			}
 			else if(!strcmp(job, "add") || !strcmp(job, "del")) {			//### ADD/DELETE ###
 			val=QSGET(job);
@@ -239,18 +329,19 @@ if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *
 			}
 			else if(!strcmp(job, "edit") && !strcmp(raw, "file_content")) {		//### EDIT FILE ###
 			SFDOPEN(fde, QSGET("edit_file"), O_RDONLY) return 10;
-			while(read(fde, &c, 1)) TYPECH(c)					//read each ch from file then stdout it
+			while(read(fde, &c, 1)) TYPECH(c);					//read each ch from file then stdout it
 			close(fde);
 			}
-			else if(!strcmp(job, "pipe") && !strcmp(raw, "pipe_output") && runpipe(QSGET("pipe_cmd"))) return err;	//### PIPE ###
+			else if(!strcmp(job, "pipe") && !strcmp(raw, "pipe_output") && (err=runpipe(QSGET("pipe_cmd")))) return err;//### PIPE
+			else if(!strcmp(job, "pipemp") && (err=fetchformmpvar(raw, nvar))) return err;			//### PIPEMULTIPART ###
 			else {									//load normal var
 			val=QSGET(raw);
-			TYPE(val)
+			TYPE(val);
 			}
 		}
-		else TYPECH(c)									//write normal char
+		else TYPECH(c);									//write normal char
 	}
-if(!strcmp(job, "save") || !strcmp(job, "add") || !strcmp(job, "del") || !strcmp(job, "clear")) nvram_commit();	//store settings into flash
+if(!strcmp(job, "save") || !strcmp(job, "add") || !strcmp(job, "del") || !strcmp(job, "clear") || !strcmp(job, "nvram")) nvram_commit();
 else if(!strcmp(job, "upload") && (err=addjs(QSGET("gen_file")))) return err;			//append javascript to page on upload job
 return 0;
 }
@@ -276,24 +367,42 @@ return 0;
 }
 
 int cgi(void) {
-enum { GET=0, POST };										//GET/POST method flag identifiers
-char *job, *todo;
+enum { GET=0, POST, POSTMP };									//method flag identifiers
+enum { JOB=0, TODO, NEXT_FILE };								//qvars identifiers
+typedef struct {
+const char *name;
+char *val;
+const char *mpname;
+char mpval[2*VARBUF];
+} qvar;
+qvar qvars[]={ { "job", NULL, MP_CONTENTDISP "job\"" EOV, "" }, { "todo", NULL, MP_CONTENTDISP "todo\"" EOV, "" }, { "next_file", NULL, MP_CONTENTDISP "next_file\"" EOV, "" } };
 int method, err, fd;
 
-TYPE(HEADER)											//write html header on stdout for first
+TYPE(HEADER);											//write html header on stdout for first
 
 #ifdef DEBUG
-SFPOPEN(FPTTYP, "/dev/ttyp0", "w") SFPOPEN(FPTTYP, "/dev/ttyp1", "w") TYPE("\ncgi(): tty console debug not open\n")
+SFPOPEN(FPTTYP, "/dev/ttyp0", "w") SFPOPEN(FPTTYP, "/dev/ttyp1", "w") TYPE("\ncgi(): tty console debug not open\n");
 #endif
 
-if((method=readquery())>1) return method;							//obtain GET/POST method & query file
-job=QSGET("job");										//retrieve the job/todo actions
-todo=QSGET("todo");
-CGIDBG("cgi(): job: \"%s\"\ncgi(): todo: \"%s\"\n", job, todo);
-SFDOPEN(fd, QSGET("next_file"), O_RDONLY) return 10;						//open webpage file descriptor
-err=populatepage(fd, job, todo);								//populate webpage
+	switch(method=readquery()) {								//retrieve method, query file & query vars
+	case GET:										//urlencoded form
+	case POST:
+	for(fd=JOB;fd<NEXT_FILE+1;fd++) qvars[fd].val=QSGET(qvars[fd].name);
+	break;
+	case POSTMP:										//multipart/form
+		for(fd=JOB;fd<NEXT_FILE+1;fd++) {
+		if((err=qrawstdinget(qvars[fd].mpname, qvars[fd].mpval))) return err;
+		qvars[fd].val=qvars[fd].mpval;
+		}
+	break;
+	default:
+	return method;
+	}
+CGIDBG("cgi(): job: \"%s\"\ncgi(): todo: \"%s\"\ncgi(): next_file: \"%s\"\n", qvars[JOB].val, qvars[TODO].val, qvars[NEXT_FILE].val);
+SFDOPEN(fd, qvars[NEXT_FILE].val, O_RDONLY) return 10;						//open webpage file descriptor
+err=populatepage(fd, qvars[JOB].val, qvars[TODO].val);						//populate webpage
 close(fd);											//close webpage file descriptor
-if(!err && method==POST && *todo) err=todorun(job, todo);					//run 'todo' cmd/instr (if any) on POST only
+if(!err && method>GET && *qvars[TODO].val) err=todorun(qvars[JOB].val, qvars[TODO].val);	//run 'todo' cmd/instr (if any) on POSTs only
 CGIDBG("cgi(): returning code: %d\n", err);
 
 #ifdef DEBUG

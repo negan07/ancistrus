@@ -78,6 +78,7 @@ exit(3);													\
 
 #define CR_SYMBOL 10							/* ASCII symbols definitions */
 #define LF_SYMBOL 13
+#define DQUOTE_SYMBOL 34
 
 #define PATH 								/* system PATH */			\
 "PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts:/usr/sbin/rc_app"
@@ -87,9 +88,10 @@ exit(3);													\
 #define SFPOPEN(FP, path, flags) if((FP=(fopen(path, flags)))==NULL)	/* sort of secure fopen() */
 #define SMALLOCSTR(data, size) if((data=(char*)malloc(size))==NULL)	/* sort of safe malloc() for strings */
 #define SFREE(var) if(var) free(var)					/* sort of safe free() */
-#define READCH(ch) read(0, &ch, 1);					/* low-level read a single char from stdin */
-#define TYPECH(ch) write(1, &ch, 1);					/* low-level write a single char to stdout */
-#define TYPE(text) write(1, text, strlen(text));			/* low-level write a text to stdout */
+#define READCH(ch) read(0, &ch, 1)					/* low-level read a char from stdin */
+#define TYPECH(ch) write(1, &ch, 1)					/* low-level write a char to stdout */
+#define READ(str) read(0, str, sizeof(str))				/* low-level read a string from stdin */
+#define TYPE(str) write(1, str, strlen(str))				/* low-level write a string to stdout */
 #define TOKENIZE(str, tag, s_str) for(s=(char*)strtok_r(str, tag, &s_str);s!=NULL;s=(char*)strtok_r(NULL, tag, &s_str))	/* tokenizer loop */
 #define NULLRED " >/dev/null 2>&1;"					/* null output redirections */
 
