@@ -99,6 +99,23 @@ function varInit() {
 	loadCheck();
 }
 
+function showFlags() {
+	var val=["bitswap", "sra", "trellis", "sesdrop", "cominmgn", "sos", "dynamicd", "dynamicf", "i24k", "monitortone"];
+	var sellink=["bitswap", "seamless-rate-adaptation", "trellis-mode", "sesdrop", "cominmgn", "sos", "dynamicd", "dynamicf", "i24k-interleave-buffer", "monitor-tone"];
+	var name=["Bitswap", "Seamless Rate Adaptation", "Trellis Mode", "Sesdrop", "CoMinMgn", "SOS", "DynamicD", "DynamicF", "I24k Interleave Buffer", "Monitor Tone"];
+	var def=[1, 1, 1, 0, 0, 1, 1, 0, 1, 1];
+	var txt="";
+
+	for(var i=0;i<name.length;i++) {
+	txt+="<tr><td align='left'><span><a href='javascript:gotoWiki(\"Dsl-Tweaking#"+sellink[i]+"\");'><b>"+name[i]+"</b></a></span></td>";
+	txt+="<td align='right'><select name='"+val[i]+"' size=1>";
+	if(def[i]==1) txt+="<option value='on'>On (DEF)</option><option value='off'>Off</option>";
+	else txt+="<option value='on'>On</option><option value='off'>Off (DEF)</option>";
+	txt+="</select></td></tr>";
+	}
+	document.write(txt);
+}
+
 function checkData() {
 	var cf=document.forms[0];
 	var msg="";
@@ -110,10 +127,8 @@ function checkData() {
 			}
 			else msg+=checkInt(cf.snr, "SNR Ratio", -136, 250, true);
 		}
-		if(cf.anc_maxdataratetweak_enable.checked || cf.maxdatarateul.value!="" || cf.maxdataratedl.value!="") {
-		msg+=checkInt(cf.maxdataratedl, "Max Data Rate Dwlink", 0, 400000, true);
-		msg+=checkInt(cf.maxdatarateul, "Max Data Rate Uplink", 0, 400000, true);
-		}
+	msg+=checkBW(cf.maxdataratedl, "Max Data Rate Dwlink", 0, "Kbps", true);
+	msg+=checkBW(cf.maxdatarateul, "Max Data Rate Uplink", 0, "Kbps", true);
 
 	if(msg.length>1) {
 	alert(msg);
@@ -165,70 +180,7 @@ function checkData() {
 	</select>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td nowrap colspan="2"><input type="checkbox" name="anc_snrtweak_enable" value="@h_anc_snrtweak_enable#"><a href="javascript:gotoWiki('Dsl-Tweaking#signal-noise-ratio');"><b>Turn SNR Tweak On</b></a></td></tr>
-<tr><td nowrap><a href="javascript:gotoWiki('Dsl-Tweaking#signal-noise-ratio');"><b>Signal Noise Ratio</b></a></td>
-<td nowrap align="right"><input type="text" class="num" name="snr" value="@snr#" size=6 maxlength=5></td></tr>
-<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#bitswap');"><b>Bitswap</b></a></span></td>
-	<td align="right"><select name="bitswap" size=1>
-		<option value="on">On (DEF)</option>
-		<option value="off">Off</option>
-	</select>
-</td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#seamless-rate-adaptation');"><b>Seamless Rate Adaptation</b></a></span></td>
-	<td align="right"><select name="sra" size=1>
-		<option value="on">On (DEF)</option>
-		<option value="off">Off</option>
-	</select>
-</td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#trellis-mode');"><b>Trellis Mode</b></a></span></td>
-	<td align="right"><select name="trellis" size=1>
-		<option value="on">On (DEF)</option>
-		<option value="off">Off</option>
-	</select>
-</td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#sesdrop');"><b>Sesdrop</b></a></span></td>
-	<td align="right"><select name="sesdrop" size=1>
-		<option value="on">On</option>
-		<option value="off">Off (DEF)</option>
-	</select>
-</td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#cominmgn');"><b>CoMinMgn</b></a></span></td>
-	<td align="right"><select name="cominmgn" size=1>
-		<option value="on">On</option>
-		<option value="off">Off (DEF)</option>
-	</select>
-</td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#sos');"><b>SOS</b></a></span></td>
-	<td align="right"><select name="sos" size=1>
-		<option value="on">On (DEF)</option>
-		<option value="off">Off</option>
-	</select>
-</td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#dynamicd');"><b>DynamicD</b></a></span></td>
-	<td align="right"><select name="dynamicd" size=1>
-		<option value="on">On (DEF)</option>
-		<option value="off">Off</option>
-	</select>
-</td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#dynamicf');"><b>DynamicF</b></a></span></td>
-	<td align="right"><select name="dynamicf" size=1>
-		<option value="on">On</option>
-		<option value="off">Off (DEF)</option>
-	</select>
-</td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#i24k-interleave-buffer');"><b>I24k Interleave Buffer</b></a></span></td>
-	<td align="right"><select name="i24k" size=1>
-		<option value="on">On (DEF)</option>
-		<option value="off">Off</option>
-	</select>
-</td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#monitor-tone');"><b>Monitor Tone</b></a></span></td>
-	<td align="right"><select name="monitortone" size=1>
-		<option value="on">On (DEF)</option>
-		<option value="off">Off</option>
-	</select>
-</td></tr>
+<script>showFlags()</script>
 <tr><td align="left"><span><a href="javascript:gotoWiki('Dsl-Tweaking#phyrexmt');"><b>PhyReXmt</b></a></span></td>
 	<td align="right"><select name="phyrexmt" size=1>
 		<option value="0">US Off, DS Off</option>
@@ -266,6 +218,10 @@ function checkData() {
 	</select>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="anc_snrtweak_enable" value="@h_anc_snrtweak_enable#"><a href="javascript:gotoWiki('Dsl-Tweaking#signal-noise-ratio');"><b>Turn SNR Tweak On</b></a></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('Dsl-Tweaking#signal-noise-ratio');"><b>Signal Noise Ratio</b></a></td>
+<td nowrap align="right"><input type="text" class="num" name="snr" value="@snr#" size=6 maxlength=5></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td nowrap colspan="2"><div id="maxdatarate_flag"><input type="checkbox" name="anc_maxdataratetweak_enable" value="@h_anc_maxdataratetweak_enable#"><a href="javascript:gotoWiki('Dsl-Tweaking#max-data-rate-limiter');"><b>Turn VDSL Data Rate Limiter Tweak On</b></a></div></td></tr>
 <tr><td nowrap><div id="maxdatarate_dl"><a href="javascript:gotoWiki('Dsl-Tweaking#max-data-rate-limiter');"><b>Limit Downlink Data Rate to:</b></a></div></td>
 <td nowrap align="right"><div id="maxdatarate_dlval"><input type="text" class="num" name="maxdataratedl" value="@maxdataratedl#" size=6 maxlength=6>
@@ -279,7 +235,7 @@ function checkData() {
 <tr><td nowrap colspan="2"><div id="profile_flag"><input type="checkbox" name="anc_dslprofile_enable" value="@h_anc_dslprofile_enable#"><a href="javascript:gotoWiki('Dsl-Tweaking#vdsl-profile');"><b>Turn VDSL Profile Tweak On</b></a></div></td></tr>
 <tr><td align="left"><div id="profile_text"><span><a href="javascript:gotoWiki('Dsl-Tweaking#vdsl-profile');"><b>VDSL Profile</b></a></span></div></td>
 	<td align="right"><div id="profile_list">
-	<select name="profile" onChange="if(this.selectedIndex==8) alert('Warning ! This option requires new dsl driver !\n');" size=1>
+	<select name="profile" onChange="if(this.value=='BrcmPriv1') alert('Warning ! This option requires new dsl driver !\n');" size=1>
 		<option value="8a">8a</option>
 		<option value="8a">8b</option>
 		<option value="8c">8c</option>
