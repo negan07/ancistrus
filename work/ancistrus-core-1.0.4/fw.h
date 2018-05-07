@@ -1,4 +1,4 @@
-#define FWARGS enum { MAIN=2, ADDRM, TYPE, NAME, PROT, REMPORT, LOCPORT };					/* aliases for main params */
+#define FWARGS enum { MAIN=2, ADDRM, FWTYPE, NAME, PROT, REMPORT, LOCPORT };					/* aliases for main params */
 
 #define RULESNAME "ancfw"											/* aliases for paths */
 #define RULES "/tmp/" RULESNAME

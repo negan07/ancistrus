@@ -157,7 +157,7 @@ char gw[256], wan[256], *oldgw, *oldwan;
 	IPT " -X %s\n"
 	CPM " del %s:1:%s:%s:%s-%s:%s:%s-%s\n"
 	, argv[NAME], argv[NAME], argv[NAME], argv[NAME], argv[NAME], argv[NAME]
-	, argv[TYPE], argv[PROT], oldgw, argv[LOCPORT], argv[LOCPORT], oldwan, argv[REMPORT], argv[REMPORT]);
+	, argv[FWTYPE], argv[PROT], oldgw, argv[LOCPORT], argv[LOCPORT], oldwan, argv[REMPORT], argv[REMPORT]);
 		if(!strcmp(argv[ADDRM], "del")) err=0;				//avoid rule creation if del
 		else {
 		getgatewayip(gw);						//obtain current wan ip and gw ip
@@ -178,7 +178,7 @@ char gw[256], wan[256], *oldgw, *oldwan;
 				else err+=fwremadd(argv, FP, wan, gw, argv[PROT], fwtype);
 			if(!err) fprintf(FP,					//add napt rule to /proc/cnapt_serv
 			CPM " add %s:1:%s:%s:%s-%s:%s:%s-%s\n"
-			, argv[TYPE], argv[PROT], gw, argv[LOCPORT], argv[LOCPORT], wan, argv[REMPORT], argv[REMPORT]);
+			, argv[FWTYPE], argv[PROT], gw, argv[LOCPORT], argv[LOCPORT], wan, argv[REMPORT], argv[REMPORT]);
 			}
 		}
 	}
@@ -200,7 +200,7 @@ DBG("fw() main:%s addrm:%s type:%s name:%s prot:%s remport:%s locport:%s\n", arg
 		break;
 		case ADDRM: if(strcmp(argv[i], "add") && strcmp(argv[i], "del")) i=argc+1;
 		break;
-		case TYPE: if(strcmp(argv[i], "ls") && strcmp(argv[i], "pf")) i=argc+1;
+		case FWTYPE: if(strcmp(argv[i], "ls") && strcmp(argv[i], "pf")) i=argc+1;
 		break;
 		case NAME: if(strlen(argv[i])>32) i=argc+1;			//safety limit for chain name
 		break;
