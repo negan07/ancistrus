@@ -89,12 +89,16 @@ var msg_regkeys = "Warning! New encryption keys are being created and olds are d
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td nowrap><a href="javascript:gotoWiki('openssh-package#activate-remote-access');"><b>SSH remote port number:</b></a></td>
 <td nowrap align="right"><input type="text" class="num" name="ssh_remote_port" value="@ssh_remote_port#" size=6 maxlength=5></td></tr>
-<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td colspan="2" align="center">
 <input class="long_common_bt" type="button" value="Select Remote Access Type" onClick="goto_formframe('FW_remote.htm&todo=cfg_init');">
-<input class="long_common_bt" type="button" value="Modify SSH Daemon Config" onClick="this.form.edit_file.value='/usr/etc/sshd_config';AncstdAction(this.form,'anc_editfile.htm','openssh.htm','edit','');">
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('openssh-package#sshd_config')" tabindex="-1"><b>Modify SSH Daemon Configuration</b></a></td></tr>
+<tr><td colspan="2" align="center">
+<input class="common_bt" type="button" value="Edit Config" onClick="this.form.edit_file.value='/usr/etc/sshd_config';AncstdAction(this.form,'anc_editfile.htm','openssh.htm','edit','');">
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('openssh-package#ssh-encryption-keys')" tabindex="-1"><b>SSH Encryption Keys</b></a></td></tr>
 <tr><td colspan="2" align="center">
 <input class="common_bt" type="button" value="Keys Regeneration" onClick="if(confirm(msg_regkeys)) AncstdAction(this.form,'openssh.htm','openssh.htm','','/usr/sbin/rc_app/rc_ssh regenkeys');">
 <input class="common_bt" type="button" value="Download Keys" onclick="if(!enableChk()) return false;window.location.href='anc.cgi?gen_file=ssh.zip&next_file=openssh.htm&job=upload&todo=/usr/sbin/rc_app/rc_ssh zipkeys';">
