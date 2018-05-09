@@ -1,7 +1,7 @@
-diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
---- work/openssh-7.6p1/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/openssh-7.6p1/Makefile	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,198 @@
+diff -urN work/openssh-7.7p1/Makefile work/openssh-7.7p1/Makefile
+--- work/openssh-7.7p1/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-7.7p1/Makefile	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,199 @@
 +include ../Rules.mak
 +
 +BINS			:= $(OPEN_SSH)/sshd $(OPEN_SSH)/ssh-keygen $(OPEN_SSH)/scp
@@ -23,10 +23,10 @@ diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 +	fi
 +
 +configure:
-+	cd $(OPEN_SSH) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --prefix=$(USRDIR) --sysconfdir=$(TMPETC) --libdir=$(LDLIB) --sharedstatedir=$(LDLIB) --bindir=$(USRSBIN) --sbindir=$(USRSBIN) --libexecdir=$(USRSBIN) --localstatedir=$(VARLIB) --disable-pkcs11 --disable-etc-default-login --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-pututline --disable-pututxline --without-hardening --without-maildir --without-bsd-auth --without-xauth --without-kerberos5 --without-shadow --with-privsep-user=root --with-privsep-path=$(VARLIB)/ssh --with-cflags --with-cflags-after --with-cppflags --with-ldflags --with-ldflags-after --with-libs --with-zlib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-ssl-dir=$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) --with-ssl-engine --with-md5-passwords --with-default-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-superuser-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-pid-dir=$(TMPDIR) CFLAGS="$(CFLAGS) -Os -s" LD=$(CC)
++	cd $(OPEN_SSH) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --prefix=$(USRDIR) --sysconfdir=$(TMPETC) --libdir=$(LDLIB) --sharedstatedir=$(LDLIB) --bindir=$(USRSBIN) --sbindir=$(USRSBIN) --libexecdir=$(USRSBIN) --localstatedir=$(VARLIB) --disable-pkcs11 --disable-etc-default-login --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-pututline --disable-pututxline --without-hardening --without-maildir --without-bsd-auth --without-xauth --without-kerberos5 --without-shadow --with-privsep-user=root --with-privsep-path=$(VARLIB)/ssh --with-cflags --with-cflags-after --with-cppflags --with-ldflags --with-ldflags-after --with-libs --with-zlib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-ssl-dir=$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) --with-ssl-engine --with-md5-passwords --with-default-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-superuser-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-pid-dir=$(TMPDIR) CFLAGS="$(CFLAGS) -Os -s -fcommon" LD=$(CC)
 +
 +sshd_conf:
-+	@echo "#	\$$OpenBSD: sshd_config,v 1.101 2017/03/14 07:19:07 djm Exp \$$" > $(SSHD_CONF)
++	@echo "#	\$$OpenBSD: sshd_config,v 1.102 2018/02/16 02:32:40 djm Exp \$$" > $(SSHD_CONF)
 +	@echo "" >> $(SSHD_CONF)
 +	@echo "# This is the sshd server system-wide configuration file.  See" >> $(SSHD_CONF)
 +	@echo "# sshd_config(5) for more information." >> $(SSHD_CONF)
@@ -44,7 +44,6 @@ diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 +	@echo "#ListenAddress ::" >> $(SSHD_CONF)
 +	@echo "" >> $(SSHD_CONF)
 +	@echo "HostKey $(SSHD_KEYS_DIR)/$(PROJECT).rsa" >> $(SSHD_CONF)
-+	@echo "#HostKey $(SSHD_KEYS_DIR)/$(PROJECT).dsa" >> $(SSHD_CONF)
 +	@echo "HostKey $(SSHD_KEYS_DIR)/$(PROJECT).ecdsa" >> $(SSHD_CONF)
 +	@echo "HostKey $(SSHD_KEYS_DIR)/$(PROJECT).ed25519" >> $(SSHD_CONF)
 +	@echo "" >> $(SSHD_CONF)
@@ -135,6 +134,8 @@ diff -urN work/openssh-7.6p1/Makefile work/openssh-7.6p1/Makefile
 +	@echo "# no default banner path" >> $(SSHD_CONF)
 +	@echo "#Banner none" >> $(SSHD_CONF)
 +	@echo "" >> $(SSHD_CONF)
++	@echo "# enable DSCP QoS values (per RFC-4594)" >> $(SSHD_CONF)
++	@echo "IPQoS AF21 AF11" >> $(SSHD_CONF)
 +	@echo "# override default of no subsystems" >> $(SSHD_CONF)
 +	@echo "Subsystem	sftp	$(USRSBIN)/sftp-server" >> $(SSHD_CONF)
 +	@echo "" >> $(SSHD_CONF)
