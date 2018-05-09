@@ -1,6 +1,6 @@
-diff -urN work/hdparm-9.52/Makefile work/hdparm-9.52/Makefile
---- work/hdparm-9.52/Makefile	2017-05-23 23:09:40.513449762 +0200
-+++ work/hdparm-9.52/Makefile	2017-05-01 21:08:42.000000000 +0200
+diff -urN work/hdparm-9.56/Makefile work/hdparm-9.56/Makefile
+--- work/hdparm-9.56/Makefile	2017-05-23 23:09:40.513449762 +0200
++++ work/hdparm-9.56/Makefile	2017-05-01 21:08:42.000000000 +0200
 @@ -1,35 +1,18 @@
  # Makefile for hdparm
  
@@ -41,7 +41,7 @@ diff -urN work/hdparm-9.52/Makefile work/hdparm-9.52/Makefile
  
  hdparm.o:	hdparm.h sgio.h
  
-@@ -43,18 +26,29 @@
+@@ -43,17 +26,9 @@
  
  apt.o:		apt.c
  
@@ -56,29 +56,9 @@ diff -urN work/hdparm-9.52/Makefile work/hdparm-9.52/Makefile
 -	$(INSTALL_PROGRAM) -D hdparm $(DESTDIR)$(sbindir)/hdparm
 -	if [ -d $(DESTDIR)$(mandir) ]; then $(INSTALL_DATA) -D hdparm.8 $(DESTDIR)$(mandir)/man8/hdparm.8 ;\
 -	elif [ -d $(DESTDIR)$(oldmandir) ]; then $(INSTALL_DATA) -D hdparm.8 $(DESTDIR)$(oldmandir)/man8/hdparm.8 ; fi
-+install: all control
++install: all
 +	install -m 0755 -d $(BINDIR)
 +	install -m 0755 hdparm $(BINDIR)
  
  clean:
  	-rm -f hdparm $(OBJS) core 2>/dev/null
- 
-+ifndef BUILD
-+control:
-+else
-+PREINST			:= $(CTRL_DIR)/preinst
-+PRERM			:= $(CTRL_DIR)/prerm
-+
-+control: preinst prerm
-+
-+preinst:
-+	@echo "#!/bin/sh" > $(PREINST)
-+	@echo "killall -9 hdparm > /dev/null 2>&1" >> $(PREINST)
-+	@echo "exit 0" >> $(PREINST)
-+
-+prerm:
-+	@echo "#!/bin/sh" > $(PRERM)
-+	@echo "echo \"hdparm required: can't uninstall...\"" >> $(PRERM)
-+	@echo "exit 1" >> $(PRERM)
-+endif
-+
