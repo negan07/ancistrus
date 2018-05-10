@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+function setDefs() {
+	var cf=document.forms[0];
+
+	if(cf.smartd_enable.value=="") cf.smartd_enable.checked=false;
+	if(cf.hdidle_timeout.value=="") cf.hdidle_timeout.value="30";
+}
+
+function varInit() {
+
+	AncdataToVisible(document.forms[0]);
+	setDefs();
+}
+
+function checkTimeout() {
+	var cf=document.forms[0];
+	var msg="";
+
+	msg+=checkInt(cf.hdidle_timeout, "Device Idle Timeout", 0, 999, true);
+
+	if(msg.length>1) {
+	alert(msg);
+	return false;
+	}
+	AncstdAction(cf,'smartmontools.htm','','save','/usr/sbin/rc usb_service reconfig');
+	return true;
+}
+
+//-->
+</script></head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
+<form name="smontools" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<div><a class="page_title" href="javascript:gotoWiki('smartmontools-package/');">SMARTMONTOOLS</a></div>
+<div class="fix_button">
+<table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
+&nbsp;
+<input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="AncdataToHidden(document.forms[0])">
+</td></tr></table>
+</div>
+<div id="main" class="main_top_button">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td nowrap colspan="2"><input type="checkbox" name="smartd_enable" value="@h_smartd_enable#">
+<a href="javascript:gotoWiki('smartmontools-package#smartd');"><b>Turn S.M.A.R.T. Daemon On</b></a>
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('smartmontools-package#device-idle-timeout')"><b>Device Idle Timeout:</b></a></td>
+<td nowrap align="right"><input type="text" class="num" name="hdidle_timeout" value="@hdidle_timeout#" size=3 maxlength=3>
+&nbsp;<span>Min</span></td></tr>
+<tr><td colspan="2" align="center"><input class="apply_bt" type="submit" value="Apply" onClick="return checkTimeout()"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#smartdconf')" tabindex="-1"><b>Modify S.M.A.R.T. Daemon Configuration</b></a></td></tr>
+<tr><td colspan="2" align="center">
+<input class="common_bt" type="button" value="Edit Config" onClick="this.form.edit_file.value='/usr/etc/smartd.conf';AncstdAction(this.form,'anc_editfile.htm','smartmontools.htm','edit','');">
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#update-devices-database')" tabindex="-1"><b>Update Device Database List</b></a></td></tr>
+<tr><td colspan="2" align="center">
+<input class="common_bt" type="button" value="Update Database" onClick="AncstdAction(this.form,'smartmontools.htm','','','/usr/sbin/rc_app/rc_smontools updatedb');">
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+<tr><td nowrap colspan="2"><a href="javascript:gotoWiki('smartmontools-package#smartctl')" tabindex="-1"><b>S.M.A.R.T. Control and Monitor Utility (smartctl)</b></a></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#select-device')" tabindex="-1"><b>Select the Device to Analyze</b></a>
+&nbsp; &nbsp; &nbsp; &nbsp;
+<select name="dev_sel" size=1>
+	<option value="/dev/sda">Usb Device #1 (/dev/sda)</option>
+	<option value="/dev/sdb">Usb Device #2 (/dev/sdb)</option>
+</select></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#show-device-infos')" tabindex="-1"><b>Show Device Infos</b></a></td></tr>
+<tr><td colspan="2" align="center"><select name="infocmd" size=1>
+	<option value="/usr/sbin/smartctl -a ">Show S.M.A.R.T. data</option>
+	<option value="/usr/sbin/smartctl -H ">Show Health status</option>
+	<option value="/usr/sbin/smartctl -g aam ">Show AAM status</option>
+	<option value="/usr/sbin/smartctl -g apm ">Show APM status</option>
+</select></td></tr>
+<tr><td colspan="2" align="center">
+<input class="common_bt" type="button" value="Show Info" onclick="this.form.pipe_cmd.value=infocmd.value+this.form.dev_sel.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');">
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#aam-status')" tabindex="-1"><b>Change AAM Status</b></a>
+&nbsp; &nbsp; &nbsp; &nbsp;
+<a href="javascript:gotoWiki('smartmontools-package#apm-status')" tabindex="-1"><b>Change APM Status</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="text" name="aam" size="3" maxlength="3" value="">
+&nbsp; &nbsp; &nbsp; &nbsp;
+<input type="text" name="apm" size="3" maxlength="3" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="apply_bt" type="submit" value="Apply" onClick="this.form.pipe_cmd.value='/usr/sbin/smartctl '+this.form.dev_sel.value+' -s aam,'+this.form.aam.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');">
+&nbsp; &nbsp; &nbsp; &nbsp;
+<input class="apply_bt" type="submit" value="Apply" onClick="this.form.pipe_cmd.value='/usr/sbin/smartctl '+this.form.dev_sel.value+' -s apm,'+this.form.apm.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#device-test')" tabindex="-1"><b>Device Test</b></a></td></tr>
+<tr><td colspan="2" align="center"><select name="testcmd" size=1>
+	<option value="/usr/sbin/smartctl --test=short ">Short data Test</option>
+	<option value="/usr/sbin/smartctl --test=long ">Long data Test</option>
+</select></td></tr>
+<tr><td colspan="2" align="center">
+<input class="common_bt" type="button" value="Run Test" onclick="this.form.pipe_cmd.value=testcmd.value+this.form.dev_sel.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');">
+<input class="common_bt" type="button" value="Show Results" onclick="this.form.pipe_cmd.value='/usr/sbin/smartctl -l selftest ' +this.form.dev_sel.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');">
+<input class="common_bt" type="button" value="Abort Test" onclick="this.form.pipe_cmd.value='/usr/sbin/smartctl -X '+this.form.dev_sel.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');">
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="save">
+<input type="hidden" name="todo" value="/usr/sbin/rc smontools start">
+<input type="hidden" name="next_file" value="smartmontools.htm">
+<input type="hidden" name="old_file" value="">
+<input type="hidden" name="edit_file" value="">
+<input type="hidden" name="pipe_cmd" value="">
+<input type="hidden" name="h_smartd_enable" value="@h_smartd_enable#">
+</div>
+</form>
+<script>printHelp();</script>
+</body></html>

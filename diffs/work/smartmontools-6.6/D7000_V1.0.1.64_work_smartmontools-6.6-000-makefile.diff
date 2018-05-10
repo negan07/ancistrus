@@ -1,0 +1,67 @@
+diff -urN work/smartmontools-6.6/Makefile work/smartmontools-6.6/Makefile
+--- work/smartmontools-6.6/Makefile	2017-11-03 21:54:56.000000000 +0100
++++ work/smartmontools-6.6/Makefile	2018-04-19 22:48:31.600116512 +0200
+@@ -0,0 +1,63 @@
++include ../Rules.mak
++
++BINS			:= $(SMONTOOLS)/smartd $(SMONTOOLS)/smartctl
++STARTUP			:= rc_smontools
++POSTSCR			:= usb_service_post
++WEB			:= ../www/$(SMONTOOLS_NAME).htm
++SMARTD_CONF 		:= $(SMONTOOLS)/examplescripts/smartd.conf
++
++all: config
++	$(MAKE) -C $(SMONTOOLS)
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(SMONTOOLS) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s -W -Wall -Wno-psabi" CXXFLAGS="$(CFLAGS) -Os -s -W -Wall -Wno-psabi" --sbindir=$(USRSBIN) --sysconfdir=$(USRETC) --with-smartdscriptdir=$(USRSBINSCR) --with-scriptpath=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-smartdplugindir=no --with-systemdsystemunitdir=no --with-systemdenvfile=no --with-initscriptdir=no --without-nvme-devicescan --with-drivedbdir=$(USRETC) --with-update-smart-drivedb=no --with-gnupg=no --without-cxx11-option
++
++install: smartd_conf control
++	$(SSTRIP) $(BINS)
++	for D in $(ETCDIR) $(BINDIR) $(APPDIR) $(WWWDIR) $(INITDIR) $(POSTDIR); do install -m 0755 -d $$D; done
++	install -m 0644 $(SMARTD_CONF) $(ETCDIR)
++	install -m 0644 $(SMONTOOLS)/drivedb.h $(ETCDIR)/smart_drivedb.h
++	install -m 0755 $(BINS) $(BINDIR)
++	install -m 0755 $(STARTUP) $(APPDIR)
++	install -m 0755 $(POSTSCR) $(POSTDIR)
++	install -m 0664 $(WEB) $(WWWDIR)
++
++clean:
++	$(MAKE) -C $(SMONTOOLS) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(SMONTOOLS) distclean
++
++smartd_conf:
++	@echo "/dev/sda -a -d removable -n standby -o off -W 0,0,50" > $(SMARTD_CONF)
++	@echo "/dev/sdb -a -d removable -n standby -o off -W 0,0,50" >> $(SMARTD_CONF)
++
++ifndef BUILD
++control:
++else
++POSTINST		:= $(CTRL_DIR)/postinst
++PRERM			:= $(CTRL_DIR)/prerm
++
++control: postinst prerm
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "cp -f $(USRETCINITDPOST)/$(POSTSCR) $(TMPETC)/$(INITD)/$(RCPOST)/" >> $(POSTINST)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "rm -f $(TMPETC)/$(INITD)/$(RCPOST)/$(POSTSCR) $(TMPETC)/smart_drivedb.h $(TMPETC)/smartd.conf" >> $(PRERM)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop" >> $(PRERM)
++	@echo "killall -9 smartctl >/dev/null 2>&1" >> $(PRERM)
++	@echo "exit 0" >> $(PRERM)
++endif
++

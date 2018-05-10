@@ -1,0 +1,90 @@
+diff -urN work/smartmontools-6.6/rc_smontools work/smartmontools-6.6/rc_smontools
+--- work/smartmontools-6.6/rc_smontools	2017-11-03 21:54:56.000000000 +0100
++++ work/smartmontools-6.6/rc_smontools	2018-04-19 22:48:31.600116512 +0200
+@@ -0,0 +1,86 @@
++#!/bin/sh
++#
++# ancistrus
++#
++# Netgear's D7000 Nighthawk Router Experience Distributed Project
++#
++# https://github.com/negan07/ancistrus
++#
++# License: GPLv2
++#
++#
++# Rc script for smartmontools daemon smartd.
++#
++# Usage: $0 < start restart startforced restartforced stop updatedb > (<debug>)
++#
++# <debug> runs smartd in foreground mode with pedantic debug messages.
++#
++
++stop() {
++	# Kill all clients
++	for PID in `pidof smartd`
++	do
++	[ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
++	done
++}
++
++start() {
++	# Checking if service is enabled
++	eval `nvram get smartd_enable` > /dev/null 2>&1
++	[ "${smartd_enable}" = "1" ] || [ ! -z "$1" ] || return 1
++
++	# Checking if the service is already running
++	[ ! -z "`pidof smartd`" ] && echo "smartd already running..." && exit 1
++
++	# Checking for /dev/sd[a-b] storage presence
++	[ ! -z "`mount | grep -o /dev/sd`" ] || [ ! -z "`cat /proc/partitions | awk '{print $4}' | grep sd | grep -v sd.[0-9]`" ] || return 2
++
++	# Starting 'smartd'
++	$SMARTD
++
++	# Sanity check
++	SMARTD_RC=$?
++	[ $SMARTD_RC -ne 0 ] && echo "$0: Error ${SMARTD_RC} starting ${SMARTD}..." && exit $SMARTD_RC
++}
++
++updatedb() {
++	curl -f -s -k -o /tmp/${LOCDB} -O https://raw.githubusercontent.com/smartmontools/smartmontools/master/smartmontools/${DB}
++	${BINDIR}/smartctl -B /tmp/${LOCDB} -P showall >/dev/null 2>&1
++	[ $? -eq 0 ] && mv -f /tmp/${LOCDB} ${CONFETCDIR}/ && sync && stop && start
++}
++
++# Dirs
++CONFETCDIR=/usr/etc
++BINDIR=/usr/sbin
++
++# Debug purpose
++#CONFETCDIR=/tmp/etc/ancdbg
++#BINDIR=/tmp/etc/ancdbg
++
++# Names
++SMARTD=${BINDIR}/smartd
++DB=drivedb.h
++LOCDB=smart_${DB}
++
++# Debug running
++[ "${2}" = "debug" ] && SMARTD="${SMARTD} -c ${BINDIR}/smartd.conf -n -d"
++
++case $1 in
++start|restart)
++stop
++start
++;;
++startforced|restartforced)
++stop
++start $1
++;;
++stop)
++stop
++;;
++updatedb)
++updatedb
++;;
++*)
++echo "Usage: $0 < start restart startforced restartforced stop updatedb > (<debug>)"
++;;
++esac

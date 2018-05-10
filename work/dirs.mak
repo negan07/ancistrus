@@ -236,12 +236,12 @@ DIRLIST				+= $(OPKG)
 TARLIST				+= $(OPKG)
 # SMARTMONTOOLS
 SMONTOOLS_NAME			:= smartmontools
-VER_$(SMONTOOLS_NAME)		:= 6.5
+VER_$(SMONTOOLS_NAME)		:= 6.6
 SMONTOOLS			:= $(SMONTOOLS_NAME)-$(VER_$(SMONTOOLS_NAME))
 NAME_$(SMONTOOLS)		:= $(SMONTOOLS_NAME)$(DBG)
 SUBVER_$(SMONTOOLS)		:= 
 VER_$(SMONTOOLS)		:= $(VER_$(SMONTOOLS_NAME))$(SUBVER_$(SMONTOOLS))
-DL_$(SMONTOOLS)			:= https://github.com/smartmontools/smartmontools/releases/download/RELEASE_6_5
+DL_$(SMONTOOLS)			:= https://github.com/smartmontools/smartmontools/releases/download/RELEASE_6_6
 TAR_$(SMONTOOLS)		:= $(SMONTOOLS).tar.gz
 HOME_$(SMONTOOLS)		:= https://www.smartmontools.org/
 LIC_$(SMONTOOLS)		:= GPLv2
