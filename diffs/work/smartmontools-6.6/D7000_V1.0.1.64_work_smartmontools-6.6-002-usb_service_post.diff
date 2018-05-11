@@ -17,7 +17,7 @@ diff -urN work/smartmontools-6.6/usb_service_post work/smartmontools-6.6/usb_ser
 +[ -z "${hdidle_timeout}" ] && hdidle_timeout=30
 +TOUT=$(( ${hdidle_timeout} * 60 ))
 +[ "${TOUT}" != "0" ] && for D in `cat /proc/partitions | awk '{print $4}' | grep sd | grep -v sd.[0-9]`; do HDIDLECMD="${HDIDLECMD} -a $D -i ${TOUT}"; done
-+$HDIDLECMD
++[ "${HDIDLECMD}" != "hd-idle" ] && ${HDIDLECMD}
 +rc smontools start
 +;;
 +esac
