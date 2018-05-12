@@ -26,6 +26,7 @@ function varInit() {
 
 	var formlen=cfe.length;
 	for(var i=0;i<formlen;i++) if(cfe[i].value=="" && cfe[i].type=="checkbox") cfe[i].checked=false;
+	if(cf.telnet_enable.value=="") cf.telnet_enable.checked=true;
 
 		if(cf.h_anc_boot_disable.value=="1") {
 		allToDisabled(cf);
