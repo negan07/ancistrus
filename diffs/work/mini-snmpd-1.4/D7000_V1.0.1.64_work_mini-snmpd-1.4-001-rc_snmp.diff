@@ -53,7 +53,7 @@ diff -urN work/mini-snmpd-1.4/rc_snmp work/mini-snmpd-1.4/rc_snmp
 +	#The location of the device (default is empty): '-L nnn, --location=nnn'
 +	[ -z "${minisnmpd_location}" ] && minisnmpd_location="here"
 +	#The contact address of the device administrator (default is empty): '-C nnn, --contact=nnn'
-+	[ -z "${minisnmpd_contact}" ] && minisnmpd_contact=""
++	[ -z "${minisnmpd_contact}" ] && minisnmpd_contact="mynum"
 +	#The list of network interfaces (default is empty): '-i nnn, --interfaces=nnn'
 +	minisnmpd_interfaces="eth0,eth1,eth2,eth3,eth4,ip6tnl0,${wan_ifname},ptm0,wl0,wl1"
 +	#The list of disk mountpoints (default is empty): '-d nnn, --disks=nnn'
