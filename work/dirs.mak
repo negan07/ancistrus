@@ -67,7 +67,7 @@ DESC_$(IPROUTE2)		:= Set of utilities for Linux networking
 DIRLIST				+= $(IPROUTE2)
 TARLIST				+= $(IPROUTE2)
 # NETPERF
-NETPERF_NAME			:= netperf
+NETPERF_NAME			:= netperf-netperf
 VER_$(NETPERF_NAME)		:= 2.7.0
 NETPERF				:= $(NETPERF_NAME)-$(VER_$(NETPERF_NAME))
 NAME_$(NETPERF)			:= $(NETPERF_NAME)$(DBG)

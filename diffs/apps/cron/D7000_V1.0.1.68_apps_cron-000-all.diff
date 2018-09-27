@@ -1,0 +1,23 @@
+diff -urN D7000_V1.0.1.68_WW_src/Source/apps/cron/Makefile D7000_V1.0.1.68_WW_src/Source/apps/cron/Makefile
+--- D7000_V1.0.1.68_WW_src/Source/apps/cron/Makefile	2016-10-11 17:54:31.000000000 +0200
++++ D7000_V1.0.1.68_WW_src/Source/apps/cron/Makefile	2017-05-04 00:05:01.655185346 +0200
+@@ -4,14 +4,16 @@
+ #
+ include ../../Rules.mak
+ 
+-#CC=$(CROSS)gcc
+-
+ all: crond 
+ 
+ crond : cron.o cron-parent.o
+-	$(CC) -s -o $@ $(LDFLAGS)  $^ 
++	$(CC) $^ $(CFLAGS) -Os -s -o $@ 
++
++%.o: %.c
++	$(CC) -c $< $(CFLAGS) -Os -s -o $@
+ 
+ install: all
++	$(SSTRIP) crond
+ 	cp -a crond ../../target/usr/sbin
+ 	chown root ../../target/usr/etc/crontab
+ 	chmod 0644 ../../target/usr/etc/crontab
