@@ -292,12 +292,15 @@ tier_shaper_tbf() {
     local tier=$4
 
     local rate
+    local burst_dur_ms
 
     case $dir in
         ingress)
-            rate="$DOWNLINK";;
+            rate="$DOWNLINK"
+            burst_dur_ms="$ITARGET_BURST_DUR_MS";;
         egress)
-            rate="$UPLINK";;
+            rate="$UPLINK"
+            burst_dur_ms="$ETARGET_BURST_DUR_MS";;
         *)
             sqm_error "Unknown direction \"$dir\" in tier_shaper_$SHAPER()."
             return 1;;
@@ -318,7 +321,7 @@ tier_shaper_tbf() {
     esac
 
     local mtu=$(get_mtu $IFACE)
-    local burst="$(get_burst ${mtu:-1514} ${rate})"
+    local burst="$(get_burst ${mtu:-1514} ${rate} ${burst_dur_ms})"
     burst=${burst:-1514}
     local args="$(get_stab_string) $SHAPER rate ${rate}kbit burst $burst latency 300ms $(get_htb_adsll_string)"
 
@@ -342,12 +345,15 @@ tier_shaper_htb() {
     local tier=$4
 
     local rate
+    local burst_dur_ms
 
     case $dir in
         ingress)
-            rate="$DOWNLINK";;
+            rate="$DOWNLINK"
+            burst_dur_ms="$ITARGET_BURST_DUR_MS";;
         egress)
-            rate="$UPLINK";;
+            rate="$UPLINK"
+            burst_dur_ms="$ETARGET_BURST_DUR_MS";;
         *)
             sqm_error "Unknown direction \"$dir\" in tier_shaper_$SHAPER()."
             return 1;;
@@ -387,7 +393,7 @@ tier_shaper_htb() {
     esac
 
     local lq="quantum `get_htb_quantum $IFACE $rate`"
-    local burst="`get_htb_burst $IFACE $rate`"
+    local burst="`get_htb_burst $IFACE $rate $burst_dur_ms`"
     local args="$SHAPER $lq $burst $(get_htb_adsll_string)"
     local args31="$SHAPER $lq $(get_htb_adsll_string)"
     local ret=""
@@ -447,10 +453,14 @@ tier_shaper_hfsc() {
 # This allows HFSC to do its work but avoids some of its virtual time quirks.
 
     local rate_c=$(( ${rate} * 105 / 100 ))
-    local rate_r=$(( ${rate} *  10 / 100 ))
-    local rate_1=$(( ${rate} *  20 / 100 ))
-    local rate_2=$(( ${rate} *  50 / 100 ))
-    local rate_3=$(( ${rate} *  30 / 100 ))
+#    local rate_r=$(( ${rate} *  10 / 100 ))
+#    local rate_1=$(( ${rate} *  20 / 100 ))
+#    local rate_2=$(( ${rate} *  50 / 100 ))
+#    local rate_3=$(( ${rate} *  30 / 100 ))
+    local rate_r=$(( ${rate} / 10 ))
+    local rate_1=$(( ${rate} / 5 ))
+    local rate_2=$(( ${rate} / 2 ))
+    local rate_3=$(( ${rate} * 3 / 10 ))
 
     case $func in
         flow_rate)
