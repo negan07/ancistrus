@@ -185,7 +185,7 @@ DIRLIST				+= $(ZLIB)
 TARLIST				+= $(ZLIB)
 # LIBARCHIVE
 LIBARCHIVE_NAME			:= libarchive
-VER_$(LIBARCHIVE_NAME)		:= 3.3.2
+VER_$(LIBARCHIVE_NAME)		:= 3.3.3
 LIBARCHIVE			:= $(LIBARCHIVE_NAME)-$(VER_$(LIBARCHIVE_NAME))
 NAME_$(LIBARCHIVE)		:= $(LIBARCHIVE_NAME)$(DBG)
 SUBVER_$(LIBARCHIVE)		:= 
@@ -222,7 +222,7 @@ OPKG_NAME			:= opkg
 VER_$(OPKG_NAME)		:= 0.3.6
 OPKG				:= $(OPKG_NAME)-$(VER_$(OPKG_NAME))
 NAME_$(OPKG)			:= $(OPKG_NAME)$(DBG)
-SUBVER_$(OPKG)			:= -020
+SUBVER_$(OPKG)			:= -021
 VER_$(OPKG)			:= $(VER_$(OPKG_NAME))$(SUBVER_$(OPKG))
 DL_$(OPKG)			:= http://downloads.yoctoproject.org/releases/opkg
 TAR_$(OPKG)			:= $(OPKG).tar.gz

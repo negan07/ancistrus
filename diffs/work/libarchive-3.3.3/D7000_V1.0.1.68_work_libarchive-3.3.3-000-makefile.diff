@@ -1,6 +1,6 @@
-diff -urN work/libarchive-3.3.2/Makefile work/libarchive-3.3.2/Makefile
---- work/libarchive-3.3.2/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/libarchive-3.3.2/Makefile	2017-03-23 20:35:44.381701657 +0100
+diff -urN work/libarchive-3.3.3/Makefile work/libarchive-3.3.3/Makefile
+--- work/libarchive-3.3.3/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/libarchive-3.3.3/Makefile	2017-03-23 20:35:44.381701657 +0100
 @@ -0,0 +1,42 @@
 +include ../Rules.mak
 +
