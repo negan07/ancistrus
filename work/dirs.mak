@@ -145,7 +145,7 @@ DEP_$(QOS_NG)			:=
 DESC_$(QOS_NG)			:= Quality Of Service tool from Netgear firmware 36_42n
 # QOS SQM
 QOS_SQM_NAME			:= qos-sqm
-VER_$(QOS_SQM_NAME)		:= 1.2.2
+VER_$(QOS_SQM_NAME)		:= 1.2.4
 QOS_SQM				:= $(QOS_SQM_NAME)-$(VER_$(QOS_SQM_NAME))
 NAME_$(QOS_SQM)			:= $(QOS_SQM_NAME)$(DBG)
 SUBVER_$(QOS_SQM)		:= 
@@ -157,7 +157,7 @@ LIC_$(QOS_SQM)			:= GPLv2
 SEC_$(QOS_SQM)			:= net
 PRIO_$(QOS_SQM)			:= standard
 DEP_$(QOS_SQM)			:= $(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
-DESC_$(QOS_SQM)			:= Quality Of Service CeroWrt script tool
+DESC_$(QOS_SQM)			:= Quality Of Service SQM scripts traffic shaper tool
 # OPENSSL (REDIRECT TO ORIG)
 OPENSSL_NAME			:= openssl
 VER_$(OPENSSL_NAME)		:= 1.0.0r
