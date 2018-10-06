@@ -70,10 +70,16 @@ function loadCheck() {
 		cf.qos_dserv_ingress[1].disabled=false;
 		cf.qos_dserv_ingress[2].disabled=false;
 		}
-	if(cf.qos_dserv_egress.value=="shaper") cf.qos_ignore_dscp_egress.disabled=true;
-	else cf.qos_ignore_dscp_egress.disabled=false;
-	if(cf.qos_dserv_ingress.value=="shaper") cf.qos_ignore_dscp_ingress.disabled=true;
-	else cf.qos_ignore_dscp_ingress.disabled=false;
+		if(cf.qos_dserv_egress.value!="diffserv3") {
+		cf.qos_ignore_dscp_egress.value="1";
+		cf.qos_ignore_dscp_egress[1].disabled=true;
+		}
+		else cf.qos_ignore_dscp_egress[1].disabled=false;
+		if(cf.qos_dserv_ingress.value!="diffserv3") {
+		cf.qos_ignore_dscp_ingress.value="1";
+		cf.qos_ignore_dscp_ingress[1].disabled=true;
+		}
+		else cf.qos_ignore_dscp_ingress[1].disabled=false;
 }
 
 function varInit() {
@@ -118,10 +124,39 @@ function checkData() {
 	return true;
 }
 
+function check_perscript() {
+	var cf=document.forms['perscript'];
+	var filename="";
+	var destdir="/tmp/";
+	var a;
+	var IEPlfm = /MSIE [67]/g;
+	var diskprefix = /^.:\\/g;
+
+		if(typeof cf.download.files[0]!='undefined') filename=cf.download.files[0].name;
+		else {
+		alert(getErrorMsgByVar("gsm_msg_bku_no_blank_filename"));
+		return false;
+		}
+		if(IEPlfm.test(navigator.userAgent) && !diskprefix.test(filename)) {
+		alert(getErrorMsgByVar("gsm_msg_upg_inv_file_type")+"sqm");
+		return false;
+		}
+	if(filename.split) a=filename.split(".");
+	else a=cdisplit(filename,".");
+		if((a.length<2) || (a[0]=="") || (a[a.length-1].toLowerCase()!="sqm")) {
+		alert(getErrorMsgByVar("gsm_msg_upg_inv_file_type")+"sqm");
+		return false;
+		}
+
+	if(!confirm("Installing personal qos script "+filename+" : proceed ?")) return false;
+	cf.todo.value="/usr/sbin/mv -f "+destdir+filename+" /usr/sbin/scripts/; /usr/sbin/nvram set qos_script="+filename+" >/dev/null 2>&1";
+	return true;
+}
+
 //-->
 </script></head>
 <body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
-<form name="ssh" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<form name="qossqm" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
 <div><a class="page_title" href="javascript:gotoWiki('qos-sqm-package/');">QOS SQM</a></div>
 <div class="fix_button">
 <table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
@@ -173,19 +208,17 @@ function checkData() {
 	</select>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td nowrap><a href="javascript:gotoWiki('qos-sqm-package#qos_script');"><b>Personal QOS Script</b></a></td>
-<td nowrap align="right"><input type="text" class="text" name="qos_script" value="@qos_script#" size=20 maxlength=20></td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_dserv_egress');"><b>Uplink Prioritization Scheme</b></a></span></td>
 	<td align="right"><select name="qos_dserv_egress" onChange="loadCheck()" size=1>
 			<option value="shaper">Shaper Only</option>
-			<option value="classful">Classfull</option>
+			<option value="classful">Classful</option>
 			<option value="diffserv3">Diffserv (DEF)</option>
 	</select>
 </td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_dserv_ingress');"><b>Downlink Prioritization Scheme</b></a></span></td>
 	<td align="right"><select name="qos_dserv_ingress" onChange="loadCheck()" size=1>
 			<option value="shaper">Shaper Only</option>
-			<option value="classful">Classfull</option>
+			<option value="classful">Classful</option>
 			<option value="diffserv3">Diffserv (DEF)</option>
 	</select>
 </td></tr>
@@ -214,6 +247,8 @@ function checkData() {
 	</select>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('qos-sqm-package#qos_script');" tabindex="-1"><b>Personal QOS Script Name</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="text" class="text" name="qos_script" value="@qos_script#" size="40" maxlength="128"></td></tr>
 </table>
 <input type="hidden" name="job" value="save">
 <input type="hidden" name="todo" value="/usr/sbin/rc qos start">
@@ -233,7 +268,16 @@ function checkData() {
 <input type="hidden" name="h_qos_eecn" value="@h_qos_eecn#">
 <input type="hidden" name="h_qos_iecn" value="@h_qos_iecn#">
 <input type="hidden" name="h_wan_traffic_type" value="@h_wan_traffic_type#">
-</div>
 </form>
+<form name="perscript" method="POST" action="anc.cgi" enctype="multipart/form-data" onSubmit="buttonToDisabled(document.forms[0])">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('qos-sqm-package#qos_script')" tabindex="-1"><b>Install a Personal QOS Script</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="FILE" name="download" size="40" maxlength="128" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="apply_bt" type="submit" name="install" value="Install" onClick="return check_perscript();"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr></table>
+<input type="hidden" name="job" value="home">
+<input type="hidden" name="todo" value="">
+<input type="hidden" name="next_file" value="qos-sqm.htm">
+</form></div>
 <script>printHelp();</script>
 </body></html>
