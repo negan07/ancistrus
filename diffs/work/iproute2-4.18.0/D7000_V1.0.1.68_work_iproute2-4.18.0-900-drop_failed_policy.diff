@@ -1,0 +1,21 @@
+diff -urN work/iproute2-4.18.0/ip/rtm_map.c work/iproute2-4.18.0/ip/rtm_map.c
+--- work/iproute2-4.18.0/ip/rtm_map.c	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.18.0/ip/rtm_map.c	2018-04-20 22:19:19.034553115 +0200
+@@ -48,6 +48,8 @@ char *rtnl_rtntype_n2a(int id, char *buf
+ 		return "nat";
+ 	case RTN_XRESOLVE:
+ 		return "xresolve";
++	case RTN_FAILED_POLICY:
++		return "failed_policy";
+ 	default:
+ 		snprintf(buf, len, "%d", id);
+ 		return buf;
+@@ -83,6 +85,8 @@ int rtnl_rtntype_a2n(int *id, char *arg)
+ 		res = RTN_UNICAST;
+ 	else if (strcmp(arg, "throw") == 0)
+ 		res = RTN_THROW;
++	else if (strcmp(arg, "failed_policy") == 0)
++		res = RTN_FAILED_POLICY;
+ 	else {
+ 		res = strtoul(arg, &end, 0);
+ 		if (!end || end == arg || *end || res > 255)

@@ -1,6 +1,6 @@
-diff -urN work/iproute2-4.16.0/include/netinet/tcp.h work/iproute2-4.16.0/include/netinet/tcp.h
---- work/iproute2-4.16.0/include/netinet/tcp.h	2018-04-02 19:06:08.000000000 +0200
-+++ work/iproute2-4.16.0/include/netinet/tcp.h	1970-01-01 01:00:00.000000000 +0100
+diff -urN work/iproute2-4.18.0/include/netinet/tcp.h work/iproute2-4.18.0/include/netinet/tcp.h
+--- work/iproute2-4.18.0/include/netinet/tcp.h	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.18.0/include/netinet/tcp.h	1970-01-01 01:00:00.000000000 +0100
 @@ -1,231 +0,0 @@
 -/*
 - * Copyright (c) 1982, 1986, 1993
@@ -233,9 +233,9 @@ diff -urN work/iproute2-4.16.0/include/netinet/tcp.h work/iproute2-4.16.0/includ
 -#endif /* Misc.  */
 -
 -#endif /* netinet/tcp.h */
-diff -urN work/iproute2-4.16.0/lib/dnet_ntop.c work/iproute2-4.16.0/lib/dnet_ntop.c
---- work/iproute2-4.16.0/lib/dnet_ntop.c	2018-04-02 19:06:08.000000000 +0200
-+++ work/iproute2-4.16.0/lib/dnet_ntop.c	2018-04-20 21:49:10.427566080 +0200
+diff -urN work/iproute2-4.18.0/lib/dnet_ntop.c work/iproute2-4.18.0/lib/dnet_ntop.c
+--- work/iproute2-4.18.0/lib/dnet_ntop.c	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.18.0/lib/dnet_ntop.c	2018-04-20 21:49:10.427566080 +0200
 @@ -1,25 +1,26 @@
  /* SPDX-License-Identifier: GPL-2.0 */
  #include <errno.h>
@@ -278,9 +278,9 @@ diff -urN work/iproute2-4.16.0/lib/dnet_ntop.c work/iproute2-4.16.0/lib/dnet_nto
  	size_t pos = 0;
  	int started = 0;
  
-diff -urN work/iproute2-4.16.0/lib/dnet_pton.c work/iproute2-4.16.0/lib/dnet_pton.c
---- work/iproute2-4.16.0/lib/dnet_pton.c	2018-04-02 19:06:08.000000000 +0200
-+++ work/iproute2-4.16.0/lib/dnet_pton.c	2018-04-20 21:50:28.875325503 +0200
+diff -urN work/iproute2-4.18.0/lib/dnet_pton.c work/iproute2-4.18.0/lib/dnet_pton.c
+--- work/iproute2-4.18.0/lib/dnet_pton.c	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.18.0/lib/dnet_pton.c	2018-04-20 21:50:28.875325503 +0200
 @@ -1,24 +1,25 @@
  /* SPDX-License-Identifier: GPL-2.0 */
  #include <errno.h>

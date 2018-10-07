@@ -1,0 +1,13 @@
+diff -urN work/iproute2-4.18.0/configure work/iproute2-4.18.0/configure
+--- work/iproute2-4.18.0/configure	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.18.0/configure	2018-04-20 22:46:49.538797017 +0200
+@@ -281,7 +281,7 @@
+ 
+ check_mnl()
+ {
+-	if ${PKG_CONFIG} libmnl --exists
++	if [ "${HAVE_MNL}" = "y" ] && ${PKG_CONFIG} libmnl --exists
+ 	then
+ 		echo "HAVE_MNL:=y" >>$CONFIG
+ 		echo "yes"
+

@@ -1,7 +1,7 @@
-diff -urN work/iproute2-4.16.0/include/uapi/linux/fib_rules.h work/iproute2-4.16.0/include/uapi/linux/fib_rules.h
---- work/iproute2-4.16.0/include/uapi/linux/fib_rules.h	2018-04-02 19:06:08.000000000 +0200
-+++ work/iproute2-4.16.0/include/uapi/linux/fib_rules.h	2018-04-20 21:08:59.358439672 +0200
-@@ -54,6 +54,9 @@
+diff -urN work/iproute2-4.18.0/include/uapi/linux/fib_rules.h work/iproute2-4.18.0/include/uapi/linux/fib_rules.h
+--- work/iproute2-4.18.0/include/uapi/linux/fib_rules.h	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.18.0/include/uapi/linux/fib_rules.h	2018-04-20 21:08:59.358439672 +0200
+@@ -59,6 +59,9 @@
  	FRA_SUPPRESS_PREFIXLEN,
  	FRA_TABLE,	/* Extended table id */
  	FRA_FWMASK,	/* mask for netfilter mark */
@@ -11,9 +11,9 @@ diff -urN work/iproute2-4.16.0/include/uapi/linux/fib_rules.h work/iproute2-4.16
  	FRA_OIFNAME,
  	FRA_PAD,
  	FRA_L3MDEV,	/* iif or oif is l3mdev goto its table */
-diff -urN work/iproute2-4.16.0/include/uapi/linux/netfilter_ipv4/ip_tables.h work/iproute2-4.16.0/include/uapi/linux/netfilter_ipv4/ip_tables.h
---- work/iproute2-4.16.0/include/uapi/linux/netfilter_ipv4/ip_tables.h	2018-04-02 19:06:08.000000000 +0200
-+++ work/iproute2-4.16.0/include/uapi/linux/netfilter_ipv4/ip_tables.h	2018-04-20 21:17:03.765089515 +0200
+diff -urN work/iproute2-4.18.0/include/uapi/linux/netfilter_ipv4/ip_tables.h work/iproute2-4.18.0/include/uapi/linux/netfilter_ipv4/ip_tables.h
+--- work/iproute2-4.18.0/include/uapi/linux/netfilter_ipv4/ip_tables.h	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.18.0/include/uapi/linux/netfilter_ipv4/ip_tables.h	2018-04-20 21:17:03.765089515 +0200
 @@ -15,47 +15,130 @@
  
  #ifndef _IPTABLES_H
@@ -360,10 +360,18 @@ diff -urN work/iproute2-4.16.0/include/uapi/linux/netfilter_ipv4/ip_tables.h wor
 +#define IPT_ALIGN(s) (((s) + (__alignof__(struct ipt_entry)-1)) & ~(__alignof__(struct ipt_entry)-1))
 +#endif /*__KERNEL__*/
  #endif /* _IPTABLES_H */
-diff -urN work/iproute2-4.16.0/include/uapi/linux/rtnetlink.h work/iproute2-4.16.0/include/uapi/linux/rtnetlink.h
---- work/iproute2-4.16.0/include/uapi/linux/rtnetlink.h	2018-04-02 19:06:08.000000000 +0200
-+++ work/iproute2-4.16.0/include/uapi/linux/rtnetlink.h	2018-04-20 21:17:26.501019155 +0200
-@@ -317,6 +317,9 @@
+diff -urN work/iproute2-4.18.0/include/uapi/linux/rtnetlink.h work/iproute2-4.18.0/include/uapi/linux/rtnetlink.h
+--- work/iproute2-4.18.0/include/uapi/linux/rtnetlink.h	2018-08-13 21:11:32.000000000 +0200
++++ work/iproute2-4.18.0/include/uapi/linux/rtnetlink.h	2018-10-06 23:57:22.539399817 +0200
+@@ -221,6 +221,7 @@
+ 	RTN_THROW,		/* Not in this table		*/
+ 	RTN_NAT,		/* Translate this address	*/
+ 	RTN_XRESOLVE,		/* Use external resolver	*/
++	RTN_FAILED_POLICY,      /* Source address failed policy */
+ 	__RTN_MAX
+ };
+ 
+@@ -322,6 +323,9 @@
  	RTA_MP_ALGO, /* no longer used */
  	RTA_TABLE,
  	RTA_MARK,
@@ -373,9 +381,9 @@ diff -urN work/iproute2-4.16.0/include/uapi/linux/rtnetlink.h work/iproute2-4.16
  	RTA_MFC_STATS,
  	RTA_VIA,
  	RTA_NEWDST,
-diff -urN work/iproute2-4.16.0/ip/ip6tunnel.c work/iproute2-4.16.0/ip/ip6tunnel.c
---- work/iproute2-4.16.0/ip/ip6tunnel.c	2018-04-02 19:06:08.000000000 +0200
-+++ work/iproute2-4.16.0/ip/ip6tunnel.c	2018-04-20 21:18:07.068892928 +0200
+diff -urN work/iproute2-4.18.0/ip/ip6tunnel.c work/iproute2-4.18.0/ip/ip6tunnel.c
+--- work/iproute2-4.18.0/ip/ip6tunnel.c	2018-08-13 21:11:32.000000000 +0200
++++ work/iproute2-4.18.0/ip/ip6tunnel.c	2018-10-06 23:31:20.836129558 +0200
 @@ -42,6 +42,9 @@
  
  #define DEFAULT_TNL_HOP_LIMIT	(64)
@@ -386,10 +394,10 @@ diff -urN work/iproute2-4.16.0/ip/ip6tunnel.c work/iproute2-4.16.0/ip/ip6tunnel.
  static void usage(void) __attribute__((noreturn));
  
  static void usage(void)
-diff -urN work/iproute2-4.16.0/ip/iprule.c work/iproute2-4.16.0/ip/iprule.c
---- work/iproute2-4.16.0/ip/iprule.c	2018-04-02 19:06:08.000000000 +0200
-+++ work/iproute2-4.16.0/ip/iprule.c	2018-04-20 21:19:58.532542503 +0200
-@@ -44,6 +44,9 @@
+diff -urN work/iproute2-4.18.0/ip/iprule.c work/iproute2-4.18.0/ip/iprule.c
+--- work/iproute2-4.18.0/ip/iprule.c	2018-08-13 21:11:32.000000000 +0200
++++ work/iproute2-4.18.0/ip/iprule.c	2018-10-06 23:36:15.851236079 +0200
+@@ -45,6 +45,9 @@
  		"       ip rule { flush | save | restore }\n"
  		"       ip rule [ list [ SELECTOR ]]\n"
  		"SELECTOR := [ not ] [ from PREFIX ] [ to PREFIX ] [ tos TOS ] [ fwmark FWMARK[/MASK] ]\n"
@@ -398,10 +406,10 @@ diff -urN work/iproute2-4.16.0/ip/iprule.c work/iproute2-4.16.0/ip/iprule.c
 +#endif
  		"            [ iif STRING ] [ oif STRING ] [ pref NUMBER ] [ l3mdev ]\n"
  		"            [ uidrange NUMBER-NUMBER ]\n"
- 		"ACTION := [ table TABLE_ID ]\n"
-@@ -249,6 +252,16 @@
- 		else
- 			fprintf(fp, "fwmark 0x%x ", mark);
+ 		"            [ ipproto PROTOCOL ]\n"
+@@ -269,6 +272,16 @@
+ 			print_0xhex(PRINT_ANY, "fwmark", "fwmark 0x%x ", mark);
+ 		}
  	}
 +#ifdef _SC_BUILD_
 +	if (tb[RTA_SCMARK]) {
@@ -415,8 +423,8 @@ diff -urN work/iproute2-4.16.0/ip/iprule.c work/iproute2-4.16.0/ip/iprule.c
 +#endif
  
  	if (tb[FRA_IFNAME]) {
- 		fprintf(fp, "iif %s ", rta_getattr_str(tb[FRA_IFNAME]));
-@@ -654,7 +667,22 @@
+ 		if (!is_json_context())
+@@ -758,7 +771,22 @@
  				addattr32(&req.n, sizeof(req),
  					  FRA_FWMASK, fwmask);
  			}
@@ -440,10 +448,10 @@ diff -urN work/iproute2-4.16.0/ip/iprule.c work/iproute2-4.16.0/ip/iprule.c
  			__u32 realm;
  
  			NEXT_ARG();
-diff -urN work/iproute2-4.16.0/tc/f_fw.c work/iproute2-4.16.0/tc/f_fw.c
---- work/iproute2-4.16.0/tc/f_fw.c	2018-04-02 19:06:08.000000000 +0200
-+++ work/iproute2-4.16.0/tc/f_fw.c	2018-04-20 21:21:16.020296574 +0200
-@@ -109,6 +109,11 @@
+diff -urN work/iproute2-4.18.0/tc/f_fw.c work/iproute2-4.18.0/tc/f_fw.c
+--- work/iproute2-4.18.0/tc/f_fw.c	2018-08-13 21:11:32.000000000 +0200
++++ work/iproute2-4.18.0/tc/f_fw.c	2018-10-06 23:38:43.522788844 +0200
+@@ -108,6 +108,11 @@
  			}
  			strncpy(d, *argv, sizeof(d) - 1);
  			addattr_l(n, MAX_MSG, TCA_FW_INDEV, d, strlen(d) + 1);
@@ -455,10 +463,10 @@ diff -urN work/iproute2-4.16.0/tc/f_fw.c work/iproute2-4.16.0/tc/f_fw.c
  		} else if (strcmp(*argv, "help") == 0) {
  			explain();
  			return -1;
-diff -urN work/iproute2-4.16.0/tc/Makefile work/iproute2-4.16.0/tc/Makefile
---- work/iproute2-4.16.0/tc/Makefile	2018-04-02 19:06:08.000000000 +0200
-+++ work/iproute2-4.16.0/tc/Makefile	2018-04-20 21:20:48.212385006 +0200
-@@ -111,7 +111,7 @@
+diff -urN work/iproute2-4.18.0/tc/Makefile work/iproute2-4.18.0/tc/Makefile
+--- work/iproute2-4.18.0/tc/Makefile	2018-08-13 21:11:32.000000000 +0200
++++ work/iproute2-4.18.0/tc/Makefile	2018-10-06 23:59:22.967035093 +0200
+@@ -112,7 +112,7 @@
  TCLIB += tc_estimator.o
  TCLIB += tc_stab.o
  
@@ -467,19 +475,18 @@ diff -urN work/iproute2-4.16.0/tc/Makefile work/iproute2-4.16.0/tc/Makefile
  ifneq ($(IPT_LIB_DIR),)
  	CFLAGS += -DIPT_LIB_DIR=\"$(IPT_LIB_DIR)\"
  endif
-diff -urN work/iproute2-4.16.0/tc/tc_util.c work/iproute2-4.16.0/tc/tc_util.c
---- work/iproute2-4.16.0/tc/tc_util.c	2018-04-02 19:06:08.000000000 +0200
-+++ work/iproute2-4.16.0/tc/tc_util.c	2018-04-20 21:21:55.276171451 +0200
-@@ -71,7 +71,7 @@
- 
+diff -urN work/iproute2-4.18.0/tc/tc_util.c work/iproute2-4.18.0/tc/tc_util.c
+--- work/iproute2-4.18.0/tc/tc_util.c	2018-08-13 21:11:32.000000000 +0200
++++ work/iproute2-4.18.0/tc/tc_util.c	2018-10-06 23:41:07.470352887 +0200
+@@ -72,6 +72,7 @@
  	return lib_dir;
  }
--
+ 
 +#define rint(x) x
  int get_qdisc_handle(__u32 *h, const char *str)
  {
  	__u32 maj;
-@@ -257,7 +257,9 @@
+@@ -257,7 +258,9 @@
  int get_rate(unsigned int *rate, const char *str)
  {
  	char *p;

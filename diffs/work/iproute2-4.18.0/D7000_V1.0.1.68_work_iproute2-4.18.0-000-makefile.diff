@@ -1,6 +1,6 @@
-diff -urN work/iproute2-4.16.0/Makefile work/iproute2-4.16.0/Makefile
---- work/iproute2-4.16.0/Makefile	2017-02-20 17:47:52.000000000 +0100
-+++ work/iproute2-4.16.0/Makefile	2017-04-01 12:47:22.848442441 +0200
+diff -urN work/iproute2-4.18.0/Makefile work/iproute2-4.18.0/Makefile
+--- work/iproute2-4.18.0/Makefile	2018-08-13 21:11:32.000000000 +0200
++++ work/iproute2-4.18.0/Makefile	2018-10-06 23:26:15.681053749 +0200
 @@ -1,5 +1,6 @@
  # SPDX-License-Identifier: GPL-2.0
  # Top level Makefile for iproute2
@@ -8,7 +8,7 @@ diff -urN work/iproute2-4.16.0/Makefile work/iproute2-4.16.0/Makefile
  
  ifeq ("$(origin V)", "command line")
  VERBOSE = $(V)
-@@ -21,7 +22,7 @@
+@@ -23,7 +24,7 @@
  DOCDIR?=$(DATADIR)/doc/iproute2
  MANDIR?=$(DATADIR)/man
  ARPDDIR?=/var/lib/arpd
@@ -17,7 +17,7 @@ diff -urN work/iproute2-4.16.0/Makefile work/iproute2-4.16.0/Makefile
  BASH_COMPDIR?=$(DATADIR)/bash-completion/completions
  
  # Path to db_185.h include
-@@ -45,19 +46,19 @@
+@@ -49,19 +50,19 @@
  #options for mpls
  ADDLIB+=mpls_ntop.o mpls_pton.o
  
@@ -39,9 +39,9 @@ diff -urN work/iproute2-4.16.0/Makefile work/iproute2-4.16.0/Makefile
 -SUBDIRS=lib ip tc bridge misc netem genl tipc devlink rdma man
 +SUBDIRS=lib ip tc
  
- LIBNETLINK=../lib/libnetlink.a ../lib/libutil.a
+ LIBNETLINK=../lib/libutil.a ../lib/libnetlink.a
  LDLIBS += $(LIBNETLINK)
-@@ -65,27 +66,21 @@
+@@ -69,27 +70,21 @@
  all: config.mk
  	@set -e; \
  	for i in $(SUBDIRS); \
@@ -80,7 +80,7 @@ diff -urN work/iproute2-4.16.0/Makefile work/iproute2-4.16.0/Makefile
  
  snapshot:
  	echo "static const char SNAPSHOT[] = \""`date +%y%m%d`"\";" \
-@@ -105,4 +100,17 @@
+@@ -109,4 +104,17 @@
  cscope:
  	cscope -b -q -R -Iinclude -sip -slib -smisc -snetem -stc
  

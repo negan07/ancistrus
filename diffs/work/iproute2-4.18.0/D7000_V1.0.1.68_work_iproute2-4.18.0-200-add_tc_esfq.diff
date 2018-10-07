@@ -1,6 +1,6 @@
-diff -urN work/iproute2-4.16.0/tc/Makefile work/iproute2-4.16.0/tc/Makefile
---- work/iproute2-4.16.0/tc/Makefile	2016-12-13 00:07:42.000000000 +0100
-+++ work/iproute2-4.16.0/tc/Makefile	2017-02-15 14:03:20.593464080 +0100
+diff -urN work/iproute2-4.18.0/tc/Makefile work/iproute2-4.18.0/tc/Makefile
+--- work/iproute2-4.18.0/tc/Makefile	2016-12-13 00:07:42.000000000 +0100
++++ work/iproute2-4.18.0/tc/Makefile	2017-02-15 14:03:20.593464080 +0100
 @@ -10,6 +10,7 @@
  TCMODULES :=
  TCMODULES += q_fifo.o
@@ -9,9 +9,9 @@ diff -urN work/iproute2-4.16.0/tc/Makefile work/iproute2-4.16.0/tc/Makefile
  TCMODULES += q_red.o
  TCMODULES += q_prio.o
  TCMODULES += q_tbf.o
-diff -urN work/iproute2-4.16.0/include/uapi/linux/pkt_sched.h work/iproute2-4.16.0/include/uapi/linux/pkt_sched.h
---- work/iproute2-4.16.0/include/uapi/linux/pkt_sched.h	2016-12-13 00:07:42.000000000 +0100
-+++ work/iproute2-4.16.0/include/uapi/linux/pkt_sched.h	2017-02-15 14:04:20.324678961 +0100
+diff -urN work/iproute2-4.18.0/include/uapi/linux/pkt_sched.h work/iproute2-4.18.0/include/uapi/linux/pkt_sched.h
+--- work/iproute2-4.18.0/include/uapi/linux/pkt_sched.h	2016-12-13 00:07:42.000000000 +0100
++++ work/iproute2-4.18.0/include/uapi/linux/pkt_sched.h	2017-02-15 14:04:20.324678961 +0100
 @@ -233,6 +233,36 @@
  	__s32		allot;
  };
@@ -49,9 +49,9 @@ diff -urN work/iproute2-4.16.0/include/uapi/linux/pkt_sched.h work/iproute2-4.16
  /* RED section */
  
  enum {
-diff -urN work/iproute2-4.16.0/tc/q_esfq.c work/iproute2-4.16.0/tc/q_esfq.c
---- work/iproute2-4.16.0/tc/q_esfq.c	1970-01-01 01:00:00.000000000 +0100
-+++ work/iproute2-4.16.0/tc/q_esfq.c	2017-02-15 14:02:36.658041558 +0100
+diff -urN work/iproute2-4.18.0/tc/q_esfq.c work/iproute2-4.18.0/tc/q_esfq.c
+--- work/iproute2-4.18.0/tc/q_esfq.c	1970-01-01 01:00:00.000000000 +0100
++++ work/iproute2-4.18.0/tc/q_esfq.c	2017-02-15 14:02:36.658041558 +0100
 @@ -0,0 +1,224 @@
 +/*
 + * q_esfq.c		ESFQ.
