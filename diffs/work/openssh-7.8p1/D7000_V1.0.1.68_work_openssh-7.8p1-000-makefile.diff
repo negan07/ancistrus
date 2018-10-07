@@ -1,7 +1,7 @@
-diff -urN work/openssh-7.7p1/Makefile work/openssh-7.7p1/Makefile
---- work/openssh-7.7p1/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/openssh-7.7p1/Makefile	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,199 @@
+diff -urN work/openssh-7.8p1/Makefile work/openssh-7.8p1/Makefile
+--- work/openssh-7.8p1/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-7.8p1/Makefile	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,198 @@
 +include ../Rules.mak
 +
 +BINS			:= $(OPEN_SSH)/sshd $(OPEN_SSH)/ssh-keygen $(OPEN_SSH)/scp
@@ -119,7 +119,6 @@ diff -urN work/openssh-7.7p1/Makefile work/openssh-7.7p1/Makefile
 +	@echo "#PrintMotd yes" >> $(SSHD_CONF)
 +	@echo "#PrintLastLog yes" >> $(SSHD_CONF)
 +	@echo "#TCPKeepAlive yes" >> $(SSHD_CONF)
-+	@echo "#UseLogin no" >> $(SSHD_CONF)
 +	@echo "#PermitUserEnvironment no" >> $(SSHD_CONF)
 +	@echo "Compression yes" >> $(SSHD_CONF)
 +	@echo "#ClientAliveInterval 0" >> $(SSHD_CONF)

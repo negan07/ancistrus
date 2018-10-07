@@ -1,6 +1,6 @@
-diff -urN work/openssh-7.7p1/openssh-7.7p1/log.c work/openssh-7.7p1/openssh-7.7p1/log.c
---- work/openssh-7.7p1/openssh-7.7p1/log.c	1970-01-01 01:00:00.000000000 +0100
-+++ work/openssh-7.7p1/openssh-7.7p1/log.c	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/openssh-7.8p1/openssh-7.8p1/log.c work/openssh-7.8p1/openssh-7.8p1/log.c
+--- work/openssh-7.8p1/openssh-7.8p1/log.c	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-7.8p1/openssh-7.8p1/log.c	2018-01-05 12:00:11.000000000 +0100
 @@ -52,6 +52,8 @@
  
  #include "log.h"
@@ -10,7 +10,7 @@ diff -urN work/openssh-7.7p1/openssh-7.7p1/log.c work/openssh-7.7p1/openssh-7.7p
  static LogLevel log_level = SYSLOG_LEVEL_INFO;
  static int log_on_stderr = 1;
  static int log_stderr_fd = STDERR_FILENO;
-@@ -400,7 +402,7 @@
+@@ -406,7 +408,7 @@
  	char msgbuf[MSGBUFSIZ];
  	char fmtbuf[MSGBUFSIZ];
  	char *txt = NULL;
@@ -19,7 +19,7 @@ diff -urN work/openssh-7.7p1/openssh-7.7p1/log.c work/openssh-7.7p1/openssh-7.7p
  	int saved_errno = errno;
  	log_handler_fn *tmp_handler;
  
-@@ -411,34 +413,34 @@
+@@ -417,34 +419,34 @@
  	case SYSLOG_LEVEL_FATAL:
  		if (!log_on_stderr)
  			txt = "fatal";
@@ -62,7 +62,7 @@ diff -urN work/openssh-7.7p1/openssh-7.7p1/log.c work/openssh-7.7p1/openssh-7.7p
  		break;
  	}
  	if (txt != NULL && log_handler == NULL) {
-@@ -462,11 +464,13 @@
+@@ -468,11 +470,13 @@
  	} else {
  #if defined(HAVE_OPENLOG_R) && defined(SYSLOG_DATA_INIT)
  		openlog_r(argv0 ? argv0 : __progname, LOG_PID, log_facility, &sdata);
