@@ -19,7 +19,7 @@
 #
 # Startup rc for qos-sqm
 #
-# Usage: $0 < start restart startforced restartforced stop show stats version > (< debug_mode >) (< verbose_mode >)
+# Usage: $0 < start restart startforced restartforced stop details stats version > (< debug_mode >) (< verbose_mode >)
 #
 
 path_binaries() {
@@ -176,7 +176,12 @@ return 0
 show_sqm() {
 local INGR=$( ifb_name ${IFACE} )
 local INGRLNK=`$IP_BINARY link | grep ${INGR}`
-[ -z "$1" ] || S="-s"
+[ -z "$1" ] && {
+S="-d"
+} || {
+S="-s"
+V="-v"
+}
 
     for I in qdisc class filter
     do
@@ -193,8 +198,8 @@ local INGRLNK=`$IP_BINARY link | grep ${INGR}`
     done
 echo
 echo "--- MANGLE ---"
-iptables -t mangle -nL -v
-[ "$IP6MODE" != "disable" ] && ip6tables -t mangle -nL -v
+iptables -t mangle -nL $V
+[ "$IP6MODE" != "disable" ] && ip6tables -t mangle -nL $V
 
 return 0
 }
@@ -231,7 +236,7 @@ _EOF_
 }
 
 usage() {
-echo "Usage: $0 < start restart startforced restartforced stop show stats version help > (< debug >) (< verbose >)"
+echo "Usage: $0 < start restart startforced restartforced stop details stats version help > (< debug >) (< verbose >)"
 }
 
 help_guide() {
@@ -508,7 +513,7 @@ logging_setup
     stop)
     stop_sqm
     ;;
-    show)
+    details)
     show_sqm
     ;;
     stats)
