@@ -33,13 +33,13 @@ function setDefs() {
 		}
 	if(cf.h_qos_disc.value=="") cf.qos_disc.value="fq_codel";
 	if(cf.h_qos_shaper.value=="") cf.qos_shaper.value="htb";
-	if(cf.qos_script.value=="") cf.qos_script.value="";
 	if(cf.h_qos_ignore_dscp_egress.value=="") cf.qos_ignore_dscp_egress.value="0";
 	if(cf.h_qos_ignore_dscp_ingress.value=="") cf.qos_ignore_dscp_ingress.value="1";
 	if(cf.h_qos_dserv_egress.value=="") cf.qos_dserv_egress.value="diffserv3";
 	if(cf.h_qos_dserv_ingress.value=="") cf.qos_dserv_ingress.value="diffserv3";
 	if(cf.h_qos_eecn.value=="") cf.qos_eecn.value="ECN";
 	if(cf.h_qos_iecn.value=="") cf.qos_iecn.value="ECN";
+	if(cf.qos_script.value=="") cf.qos_script.value="";
 }
 
 function loadCheck() {
@@ -124,7 +124,7 @@ function checkData() {
 	return true;
 }
 
-function check_perscript() {
+function checkPerscript() {
 	var cf=document.forms['perscript'];
 	var filename="";
 	var destdir="/tmp/";
@@ -160,13 +160,15 @@ function check_perscript() {
 <div><a class="page_title" href="javascript:gotoWiki('qos-sqm-package/');">QOS SQM</a></div>
 <div class="fix_button">
 <table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
-<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
+<input class="cancel_bt" type="reset" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
 &nbsp;
-<input type="button" class="common_bt" value="Details" onClick="this.form.pipe_cmd.value='/usr/sbin/rc_app/rc_qos details';AncstdAction(this.form,'anc_run.htm','qos-sqm.htm','pipe','');">
+<input class="common_bt" type="submit" name="resetqos" value="Reset" onClick="this.form.job.value='home';this.form.todo.value='/usr/sbin/rc_app/rc_qos reset';if(!confirm('Qos sqm settings are about to be unset: proceed ?')) return false;else return true">
 &nbsp;
-<input type="button" class="common_bt" value="Stats" onClick="this.form.pipe_cmd.value='/usr/sbin/rc_app/rc_qos stats';AncstdAction(this.form,'anc_run.htm','qos-sqm.htm','pipe','');">
+<input class="common_bt" type="button" name="details" value="Details" onClick="this.form.pipe_cmd.value='/usr/sbin/rc_app/rc_qos details';AncstdAction(this.form,'anc_run.htm','qos-sqm.htm','pipe','');">
 &nbsp;
-<input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return checkData()">
+<input class="common_bt" type="button" name="stats" value="Stats" onClick="this.form.pipe_cmd.value='/usr/sbin/rc_app/rc_qos stats';AncstdAction(this.form,'anc_run.htm','qos-sqm.htm','pipe','');">
+&nbsp;
+<input class="apply_bt" type="submit" name="apply" value="Apply" onClick="return checkData()">
 </td></tr></table>
 </div>
 <div id="main" class="main_top_button">
@@ -275,7 +277,7 @@ function check_perscript() {
 <table border="0" cellpadding="0" cellspacing="3" width="100%">
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('qos-sqm-package#qos_script')" tabindex="-1"><b>Install a Personal QOS Script</b></a></td></tr>
 <tr><td colspan="2" align="center"><input type="FILE" name="download" size="40" maxlength="128" value=""></td></tr>
-<tr><td colspan="2" align="center"><input class="apply_bt" type="submit" name="install" value="Install" onClick="return check_perscript();"></td></tr>
+<tr><td colspan="2" align="center"><input class="apply_bt" type="submit" name="install" value="Install" onClick="return checkPerscript();"></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr></table>
 <input type="hidden" name="job" value="home">
 <input type="hidden" name="todo" value="">

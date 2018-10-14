@@ -19,7 +19,7 @@
 #
 # Startup rc for qos-sqm
 #
-# Usage: $0 < start restart startforced restartforced stop details stats version > (< debug_mode >) (< verbose_mode >)
+# Usage: $0 < start restart startforced restartforced stop details stats reset help > (< debug >) (< verbose >)
 #
 
 path_binaries() {
@@ -204,7 +204,29 @@ iptables -t mangle -nL $V
 return 0
 }
 
-version() {
+reset() {
+# Stop qos-sqm
+stop_sqm >/dev/null 2>&1
+
+# Set original qos default vars
+set -- ${DEF}
+ORIGS="$1 $2 $3"
+set -- ${VAR}
+for V in $ORIGS
+do
+anc nvram set $1 $V
+shift
+done
+
+# Unset other qos vars
+for V in "$@"
+do
+[ "`echo $V | head -c 4`" = "qos_" ] && anc nvram unset $V
+done
+nvram commit
+}
+
+splash() {
 cat << _EOF_
 ################################################################################
 # (Cero3 Shaper)
@@ -234,7 +256,7 @@ _EOF_
 }
 
 usage() {
-echo "Usage: $0 < start restart startforced restartforced stop details stats version help > (< debug >) (< verbose >)"
+echo "Usage: $0 < start restart startforced restartforced stop details stats reset help > (< debug >) (< verbose >)"
 }
 
 help_guide() {
@@ -517,11 +539,11 @@ logging_setup
     stats)
     show_sqm stats
     ;;
-    -v|-V|--version|version)
-    version
+    reset)
+    reset
     ;;
-    -h|-H|--help|help)
-    version
+    -v|-V|-h|-H|--help|help)
+    splash
     usage
     help_guide
     ;;
