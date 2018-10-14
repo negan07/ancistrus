@@ -34,8 +34,8 @@ function setDefs() {
 	if(cf.h_qos_disc.value=="") cf.qos_disc.value="fq_codel";
 	if(cf.h_qos_shaper.value=="") cf.qos_shaper.value="htb";
 	if(cf.qos_script.value=="") cf.qos_script.value="";
-	if(cf.h_qos_ignore_dscp_egress.value=="") cf.qos_ignore_dscp_egress.value="1";
-	if(cf.h_qos_ignore_dscp_ingress.value=="") cf.qos_ignore_dscp_ingress.value="0";
+	if(cf.h_qos_ignore_dscp_egress.value=="") cf.qos_ignore_dscp_egress.value="0";
+	if(cf.h_qos_ignore_dscp_ingress.value=="") cf.qos_ignore_dscp_ingress.value="1";
 	if(cf.h_qos_dserv_egress.value=="") cf.qos_dserv_egress.value="diffserv3";
 	if(cf.h_qos_dserv_ingress.value=="") cf.qos_dserv_ingress.value="diffserv3";
 	if(cf.h_qos_eecn.value=="") cf.qos_eecn.value="ECN";
@@ -226,14 +226,14 @@ function check_perscript() {
 </td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_ignore_dscp_egress');"><b>DSCP Uplink Filtering Classification</b></a></span></td>
 	<td align="right"><select name="qos_ignore_dscp_egress" size=1>
-			<option value="1">Undifferentiated Priority (DEF)</option>
-			<option value="0">N-Tier Priority</option>
+			<option value="1">Undifferentiated Priority</option>
+			<option value="0">N-Tier Priority (DEF)</option>
 	</select>
 </td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_ignore_dscp_ingress');"><b>DSCP Downlink Filtering Classification</b></a></span></td>
 	<td align="right"><select name="qos_ignore_dscp_ingress" size=1>
-			<option value="1">Undifferentiated Priority</option>
-			<option value="0">N-Tier Priority (DEF)</option>
+			<option value="1">Undifferentiated Priority (DEF)</option>
+			<option value="0">N-Tier Priority</option>
 	</select>
 </td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_eecn');"><b>Uplink Explicit Congestion Notification</b></a></span></td>

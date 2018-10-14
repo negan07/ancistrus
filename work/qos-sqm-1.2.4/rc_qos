@@ -230,8 +230,6 @@ cat << _EOF_
 # License: GPLv2
 #
 #
-# qos-sqm - version: 1.2.4
-#
 _EOF_
 }
 
@@ -331,14 +329,14 @@ Note that DSCP filtering can be performed with diffserv prioritization scheme on
 Options available
 '1': do not perform DSCP based filtering on egress (1-tier classification).
 '0': perform DSCP based filtering on egress (n-tier classification).
-(Default: 1).
+(Default: 0).
 
 qos_ignore_dscp_ingress
 Note that DSCP filtering can be performed with diffserv prioritization scheme only (htb, hfsc shapers).
 Options available
 '1': do not perform DSCP based filtering on ingress (1-tier classification).
 '0': perform DSCP based filtering on ingress (n-tier classification).
-(Default: 0).
+(Default: 1).
 
 qos_dserv_ingress
 Ingress prioritization scheme. 
