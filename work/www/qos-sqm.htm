@@ -108,9 +108,14 @@ function rateDlChange() {
 function checkData() {
 	var cf=document.forms[0];
 	var msg="";
+	var lim;
 
-	msg+=checkBW(cf.qos_uplink_rate, "Uplink bandwidth", 0, cf.qos_rate_unit.value, true);
-	msg+=checkBW(cf.qos_dwlink_rate, "Downlink bandwidth", 0, cf.qos_rate_unit_dw.value, true);
+	if(cf.qos_rate_unit.value=="Mbps") lim=999;
+	else lim=999999;
+	msg+=checkInt(cf.qos_uplink_rate, "Uplink bandwidth", 0, lim, true);
+	if(cf.qos_rate_unit_dw.value=="Mbps") lim=999;
+	else lim=999999;
+	msg+=checkInt(cf.qos_dwlink_rate, "Downlink bandwidth", 0, lim, true);
 		if(cf.qos_script.value!="") {
 		if(cf.qos_script.value.indexOf(".sqm")<0) msg+="Invalid qos script name: it must have \".sqm\" extension\n";
 		if(!checkInvalidChars(cf.qos_script.value, invalid_folder_char)) msg+="Invalid qos script name: characters not allowed\n";
