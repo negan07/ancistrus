@@ -93,16 +93,16 @@ function rateUlChange() {
 	var cf=document.forms[0];
 
 	if(cf.qos_uplink_rate.value=="") cf.qos_uplink_rate.value="0";
-	else if(cf.qos_rate_unit.value=="Mbps") cf.qos_uplink_rate.value=Math.floor(parseInt(cf.qos_uplink_rate.value)/1024);
-	else cf.qos_uplink_rate.value=Math.floor(parseInt(cf.qos_uplink_rate.value)*1024);
+	else if(cf.qos_rate_unit.value=="Mbps") cf.qos_uplink_rate.value=Math.floor(parseInt(cf.qos_uplink_rate.value)/1000);
+	else cf.qos_uplink_rate.value=Math.floor(parseInt(cf.qos_uplink_rate.value)*1000);
 }
 
 function rateDlChange() {
 	var cf=document.forms[0];
 
 	if(cf.qos_dwlink_rate.value=="") cf.qos_dwlink_rate.value="0";
-	else if(cf.qos_rate_unit_dw.value=="Mbps") cf.qos_dwlink_rate.value=Math.floor(parseInt(cf.qos_dwlink_rate.value)/1024);
-	else cf.qos_dwlink_rate.value=Math.floor(parseInt(cf.qos_dwlink_rate.value)*1024);
+	else if(cf.qos_rate_unit_dw.value=="Mbps") cf.qos_dwlink_rate.value=Math.floor(parseInt(cf.qos_dwlink_rate.value)/1000);
+	else cf.qos_dwlink_rate.value=Math.floor(parseInt(cf.qos_dwlink_rate.value)*1000);
 }
 
 function checkData() {

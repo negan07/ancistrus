@@ -73,8 +73,8 @@ shift
 done
 
 # Convert ul/dw rate values from mbps to kbps to mantain compatibility
-[ "${UP_RATE_UNIT}" = "Mbps" ] && UPLINK=$(( ${UPLINK} * 1024 )) && UP_RATE_UNIT="Kbps"
-[ "${DW_RATE_UNIT}" = "Mbps" ] && DOWNLINK=$(( ${DOWNLINK} * 1024 )) && DW_RATE_UNIT="Kbps"
+[ "${UP_RATE_UNIT}" = "Mbps" ] && UPLINK=$(( ${UPLINK} * 1000 )) && UP_RATE_UNIT="Kbps"
+[ "${DW_RATE_UNIT}" = "Mbps" ] && DOWNLINK=$(( ${DOWNLINK} * 1000 )) && DW_RATE_UNIT="Kbps"
 
 # These are the modules that undo_modules() will attempt to unload
 [ -z "$ALL_UNDO_MODULES" ] && ALL_UNDO_MODULES="sch_$SHAPER cls_flow sch_$QDISC act_ipt sc_track_ftp sc_priority"
@@ -277,7 +277,7 @@ Real upload bandwidth (no bearer, no max): it can be discovered with 'speedtest'
 (Default: 512).
 
 qos_rate_unit
-Upload rate unit. Note that Mbps=1024*Kbps.
+Upload rate unit. Note that according to pure SI-prefix notation Mbps=1000*Kbps.
 Options
 'Kbps': kilobits per second.
 'Mbps': megabits per second.
@@ -288,7 +288,7 @@ Real download bandwidth: as before.
 (Default: 0 = download qos disabled).
 
 qos_rate_unit_dw
-Download rate unit. Note that Mbps=1024*Kbps.
+Download rate unit. Note that according to pure SI-prefix notation Mbps=1000*Kbps.
 Options
 'Kbps': kilobits per second.
 'Mbps': megabits per second.
