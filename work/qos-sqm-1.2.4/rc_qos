@@ -438,7 +438,7 @@ Egress Explicit Congestion Notification.
 Options available
 'ECN': egress ECN on.
 'NOECN': egress ECN off.
-(Default: ECN).
+(Default: NOECN).
 
 qos_idisc_opts
 Other defined ingress qdisc options.
@@ -463,12 +463,12 @@ In case of other option a value of 1500 will be used as fallback.
 qos_itarget_burst_dur
 Setup the ingress target burst duration (ms) to leap over CPU interrupts when the CPU is severly loaded.
 Setting this value to 0, in conjunction with htb shaper, allows htb default burst of 2*mtu.
-(Default: 3).
+(Default: 1).
 
 qos_etarget_burst_dur
 Setup the egress target burst duration (ms) to leap over CPU interrupts when the CPU is severly loaded.
 Setting this value to 0, in conjunction with htb shaper, allows htb default burst of 2*mtu.
-(Default: 3).
+(Default: 1).
 
 How to setup
 All settings can be setup at once with: 
