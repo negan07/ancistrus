@@ -39,7 +39,6 @@ function setDefs() {
 	if(cf.h_qos_dserv_ingress.value=="") cf.qos_dserv_ingress.value="diffserv3";
 	if(cf.h_qos_eecn.value=="") cf.qos_eecn.value="ECN";
 	if(cf.h_qos_iecn.value=="") cf.qos_iecn.value="ECN";
-	if(cf.qos_script.value=="") cf.qos_script.value="";
 }
 
 function loadCheck() {
@@ -110,12 +109,14 @@ function checkData() {
 	var msg="";
 	var lim;
 
-	if(cf.qos_rate_unit.value=="Mbps") lim=999;
+	if(cf.qos_rate_unit.value=="Mbps") lim=9999;
 	else lim=999999;
-	msg+=checkInt(cf.qos_uplink_rate, "Uplink bandwidth", 0, lim, true);
-	if(cf.qos_rate_unit_dw.value=="Mbps") lim=999;
+	if(cf.qos_uplink_rate.value.length>1 && cf.qos_uplink_rate.value[0]=='0') msg+="Invalid Uplink bandwidth value";
+	else msg+=checkInt(cf.qos_uplink_rate, "Uplink bandwidth", 0, lim, true);
+	if(cf.qos_rate_unit_dw.value=="Mbps") lim=9999;
 	else lim=999999;
-	msg+=checkInt(cf.qos_dwlink_rate, "Downlink bandwidth", 0, lim, true);
+	if(cf.qos_dwlink_rate.value.length>1 && cf.qos_dwlink_rate.value[0]=='0') msg+="Invalid Downlink bandwidth value";
+	else msg+=checkInt(cf.qos_dwlink_rate, "Downlink bandwidth", 0, lim, true);
 		if(cf.qos_script.value!="") {
 		if(cf.qos_script.value.indexOf(".sqm")<0) msg+="Invalid qos script name: it must have \".sqm\" extension\n";
 		if(!checkInvalidChars(cf.qos_script.value, invalid_folder_char)) msg+="Invalid qos script name: characters not allowed\n";
