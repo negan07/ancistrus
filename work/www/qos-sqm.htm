@@ -37,8 +37,19 @@ function setDefs() {
 	if(cf.h_qos_ignore_dscp_ingress.value=="") cf.qos_ignore_dscp_ingress.value="1";
 	if(cf.h_qos_dserv_egress.value=="") cf.qos_dserv_egress.value="diffserv3";
 	if(cf.h_qos_dserv_ingress.value=="") cf.qos_dserv_ingress.value="diffserv3";
+	EcnDivCheck();
 	if(cf.h_qos_eecn.value=="") cf.qos_eecn.value="NOECN";
 	if(cf.h_qos_iecn.value=="") cf.qos_iecn.value="ECN";
+}
+
+function EcnDivCheck() {
+	var cf=document.forms[0];
+	var div_obj, ecnopt=["eecn", "eecnval", "iecn", "iecnval"];
+
+		for(var i=0;i<ecnopt.length;i++) {
+		div_obj=document.getElementById(ecnopt[i]);
+		((div_obj!=null && cf.qos_disc.value!="sfq") ? div_obj.style.display="inline" : div_obj.style.display="none");
+		}
 }
 
 function loadCheck() {
@@ -205,7 +216,7 @@ function checkPerscript() {
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_disc');"><b>Disc Algorithm</b></a></span></td>
-	<td align="right"><select name="qos_disc" onChange="loadCheck()" size=1>
+	<td align="right"><select name="qos_disc" onChange="loadCheck();EcnDivCheck();" size=1>
 		<option value="fq_codel">Fq_Codel (DEF)</option>
 		<option value="sfq">Sfq</option>
 	</select>
@@ -244,18 +255,18 @@ function checkPerscript() {
 			<option value="0">N-Tier Priority</option>
 	</select>
 </td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_eecn');"><b>Uplink Explicit Congestion Notification</b></a></span></td>
-	<td align="right"><select name="qos_eecn" onChange="if(this.value=='ECN' && this.form.qos_rate_unit.value=='Kbps' && this.form.qos_uplink_rate.value<1000) alert('Warning ! Uplink bandwidth too low for ECN !\n')" size=1>
+<tr><td align="left"><div id="eecn"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_eecn');"><b>Uplink Explicit Congestion Notification</b></a></span></div></td>
+	<td align="right"><div id="eecnval"><select name="qos_eecn" onChange="if(this.value=='ECN' && this.form.qos_rate_unit.value=='Kbps' && this.form.qos_uplink_rate.value<1000) alert('Warning ! Uplink bandwidth too low for ECN !\n')" size=1>
 			<option value="ECN">ECN On (DEF)</option>
 			<option value="NOECN">ECN Off</option>
 	</select>
-</td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_iecn');"><b>Downlink Explicit Congestion Notification</b></a></span></td>
-	<td align="right"><select name="qos_iecn" size=1>
+</div></td></tr>
+<tr><td align="left"><div id="iecn"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_iecn');"><b>Downlink Explicit Congestion Notification</b></a></span></div></td>
+	<td align="right"><div id="iecnval"><select name="qos_iecn" size=1>
 			<option value="ECN">ECN On (DEF)</option>
 			<option value="NOECN">ECN Off</option>
 	</select>
-</td></tr>
+</div></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('qos-sqm-package#qos_script');" tabindex="-1"><b>Personal QOS Script Name</b></a></td></tr>
 <tr><td colspan="2" align="center"><input type="text" class="text" name="qos_script" value="@qos_script#" size="40" maxlength="128"></td></tr>

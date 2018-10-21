@@ -459,7 +459,7 @@ get_burst() {
     local BURST=
 
     if [ -z "${TARGET_BURST_MS}" ] ; then
-	local TARGET_BURST_MS=3	# the duration of the burst in milliseconds
+	local TARGET_BURST_MS=1	# the duration of the burst in milliseconds
 	sqm_debug "Defaulting to ${TARGET_BURST_MS} milliseconds bursts"
     fi
 
