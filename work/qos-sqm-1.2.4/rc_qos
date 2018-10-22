@@ -268,6 +268,7 @@ There are many settings, but the main are generally the most important to know a
 Main settings
 
 qos_enable
+Options available
 '0': disable qos
 '1': enable qos
 (Default: 0).
@@ -278,29 +279,58 @@ Real upload bandwidth (no bearer, no max): it can be discovered with 'speedtest'
 
 qos_rate_unit
 Upload rate unit. Note that according to pure SI-prefix notation Mbps=1000*Kbps.
-Options
+Options available
 'Kbps': kilobits per second.
 'Mbps': megabits per second.
 (Default: Kbps).
 
 qos_dwlink_rate
 Real download bandwidth: as before.
-(Default: 0 = download qos disabled).
+(Default: 0=download qos disabled).
 
 qos_rate_unit_dw
 Download rate unit. Note that according to pure SI-prefix notation Mbps=1000*Kbps.
-Options
+Options available
 'Kbps': kilobits per second.
 'Mbps': megabits per second.
 (Default: Kbps).
 
 qos_llayer
-Adsl link layer.
-Options
+Link layer adaptation: wan connection proper overheads calculation.
+Options available
 'ethernet': VDSL connections.
 'atm': ADSL connections.
-'none': cables or other connections.
+'none': FTTH fiber, direct LAN, Cable or other connections.
 (Default: none).
+
+qos_overhead
+Per-packet size overhead: can be negative. Range possibile is [ -1500 - 1500 ].
+This setting may depend from the wan connection type and from the ISP.
+Typical values
+VDSL connections: it starts from 22 bytes + 4 bytes for every vlan tag + 8 bytes for pppoe connection.
+ADSL connections: typically 44 bytes overall; better tuning may be done with atm overhead detector script.
+Other connections (FTTH fiber / LAN / Cable): value is strictly ISP dependent.
+(Default: 0).
+
+qos_stab_mtu
+Max packet size creating size table for (bytes).
+For ethernet and atm link layer value must be >= (wan_mtu + qos_overhead) .
+For none link layer this setting is not active.
+(Default: 2047).
+
+qos_stab_tsize
+Number of entries in size/rates table (slots).
+For ethernet link layer use the default value.
+For atm link layer value is (qos_stab_mtu + 1) / 16 (typically 128) .
+For none link layer this setting is not active.
+(Default: 512).
+
+qos_stab_mpu
+Min packet size used (bytes).
+For ethernet link layer value must be > 0 (typically 64 is recommended).
+For atm link layer generally not required with exceptions depending from ISP (failsafe value could be 32).
+For none link layer this setting is not active.
+(Default: 0).
 
 qos_disc
 The qos disc sched algorithm used: note that the related sched disc algorithm must be available on router.
@@ -317,34 +347,25 @@ Options available
 'tbf': one of the simplest algos.
 (Default: htb).
 
-Other settings
-Default values should commonly satisfy: change them only if you know what to do.
-Consider that ingress=download, egress=upload.
-
-qos_script
-Use a custom qos script instead of builtin.
-Scripts must have .sqm extension and must have compatible content.
-Note that old legacy scripts: 'simple.qos', 'simplest.qos', 'simplest_tbf.qos' are embedded now.
-(Default: void).
-
-qos_llam
-Link layer adjustment method.
+qos_dserv_egress
+Egress prioritization scheme.
 Options available
-'htb_private': htb fixed table size of 256.
-'tc_stab': generic size table manipulations.
-(Default: default=tc_stab).
+For htb, hfsc shapers:
+'shaper': acting as a shaper (only).
+'classful': use of priority tiers.
+'diffserv3': priority scheme is supported.
+For tbf shaper value is only: 'shaper' (setting will be adjusted automatically at runtime).
+(Default: diffserv3).
 
-qos_zero_dscp_egress
+qos_dserv_ingress
+Ingress prioritization scheme.
 Options available
-'1': squashing differentiated services code points (DSCP) on egress.
-'0': keeping differentiated services code points (DSCP) on egress. 
-(Default: 1).
-
-qos_zero_dscp_ingress
-Options available
-'1': squashing differentiated services code points (DSCP) from ingress
-'0': keeping differentiated services code points (DSCP) from ingress.
-(Default: 1).
+For htb, hfsc shapers:
+'shaper': acting as a shaper (only).
+'classful': use of priority tiers.
+'diffserv3': priority scheme is supported.
+For tbf shaper value is only: 'shaper' (setting will be adjusted automatically at runtime).
+(Default: diffserv3).
 
 qos_ignore_dscp_egress
 Note that DSCP filtering can be performed with diffserv prioritization scheme only (htb, hfsc shapers).
@@ -360,45 +381,40 @@ Options available
 '0': perform DSCP based filtering on ingress (n-tier classification).
 (Default: 1).
 
-qos_dserv_ingress
-Ingress prioritization scheme. 
+qos_eecn
+Egress Explicit Congestion Notification.
+It's recommended to set ECN on high uplink rates (VDSL connections) and NOECN on low uplink rates (ADSL connections).
+Note that this option is not available in conjunction with classless shapers (sfq).
 Options available
-For htb, hfsc shapers:
-'shaper': acting as a shaper (only).
-'classful': use of priority tiers.
-'diffserv3': priority scheme is supported.
-For tbf shaper value is only: 'shaper' (setting will be adjusted automatically at runtime).
-(Default: diffserv3).
+'ECN': egress ECN on.
+'NOECN': egress ECN off.
+(Default: NOECN).
 
-qos_dserv_egress
-Egress prioritization scheme. 
+qos_iecn
+Ingress Explicit Congestion Notification.
+It's recommended to set ECN to notify congestions to local hosts before starting to drop packets.
+Note that this option is not available in conjunction with classless shapers (sfq).
 Options available
-For htb, hfsc shapers:
-'shaper': acting as a shaper (only).
-'classful': use of priority tiers.
-'diffserv3': priority scheme is supported.
-For tbf shaper value is only: 'shaper' (setting will be adjusted automatically at runtime).
-(Default: diffserv3).
+'ECN': ingress ECN on.
+'NOECN': ingress ECN off.
+(Default: ECN).
 
-qos_ipt_mask
-Iptables mask. To disable: set mask to '0xffffffff'.
-(Default: 0xff).
+qos_script
+Use a custom qos script instead of builtin.
+Scripts must have .sqm extension and must have compatible content.
+Note that old legacy scripts: 'simple.qos', 'simplest.qos', 'simplest_tbf.qos' are embedded now.
+(Default: void).
 
-qos_overhead
-Per-packet size overhead: can be negative.
-(Default: 0).
+Other settings
+Default values should commonly satisfy: change them only if you know what to do.
+Consider that ingress=download, egress=upload.
 
-qos_stab_mtu
-Max packet size creating size table for.
-(Default: 2047).
-
-qos_stab_mpu
-Min packet size used.
-(Default: 0).
-
-qos_stab_tsize
-Table size.
-(Default: 512).
+qos_llam
+Link layer adjustment method.
+Options available
+'htb_private': htb fixed table size of 256.
+'tc_stab': generic size table manipulations.
+(Default: default=tc_stab).
 
 qos_autoflow
 Options available
@@ -406,59 +422,34 @@ Options available
 '0': the default of 1024 will be used for all Xfq_codel qdiscs.
 (Default: 0).
 
+qos_ipt_mask
+Iptables mask. To disable: set mask to '0xffffffff'.
+(Default: 0xff).
+
 qos_limit
 Global queue size hard limit.
 (Default: 1001).
-
-qos_ilimit
-Ingress queue size limit.
-(Default: void).
 
 qos_elimit
 Egress queue size limit.
 (Default: void).
 
-qos_itarget
-Ingress minimum queue delay target.
+qos_ilimit
+Ingress queue size limit.
 (Default: void).
 
 qos_etarget
 Egress minimum queue delay target.
 (Default: void).
 
-qos_iecn
-Ingress Explicit Congestion Notification.
-Options available
-'ECN': ingress ECN on.
-'NOECN': ingress ECN off.
-(Default: ECN).
-
-qos_eecn
-Egress Explicit Congestion Notification.
-Options available
-'ECN': egress ECN on.
-'NOECN': egress ECN off.
-(Default: NOECN).
-
-qos_idisc_opts
-Other defined ingress qdisc options.
-(Default: void).
-
-qos_edisc_opts
-Other defined egress qdisc options.
+qos_itarget
+Ingress minimum queue delay target.
 (Default: void).
 
 qos_codel_target
-Used in conjunction with fq_codel disc only: target of 5ms is good for fast links, in the worst cases it depends from dw bandwidth and it is recalculated.
+Used in conjunction with fq_codel disc only: target of 5ms is good for fast links, in the worst cases it depends from
+dw bandwidth and it is recalculated.
 (Default: 5ms).
-
-qos_htb_quantum_function
-Used only in conjunction with htb shaper: scale quantum with bandwidth to lower computation cost.
-Options available
-'linear': function is a continuous straight line.
-'step': function is linear step by step only.
-In case of other option a value of 1500 will be used as fallback.
-(Default: linear).
 
 qos_itarget_burst_dur
 Setup the ingress target burst duration (ms) to leap over CPU interrupts when the CPU is severly loaded.
@@ -469,6 +460,36 @@ qos_etarget_burst_dur
 Setup the egress target burst duration (ms) to leap over CPU interrupts when the CPU is severly loaded.
 Setting this value to 0, in conjunction with htb shaper, allows htb default burst of 2*mtu.
 (Default: 1).
+
+qos_edisc_opts
+Other defined egress qdisc options.
+(Default: void).
+
+qos_idisc_opts
+Other defined ingress qdisc options.
+(Default: void).
+
+qos_zero_dscp_egress
+Legacy option to mantain retrocompatibility with old configs.
+Options available
+'1': squashing differentiated services code points (DSCP) on egress.
+'0': keeping differentiated services code points (DSCP) on egress.
+(Default: 1).
+
+qos_zero_dscp_ingress
+Legacy option to mantain retrocompatibility with old configs.
+Options available
+'1': squashing differentiated services code points (DSCP) from ingress.
+'0': keeping differentiated services code points (DSCP) from ingress.
+(Default: 1).
+
+qos_htb_quantum_function
+Used only in conjunction with htb shaper: scale quantum with bandwidth to lower computation cost.
+Options available
+'linear': function is a continuous straight line.
+'step': function is linear step by step only.
+In case of other option a value of 1500 will be used as fallback.
+(Default: linear).
 
 How to setup
 All settings can be setup at once with: 
