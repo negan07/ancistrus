@@ -236,6 +236,7 @@ verify_qdisc() {
     local args=""
 
     create_ifb $ifb || return 1
+
     case $qdisc in
         #ingress is special
         ingress) root_string="" ;;
@@ -449,7 +450,7 @@ htb_quantum_step() {
 # at the configured bandwidth conceptuallly the matching quantum for this burst
 # should be BURST/number_of_tiers to give each htb tier a chance to dequeue into
 # each burst, but that most likely will end up with a somewhat too small quantum.
-# Note that to get htb to report the configured burst/cburst one needs to issue
+# Note: to get htb to report the configured burst/cburst one needs to issue
 # the following command (for ifb4pppoe-wan):
 #	tc -d class show dev ifb4pppoe-wan
 get_burst() {
