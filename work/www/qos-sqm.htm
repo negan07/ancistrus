@@ -53,11 +53,27 @@ function EcnDivCheck() {
 }
 
 function loadCheck() {
-	var cf=document.forms[0];
+	var cf=document.forms[0], ul=1, dl=1;
 
+	cf.qos_dserv_egress.disabled=false;
+	cf.qos_dserv_ingress.disabled=false;
+	cf.qos_ignore_dscp_egress.disabled=false;
+	cf.qos_ignore_dscp_ingress.disabled=false;
+		if(cf.qos_uplink_rate.value=="0") {
+		cf.qos_dserv_egress.disabled=true;
+		cf.qos_ignore_dscp_egress.disabled=true;
+		cf.qos_eecn.disabled=true;
+		ul=0;
+		}
+		if(cf.qos_dwlink_rate.value=="0") {
+		cf.qos_dserv_ingress.disabled=true;
+		cf.qos_ignore_dscp_ingress.disabled=true;
+		cf.qos_iecn.disabled=true;
+		dl=0;
+		}
 		if(cf.qos_disc.value=="fq_codel") {
-		cf.qos_eecn.disabled=false;
-		cf.qos_iecn.disabled=false;
+		if(ul) cf.qos_eecn.disabled=false;
+		if(dl) cf.qos_iecn.disabled=false;
 		if(cf.qos_shaper.value=="hfsc") cf.qos_shaper.value="htb";
 		cf.qos_shaper[1].disabled=true;
 		}
@@ -75,21 +91,25 @@ function loadCheck() {
 		cf.qos_dserv_ingress[2].disabled=true;
 		}
 		else {
-		cf.qos_dserv_egress[1].disabled=false;
-		cf.qos_dserv_egress[2].disabled=false;
-		cf.qos_dserv_ingress[1].disabled=false;
-		cf.qos_dserv_ingress[2].disabled=false;
+			if(ul) {
+			cf.qos_dserv_egress[1].disabled=false;
+			cf.qos_dserv_egress[2].disabled=false;
+			}
+			if(dl) {
+			cf.qos_dserv_ingress[1].disabled=false;
+			cf.qos_dserv_ingress[2].disabled=false;
+			}
 		}
 		if(cf.qos_dserv_egress.value!="diffserv3") {
 		cf.qos_ignore_dscp_egress.value="1";
 		cf.qos_ignore_dscp_egress[1].disabled=true;
 		}
-		else cf.qos_ignore_dscp_egress[1].disabled=false;
+		else if(ul) cf.qos_ignore_dscp_egress[1].disabled=false;
 		if(cf.qos_dserv_ingress.value!="diffserv3") {
 		cf.qos_ignore_dscp_ingress.value="1";
 		cf.qos_ignore_dscp_ingress[1].disabled=true;
 		}
-		else cf.qos_ignore_dscp_ingress[1].disabled=false;
+		else if(dl) cf.qos_ignore_dscp_ingress[1].disabled=false;
 }
 
 function varInit() {
@@ -116,9 +136,7 @@ function rateDlChange() {
 }
 
 function checkData() {
-	var cf=document.forms[0];
-	var msg="";
-	var lim;
+	var cf=document.forms[0], msg="", lim;
 
 	if(cf.qos_rate_unit.value=="Mbps") lim=9999;
 	else lim=999999;
@@ -193,25 +211,25 @@ function checkPerscript() {
 <tr><td nowrap colspan="2"><input type="checkbox" name="qos_enable" value="@h_qos_enable#"><a href="javascript:gotoWiki('qos-sqm-package#qos_enable');"><b>Turn QOS Service On</b></a></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td nowrap><a href="javascript:gotoWiki('qos-sqm-package#qos_uplink_rate');"><b>Uplink Bandwidth</b></a></td>
-<td nowrap align="right"><input type="text" class="num" name="qos_uplink_rate" value="@qos_uplink_rate#" size=6 maxlength=6>
+<td nowrap align="right"><input type="text" class="num" name="qos_uplink_rate" value="@qos_uplink_rate#" onChange="loadCheck()" size=6 maxlength=6>
 &nbsp;	<select name="qos_rate_unit" onChange="rateUlChange()" size=1>
 		<option value="Kbps">Kbps</option>
 		<option value="Mbps">Mbps</option>
 	</select>
 </td></tr>
 <tr><td nowrap><a href="javascript:gotoWiki('qos-sqm-package#qos_dwlink_rate');"><b>Downlink Bandwidth</b></a></td>
-<td nowrap align="right"><input type="text" class="num" name="qos_dwlink_rate" value="@qos_dwlink_rate#" size=6 maxlength=6>
+<td nowrap align="right"><input type="text" class="num" name="qos_dwlink_rate" value="@qos_dwlink_rate#" onChange="loadCheck()" size=6 maxlength=6>
 &nbsp;	<select name="qos_rate_unit_dw" onChange="rateDlChange()" size=1>
 		<option value="Kbps">Kbps</option>
 		<option value="Mbps">Mbps</option>
 	</select>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_llayer');"><b>Dsl Link Layer</b></a></span></td>
+<tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_llayer');"><b>Link Layer Adaptation</b></a></span></td>
 	<td align="right"><select name="qos_llayer" size=1>
-		<option value="ethernet">VDSL</option>
-		<option value="atm">ADSL</option>
-		<option value="none">Other (DEF)</option>
+		<option value="ethernet">VDSL (ethernet)</option>
+		<option value="atm">ADSL (atm)</option>
+		<option value="none">Other (none) (DEF)</option>
 	</select>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
@@ -268,8 +286,8 @@ function checkPerscript() {
 	</select>
 </div></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('qos-sqm-package#qos_script');" tabindex="-1"><b>Personal QOS Script Name</b></a></td></tr>
-<tr><td colspan="2" align="center"><input type="text" class="text" name="qos_script" value="@qos_script#" size="40" maxlength="128"></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('qos-sqm-package#qos_script');" tabindex="-1"><b>Personal QOS Script Name</b></a></td><td nowrap align="right"><input type="text" class="text" name="qos_script" value="@qos_script#" size="20" maxlength="128"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 </table>
 <input type="hidden" name="job" value="save">
 <input type="hidden" name="todo" value="/usr/sbin/rc qos start">
