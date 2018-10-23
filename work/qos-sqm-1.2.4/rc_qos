@@ -274,7 +274,10 @@ Options available
 (Default: 0).
 
 qos_uplink_rate
-Real upload bandwidth (no bearer, no max): it can be discovered with 'speedtest' or with network-test package 'betterspeedtest.sh' script. It is the most important parameter, bad setting may bring to qos failure.
+Real upload bandwidth (no bearer, no max): it can be discovered with 'speedtest'
+or with network-test package 'betterspeedtest.sh' script.
+It is the most important parameter, bad setting may bring to qos failure.
+Setup to 0 to disable qos uplink capability.
 (Default: 512).
 
 qos_rate_unit
@@ -343,8 +346,8 @@ qos_shaper
 The qos shaper sched algorithm used: note that the related shaper sched algorithm must be available on router. 
 Options available
 'htb': is the recommended for most usage.
-'hfsc': best combined with 'sfq' qdisc.
-'tbf': one of the simplest algos.
+'hfsc': best combined with sfq qdisc, but unavailable with fq_codel qdisc due to possible incompatibilities.
+'tbf': one of the simplest algos. This shaper is classless (no _DSCP_ settings available).
 (Default: htb).
 
 qos_dserv_egress
@@ -354,7 +357,7 @@ For htb, hfsc shapers:
 'shaper': acting as a shaper (only).
 'classful': use of priority tiers.
 'diffserv3': priority scheme is supported.
-For tbf shaper value is only: 'shaper' (setting will be adjusted automatically at runtime).
+For tbf shaper value can only be: 'shaper' (setting will be adjusted automatically at runtime).
 (Default: diffserv3).
 
 qos_dserv_ingress
@@ -364,7 +367,7 @@ For htb, hfsc shapers:
 'shaper': acting as a shaper (only).
 'classful': use of priority tiers.
 'diffserv3': priority scheme is supported.
-For tbf shaper value is only: 'shaper' (setting will be adjusted automatically at runtime).
+For tbf shaper value can only be: 'shaper' (setting will be adjusted automatically at runtime).
 (Default: diffserv3).
 
 qos_ignore_dscp_egress
@@ -400,7 +403,7 @@ Options available
 (Default: ECN).
 
 qos_script
-Use a custom qos script instead of builtin.
+Use a personal qos script instead of builtin.
 Scripts must have .sqm extension and must have compatible content.
 Note that old legacy scripts: 'simple.qos', 'simplest.qos', 'simplest_tbf.qos' are embedded now.
 (Default: void).
