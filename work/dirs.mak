@@ -162,10 +162,6 @@ DESC_$(QOS_SQM)			:= Quality Of Service SQM scripts traffic shaper tool
 OPENSSL_NAME			:= openssl
 VER_$(OPENSSL_NAME)		:= 1.0.0r
 OPENSSL				:= $(OPENSSL_NAME)-$(VER_$(OPENSSL_NAME))
-# CURL (REDIRECT TO ORIG)
-CURL_NAME			:= curl/curl
-VER_$(CURL_NAME)		:= 7.36.0
-CURL				:= $(CURL_NAME)-$(VER_$(CURL_NAME))
 # ZLIB
 ZLIB_NAME			:= zlib
 VER_$(ZLIB_NAME)		:= 1.2.11
@@ -183,6 +179,23 @@ DEP_$(ZLIB)			:=
 DESC_$(ZLIB)			:= A Massively Spiffy Yet Delicately Unobtrusive Compression Library
 DIRLIST				+= $(ZLIB)
 TARLIST				+= $(ZLIB)
+# CURL
+CURL_NAME			:= curl
+VER_$(CURL_NAME)		:= 7.61.1
+CURL				:= $(CURL_NAME)-$(VER_$(CURL_NAME))
+NAME_$(CURL)			:= $(CURL_NAME)$(DBG)
+SUBVER_$(CURL)			:= 
+VER_$(CURL)			:= $(VER_$(CURL_NAME))$(SUBVER_$(CURL))
+DL_$(CURL)			:= https://curl.haxx.se/download/
+TAR_$(CURL)			:= $(CURL).tar.gz
+HOME_$(CURL)			:= https://curl.haxx.se/
+LIC_$(CURL)			:= MIT/X
+SEC_$(CURL)			:= libs
+PRIO_$(CURL)			:= required
+DEP_$(CURL)			:= $(NAME_$(ZLIB))
+DESC_$(CURL)			:= Command line tool and library for transferring data with URLs
+DIRLIST				+= $(CURL)
+TARLIST				+= $(CURL)
 # LIBARCHIVE
 LIBARCHIVE_NAME			:= libarchive
 VER_$(LIBARCHIVE_NAME)		:= 3.3.3
@@ -346,6 +359,7 @@ BUILTINLIB 			+= $(NVRAM)
 THIRDPARTY			+= $(CORE_WORK)
 BUILTINLIB			+= $(LZO)
 BUILTINLIB			+= $(ZLIB)
+BUILTINLIB			+= $(CURL)
 BUILTIN				+= $(UTELNETD)
 BUILTIN				+= $(IPROUTE2)
 BUILTIN				+= $(HDPARM)

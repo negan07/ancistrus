@@ -1,0 +1,55 @@
+diff -urN work/curl-7.61.1/Makefile work/curl-7.61.1/Makefile
+--- work/curl-7.61.1/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/curl-7.61.1/Makefile	2018-10-23 23:01:08.566300143 +0200
+@@ -0,0 +1,51 @@
++include ../Rules.mak
++
++LIBSNAME		:= libcurl.so
++LIBSMAINVER		:= 4
++LIBSVER			:= $(LIBSMAINVER).5.0
++LIBS			:= $(LIBSNAME).$(LIBSVER)
++BINS			:= curl
++
++all: config
++	$(MAKE) -C $(CURL)
++	$(STRIP) $(STRIPFLAGS) $(CURL)/lib/.libs/*.a
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(CURL) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --prefix=$(USRDIR) --sysconfdir=$(TMPETC) --libdir=$(LDLIB) --sharedstatedir=$(LDLIB) --bindir=$(USRSBIN) --sbindir=$(USRSBIN) --libexecdir=$(USRSBIN) --localstatedir=$(VARLIB) --with-zlib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-ssl=$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) --enable-shared=yes --enable-static=yes --enable-ipv6 --disable-debug --disable-curldebug --disable-manual --disable-verbose --without-cyassl --without-brotli --without-mbedtls --without-wolfssl --without-zsh-functions-dir CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(ZLIB)/$(ZLIB) -I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include" LDFLAGS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) -L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)" LIBS="-lz -lssl -lcrypto"
++
++install: control
++	$(STRIP) $(CURL)/lib/.libs/$(LIBS)
++	$(SSTRIP) $(CURL)/src/.libs/$(BINS)
++	for D in $(BINDIR) $(LIBDIR); do install -m 0755 -d $$D; done
++	install -m 0755 $(CURL)/lib/.libs/$(LIBS) $(LIBDIR)
++	install -m 0755 $(CURL)/src/.libs/$(BINS) $(BINDIR)
++	ln -sf $(LIBS) $(LIBDIR)/$(LIBSNAME)
++	ln -sf $(LIBS) $(LIBDIR)/$(LIBSNAME).$(LIBSMAINVER)
++
++clean:
++	$(MAKE) -C $(CURL) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(CURL) distclean
++
++ifndef BUILD
++control:
++else
++PREINST			:= $(CTRL_DIR)/preinst
++
++control: preinst
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "echo \"Removing old curl libs ver & symlinks...\"" >> $(PREINST)
++	@echo "rm -f $(LDLIB)/$(LIBSNAME)*" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++endif
++
