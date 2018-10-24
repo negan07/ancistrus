@@ -296,16 +296,16 @@ tier_shaper_tbf() {
     local tier=$4
 
     local rate
-    local burst_dur_ms
+    local burst_dur_us
 
     case $dir in
     ingress)
     rate="$DOWNLINK"
-    burst_dur_ms="$ITARGET_BURST_DUR_MS"
+    burst_dur_us="$ISHAPER_BURST_DUR_US"
     ;;
     egress)
     rate="$UPLINK"
-    burst_dur_ms="$ETARGET_BURST_DUR_MS"
+    burst_dur_us="$ESHAPER_BURST_DUR_US"
     ;;
     *)
     sqm_error "Unknown direction \"$dir\" in tier_shaper_$SHAPER()."
@@ -331,7 +331,7 @@ tier_shaper_tbf() {
     esac
 
     local mtu=$(get_mtu $IFACE)
-    local burst="$(get_burst ${mtu:-1514} ${rate} ${burst_dur_ms})"
+    local burst="$(get_burst ${mtu:-1514} ${rate} ${burst_dur_us})"
     burst=${burst:-1514}
     local args="$(get_stab_string) $SHAPER rate ${rate}kbit burst $burst latency 300ms $(get_htb_adsll_string)"
 
@@ -357,16 +357,19 @@ tier_shaper_htb() {
     local tier=$4
 
     local rate
-    local burst_dur_ms
+    local burst_dur_us
+    local quantum_dur_us
 
     case $dir in
     ingress)
     rate="$DOWNLINK"
-    burst_dur_ms="$ITARGET_BURST_DUR_MS"
+    burst_dur_us="$ISHAPER_BURST_DUR_US"
+    quantum_dur_us="$ISHAPER_QUANTUM_DUR_US"
     ;;
     egress)
     rate="$UPLINK"
-    burst_dur_ms="$ETARGET_BURST_DUR_MS"
+    burst_dur_us="$ESHAPER_BURST_DUR_US"
+    quantum_dur_us="$ESHAPER_QUANTUM_DUR_US"
     ;;
     *)
     sqm_error "Unknown direction \"$dir\" in tier_shaper_$SHAPER()."
@@ -424,8 +427,8 @@ tier_shaper_htb() {
     ;;
     esac
 
-    local lq="quantum `get_htb_quantum $IFACE $rate`"
-    local burst="`get_htb_burst $IFACE $rate $burst_dur_ms`"
+    local lq="quantum `get_htb_quantum $IFACE $rate $quantum_dur_us`"
+    local burst="`get_htb_burst $IFACE $rate $burst_dur_us`"
     local args="$SHAPER $lq $burst $(get_htb_adsll_string)"
     local args31="$SHAPER $lq $(get_htb_adsll_string)"
     local ret=""

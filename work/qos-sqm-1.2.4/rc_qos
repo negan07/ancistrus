@@ -454,15 +454,27 @@ Used in conjunction with fq_codel disc only: target of 5ms is good for fast link
 dw bandwidth and it is recalculated.
 (Default: 5ms).
 
-qos_itarget_burst_dur
-Setup the ingress target burst duration (ms) to leap over CPU interrupts when the CPU is severly loaded.
-Setting this value to 0, in conjunction with htb shaper, allows htb default burst of 2*mtu.
-(Default: 1).
+qos_eshaper_burst_dur
+Setup the egress shaper burst duration (us) to leap over CPU interrupts when the CPU is severly loaded.
+Setting this value to 0, in conjunction with htb, allows default burst of the ATM/AAL5 expanded mtu packet with overhead.
+(Default: 1000).
 
-qos_etarget_burst_dur
-Setup the egress target burst duration (ms) to leap over CPU interrupts when the CPU is severly loaded.
-Setting this value to 0, in conjunction with htb shaper, allows htb default burst of 2*mtu.
-(Default: 1).
+qos_ishaper_burst_dur
+Setup the ingress shaper burst duration (us) to leap over CPU interrupts when the CPU is severly loaded.
+Setting this value to 0, in conjunction with htb, allows default burst of the ATM/AAL5 expanded mtu packet with overhead.
+(Default: 1000).
+
+qos_eshaper_quantum_dur
+Setup the egress shaper quantum duration (us).
+This checks how many bytes htb tries to deque from the current tier before switching to the next to lower CPU cost.
+In first approximation this value should be <= qos_eshaper_burst_dur.
+(Default: 1000).
+
+qos_ishaper_quantum_dur
+Setup the ingress shaper quantum duration (us).
+This checks how many bytes htb tries to deque from the current tier before switching to the next to lower CPU cost.
+In first approximation this value should be <= qos_ishaper_burst_dur.
+(Default: 1000).
 
 qos_edisc_opts
 Other defined egress qdisc options.
@@ -485,14 +497,6 @@ Options available
 '1': squashing differentiated services code points (DSCP) from ingress.
 '0': keeping differentiated services code points (DSCP) from ingress.
 (Default: 1).
-
-qos_htb_quantum_function
-Used only in conjunction with htb shaper: scale quantum with bandwidth to lower computation cost.
-Options available
-'linear': function is a continuous straight line.
-'step': function is linear step by step only.
-In case of other option a value of 1500 will be used as fallback.
-(Default: linear).
 
 How to setup
 All settings can be setup at once with: 
