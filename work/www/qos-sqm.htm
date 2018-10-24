@@ -31,6 +31,8 @@ function setDefs() {
 		else if(cf.h_wan_traffic_type.value=="atm") cf.qos_llayer.value="atm";
 		else cf.qos_llayer.value="none";
 		}
+	LLayerDivCheck();
+	if(cf.qos_overhead.value=="" || cf.qos_stab_mtu.value=="" || cf.qos_stab_tsize.value=="" || cf.qos_stab_mpu.value=="") LLayerOptCheck();
 	if(cf.h_qos_disc.value=="") cf.qos_disc.value="fq_codel";
 	if(cf.h_qos_shaper.value=="") cf.qos_shaper.value="htb";
 	if(cf.h_qos_ignore_dscp_egress.value=="") cf.qos_ignore_dscp_egress.value="0";
@@ -40,6 +42,39 @@ function setDefs() {
 	EcnDivCheck();
 	if(cf.h_qos_eecn.value=="") cf.qos_eecn.value="NOECN";
 	if(cf.h_qos_iecn.value=="") cf.qos_iecn.value="ECN";
+}
+
+function LLayerOptCheck() {
+	var cf=document.forms[0];
+
+		if(cf.qos_llayer.value=="ethernet") {
+		cf.qos_overhead.value="34";
+		cf.qos_stab_mtu.value="2047";
+		cf.qos_stab_tsize.value="512";
+		cf.qos_stab_mpu.value="64";
+		}
+		else if(cf.qos_llayer.value=="atm") {
+		cf.qos_overhead.value="44";
+		cf.qos_stab_mtu.value="2047";
+		cf.qos_stab_tsize.value="128";
+		cf.qos_stab_mpu.value="0";
+		}
+		else {
+		cf.qos_overhead.value="0";
+		cf.qos_stab_mtu.value="2047";
+		cf.qos_stab_tsize.value="512";
+		cf.qos_stab_mpu.value="0";
+		}
+}
+
+function LLayerDivCheck() {
+	var cf=document.forms[0];
+	var div_obj, llopt=["llov", "llovval", "llmtu", "llmtuval", "llstab", "llstabval", "llmpu", "llmpuval"];
+
+		for(var i=0;i<llopt.length;i++) {
+		div_obj=document.getElementById(llopt[i]);
+		((div_obj!=null && cf.qos_llayer.value!="none") ? div_obj.style.display="inline" : div_obj.style.display="none");
+		}
 }
 
 function EcnDivCheck() {
@@ -135,6 +170,22 @@ function rateDlChange() {
 	else cf.qos_dwlink_rate.value=Math.floor(parseInt(cf.qos_dwlink_rate.value)*1000);
 }
 
+function smtuChange() {
+	var cf=document.forms[0];
+
+		if(cf.qos_llayer.value=="atm") {
+		var tsize=(parseInt(cf.qos_stab_mtu.value)+1)/16;
+		if(parseInt(tsize)==tsize) cf.qos_stab_tsize.value=tsize;
+		else alert("Size Table MTU value returns non integer Required Table Size value !");
+		}
+}
+
+function stabChange() {
+	var cf=document.forms[0];
+
+	if(cf.qos_llayer.value=="atm") cf.qos_stab_mtu.value=parseInt(cf.qos_stab_tsize.value)*16-1;
+}
+
 function checkData() {
 	var cf=document.forms[0], msg="", lim;
 
@@ -146,6 +197,22 @@ function checkData() {
 	else lim=999999;
 	if(cf.qos_dwlink_rate.value.length>1 && cf.qos_dwlink_rate.value[0]=='0') msg+="Invalid Downlink bandwidth value";
 	else msg+=checkInt(cf.qos_dwlink_rate, "Downlink bandwidth", 0, lim, true);
+		if(cf.qos_llayer.value!="none") {
+			if(cf.qos_overhead.value[0]=='-') {
+			var absovh=Math.abs(cf.qos_overhead.value);
+			if(isNaN(absovh) || absovh>1500) msg+="Overhead is out of range: -1500 ~ 9999";
+			}
+			else msg+=checkInt(cf.qos_overhead, "Overhead", -1500, 9999, true);
+		if(parseInt(cf.qos_stab_mtu.value)<(parseInt(cf.h_wan_mtu.value)+parseInt(cf.qos_overhead.value))) 
+		msg+="Size Table MTU must be greater/equal than ( wan MTU ("+cf.h_wan_mtu.value+") + overhead ("+cf.qos_overhead.value+") ) on the selected link layer\n";
+		else msg+=checkInt(cf.qos_stab_mtu, "Size Table MTU", parseInt(cf.h_wan_mtu.value)+parseInt(cf.qos_overhead.value), 9999, true);
+		if(cf.qos_llayer.value=="atm" && cf.qos_stab_tsize.value!=((parseInt(cf.qos_stab_mtu.value)+1)/16)) 
+		msg+="Required Table Size must be: (Size Table MTU + 1) / 16 on the selected link layer\n";
+		else msg+=checkInt(cf.qos_stab_tsize, "Required Table Size", 0, 9999, true);
+		if(cf.qos_llayer.value=="ethernet" && cf.qos_stab_mpu.value=="0") 
+		msg+="Size Table MPU must be greater than 0 on the selected link layer\n";
+		else msg+=checkInt(cf.qos_stab_mpu, "Size Table MPU", 0, 9999, true);
+		}
 		if(cf.qos_script.value!="") {
 		if(cf.qos_script.value.indexOf(".sqm")<0) msg+="Invalid qos script name: it must have \".sqm\" extension\n";
 		if(!checkInvalidChars(cf.qos_script.value, invalid_folder_char)) msg+="Invalid qos script name: characters not allowed\n";
@@ -226,12 +293,24 @@ function checkPerscript() {
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_llayer');"><b>Link Layer Adaptation</b></a></span></td>
-	<td align="right"><select name="qos_llayer" size=1>
+	<td align="right"><select name="qos_llayer" onChange="LLayerOptCheck();LLayerDivCheck();" size=1>
 		<option value="ethernet">VDSL (ethernet)</option>
 		<option value="atm">ADSL (atm)</option>
 		<option value="none">Other (none) (DEF)</option>
 	</select>
 </td></tr>
+<tr><td nowrap><div id="llov"><a href="javascript:gotoWiki('qos-sqm-package#qos_overhead');"><b>Per-Packet Overhead</b></a></div></td>
+<td nowrap align="right"><div id="llovval"><input type="text" class="num" name="qos_overhead" value="@qos_overhead#" size=5 maxlength=5>
+&nbsp; Bytes</div></td></tr>
+<tr><td nowrap><div id="llmtu"><a href="javascript:gotoWiki('qos-sqm-package#qos_stab_mtu');"><b>Size Table MTU</b></a></div></td>
+<td nowrap align="right"><div id="llmtuval"><input type="text" class="num" name="qos_stab_mtu" value="@qos_stab_mtu#" onChange="smtuChange()" size=5 maxlength=5>
+&nbsp; Bytes</div></td></tr>
+<tr><td nowrap><div id="llstab"><a href="javascript:gotoWiki('qos-sqm-package#qos_stab_tsize');"><b>Required Table Size</b></a></div></td>
+<td nowrap align="right"><div id="llstabval"><input type="text" class="num" name="qos_stab_tsize" value="@qos_stab_tsize#" onChange="stabChange()" size=5 maxlength=5>
+&nbsp;&nbsp; Slots</div></td></tr>
+<tr><td nowrap><div id="llmpu"><a href="javascript:gotoWiki('qos-sqm-package#qos_stab_mpu');"><b>Size Table MPU</b></a></div></td>
+<td nowrap align="right"><div id="llmpuval"><input type="text" class="num" name="qos_stab_mpu" value="@qos_stab_mpu#" size=5 maxlength=5>
+&nbsp; Bytes</div></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('qos-sqm-package#qos_disc');"><b>Disc Algorithm</b></a></span></td>
 	<td align="right"><select name="qos_disc" onChange="loadCheck();EcnDivCheck();" size=1>
@@ -307,6 +386,7 @@ function checkPerscript() {
 <input type="hidden" name="h_qos_eecn" value="@h_qos_eecn#">
 <input type="hidden" name="h_qos_iecn" value="@h_qos_iecn#">
 <input type="hidden" name="h_wan_traffic_type" value="@h_wan_traffic_type#">
+<input type="hidden" name="h_wan_mtu" value="@h_wan_mtu#">
 </form>
 <form name="perscript" method="POST" action="anc.cgi" enctype="multipart/form-data" onSubmit="buttonToDisabled(document.forms[0])">
 <table border="0" cellpadding="0" cellspacing="3" width="100%">
