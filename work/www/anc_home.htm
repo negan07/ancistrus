@@ -140,7 +140,7 @@ function readInfo() {
 			else if(line[i].indexOf("ChipSet Vendor Id:	")>-1) {
 			var vendor=line[i].replace("ChipSet Vendor Id:	", "");
 			var vendoridver=vendor.split(':');
-			vendorid=vendoridver[0];
+			if(typeof(vendor[0])!="undefined") vendorid=vendoridver[0];
 			if(typeof(vendor[1])!="undefined") vendorver=parseInt(vendoridver[1].substring(0, 4))+"."+parseInt(vendoridver[1].substring(4), 16);
 			}
 			else if("@h_wan_traffic_type#"=="ptm" && line[i].indexOf("VDSL2 Profile:		Profile ")>-1) {
