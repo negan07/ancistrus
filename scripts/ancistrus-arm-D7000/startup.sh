@@ -37,7 +37,7 @@ OPKG=${ETCDIR}/${BIN}
 CONF=${OPKG}.conf
 ARC=${OPKG}.zip
 ABSARC=${BIN}.zip
-TOINST="${BIN} zlib ancistrus-core utelnetd"
+TOINST="zlib curl ${BIN} ancistrus-core utelnetd"
 
 WWW=/www
 LANGSDIR=${WWW}/langs
