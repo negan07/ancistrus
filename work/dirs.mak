@@ -48,7 +48,7 @@ PRIO_$(UTELNETD)		:= standard
 DEP_$(UTELNETD)			:= 
 DESC_$(UTELNETD)		:= Small telnet daemon for standalone use
 DIRLIST				+= $(UTELNETD)
-TARLIST				+= $(UTELNETD)
+TARLIST				+= $(TAR_$(UTELNETD))
 # IPROUTE2
 IPROUTE2_NAME			:= iproute2
 VER_$(IPROUTE2_NAME)		:= 4.18.0
@@ -65,7 +65,7 @@ PRIO_$(IPROUTE2)		:= standard
 DEP_$(IPROUTE2)			:= 
 DESC_$(IPROUTE2)		:= Set of utilities for Linux networking
 DIRLIST				+= $(IPROUTE2)
-TARLIST				+= $(IPROUTE2)
+TARLIST				+= $(TAR_$(IPROUTE2))
 # NETPERF
 NETPERF_NAME			:= netperf-netperf
 VER_$(NETPERF_NAME)		:= 2.7.0
@@ -82,7 +82,7 @@ PRIO_$(NETPERF)			:= optional
 DEP_$(NETPERF)			:= 
 DESC_$(NETPERF)			:= TCP/UDP/sockets/etc performance benchmark
 DIRLIST				+= $(NETPERF)
-TARLIST				+= $(NETPERF)
+TARLIST				+= $(TAR_$(NETPERF))
 # NETWORK TEST
 NETWORKTEST_NAME		:= network-test
 VER_$(NETWORKTEST_NAME)		:= 0.3.0-270
@@ -178,7 +178,7 @@ PRIO_$(ZLIB)			:= required
 DEP_$(ZLIB)			:= 
 DESC_$(ZLIB)			:= A Massively Spiffy Yet Delicately Unobtrusive Compression Library
 DIRLIST				+= $(ZLIB)
-TARLIST				+= $(ZLIB)
+TARLIST				+= $(TAR_$(ZLIB))
 # CURL
 CURL_NAME			:= curl
 VER_$(CURL_NAME)		:= 7.61.1
@@ -195,7 +195,7 @@ PRIO_$(CURL)			:= required
 DEP_$(CURL)			:= $(NAME_$(ZLIB))
 DESC_$(CURL)			:= Command line tool and library for transferring data with URLs
 DIRLIST				+= $(CURL)
-TARLIST				+= $(CURL)
+TARLIST				+= $(TAR_$(CURL))
 # LIBARCHIVE
 LIBARCHIVE_NAME			:= libarchive
 VER_$(LIBARCHIVE_NAME)		:= 3.3.3
@@ -212,7 +212,7 @@ PRIO_$(LIBARCHIVE)		:= required
 DEP_$(LIBARCHIVE)		:= 
 DESC_$(LIBARCHIVE)		:= Portable efficient C library for many streaming archive formats
 DIRLIST				+= $(LIBARCHIVE)
-TARLIST				+= $(LIBARCHIVE)
+TARLIST				+= $(TAR_$(LIBARCHIVE))
 # OPKGUTILS
 OPKG_UTILS_NAME			:= opkg-utils
 VER_$(OPKG_UTILS_NAME)		:= 0.3.6
@@ -229,7 +229,7 @@ PRIO_$(OPKG_UTILS)		:= required
 DEP_$(OPKG_UTILS)		:= 
 DESC_$(OPKG_UTILS)		:= Lightweight package prepare and build management system
 DIRLIST				+= $(OPKG_UTILS)
-TARLIST				+= $(OPKG_UTILS)
+TARLIST				+= $(TAR_$(OPKG_UTILS))
 # OPKG
 OPKG_NAME			:= opkg
 VER_$(OPKG_NAME)		:= 0.3.6
@@ -246,7 +246,7 @@ PRIO_$(OPKG)			:= required
 DEP_$(OPKG)			:= 
 DESC_$(OPKG)			:= Lightweight package management system
 DIRLIST				+= $(OPKG)
-TARLIST				+= $(OPKG)
+TARLIST				+= $(TAR_$(OPKG))
 # SMARTMONTOOLS
 SMONTOOLS_NAME			:= smartmontools
 VER_$(SMONTOOLS_NAME)		:= 6.7
@@ -263,7 +263,7 @@ PRIO_$(SMONTOOLS)		:= optional
 DEP_$(SMONTOOLS)		:= 
 DESC_$(SMONTOOLS)		:= S.M.A.R.T. utility toolset
 DIRLIST				+= $(SMONTOOLS)
-TARLIST				+= $(SMONTOOLS)
+TARLIST				+= $(TAR_$(SMONTOOLS))
 # HDPARM
 HDPARM_NAME			:= hdparm
 VER_$(HDPARM_NAME)		:= 9.56
@@ -280,7 +280,7 @@ PRIO_$(HDPARM)			:= required
 DEP_$(HDPARM)			:= 
 DESC_$(HDPARM)			:= Get/set ATA/SATA drive parameters under Linux
 DIRLIST				+= $(HDPARM)
-TARLIST				+= $(HDPARM)
+TARLIST				+= $(TAR_$(HDPARM))
 # LIBLZO
 LZO_NAME			:= lzo
 VER_$(LZO_NAME)			:= 2.10
@@ -297,7 +297,7 @@ PRIO_$(LZO)			:= required
 DEP_$(LZO)			:= 
 DESC_$(LZO)			:= A portable lossless data compression library
 DIRLIST				+= $(LZO)
-TARLIST				+= $(LZO)
+TARLIST				+= $(TAR_$(LZO))
 # OPENVPN
 OPEN_VPN_NAME			:= openvpn
 VER_$(OPEN_VPN_NAME)		:= 2.4.6
@@ -314,7 +314,7 @@ PRIO_$(OPEN_VPN)		:= required
 DEP_$(OPEN_VPN)			:= 
 DESC_$(OPEN_VPN)		:= Your private path to access network resources and services securely
 DIRLIST				+= $(OPEN_VPN)
-TARLIST				+= $(OPEN_VPN)
+TARLIST				+= $(TAR_$(OPEN_VPN))
 # OPENSSH
 OPEN_SSH_NAME			:= openssh
 VER_$(OPEN_SSH_NAME)		:= 7.8p1
@@ -331,7 +331,7 @@ PRIO_$(OPEN_SSH)		:= optional
 DEP_$(OPEN_SSH)			:= $(NAME_$(ZLIB)),$(NAME_$(CORE_WORK))
 DESC_$(OPEN_SSH)		:= Free SSH protocol suite providing encryption for network services
 DIRLIST				+= $(OPEN_SSH)
-TARLIST				+= $(OPEN_SSH)
+TARLIST				+= $(TAR_$(OPEN_SSH))
 # MINI_SNMPD
 MINI_SNMPD_NAME			:= mini-snmpd
 VER_$(MINI_SNMPD_NAME)		:= 1.4
@@ -348,7 +348,7 @@ PRIO_$(MINI_SNMPD)		:= optional
 DEP_$(MINI_SNMPD)		:= $(NAME_$(CORE_WORK))
 DESC_$(MINI_SNMPD)		:= SNMP server for small and embedded systems
 DIRLIST				+= $(MINI_SNMPD)
-TARLIST				+= $(MINI_SNMPD)
+TARLIST				+= $(TAR_$(MINI_SNMPD))
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
