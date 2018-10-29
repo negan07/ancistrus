@@ -16,7 +16,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 #
-#   Copyright (C) 2012-6
+#   Copyright (C) 2012-2018
 #       Michael D. Taht, Toke Høiland-Jørgensen, Sebastian Moeller
 #       Eric Luehrsen
 #
@@ -83,15 +83,42 @@ ipt() {
 }
 
 # wrapper to call tc to allow debug logging
-tc_wrapper() {
-    sqm_trace "${TC_BINARY} $*"
-    ${TC_BINARY} $* >> ${OUTPUT_TARGET} 2>&1
+tc_wrapper(){
+    cmd_wrapper tc ${TC_BINARY} "$@"
 }
 
-# wrapper to call tc to allow debug logging
-ip_wrapper() {
-    sqm_trace "${IP_BINARY} $*"
-    ${IP_BINARY} $* >> ${OUTPUT_TARGET} 2>&1
+# wrapper to call ip to allow debug logging
+ip_wrapper(){
+    cmd_wrapper ip ${IP_BINARY} "$@"
+}
+
+# the actual command execution wrapper
+cmd_wrapper(){
+    # $1: the symbolic name of the command for informative output
+    # $2: the name of the binary to call (potentially including the full path)
+    # $3-$end: the actual arguments for $2
+    local CALLERID
+    local CMD_BINARY
+    local LAST_ERROR
+    local RET
+
+    CALLERID=$1 ; shift 1   # extract and remove the id string
+    CMD_BINARY=$1 ; shift 1 # extract and remove the binary
+
+    #sqm_trace "${CMD_BINARY} $@"
+    LAST_ERROR=$( ${CMD_BINARY} "$@" 2>&1 )
+    RET=$?
+    #sqm_trace "${LAST_ERROR}"
+
+    if [ "$RET" -eq "0" ] ; then
+        sqm_debug "cmd_wrapper: ${CALLERID}: SUCCESS: ${CMD_BINARY} $@"
+    else
+        # this went south, try to capture & report more detail
+        sqm_error "cmd_wrapper: ${CALLERID}: FAILURE (${RET}): ${CMD_BINARY} $@"
+        sqm_error "cmd_wrapper: ${CALLERID}: LAST ERROR: ${LAST_ERROR}"
+    fi
+
+    return $RET
 }
 
 
@@ -180,8 +207,9 @@ ifb_name() {
 create_new_ifb_for_if() {
     local NEW_IFB=$(ifb_name $1)
     create_ifb ${NEW_IFB}
+    local RET=$?
     echo $NEW_IFB
-    return $?
+    return $RET
 }
 
 
@@ -189,14 +217,12 @@ create_new_ifb_for_if() {
 create_ifb() {
     local CUR_IFB=${1}
     $IP link add name ${CUR_IFB} type ifb
-    return $?
 }
 
 delete_ifb() {
     local CUR_IFB=${1}
     $IP link set dev ${CUR_IFB} down
     $IP link delete ${CUR_IFB} type ifb
-    return $?
 }
 
 
@@ -383,6 +409,8 @@ get_htb_quantum() {
     local HTB_MTU=$( get_mtu $1 )
     local BANDWIDTH=$2
     local DURATION_US=$3
+    local MIN_QUANTUM
+    local QUANTUM
 
     sqm_debug "get_htb_quantum: 1: ${1}, 2: ${2}, 3: ${3}"
 
@@ -396,11 +424,11 @@ get_htb_quantum() {
     fi
 
     if [ -z "$QUANTUM" ]; then
-#        local MIN_QUANTUM=$(( ${MTU} + 48 )) # add 48 bytes to MTU for the overhead
+#        MIN_QUANTUM=$(( ${MTU} + 48 )) # add 48 bytes to MTU for the overhead
 #        MIN_QUANTUM=$(( ${MIN_QUANTUM} + 47 )) # now do ceil(Min_BURST / 48) * 53 in shell integer arithmic
 #        MIN_QUANTUM=$(( ${MIN_QUANTUM} / 48 ))
 #        MIN_QUANTUM=$(( ${MIN_QUANTUM} * 53 )) # for MTU 1489 to 1536 this will result in MIN_BURST = 1749 Bytes
-         local MIN_QUANTUM=$(( (${MTU} + 95) / 48 * 53 ))
+         MIN_QUANTUM=$(( (${MTU} + 95) / 48 * 53 ))
     sqm_warn "get_htb_quantum: 0 bytes quantum will not work, defaulting to one ATM/AAL5 expanded MTU packet with overhead: ${MIN_QUANTUM}"
         echo ${MIN_QUANTUM}
     else
@@ -419,22 +447,23 @@ get_burst() {
     local MTU=$1
     local BANDWIDTH=$2 # note bandwidth is always given in kbps
     local SHAPER_BURST_US=$3
-    local BURST=
+    local MIN_BURST
+    local BURST
 
     sqm_debug "get_burst: 1: ${1}, 2: ${2}, 3: ${3}"
 
     if [ -z "${SHAPER_BURST_US}" ] ; then
-	local SHAPER_BURST_US=1000 # the duration of the burst in microseconds
+	SHAPER_BURST_US=1000 # the duration of the burst in microseconds
 	sqm_warn "get_burst (by duration): Defaulting to ${SHAPER_BURST_US} microseconds bursts."
     fi
 
     # let's assume ATM/AAL5 to be the worst case encapsulation
     # and 48 Bytes a reasonable worst case per packet overhead
-#    local MIN_BURST=$(( ${MTU} + 48 ))	# add 48 bytes to MTU for the overhead
+#    MIN_BURST=$(( ${MTU} + 48 ))	# add 48 bytes to MTU for the overhead
 #    MIN_BURST=$(( ${MIN_BURST} + 47 ))	# now do ceil(Min_BURST / 48) * 53 in shell integer arithmic
 #    MIN_BURST=$(( ${MIN_BURST} / 48 ))
 #    MIN_BURST=$(( ${MIN_BURST} * 53 ))	# for MTU 1489 to 1536 this will result in MIN_BURST = 1749 Bytes
-    local MIN_BURST=$(( (${MTU} + 95) / 48 * 53 ))
+    MIN_BURST=$(( (${MTU} + 95) / 48 * 53 ))
 
     # htb/tbf expect burst to be specified in bytes, while bandwidth is in kbps
     BURST=$(( ${SHAPER_BURST_US} * ${BANDWIDTH} / 8000 ))
@@ -455,11 +484,12 @@ get_htb_burst() {
     local HTB_MTU=$( get_mtu $1 )
     local BANDWIDTH=$2
     local DURATION_US=$3
+    local BURST
 
     sqm_debug "get_htb_burst: 1: ${1}, 2: ${2}, 3: ${3}"
 
     if [ -z "${DURATION_US}" ] ; then
-        local DURATION_US=1000 # the duration of the burst in microseconds
+        DURATION_US=1000 # the duration of the burst in microseconds
         sqm_warn "get_htb_burst (by duration): Defaulting to ${DURATION_US} microseconds."
     fi
 
