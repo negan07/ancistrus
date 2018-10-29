@@ -22,21 +22,26 @@ function setDefs() {
 	var cf=document.forms[0];
 
 	if(cf.minisnmpd_enable.value=="") cf.minisnmpd_enable.checked=false;
-	if(cf.minisnmpd_prot.value=="") cf.minisnmpd_prot.value="udp";
-	if(cf.minisnmpd_port.value=="") cf.minisnmpd_port.value="161";
+	if(cf.minisnmpd_ip6.value=="") cf.minisnmpd_ip6.value="0";
+	if(cf.minisnmpd_auth.value=="") cf.minisnmpd_auth.checked=false;
+	if(cf.minisnmpd_timeout.value=="") cf.minisnmpd_timeout.value="1";
 	if(cf.minisnmpd_community.value=="") cf.minisnmpd_community.value="public";
 	if(cf.minisnmpd_description.value=="") cf.minisnmpd_description.value="router";
 	if(cf.minisnmpd_vendor.value=="") cf.minisnmpd_vendor.value=".1.3.6.1.4.1";
 	if(cf.minisnmpd_location.value=="") cf.minisnmpd_location.value="here";
 	if(cf.minisnmpd_contact.value=="") cf.minisnmpd_contact.value="mynum";
 	if(cf.minisnmpd_remote_enable.value=="") cf.minisnmpd_remote_enable.checked=false;
-	if(cf.minisnmpd_remote_prot.value=="") cf.minisnmpd_remote_prot.value="udp";
 	if(cf.minisnmpd_remote_port.value=="") cf.minisnmpd_remote_port.value="";
 }
 
 function loadCheck() {
 	var cf=document.forms[0];
 
+		if(cf.h_ip6_mode.value=="disable") {
+		cf.minisnmpd_ip6.value="0";
+		cf.minisnmpd_ip6[1].disabled=true;
+		}
+		else cf.minisnmpd_ip6[1].disabled=false;
 	if(cf.minisnmpd_enable.checked) cf.minisnmpd_remote_enable.disabled=false;
 	else cf.minisnmpd_remote_enable.disabled=true;
 }
@@ -52,10 +57,12 @@ function checkData() {
 	var cf=document.forms[0];
 	var msg="";
 
-	msg+=checkInt(cf.minisnmpd_port, "SNMP port number", 1, 65534, true);
-	if(cf.minisnmpd_vendor.value=="") msg+="Vendor cannot be void\n";
-	if(cf.minisnmpd_remote_enable.checked || cf.minisnmpd_remote_port.value!="") 
-	msg+=checkInt(cf.minisnmpd_remote_port, "SNMP remote port number", 1, 65534, true);
+	msg+=checkInt(cf.minisnmpd_timeout, "SNMP MIB Poll Timeout", 1, 999, true);
+	msg+=checkBlank(cf.minisnmpd_description, "SNMP Description");
+	msg+=checkBlank(cf.minisnmpd_vendor, "SNMP Vendor");
+	msg+=checkBlank(cf.minisnmpd_location, "SNMP Location");
+	msg+=checkBlank(cf.minisnmpd_contact, "SNMP Contact");
+	if(cf.minisnmpd_remote_enable.checked || cf.minisnmpd_remote_port.value!="") msg+=checkInt(cf.minisnmpd_remote_port, "SNMP remote port number", 1, 65534, true);
 
 	if(msg.length>1) {
 	alert(msg);
@@ -83,15 +90,17 @@ function checkData() {
 <a href="javascript:gotoWiki('mini-snmpd-package#mini-snmpd');"><b>Turn Mini SNMP Daemon On</b></a>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('mini-snmpd-package#connection-protocol');"><b>Select SNMP Connection Protocol</b></a></span></td>
-	<td align="right"><select name="minisnmpd_prot" size=1>
-		<option value="udp">UDP (DEF)</option>
-		<option value="tcp">TCP</option>
+<tr><td align="left"><span><a href="javascript:gotoWiki('mini-snmpd-package#protocol-version');"><b>Select SNMP Protocol Version</b></a></span></td>
+	<td align="right"><select name="minisnmpd_ip6" size=1>
+		<option value="0">IPV4 (DEF)</option>
+		<option value="1">IPV6</option>
 	</select>
 </td></tr>
-<tr><td nowrap><a href="javascript:gotoWiki('mini-snmpd-package#connection-port');"><b>SNMP Connection port number:</b></a></td>
-<td nowrap align="right"><input type="text" class="num" name="minisnmpd_port" value="@minisnmpd_port#" size=6 maxlength=5></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="minisnmpd_auth" value="@h_minisnmpd_auth#"><a href="javascript:gotoWiki('mini-snmpd-package#authentication');"><b>Turn SNMP authentication On</b></a></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('mini-snmpd-package#mib-poll-timeout');"><b>SNMP MIB Poll Timeout:</b></a></td>
+<td nowrap align="right"><input type="text" class="num" name="minisnmpd_timeout" value="@minisnmpd_timeout#" size=3 maxlength=3>
+&nbsp;<span>Sec</span></td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('mini-snmpd-package#community');"><b>SNMP Community:</b></a></span></td>
 	<td align="right"><select name="minisnmpd_community" size=1>
 		<option value="public">Public (DEF)</option>
@@ -109,12 +118,6 @@ function checkData() {
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td nowrap colspan="2"><input type="checkbox" name="minisnmpd_remote_enable" value="@h_minisnmpd_remote_enable#" onClick="loadCheck()"><a href="javascript:gotoWiki('mini-snmpd-package#activate-remote-access');"><b>Turn SNMP remote access On</b></a></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td align="left"><span><a href="javascript:gotoWiki('mini-snmpd-package#activate-remote-access');"><b>Select SNMP Remote Connection Protocol</b></a></span></td>
-	<td align="right"><select name="minisnmpd_remote_prot" size=1>
-		<option value="udp">UDP (DEF)</option>
-		<option value="tcp">TCP</option>
-	</select>
-</td></tr>
 <tr><td nowrap><a href="javascript:gotoWiki('mini-snmpd-package#activate-remote-access');"><b>SNMP remote port number:</b></a></td>
 <td nowrap align="right"><input type="text" class="num" name="minisnmpd_remote_port" value="@minisnmpd_remote_port#" size=6 maxlength=5></td></tr>
 <tr><td colspan="2" align="center">
@@ -126,10 +129,11 @@ function checkData() {
 <input type="hidden" name="todo" value="/usr/sbin/rc snmp start">
 <input type="hidden" name="next_file" value="mini-snmpd.htm">
 <input type="hidden" name="h_minisnmpd_enable" value="@h_minisnmpd_enable#">
-<input type="hidden" name="h_minisnmpd_prot" value="@h_minisnmpd_prot#">
+<input type="hidden" name="h_minisnmpd_ip6" value="@h_minisnmpd_ip6#">
+<input type="hidden" name="h_minisnmpd_auth" value="@h_minisnmpd_auth#">
 <input type="hidden" name="h_minisnmpd_community" value="@h_minisnmpd_community#">
 <input type="hidden" name="h_minisnmpd_remote_enable" value="@h_minisnmpd_remote_enable#">
-<input type="hidden" name="h_minisnmpd_remote_prot" value="@h_minisnmpd_remote_prot#">
+<input type="hidden" name="h_ip6_mode" value="@h_ip6_mode#">
 </div>
 </form>
 <script>printHelp();</script>
