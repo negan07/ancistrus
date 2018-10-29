@@ -1,6 +1,6 @@
-diff -urN work/mini-snmpd-1.4/Makefile work/mini-snmpd-1.4/Makefile
---- work/mini-snmpd-1.4/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/mini-snmpd-1.4/Makefile	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/Makefile work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/Makefile
+--- work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/Makefile	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,56 @@
 +include ../Rules.mak
 +
@@ -20,7 +20,7 @@ diff -urN work/mini-snmpd-1.4/Makefile work/mini-snmpd-1.4/Makefile
 +	fi
 +
 +configure:
-+	cd $(MINI_SNMPD) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s"
++	cd $(MINI_SNMPD) && ./autogen.sh && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" --without-config
 +
 +install: control
 +	$(SSTRIP) $(BINS)
