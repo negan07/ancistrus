@@ -146,7 +146,7 @@ kill_pings
 
 # Print TCP Download speed
 echo
-echo " $1: `awk '{s+=$1} END {print s * 1024}' $SPEEDFILE` Kbps"
+echo " $1: `awk '{s+=$1} END {print s * 1000}' $SPEEDFILE` Kbps"
 
 # Summarize the ping data
 summarize_pings $PINGFILE
@@ -218,8 +218,8 @@ kill_pings
 
 # Sum up all the values (one line per netperf test) from $DLFILE and $ULFILE
 # then summarize the ping stat's
-echo " Download: `awk '{s+=$1} END {print s * 1024}' $DLFILE` Kbps"
-echo "   Upload: `awk '{s+=$1} END {print s * 1024}' $ULFILE` Kbps"
+echo " Download: `awk '{s+=$1} END {print s * 1000}' $DLFILE` Kbps"
+echo "   Upload: `awk '{s+=$1} END {print s * 1000}' $ULFILE` Kbps"
 
 # Summarize the ping data
 summarize_pings $PINGFILE
