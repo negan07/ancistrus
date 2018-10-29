@@ -77,7 +77,7 @@ prepare_package: creat_rules
 	$(foreach S, $(CTRL_SCRIPTS), chmod -f 755 $(CTRL_DIR_PATH)/$(S);) \
 	mv -f $(BUILD_TMP) $(BUILD_DIR_PATH)/$(D)$(SUBVER_$D);)
 	@echo -e "\\e[35m$(CUR_REL_PATH): cleanup void \\e[36mPackages \\e[0m";
-	@$(foreach R, $(PKG_RM_LIST), rm -rf $(BUILD_DIR_PATH)/$(R);)
+	@$(foreach R, $(PKG_RM_LIST), rm -rf $(BUILD_DIR_PATH)/$(R)$(SUBVER_$R);)
 
 build_package:
 	@[ -d $(BUILD_DIR_PATH) ] && [ -x ../$(SCRIPTS_DIR)/$(OPKG_UTILS)/opkg-build ]
