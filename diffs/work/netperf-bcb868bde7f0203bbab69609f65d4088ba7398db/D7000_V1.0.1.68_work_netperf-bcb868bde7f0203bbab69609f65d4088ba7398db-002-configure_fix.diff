@@ -1,0 +1,12 @@
+diff -urN work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/configure.ac work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/configure.ac
+--- work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/configure.ac	2015-07-20 19:30:24.000000000 +0200
++++ work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/configure.ac	2017-03-18 15:07:04.363079000 +0100
+@@ -72,7 +72,7 @@
+ # AC_FUNC_MALLOC
+ AC_FUNC_MMAP
+ AC_FUNC_SELECT_ARGTYPES
+-AC_FUNC_SETPGRP
++#AC_FUNC_SETPGRP
+ AC_TYPE_SIGNAL
+ # AC_FUNC_STAT
+ # remove pstat_getdynamic (at least for now) since we don't do

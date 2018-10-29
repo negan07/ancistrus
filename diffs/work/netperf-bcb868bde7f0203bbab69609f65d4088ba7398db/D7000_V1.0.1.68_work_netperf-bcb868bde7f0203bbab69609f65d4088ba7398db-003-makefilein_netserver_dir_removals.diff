@@ -1,0 +1,37 @@
+diff -urN work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/Makefile.am work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/Makefile.am
+--- work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/Makefile.am	2015-07-20 19:30:24.000000000 +0200
++++ work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/Makefile.am	2017-03-23 21:20:45.828649220 +0100
+@@ -1,4 +1,4 @@
+ 
+ AUTOMAKE_OPTIONS = dist-bzip2 dist-zip
+-SUBDIRS = src doc
++SUBDIRS = src #doc
+ EXTRA_DIST = README.* Release_Notes inet_ntop.c autogen.sh m4
+diff -urN work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/Makefile.am work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/Makefile.am
+--- work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/Makefile.am	2015-07-20 19:30:24.000000000 +0200
++++ work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/Makefile.am	2017-03-23 21:20:45.828649220 +0100
+@@ -1,8 +1,8 @@
+-SUBDIRS = missing
++SUBDIRS = #missing
+ 
+-CLEANFILES = netperf_version.h
++CLEANFILES = #netperf_version.h
+ 
+-bin_PROGRAMS = netperf netserver
++bin_PROGRAMS = netperf #netserver
+ 
+ AM_CFLAGS = $(NETPERF_CFLAGS)
+ 
+@@ -13,10 +13,10 @@
+ COMMON_SRC = hist.h netlib.c netlib.h netcpu.h netsh.c netsh.h nettest_bsd.c nettest_bsd.h nettest_dlpi.c nettest_dlpi.h nettest_unix.c nettest_unix.h nettest_xti.c nettest_xti.h nettest_sctp.c nettest_sctp.h netperf_version.h nettest_sdp.c nettest_sdp.h nettest_omni.c net_uuid.c dscp.c
+ 
+ netperf_SOURCES = netperf.c $(COMMON_SRC) $(USE_CPU_SOURCE) $(USE_SYS_SOURCE) $(USE_SEC_SOURCE) $(USE_FIRE_SOURCE)
+-netserver_SOURCES = netserver.c $(COMMON_SRC) $(USE_CPU_SOURCE) $(USE_SYS_SOURCE) $(USE_SEC_SOURCE) $(USE_FIRE_SOURCE)
++#netserver_SOURCES = netserver.c $(COMMON_SRC) $(USE_CPU_SOURCE) $(USE_SYS_SOURCE) $(USE_SEC_SOURCE) $(USE_FIRE_SOURCE)
+ 
+ # if there are any "missing" routines, the libobjs should cover it
+ if NEED_LIBCOMPAT
+ netperf_LDADD = missing/libcompat.a
+-netserver_LDADD = missing/libcompat.ap
++#netserver_LDADD = missing/libcompat.ap
+ endif
