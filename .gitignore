@@ -129,4 +129,6 @@ work/lzo-*/
 work/openssh-*/
 work/mini-snmpd-*/
 work/curl-*/
+work/busybox-*/
+work/openssl-*/
 

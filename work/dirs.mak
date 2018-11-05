@@ -158,10 +158,6 @@ SEC_$(QOS_SQM)			:= net
 PRIO_$(QOS_SQM)			:= standard
 DEP_$(QOS_SQM)			:= $(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
 DESC_$(QOS_SQM)			:= Quality Of Service SQM scripts traffic shaper tool
-# OPENSSL (REDIRECT TO ORIG)
-OPENSSL_NAME			:= openssl
-VER_$(OPENSSL_NAME)		:= 1.0.0r
-OPENSSL				:= $(OPENSSL_NAME)-$(VER_$(OPENSSL_NAME))
 # ZLIB
 ZLIB_NAME			:= zlib
 VER_$(ZLIB_NAME)		:= 1.2.11
@@ -179,6 +175,10 @@ DEP_$(ZLIB)			:=
 DESC_$(ZLIB)			:= A Massively Spiffy Yet Delicately Unobtrusive Compression Library
 DIRLIST				+= $(ZLIB)
 TARLIST				+= $(TAR_$(ZLIB))
+# OPENSSL (REDIRECT TO ORIG)
+OPENSSL_NAME			:= openssl
+VER_$(OPENSSL_NAME)		:= 1.0.0r
+OPENSSL				:= $(OPENSSL_NAME)-$(VER_$(OPENSSL_NAME))
 # CURL
 CURL_NAME			:= curl
 VER_$(CURL_NAME)		:= 7.61.1
@@ -315,6 +315,23 @@ DEP_$(OPEN_VPN)			:=
 DESC_$(OPEN_VPN)		:= Your private path to access network resources and services securely
 DIRLIST				+= $(OPEN_VPN)
 TARLIST				+= $(TAR_$(OPEN_VPN))
+# BUSYBOX
+BUSYBOX_NAME			:= busybox
+VER_$(BUSYBOX_NAME)		:= 1.29.3
+BUSYBOX				:= $(BUSYBOX_NAME)-$(VER_$(BUSYBOX_NAME))
+NAME_$(BUSYBOX)			:= $(BUSYBOX_NAME)$(DBG)
+SUBVER_$(BUSYBOX)		:= 
+VER_$(BUSYBOX)			:= $(VER_$(BUSYBOX_NAME))$(SUBVER_$(BUSYBOX))
+DL_$(BUSYBOX)			:= https://busybox.net/downloads
+TAR_$(BUSYBOX)			:= $(BUSYBOX).tar.bz2
+HOME_$(BUSYBOX)			:= https://busybox.net/
+LIC_$(BUSYBOX)			:= GPLv2
+SEC_$(BUSYBOX)			:= base
+PRIO_$(BUSYBOX)			:= required
+DEP_$(BUSYBOX)			:= 
+DESC_$(BUSYBOX)			:= The Swiss Army Knife of Embedded Linux
+DIRLIST				+= $(BUSYBOX)
+TARLIST				+= $(TAR_$(BUSYBOX))
 # OPENSSH
 OPEN_SSH_NAME			:= openssh
 VER_$(OPEN_SSH_NAME)		:= 7.8p1
@@ -364,6 +381,7 @@ BUILTIN				+= $(UTELNETD)
 BUILTIN				+= $(IPROUTE2)
 BUILTIN				+= $(HDPARM)
 BUILTIN				+= $(OPEN_VPN)
+BUILTIN				+= $(BUSYBOX)
 THIRDPARTYLIB			+= $(LIBARCHIVE)
 THIRDPARTY			+= $(NETPERF)
 THIRDPARTY			+= $(NETWORKTEST)

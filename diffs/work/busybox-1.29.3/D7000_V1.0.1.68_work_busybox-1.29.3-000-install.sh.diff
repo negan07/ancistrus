@@ -1,0 +1,117 @@
+diff -urN work/busybox-1.29.3/applets/install.sh work/busybox-1.29.3/applets/install.sh
+--- work/busybox-1.29.3/applets/install.sh	2018-09-09 20:56:44.000000000 +0200
++++ work/busybox-1.29.3/applets/install.sh	2018-10-31 22:11:47.013674367 +0100
+@@ -18,6 +18,7 @@
+ h=`sort busybox.links | uniq`
+ 
+ sharedlib_dir="0_lib"
++appdir="tmp"
+ 
+ linkopts=""
+ scriptwrapper="n"
+@@ -60,8 +61,8 @@
+ 	done
+ fi
+ 
+-if [ x"$cleanup" = x"1" ] && [ -e "$prefix/bin/busybox" ]; then
+-	inode=`ls -i "$prefix/bin/busybox" | awk '{print $1}'`
++if [ x"$cleanup" = x"1" ] && [ -e "$prefix/${appdir}/busybox" ]; then
++	inode=`ls -i "$prefix/${appdir}/busybox" | awk '{print $1}'`
+ 	sub_shell_it=`
+ 		cd "$prefix"
+ 		for d in usr/sbin usr/bin sbin bin; do
+@@ -76,24 +77,24 @@
+ 	exit 0
+ fi
+ 
+-rm -f "$prefix/bin/busybox" || exit 1
+-mkdir -p "$prefix/bin" || exit 1
+-install -m 755 busybox "$prefix/bin/busybox" || exit 1
++rm -f "$prefix/${appdir}/busybox" || exit 1
++mkdir -p "$prefix/${appdir}" || exit 1
++install -m 755 busybox "$prefix/${appdir}/busybox" || exit 1
+ 
++mkdir -p "$prefix/${appdir}" || exit 1
++habslist=""
+ for i in $h; do
+-	appdir=`dirname "$i"`
+ 	app=`basename "$i"`
+ 	if [ x"$noclobber" = x"1" ] && [ -e "$prefix/$i" ]; then
+ 		echo "  $prefix/$i already exists"
+ 		continue
+ 	fi
+-	mkdir -p "$prefix/$appdir" || exit 1
+ 	if [ x"$scriptwrapper" = x"y" ]; then
+ 		if [ x"$swrapall" != x"y" ] && [ x"$i" = x"/bin/sh" ]; then
+ 			ln $linkopts busybox "$prefix/$i" || exit 1
+ 		else
+ 			rm -f "$prefix/$i"
+-			echo "#!/bin/busybox" >"$prefix/$i"
++			echo "#!/usr/sbin/busybox" >"$prefix/$i"
+ 			chmod +x "$prefix/$i"
+ 		fi
+ 		echo "	$prefix/$i"
+@@ -107,31 +108,39 @@
+ 			exit 1
+ 		fi
+ 	else
+-		if [ x"$linkopts" = x"-f" ]; then
+-			bb_path="$prefix/bin/busybox"
+-		else
+-			case "$appdir" in
+-			/)
+-				bb_path="bin/busybox"
+-			;;
+-			/bin)
+-				bb_path="busybox"
+-			;;
+-			/sbin)
+-				bb_path="../bin/busybox"
+-			;;
+-			/usr/bin | /usr/sbin)
+-				bb_path="../../bin/busybox"
+-			;;
+-			*)
+-				echo "Unknown installation directory: $appdir"
+-				exit 1
+-			;;
+-			esac
+-		fi
+-		echo "  $prefix/$i -> $bb_path"
+-		ln $linkopts "$bb_path" "$prefix/$i" || exit 1
++		bb_path="busybox"
++		echo "  ${prefix}/${app} -> $bb_path"
++		habslist="${habslist}/${appdir}/${app} "
++		ln $linkopts "$bb_path" "${prefix}/${appdir}/${app}" || exit 1
+ 	fi
+ done
+ 
++POSTINST=${prefix}/CONTROL/postinst
++touch ${POSTINST}
++chmod 755 ${POSTINST}
++[ -f profile ] && chmod 755 profile
++[ -x profile ] && cp -f profile ${prefix}/${appdir}/
++
++cat <<_EOF_ >${POSTINST}
++#!/bin/sh
++if [ -f /${appdir}/busybox -a -x /${appdir}/busybox ]; then
++echo "Updating busybox..."
++mv -f ${habslist}/${appdir}/busybox /usr/sbin/
++sleep 1
++sync
++	if [ -f /${appdir}/profile -a -x /${appdir}/profile ]; then
++	echo "Updating shell profile ..."
++	cp -f /${appdir}/profile /etc/
++	mv -f /${appdir}/profile /usr/etc/
++	. /etc/profile
++	fi
++sync
++echo
++echo "Busybox installation completed"
++echo "This package can now be removed because new busybox binary and applet symlinks have been moved to the working binpath"
++echo "Type 'opkg remove busybox'"
++fi
++exit 0
++_EOF_
++
+ exit 0

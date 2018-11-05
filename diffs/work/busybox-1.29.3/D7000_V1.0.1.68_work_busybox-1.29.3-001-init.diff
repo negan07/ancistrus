@@ -1,0 +1,25 @@
+diff -urN work/busybox-1.29.3/init/init.c work/busybox-1.29.3/init/init.c
+--- work/busybox-1.29.3/init/init.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.29.3/init/init.c	2018-10-31 21:58:27.180671141 +0100
+@@ -160,7 +160,7 @@
+ 
+ /* Default sysinit script. */
+ #ifndef INIT_SCRIPT
+-# define INIT_SCRIPT  "/etc/init.d/rcS"
++#define INIT_SCRIPT  "/usr/etc/rcS"
+ #endif
+ 
+ /* Each type of actions can appear many times. They will be
+@@ -686,11 +686,7 @@
+ 		/* Sysinit */
+ 		new_init_action(SYSINIT, INIT_SCRIPT, "");
+ 		/* Askfirst shell on tty1-4 */
+-		new_init_action(ASKFIRST, bb_default_login_shell, "");
+-//TODO: VC_1 instead of ""? "" is console -> ctty problems -> angry users
+-		new_init_action(ASKFIRST, bb_default_login_shell, VC_2);
+-		new_init_action(ASKFIRST, bb_default_login_shell, VC_3);
+-		new_init_action(ASKFIRST, bb_default_login_shell, VC_4);
++		new_init_action(ASKFIRST, bb_default_login_shell, "/dev/ttyS0");
+ 		/* Reboot on Ctrl-Alt-Del */
+ 		new_init_action(CTRLALTDEL, "reboot", "");
+ 		/* Umount all filesystems on halt/reboot */

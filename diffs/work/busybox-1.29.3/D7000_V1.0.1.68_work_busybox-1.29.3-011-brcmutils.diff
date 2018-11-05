@@ -1,0 +1,698 @@
+diff -urN work/busybox-1.29.3/miscutils/flash_eraseall.c work/busybox-1.29.3/miscutils/flash_eraseall.c
+--- work/busybox-1.29.3/miscutils/flash_eraseall.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.29.3/miscutils/flash_eraseall.c	2018-11-01 21:16:26.148477636 +0100
+@@ -11,10 +11,10 @@
+  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+  */
+ //config:config FLASH_ERASEALL
+-//config:	bool "flash_eraseall (5.5 kb)"
+-//config:	default n  # doesn't build on Ubuntu 8.04
++//config:	bool "flash_eraseall (~5.5 kb)"
++//config:	default n
+ //config:	help
+-//config:	The flash_eraseall binary from mtd-utils as of git head c4c6a59eb.
++//config:	The flash_eraseall binary patched by broadcom
+ //config:	This utility is used to erase the whole MTD device.
+ 
+ //applet:IF_FLASH_ERASEALL(APPLET(flash_eraseall, BB_DIR_USR_SBIN, BB_SUID_DROP))
+@@ -23,44 +23,73 @@
+ //kbuild:lib-$(CONFIG_FLASH_ERASEALL) += flash_eraseall.o
+ 
+ //usage:#define flash_eraseall_trivial_usage
+-//usage:       "[-jNq] MTD_DEVICE"
++//usage:       "[-jqre] MTD_DEVICE"
+ //usage:#define flash_eraseall_full_usage "\n\n"
+ //usage:       "Erase an MTD device\n"
+ //usage:     "\n	-j	Format the device for jffs2"
+-//usage:     "\n	-N	Don't skip bad blocks"
+ //usage:     "\n	-q	Don't display progress messages"
++//usage:     "\n	-r	For testing, read back cleanmarker"
++//usage:     "\n	-e	Flash erase"
+ 
++#include <getopt.h>
++#include <features.h>
++#include <sys/types.h>
++#include <sys/stat.h>           /* stat */
++#include <sys/ioctl.h>           /* stat */
++#include <ctype.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <string.h>
++#include <errno.h>
++#include <unistd.h>
++#include <fcntl.h>
+ #include "libbb.h"
+ #include <mtd/mtd-user.h>
++#include <linux/version.h>
+ #include <linux/jffs2.h>
+ 
+-#define OPTION_J  (1 << 0)
+-#define OPTION_N  (1 << 1)
+-#define OPTION_Q  (1 << 2)
+-#define IS_NAND   (1 << 3)
++/* Broadcom has changed the definition of this structure in the kernel version
++ * of mtdabi.h.  This file includes a version of mtdabi.h from the toolchain.
++ * Therefore, copy the kernel definition here.
++ */
++#undef ECCGETLAYOUT
++#define ECCGETLAYOUT        _IOR('M', 17, struct k_nand_ecclayout)
++
++#if defined(MTD_MAX_OOBFREE_ENTRIES)
++#undef MTD_MAX_OOBFREE_ENTRIES
++#endif
++#if defined(MTD_MAX_OOBFREE_ENTRIES)
++#undef MTD_MAX_OOBFREE_ENTRIES
++#endif
++
++#define MTD_MAX_OOBFREE_ENTRIES	8
++#define MTD_MAX_ECCPOS_ENTRIES	64
++
++/*
++ * ECC layout control structure. Exported to userspace for
++ * diagnosis and to allow creation of raw images
++ */
++struct k_nand_ecclayout {
++    uint32_t eccbytes;
++    uint32_t eccpos[MTD_MAX_ECCPOS_ENTRIES];
++    uint32_t oobavail;
++    struct nand_oobfree oobfree[MTD_MAX_OOBFREE_ENTRIES];
++};
++
++#define OPTION_J    (1 << 0)
++#define OPTION_Q    (1 << 1)
++#define OPTION_R    (1 << 2)
++#define OPTION_E    (1 << 3)
++#define IS_NAND     (1 << 4)
++#define BBTEST      (1 << 5)
+ 
+-/* mtd/jffs2-user.h used to have this atrocity:
+-extern int target_endian;
++int target_endian = __BYTE_ORDER;
+ 
+ #define t16(x) ({ __u16 __b = (x); (target_endian==__BYTE_ORDER)?__b:bswap_16(__b); })
+ #define t32(x) ({ __u32 __b = (x); (target_endian==__BYTE_ORDER)?__b:bswap_32(__b); })
+ 
+ #define cpu_to_je16(x) ((jint16_t){t16(x)})
+ #define cpu_to_je32(x) ((jint32_t){t32(x)})
+-#define cpu_to_jemode(x) ((jmode_t){t32(x)})
+-
+-#define je16_to_cpu(x) (t16((x).v16))
+-#define je32_to_cpu(x) (t32((x).v32))
+-#define jemode_to_cpu(x) (t32((x).m))
+-
+-but mtd/jffs2-user.h is gone now (at least 2.6.31.6 does not have it anymore)
+-*/
+-
+-/* We always use native endianness */
+-#undef cpu_to_je16
+-#undef cpu_to_je32
+-#define cpu_to_je16(v) ((jint16_t){(v)})
+-#define cpu_to_je32(v) ((jint32_t){(v)})
+ 
+ static void show_progress(mtd_info_t *meminfo, erase_info_t *erase)
+ {
+@@ -75,144 +104,144 @@
+ int flash_eraseall_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
+ int flash_eraseall_main(int argc UNUSED_PARAM, char **argv)
+ {
+-	struct jffs2_unknown_node cleanmarker;
+-	mtd_info_t meminfo;
+-	int fd, clmpos, clmlen;
+-	erase_info_t erase;
+-	struct stat st;
+-	unsigned int flags;
+-	char *mtd_name;
+-
+-	flags = getopt32(argv, "^" "jNq" "\0" "=1");
+-
+-	mtd_name = argv[optind];
+-	fd = xopen(mtd_name, O_RDWR);
+-	fstat(fd, &st);
+-	if (!S_ISCHR(st.st_mode))
+-		bb_error_msg_and_die("%s: not a char device", mtd_name);
+-
+-	xioctl(fd, MEMGETINFO, &meminfo);
+-	erase.length = meminfo.erasesize;
+-	if (meminfo.type == MTD_NANDFLASH)
+-		flags |= IS_NAND;
+-
+-	clmpos = 0;
+-	clmlen = 8;
+-	if (flags & OPTION_J) {
+-		uint32_t *crc32_table;
+-
+-		crc32_table = crc32_new_table_le();
+-
+-		cleanmarker.magic = cpu_to_je16(JFFS2_MAGIC_BITMASK);
+-		cleanmarker.nodetype = cpu_to_je16(JFFS2_NODETYPE_CLEANMARKER);
+-		if (!(flags & IS_NAND))
+-			cleanmarker.totlen = cpu_to_je32(sizeof(struct jffs2_unknown_node));
+-		else {
+-			struct nand_oobinfo oobinfo;
+-
+-			xioctl(fd, MEMGETOOBSEL, &oobinfo);
+-
+-			/* Check for autoplacement */
+-			if (oobinfo.useecc == MTD_NANDECC_AUTOPLACE) {
+-				/* Get the position of the free bytes */
+-				clmpos = oobinfo.oobfree[0][0];
+-				clmlen = oobinfo.oobfree[0][1];
+-				if (clmlen > 8)
+-					clmlen = 8;
+-				if (clmlen == 0)
+-					bb_error_msg_and_die("autoplacement selected and no empty space in oob");
+-			} else {
+-				/* Legacy mode */
+-				switch (meminfo.oobsize) {
+-				case 8:
+-					clmpos = 6;
+-					clmlen = 2;
+-					break;
+-				case 16:
+-					clmpos = 8;
+-					/*clmlen = 8;*/
+-					break;
+-				case 64:
+-					clmpos = 16;
+-					/*clmlen = 8;*/
+-					break;
+-				}
+-			}
+-			cleanmarker.totlen = cpu_to_je32(8);
+-		}
+-
+-		cleanmarker.hdr_crc = cpu_to_je32(
+-			crc32_block_endian0(0, &cleanmarker, sizeof(struct jffs2_unknown_node) - 4, crc32_table)
+-		);
+-	}
+-
+-	/* Don't want to destroy progress indicator by bb_error_msg's */
+-	applet_name = xasprintf("\n%s: %s", applet_name, mtd_name);
+-
+-	for (erase.start = 0; erase.start < meminfo.size;
+-	     erase.start += meminfo.erasesize) {
+-		if (!(flags & OPTION_N)) {
+-			int ret;
+-			loff_t offset = erase.start;
+-
+-			ret = ioctl(fd, MEMGETBADBLOCK, &offset);
+-			if (ret > 0) {
+-				if (!(flags & OPTION_Q))
+-					printf("\nSkipping bad block at 0x%08x\n", erase.start);
+-				continue;
+-			}
+-			if (ret < 0) {
+-				/* Black block table is not available on certain flash
+-				 * types e.g. NOR
+-				 */
+-				if (errno == EOPNOTSUPP) {
+-					flags |= OPTION_N;
+-					if (flags & IS_NAND)
+-						bb_error_msg_and_die("bad block check not available");
+-				} else {
+-					bb_perror_msg_and_die("MEMGETBADBLOCK error");
+-				}
+-			}
+-		}
+-
+-		if (!(flags & OPTION_Q))
+-			show_progress(&meminfo, &erase);
+-
+-		xioctl(fd, MEMERASE, &erase);
+-
+-		/* format for JFFS2 ? */
+-		if (!(flags & OPTION_J))
+-			continue;
+-
+-		/* write cleanmarker */
+-		if (flags & IS_NAND) {
+-			struct mtd_oob_buf oob;
+-
+-			oob.ptr = (unsigned char *) &cleanmarker;
+-			oob.start = erase.start + clmpos;
+-			oob.length = clmlen;
+-			xioctl(fd, MEMWRITEOOB, &oob);
+-		} else {
+-			xlseek(fd, erase.start, SEEK_SET);
+-			/* if (lseek(fd, erase.start, SEEK_SET) < 0) {
+-				bb_perror_msg("MTD %s failure", "seek");
+-				continue;
+-			} */
+-			xwrite(fd, &cleanmarker, sizeof(cleanmarker));
+-			/* if (write(fd, &cleanmarker, sizeof(cleanmarker)) != sizeof(cleanmarker)) {
+-				bb_perror_msg("MTD %s failure", "write");
+-				continue;
+-			} */
+-		}
+-		if (!(flags & OPTION_Q))
+-			printf(" Cleanmarker written at %x.", erase.start);
+-	}
+-	if (!(flags & OPTION_Q)) {
+-		show_progress(&meminfo, &erase);
+-		bb_putchar('\n');
+-	}
+-
+-	if (ENABLE_FEATURE_CLEAN_UP)
+-		close(fd);
+-	return EXIT_SUCCESS;
++    struct jffs2_unknown_node oob_cleanmarker;
++    mtd_info_t meminfo;
++    int fd, clmpos, clmlen;
++    erase_info_t erase;
++    struct stat st;
++    unsigned int flags;
++    char *mtd_name;
++    unsigned char spare_buf[16 * 27];
++
++	flags = getopt32(argv, "^" "jqre" "\0" "=1");
++
++    mtd_name = argv[optind];
++    stat(mtd_name, &st);
++    if (!S_ISCHR(st.st_mode))
++        bb_error_msg_and_die("%s: not a char device", mtd_name);
++
++    fd = xopen(mtd_name, O_RDWR);
++
++    if(ioctl(fd, MEMGETINFO, &meminfo) != 0)
++        printf("ioctl MEMGETINFO failed:(%d)%s\n", errno, strerror(errno));
++    erase.length = meminfo.erasesize;
++    if (meminfo.type == MTD_NANDFLASH)
++        flags |= IS_NAND;
++
++    clmpos = 0;
++    clmlen = 8;
++    if (flags & OPTION_J) {
++
++        oob_cleanmarker.magic = cpu_to_je16(JFFS2_MAGIC_BITMASK);
++        oob_cleanmarker.nodetype = cpu_to_je16(JFFS2_NODETYPE_CLEANMARKER);
++        oob_cleanmarker.totlen = cpu_to_je32(8);
++        oob_cleanmarker.hdr_crc = cpu_to_je32(0xffffffff);
++        memset(spare_buf, 0xff, sizeof(spare_buf));
++        memcpy(spare_buf, (unsigned char *) &oob_cleanmarker,
++            sizeof(oob_cleanmarker));
++
++        if (!(flags & IS_NAND))
++            oob_cleanmarker.totlen = cpu_to_je32(sizeof(struct jffs2_unknown_node));
++        else {
++            struct k_nand_ecclayout ecclayout;
++
++            if(ioctl(fd, ECCGETLAYOUT, &ecclayout) != 0) {
++                printf("ioctl ECCGETLAYOUT failed:(%d)%s\n", errno, strerror(errno));
++                clmlen = 50;
++                clmpos = 0;
++            }
++            else {
++                clmlen = ecclayout.oobavail;
++                clmpos = 0;
++            }
++        }
++    }
++
++    /* Don't want to destroy progress indicator by bb_error_msg's */
++   applet_name = xasprintf("\n%s: %s", applet_name, mtd_name);
++
++    for (erase.start = 0; erase.start < meminfo.size;
++         erase.start += meminfo.erasesize) {
++        if (flags & BBTEST) {
++            int ret;
++            loff_t offset = erase.start;
++
++            ret = ioctl(fd, MEMGETBADBLOCK, &offset);
++            if (ret > 0) {
++                if (!(flags & OPTION_Q))
++                    printf("\nSkipping bad block at 0x%08x\n", erase.start);
++                continue;
++            }
++            if (ret < 0) {
++                /* Black block table is not available on certain flash
++                 * types e.g. NOR
++                 */
++                if (errno == EOPNOTSUPP) {
++                    flags = ~BBTEST;
++                    if (flags & IS_NAND)
++                        bb_error_msg_and_die("bad block check not available");
++                } else {
++                    bb_perror_msg_and_die("MEMGETBADBLOCK error");
++                }
++            }
++        }
++
++        if (!(flags & OPTION_Q))
++            show_progress(&meminfo, &erase);
++
++        if (!(flags & OPTION_E))
++            ioctl(fd, MEMERASE, &erase);
++
++        /* format for JFFS2 ? */
++        if (!(flags & OPTION_J))
++            continue;
++
++        /* write cleanmarker */
++        if (flags & IS_NAND) {
++            struct mtd_oob_buf oob;
++
++            oob.ptr = spare_buf;
++            oob.start = erase.start + clmpos;
++            oob.length = clmlen;
++            if(ioctl(fd, MEMWRITEOOB, &oob) != 0)
++                printf("ioctl MEMWRITEOOB failed:(%d)%s\n", errno, strerror(errno));
++        } else {
++            lseek(fd, erase.start, SEEK_SET);
++            write(fd, &oob_cleanmarker, sizeof(oob_cleanmarker));
++        }
++        if (!(flags & OPTION_Q))
++            printf(" Cleanmarker written at %x.", erase.start);
++    }
++    if (!(flags & OPTION_Q)) {
++        show_progress(&meminfo, &erase);
++        putchar('\n');
++    }
++
++    if (flags & OPTION_R) {
++        int i;
++        /* For testing, read back cleanmarker. */
++        for (i= 0; i< meminfo.size; i+= meminfo.erasesize) { 
++
++            if (flags & IS_NAND) {
++                unsigned char spare[64];
++                struct mtd_oob_buf oob;
++
++                memset(spare, 0x00, sizeof(spare));
++                oob.ptr = (unsigned char *) &spare;
++                oob.start = i;
++                oob.length = sizeof(spare);
++                ioctl(fd, MEMREADOOB, &oob);
++                printf("R %8.8lx: %8.8x %8.8x %8.8x %8.8x\n",
++                    (unsigned long) (i + 0),
++                    *((unsigned char *) &spare[0]),
++                    *((unsigned char *) &spare[4]),
++                    *((unsigned char *) &spare[8]),
++                    *((unsigned char *) &spare[12]));
++            }
++        }
++    }
++
++    close(fd);
++    return EXIT_SUCCESS;
+ }
++
+diff -urN work/busybox-1.29.3/miscutils/sysinfo.c work/busybox-1.29.3/miscutils/sysinfo.c
+--- work/busybox-1.29.3/miscutils/sysinfo.c	1970-01-01 01:00:00.000000000 +0100
++++ work/busybox-1.29.3/miscutils/sysinfo.c	2018-11-01 21:05:59.455074660 +0100
+@@ -0,0 +1,111 @@
++/*
++ *  Report system information including
++ *      number of processes, uptime, system average load
++ *      and memory information.
++ *
++ */
++//config:config SYSINFO
++//config:	bool "sysinfo"
++//config:	default y
++//config:	help
++//config:	The system status report utility.
++//config:
++
++//kbuild:lib-$(CONFIG_SYSINFO) += sysinfo.o
++
++
++#include <stdio.h>
++#include <errno.h>
++#include <stdlib.h>
++#include <time.h>
++#ifdef __linux__
++#include <sys/sysinfo.h>
++#endif
++#include "busybox.h"
++
++static const int FSHIFT = 16;              /* nr of bits of precision */
++#define FIXED_1         (1<<FSHIFT)     /* 1.0 as fixed-point */
++#define LOAD_INT(x) ((x) >> FSHIFT)
++#define LOAD_FRAC(x) LOAD_INT(((x) & (FIXED_1-1)) * 100)
++
++static int sysinfo_mem(void)
++{
++	struct sysinfo info;
++	sysinfo(&info);
++
++	/* Kernels prior to 2.4.x will return info.mem_unit==0, so cope... */
++	if (info.mem_unit==0) {
++		info.mem_unit=1;
++	}
++	info.mem_unit*=1024;
++
++	/* TODO:  Make all this stuff not overflow when mem >= 4 Gib */
++	info.totalram/=info.mem_unit;
++	info.freeram/=info.mem_unit;
++	info.totalswap/=info.mem_unit;
++	info.freeswap/=info.mem_unit;
++	info.sharedram/=info.mem_unit;
++	info.bufferram/=info.mem_unit;
++
++	printf("%6s%13s%13s%13s%13s%13s\n", "", "total", "used", "free",
++			"shared", "buffers");
++
++	printf("%6s%13ld%13ld%13ld%13ld%13ld\n", "Mem:", info.totalram,
++			info.totalram-info.freeram, info.freeram,
++			info.sharedram, info.bufferram);
++
++	printf("%6s%13ld%13ld%13ld\n", "Swap:", info.totalswap,
++			info.totalswap-info.freeswap, info.freeswap);
++
++	printf("%6s%13ld%13ld%13ld\n", "Total:", info.totalram+info.totalswap,
++			(info.totalram-info.freeram)+(info.totalswap-info.freeswap),
++			info.freeram+info.freeswap);
++	return EXIT_SUCCESS;
++}
++
++
++
++static int sysinfo_uptime(void)
++{
++	int updays, uphours, upminutes;
++	struct sysinfo info;
++	struct tm *current_time;
++	time_t current_secs;
++
++	time(&current_secs);
++	current_time = localtime(&current_secs);
++
++	sysinfo(&info);
++
++    printf("Number of processes: %d\n", info.procs);
++	printf(" %2d:%02d%s  up ",
++			current_time->tm_hour%12 ? current_time->tm_hour%12 : 12,
++			current_time->tm_min, current_time->tm_hour > 11 ? "pm" : "am");
++	updays = (int) info.uptime / (60*60*24);
++	if (updays)
++		printf("%d day%s, ", updays, (updays != 1) ? "s" : "");
++	upminutes = (int) info.uptime / 60;
++	uphours = (upminutes / 60) % 24;
++	upminutes %= 60;
++	if(uphours)
++		printf("%2d:%02d, ", uphours, upminutes);
++	else
++		printf("%d min, ", upminutes);
++
++	printf("\nload average: 1 min:%ld.%02ld, 5 min:%ld.%02ld, 15 min:%ld.%02ld\n",
++			LOAD_INT(info.loads[0]), LOAD_FRAC(info.loads[0]),
++			LOAD_INT(info.loads[1]), LOAD_FRAC(info.loads[1]),
++			LOAD_INT(info.loads[2]), LOAD_FRAC(info.loads[2]));
++
++	return EXIT_SUCCESS;
++}
++
++extern int sysinfo_main(int argc UNUSED_PARAM, char **argv UNUSED_PARAM) MAIN_EXTERNALLY_VISIBLE;
++extern int sysinfo_main(int argc UNUSED_PARAM, char **argv UNUSED_PARAM)
++{
++    sysinfo_uptime();
++    sysinfo_mem();
++
++    return EXIT_SUCCESS;
++
++}
+diff -urN work/busybox-1.29.3/networking/sendarp.c work/busybox-1.29.3/networking/sendarp.c
+--- work/busybox-1.29.3/networking/sendarp.c	1970-01-01 01:00:00.000000000 +0100
++++ work/busybox-1.29.3/networking/sendarp.c	2018-11-01 21:10:25.954041123 +0100
+@@ -0,0 +1,181 @@
++//config:config SENDARP
++//config:	bool "sendarp"
++//config:	default y
++//config:	help
++//config:	Ping hosts by ARP packets.
++//config:
++
++//applet:IF_SENDARP(APPLET(sendarp, BB_DIR_USR_BIN, BB_SUID_DROP))
++
++//kbuild:lib-$(CONFIG_SENDARP) += sendarp.o
++
++
++#include <stdlib.h>
++#include <string.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <linux/if_packet.h>
++#include <net/if.h>
++#include <sys/ioctl.h>
++#include <netinet/if_ether.h>
++#include "busybox.h"
++
++#define MAC_BCAST_ADDR	"\xff\xff\xff\xff\xff\xff"
++
++#define IFIPADDR        1
++#define IFHWADDR        2
++
++struct arpMsg {
++	struct ethhdr ethhdr;	 		/* Ethernet header */
++	u_short htype;				/* hardware type (must be ARPHRD_ETHER) */
++	u_short ptype;				/* protocol type (must be ETH_P_IP) */
++	u_char  hlen;				/* hardware address length (must be 6) */
++	u_char  plen;				/* protocol address length (must be 4) */
++	u_short operation;			/* ARP opcode */
++	u_char  sHaddr[6];			/* sender's hardware address */
++	u_char  sInaddr[4];			/* sender's IP address */
++	u_char  tHaddr[6];			/* target's hardware address */
++	u_char  tInaddr[4];			/* target's IP address */
++	u_char  pad[18];			/* pad for min. Ethernet payload (60 bytes) */
++};
++
++/* local prototypes */
++static void sendArp(char *srcDev, char *destDev);
++static void mkArpMsg(int opcode, u_long tInaddr, u_char *tHaddr, u_long sInaddr, u_char *sHaddr, struct arpMsg *msg);
++static int getDevInfo (char *devname, int infotype, char *data);
++
++int sendarp_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
++int sendarp_main(int argc, char **argv)
++{
++	char *srcdev = NULL;
++	char *dstdev = NULL;
++	int opt;
++
++	while ((opt = getopt(argc, argv, "s:d:")) != -1) {
++		switch (opt) {
++		case 's': 
++			srcdev = xstrdup(optarg);
++			break;
++		case 'd':
++			dstdev = xstrdup(optarg);
++			break;
++		}
++	}
++
++    if ((srcdev == NULL) || (dstdev == NULL)) {
++        bb_show_usage();
++        return 0;
++    }
++
++    /* send gratutious ARP packet with srcdev's IP and hardware address to dstdev */
++    sendArp(srcdev, dstdev);
++
++	return EXIT_SUCCESS;
++}
++
++static void mkArpMsg(int opcode, u_long tInaddr, u_char *tHaddr,
++		 u_long sInaddr, u_char *sHaddr, struct arpMsg *msg) {
++	bzero(msg, sizeof(*msg));
++	bcopy(MAC_BCAST_ADDR, msg->ethhdr.h_dest, 6); /* MAC DA */
++	bcopy(sHaddr, msg->ethhdr.h_source, 6);	/* MAC SA */
++	msg->ethhdr.h_proto = htons(ETH_P_ARP);	/* protocol type (Ethernet) */
++	msg->htype = htons(ARPHRD_ETHER);		/* hardware type */
++	msg->ptype = htons(ETH_P_IP);			/* protocol type (ARP message) */
++	msg->hlen = 6;							/* hardware address length */
++	msg->plen = 4;							/* protocol address length */
++	msg->operation = htons(opcode);			/* ARP op code */
++//brcm start
++   bcopy((u_char *)&sInaddr, &msg->sInaddr[0], 4);  /* source IP address */
++	bcopy(sHaddr, msg->sHaddr, 6);			/* source hardware address */
++   bcopy((u_char *)&tInaddr, &msg->tInaddr[0], 4);  /* target IP address */
++//brcm end
++	if ( opcode == ARPOP_REPLY )
++		bcopy(tHaddr, msg->tHaddr, 6);		/* target hardware address */
++}
++
++static int getDevInfo (char *devname, int infotype, char *data) {
++    int    sock;
++    struct ifreq ifr;
++    int rc = 0;
++
++    /* create device level socket */
++    if ((sock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0)
++    {
++		perror("cannot open socket ");
++        return -1;
++    }
++
++    memset(&ifr, 0, sizeof(struct ifreq));
++    strcpy(ifr.ifr_name, devname);
++    switch(infotype) {
++        case IFIPADDR:
++            /* get IP address */
++            if (ioctl(sock, SIOCGIFADDR, &ifr) == -1) {
++                rc = -1;
++            } else {
++                memcpy(data, &((struct sockaddr_in *)&(ifr.ifr_addr))->sin_addr, sizeof(struct in_addr));
++            }
++            break;
++        case IFHWADDR:
++            /* get hardware address */
++            if (ioctl(sock, SIOCGIFHWADDR, &ifr) == -1) {
++                rc = -1;
++            } else {
++                memcpy(data, ifr.ifr_hwaddr.sa_data, ETH_ALEN);
++            }
++            break;
++        default:
++            rc = -1;
++            break;
++    }
++	close (sock);
++	return rc;
++}
++
++static void sendArp(char *srcDev, char *destDev) {
++    int sock;
++    struct arpMsg arp;
++    unsigned char br_macaddr[ETH_ALEN];
++    unsigned char eth_macaddr[ETH_ALEN];
++    unsigned int br_ipAddr;
++    struct sockaddr_ll sll; 
++    struct ifreq ifr;
++    int flag;
++
++    if ((getDevInfo(srcDev, IFIPADDR, (char *)&br_ipAddr) == 0) &&
++       (getDevInfo(srcDev, IFHWADDR, (char *)br_macaddr) == 0) &&
++       (getDevInfo(destDev, IFHWADDR, (char *)eth_macaddr) == 0)) {
++            /* create device level socket */
++            if ((sock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0) {
++		        perror("cannot open socket ");
++                return;
++            }
++
++            memset(&sll, 0, sizeof(sll));
++            sll.sll_family = AF_PACKET;
++            sll.sll_protocol = htons(ETH_P_ALL);
++
++            /* get interface index number */
++            memset(&ifr, 0, sizeof(struct ifreq));
++            strcpy(ifr.ifr_name, destDev);
++            if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0) {
++ 		        perror("SIOCGIFINDEX(): ");
++                close(sock);
++                return;
++            }
++            sll.sll_ifindex = ifr.ifr_ifindex;
++            /* bind the socket to the interface */
++            if (bind(sock, (struct sockaddr *)&sll,	sizeof(sll)) == -1) {
++ 		        perror("bind(): ");
++                close(sock);
++                return;
++            }
++            /* set socket to non-blocking operation */
++            if ((flag = fcntl(sock, F_GETFL, 0)) >= 0) {
++                fcntl(sock, F_SETFL, flag | O_NONBLOCK);
++            }
++            mkArpMsg(ARPOP_REQUEST, br_ipAddr, NULL, br_ipAddr, br_macaddr, &arp);
++            sendto(sock, &arp, sizeof(arp), 0, (struct sockaddr *)&sll, sizeof(sll));
++            close(sock);
++    }
++}
