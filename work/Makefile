@@ -102,6 +102,8 @@ pre_inst:
 	@mkdir -p -m 777 $(IMAGEDIR)/opkg $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR) || exit 1
 	echo -e "\\e[35m$(CUR_REL_PATH): removing old $(NAME_$(ZLIB)) reference on \\e[36m$(BUILD_TARGET) \\e[0m"
 	rm $(BUILD_TARGET)$(RCLDLIB)/libz.so* || exit 1
+	echo -e "\\e[35m$(CUR_REL_PATH): removing old $(NAME_$(CURL)) reference on \\e[36m$(BUILD_TARGET) \\e[0m"
+	rm $(BUILD_TARGET)$(RCLDLIB)/libcurl.so* || exit 1
 
 opkg_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(BUILD_TARGET) \\e[0m"
