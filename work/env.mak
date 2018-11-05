@@ -52,7 +52,7 @@ export SCHDIR		:= $(INITDIR)/$(RCSCH)
 export BINDIR		:= $(PREFIX)$(USRSBIN)
 export APPDIR		:= $(BINDIR)/$(RCAPP)
 export SCRDIR		:= $(BINDIR)/scripts
-export LIBDIR		:= $(PREFIX)/$(LDLIB)
+export LIBDIR		:= $(PREFIX)$(LDLIB)
 export MODDIR		:= $(LIBDIR)/modules
 export WWWDIR		:= $(PREFIX)$(WWW)
 # DEBUG
