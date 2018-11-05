@@ -1,6 +1,6 @@
-diff -urN work/hdparm-9.56/Makefile work/hdparm-9.56/Makefile
---- work/hdparm-9.56/Makefile	2017-05-23 23:09:40.513449762 +0200
-+++ work/hdparm-9.56/Makefile	2017-05-01 21:08:42.000000000 +0200
+diff -urN work/hdparm-9.58/Makefile work/hdparm-9.58/Makefile
+--- work/hdparm-9.58/Makefile	2017-05-23 23:09:40.513449762 +0200
++++ work/hdparm-9.58/Makefile	2017-05-01 21:08:42.000000000 +0200
 @@ -1,35 +1,18 @@
  # Makefile for hdparm
  
