@@ -1,23 +1,23 @@
 #!/bin/sh
 #
-# This script consolidates functionality of the original CeroWrt scripts
-# betterspeedtest.sh and netperfrunner.sh written by Rich Brown.
+# This script provides a convenient means of on-device network performance testing for router devices, and subsumes functionality
+# of the earlier CeroWrt scripts betterspeedtest.sh and netperfrunner.sh written by Rich Brown.
 #
-# Script betterspeedtest.sh simulated http://speedtest.net by initiating
-# a download followed by an upload, while measuring ping latency and data
-# transfer rates.
+# When launched, this script uses netperf to run several upload and download streams to an Internet server.
+# This places a heavy load on the bottleneck link of your network (probably your Internet connection) while measuring the total bandwidth
+# of the link during the transfers. Under this network load, this script simultaneously measures the latency of pings to see whether the file
+# transfers affect the responsiveness of your network. Additionally, this script tracks the per-CPU processor usage,
+# as well as the netperf CPU usage used for the test.
 #
-# Script netperfrunner.sh ran several simultaneous uploads and downloads, to
-# mimic the stress test of Flent (www.flent.org - formerly, "netperf-wrapper")
-# from Toke <toke@toke.dk> but without the nice GUI results.
+# This script operates in two modes of network loading: sequential and concurrent.
+# The default sequential mode emulates a web-based speed test by first downloading and then uploading network streams,
+# while concurrent mode provides a stress test by dowloading and uploading streams simultaneously.
 #
-# This speedtest.sh script merges both scripts above and allows selection
-# of either sequential or concurrent upload and download tests. It also
-# measures processor usage during testing to help identify being CPU-bound.
+# NOTE: this script uses servers and network bandwidth that are provided by generous volunteers (not some wealthy "big company").
+# Feel free to use the script to test your SQM configuration or troubleshoot network and latency problems:
+# continuous or high rate use of this script may result in denied access.
 #
-# Usage: network-test.sh [ -s | -c ] [-4 | -6] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-streams ]
-#
-# Options (if present):
+# Usage: $0 [ -s | -c ] [-4 | -6] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-streams ]
 #
 # Options (if present):
 #
@@ -90,13 +90,14 @@ summarize_pings() {
 				if (numrows%2==1) med=arr[(numrows+1)/2]; else med=(arr[numrows/2]); \
 			}; \
 			pktloss = numdrops/(numdrops+numrows) * 100; \
-			printf("  Latency: (in msec, %d pings, %4.2f%% packet loss)\n      Min: %4.3f \n    10pct: %4.3f \n   Median: %4.3f \n      Avg: %4.3f \n    90pct: %4.3f \n      Max: %4.3f\n", numrows, pktloss, arr[1], pc10, med, sum/numrows, pc90, arr[numrows] )\
+			printf("%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n", \
+			"Min",arr[1],"10pct",pc10,"Median",med,"Avg",sum/numrows,"90pct",pc90,"Max",arr[numrows])\
 		 }'
 }
 
-# Summarize the contents of the load file and speedtest process stat file
-# to show mean/stddev CPU utilization, and script CPU usage.
-#   input parameter ($1) file contains CPU load samples from /proc/stat
+# Summarize the contents of the load file, speedtest process stat file, cpuinfo
+# file to show mean/stddev CPU utilization and netperf CPU usage.
+#   input parameter ($1) file contains CPU load samples
 
 summarize_load() {
 	cat $1 /proc/$$/stat | awk '
@@ -108,18 +109,19 @@ $1 !~ /cpu/ {
 }
 # track aggregate CPU stats
 $1 == "cpu" {
-	tot=0; for (f=2;f<=NF;f++) tot+=$f
+	tot=0; for (f=2;f<=8;f++) tot+=$f
 	if (init_cpu=="") init_cpu=tot
 	tot_cpu=tot-init_cpu
+	n_load_samp++
 }
 # track per-CPU stats
 $1 ~ /cpu[0-9]+/ {
-	tot=0; for (f=2;f<=NF;f++) tot+=$f
-	usg = tot - $5
+	tot=0; for (f=2;f<=8;f++) tot+=$f
+	usg=tot-($5+$6)
 	if (init_tot[$1]=="") {
 		init_tot[$1]=tot
 		init_usg[$1]=usg
-		cpus[num_cpus++]=$1
+		cpus[n_cpus++]=$1
 	}
 	if (last_tot[$1]>0) {
 		sum_usg_2[$1] += ((usg-last_usg[$1])/(tot-last_tot[$1]))^2
@@ -128,20 +130,21 @@ $1 ~ /cpu[0-9]+/ {
 	last_usg[$1]=usg
 }
 END {
-	num_samp=(NR-2)/(num_cpus+1)-1
-	printf("Processor: (in %% busy, avg +/- stddev, %d samples)\n", num_samp)
-	for (i=0;i<num_cpus;i++) {
+	n_freq_samp/=n_cpus
+	n_load_samp--
+	printf(" CPU Load: [in %% busy (avg +/- std dev), %d samples]\n", n_load_samp)
+	for (i=0;i<n_cpus;i++) {
 		c=cpus[i]
-		if (num_samp>0) {
+		if (n_load_samp>0) {
 			avg_usg=(last_tot[c]-init_tot[c])
 			avg_usg=avg_usg>0 ? (last_usg[c]-init_usg[c])/avg_usg : 0
-			std_usg=sum_usg_2[c]/num_samp-avg_usg^2
+			std_usg=sum_usg_2[c]/n_load_samp-avg_usg^2
 			std_usg=std_usg>0 ? sqrt(std_usg) : 0
-			printf("%9s: %2.f +/- %2.f\n", c, avg_usg*100, std_usg*100)
+			printf("%9s: %5.1f%% +/- %4.1f%%\n", c, avg_usg*100, std_usg*100)
 		}
 	}
 	printf(" Overhead: (in %% total CPU used)\n")
-	printf("%9s: %2.f\n", "netperf", tot_cpu>0 ? proc_cpu/tot_cpu*100 : 0)
+	printf("%9s: %5.1f%%\n", "netperf", tot_cpu>0 ? proc_cpu/tot_cpu*100 : 0)
 }'
 }
 
@@ -153,7 +156,7 @@ summarize_speed() {
 	printf "%9s: %6.2f Mbps\n" $1 $(awk '{s+=$1} END {print s}' $2)
 }
 
-# Capture per-CPU and process load info at 1-second intervals.
+# Capture process load info at 1-second intervals.
 
 sample_load() {
 	cat /proc/$$/stat
