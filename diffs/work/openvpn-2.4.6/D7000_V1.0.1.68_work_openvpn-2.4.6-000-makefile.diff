@@ -6,7 +6,7 @@ diff -urN work/openvpn-2.4.6/Makefile work/openvpn-2.4.6/Makefile
 +
 +#USROVPNDIR 		:= $(BINDIR)/../openvpn
 +STARTUP			:= rc_openvpn
-+LEGSTATUP		:= rc_vpn
++LEGSTARTUP		:= rc_vpn
 +TUNKO			:= tun.ko
 +
 +all: config
