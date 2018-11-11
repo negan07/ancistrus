@@ -90,8 +90,9 @@ summarize_pings() {
 				if (numrows%2==1) med=arr[(numrows+1)/2]; else med=(arr[numrows/2]); \
 			}; \
 			pktloss = numdrops/(numdrops+numrows) * 100; \
-			printf("%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n", \
-			"Min",arr[1],"10pct",pc10,"Median",med,"Avg",sum/numrows,"90pct",pc90,"Max",arr[numrows])\
+			printf("  Latency: [in msec, %d pings, %4.2f%% packet loss]\n",numrows,pktloss); \
+			printf("%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n",
+			"Min",arr[1],"10pct",pc10,"Median",med,"Avg",sum/numrows,"90pct",pc90,"Max",arr[numrows]) \
 		 }'
 }
 
@@ -130,7 +131,6 @@ $1 ~ /cpu[0-9]+/ {
 	last_usg[$1]=usg
 }
 END {
-	n_freq_samp/=n_cpus
 	n_load_samp--
 	printf(" CPU Load: [in %% busy (avg +/- std dev), %d samples]\n", n_load_samp)
 	for (i=0;i<n_cpus;i++) {
