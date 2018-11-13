@@ -156,7 +156,7 @@ download:
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): download & extract \\e[36m$D \\e[0m"; \
 	[ -d $D ] || ../$(SCRIPTS_DIR)/dl_sources.sh $D $(DL_$D) $(TAR_$D) || exit 1; \
 	if [ ! -d $(D)/$(D) ];then \
-	if [ -f $(D)/Makefile.in ] || [ -f $(D)/configure.ac ]; then \
+	if [ -f $(D)/Makefile.in ] || [ -f $(D)/configure.ac ] || [ -x $(D)/config ]; then \
 	FLIST=$$(ls -A $D); \
 	mkdir -p -m 0755 $(D)/$(D) || exit 1; \
 	cd $D; mv -f $${FLIST} $D || exit 1; cd ..; \
