@@ -1,0 +1,12 @@
+diff -urN work/openssh-7.9p1/openssh-7.9p1/openbsd-compat/openssl-compat.c work/openssh-7.9p1/openssh-7.9p1/openbsd-compat/openssl-compat.c
+--- work/openssh-7.9p1/openssh-7.9p1/openbsd-compat/openssl-compat.c	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-7.9p1/openssh-7.9p1/openbsd-compat/openssl-compat.c	2018-01-05 12:00:11.000000000 +0100
+@@ -76,7 +76,7 @@
+ 	ENGINE_load_builtin_engines();
+ 	ENGINE_register_all_complete();
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10001000L
++#if OPENSSL_VERSION_NUMBER < 0x10100000L
+ 	OPENSSL_config(NULL);
+ #else
+ 	OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_CIPHERS |
