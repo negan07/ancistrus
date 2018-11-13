@@ -1,12 +1,12 @@
 diff -urN work/zlib-1.2.11/Makefile work/zlib-1.2.11/Makefile
 --- work/zlib-1.2.11/Makefile	2017-04-06 18:00:46.662292000 +0200
 +++ work/zlib-1.2.11/Makefile	2017-04-06 18:01:08.566300143 +0200
-@@ -0,0 +1,55 @@
+@@ -0,0 +1,65 @@
 +include ../Rules.mak
 +
 +LIBSNAME		:= libz.so
 +LIBSMAINVER		:= 1
-+LIBS			:= $(LIBSNAME).$(VER_$(ZLIB))
++LIBS			:= $(LIBSNAME).$(VER_$(ZLIB_NAME))
 +
 +all: config
 +	$(MAKE) -C $(ZLIB)
@@ -37,23 +37,33 @@ diff -urN work/zlib-1.2.11/Makefile work/zlib-1.2.11/Makefile
 +
 +install: control
 +	$(STRIP) $(ZLIB)/$(LIBS)
-+	install -m 0755 -d $(LIBDIR)
-+	install -m 0755 $(ZLIB)/$(LIBS) $(LIBDIR)
-+	ln -sf $(LIBS) $(LIBDIR)/$(LIBSNAME)
-+	ln -sf $(LIBS) $(LIBDIR)/$(LIBSNAME).$(LIBSMAINVER)
++	install -m 0755 -d $(TMPINSTDIR)
++	install -m 0755 $(ZLIB)/$(LIBS) $(TMPINSTDIR)
 +
 +ifndef BUILD
 +control:
 +else
 +PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
 +
-+control: preinst
++control: preinst postinst
 +
 +preinst:
 +	@echo "#!/bin/sh" > $(PREINST)
 +	@echo "echo \"Removing old zlib ver & symlinks...\"" >> $(PREINST)
 +	@echo "rm -f $(LDLIB)/$(LIBSNAME)*" >> $(PREINST)
++	@echo "sync" >> $(PREINST)
 +	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "[ ! -f $(TMPDIR)/$(LIBS) ] && exit 0" >> $(POSTINST)
++	@echo "echo \"Updating zlib ...\"" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(LIBS) $(LDLIB)/" >> $(POSTINST)
++	@echo "ln -sf $(LIBS) $(LDLIB)/$(LIBSNAME)" >> $(POSTINST)
++	@echo "ln -sf $(LIBS) $(LDLIB)/$(LIBSNAME).$(LIBSMAINVER)" >> $(POSTINST)
++	@echo "sync" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
 +endif
 +endif
 +
