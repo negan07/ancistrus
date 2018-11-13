@@ -19,7 +19,7 @@ diff -urN work/openvpn-2.4.6/Makefile work/openvpn-2.4.6/Makefile
 +	fi
 +
 +configure:
-+	cd $(OPEN_VPN) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL) -lssl -lcrypto" LZO_LIBS="-L$(WORK_DIR)/$(LZO)/$(LZO)/src/.libs -llzo2" LDFLAGS="-L$(WORK_DIR)/$(NVRAM)" LIBS="-lscnvram" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/$(OPENSSL)/include -I$(WORK_DIR)/$(LZO)/$(LZO)/include -I$(WORK_DIR)/$(NVRAM) -I$(GIT_ROOT_DIR)/$(SRC_ROOT_DIR)" --disable-lz4 --enable-lzo --enable-crypto --enable-server --disable-plugins --enable-management --enable-fragment --enable-multihome --enable-port-share --enable-pf --enable-debug
++	cd $(OPEN_VPN) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -lssl -lcrypto" LZO_LIBS="-L$(WORK_DIR)/$(LZO)/$(LZO)/src/.libs -llzo2" LDFLAGS="-L$(WORK_DIR)/$(NVRAM)" LIBS="-lscnvram" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include -I$(WORK_DIR)/$(LZO)/$(LZO)/include -I$(WORK_DIR)/$(NVRAM) -I$(GIT_ROOT_DIR)/$(SRC_ROOT_DIR)" --disable-lz4 --enable-lzo --enable-crypto --enable-server --disable-plugins --enable-management --enable-fragment --enable-multihome --enable-port-share --enable-pf --enable-debug
 +
 +install: control
 +	$(SSTRIP) $(OPEN_VPN)/src/openvpn/openvpn
