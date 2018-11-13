@@ -194,7 +194,7 @@ DIRLIST				+= $(OPENSSL)
 TARLIST				+= $(TAR_$(OPENSSL))
 # CURL
 CURL_NAME			:= curl
-VER_$(CURL_NAME)		:= 7.61.1
+VER_$(CURL_NAME)		:= 7.62.0
 CURL				:= $(CURL_NAME)-$(VER_$(CURL_NAME))
 NAME_$(CURL)			:= $(CURL_NAME)$(DBG)
 SUBVER_$(CURL)			:= 
@@ -205,7 +205,7 @@ HOME_$(CURL)			:= https://curl.haxx.se/
 LIC_$(CURL)			:= MIT/X
 SEC_$(CURL)			:= libs
 PRIO_$(CURL)			:= required
-DEP_$(CURL)			:= $(NAME_$(ZLIB))
+DEP_$(CURL)			:= $(NAME_$(ZLIB)),$(NAME_$(OPENSSL))
 DESC_$(CURL)			:= Command line tool and library for transferring data with URLs
 DIRLIST				+= $(CURL)
 TARLIST				+= $(TAR_$(CURL))
