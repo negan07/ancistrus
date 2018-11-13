@@ -35,6 +35,7 @@ BINDIR=/usr/sbin
 BIN=opkg
 OPKG=${ETCDIR}/${BIN}
 CONF=${OPKG}.conf
+OPKGCMD="${OPKG} -f ${ETCDIR}/${CONF}"
 ARC=${OPKG}.zip
 ABSARC=${BIN}.zip
 TOINST="zlib openssl curl ancistrus-core utelnetd ${BIN}"
@@ -64,10 +65,10 @@ chmod 755 ${OPKG}
 chmod 644 ${CONF}
 echo
 echo "Installing essential packages: ${TOINST}"
-${OPKG} update && sleep 1
+${OPKGCMD} update && sleep 1
 for IPK in ${TOINST}
 do
-${OPKG} install ${IPK}
+${OPKGCMD} install ${IPK}
 [ $? -ne 0 ] && echo "${IPK} installation failed: check repository urls on ${CONF}" && exit 1
 sleep 1
 done
