@@ -100,10 +100,8 @@ pre_inst:
 	@mkdir -p -m 777 $(IMAGEDIR)/$(RCINITD) $(BUILD_TARGET)$(RCINITDIR) || exit 1
 	@echo -e "\\e[35m$(CUR_REL_PATH): creating partition dir \\e[36mopkg \\e[0m"
 	@mkdir -p -m 777 $(IMAGEDIR)/opkg $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR) || exit 1
-	echo -e "\\e[35m$(CUR_REL_PATH): removing old $(NAME_$(ZLIB)) reference on \\e[36m$(BUILD_TARGET) \\e[0m"
-	rm $(BUILD_TARGET)$(RCLDLIB)/libz.so* || exit 1
-	echo -e "\\e[35m$(CUR_REL_PATH): removing old $(NAME_$(CURL)) reference on \\e[36m$(BUILD_TARGET) \\e[0m"
-	rm $(BUILD_TARGET)$(RCLDLIB)/libcurl.so* || exit 1
+	echo -e "\\e[35m$(CUR_REL_PATH): removing old shared lib references on \\e[36m$(BUILD_TARGET) \\e[0m"
+	rm $(BUILD_TARGET)$(RCLDLIB)/libz.so* $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so* $(BUILD_TARGET)$(RCLDLIB)/libssl.so* $(BUILD_TARGET)$(RCLDLIB)/libcurl.so* || exit 1
 
 opkg_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(BUILD_TARGET) \\e[0m"
@@ -116,10 +114,18 @@ opkg_inst:
 post_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): making FS post install modifications on \\e[36m$(BUILD_TARGET) \\e[0m"
 	@mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCBOOT_NAME) $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1
-	@mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCNVRAMSO) $(BUILD_TARGET)$(RCLDLIB)/ || exit 1
+	@mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCNVRAMSO) $(BUILD_TARGET)$(RCTMPDIR)/libz.so* $(BUILD_TARGET)$(RCTMPDIR)/libcrypto.so* $(BUILD_TARGET)$(RCTMPDIR)/libssl.so* $(BUILD_TARGET)$(RCTMPDIR)/libcurl.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1
+	@ln -sf libz.so.$(RCZLIBVER) $(BUILD_TARGET)$(RCLDLIB)/libz.so || exit 1
+	@ln -sf libz.so.$(RCZLIBVER) $(BUILD_TARGET)$(RCLDLIB)/libz.so.$(RCZLIBMAINVER) || exit 1
+	@ln -sf libcrypto.so.$(RCSSLVER) $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so || exit 1
+	@ln -sf libssl.so.$(RCSSLVER) $(BUILD_TARGET)$(RCLDLIB)/libssl.so || exit 1
+	@ln -sf libcurl.so.$(RCCURLVER) $(BUILD_TARGET)$(RCLDLIB)/libcurl.so || exit 1
+	@ln -sf libcurl.so.$(RCCURLVER) $(BUILD_TARGET)$(RCLDLIB)/libcurl.so.$(RCCURLMAINVER) || exit 1
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBOOTDIR)/$(RCAPPSNAME) || exit 1
 	@mv $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMDBIN) || exit 1
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) || exit 1
+	@mv $(BUILD_TARGET)$(RCTMPDIR)/openssl $(BUILD_TARGET)$(RCTMPDIR)/curl $(BUILD_TARGET)$(RCTMPDIR)/busybox $(BUILD_TARGET)$(RCBINDIR)/ || exit 1
+	@for F in `cat $(BUSYBOX)/busybox.links`; do mv $(BUILD_TARGET)$(RCTMPDIR)/`basename $$F` $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; done
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep xdsl-driver`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
 	for F in $(RCDSLKO); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCLDLIBMOD)/ || exit 1; done; \
