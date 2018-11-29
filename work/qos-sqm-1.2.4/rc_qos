@@ -4,7 +4,11 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 #
-#       Copyright (C) 2012-4 Michael D. Taht, Toke Høiland-Jørgensen, Sebastian Moeller
+#   Copyright (C) 2012-2018
+#       Michael D. Taht, Toke Høiland-Jørgensen, Sebastian Moeller
+#       Eric Luehrsen
+#
+#   Copyright (C) 2017-2018 Tony Ambardar
 #
 # Revised & adapted:
 #
@@ -41,6 +45,7 @@ path_binaries() {
 [ -z "$IP" ] && IP=ip_wrapper
 [ -z "$TC_BINARY" ] && TC_BINARY=${BINDIR}/tc
 [ -z "$IP_BINARY" ] && IP_BINARY=${BINDIR}/ip
+[ -z "$LOCKFILE" ] && LOCKFILE=/tmp/var/lock/qos-sqm.lock
 [ -z "$STATE_FILE" ] && STATE_FILE=/tmp/qos.state
 [ "$SQM_DEBUG" = "1" ] && QOS_LOG=/tmp/qosdebug.log
 }
@@ -103,6 +108,28 @@ then
 else
     OUTPUT_TARGET="/dev/null"
 fi
+}
+
+run_lock() {
+# take lock to protect against concurrent runs
+local MAX_TRIES=10
+local TRIES=0
+
+	while [ ${TRIES} -lt ${MAX_TRIES} ]
+	do
+	lock -n ${LOCKFILE} 2>/dev/null
+		if [ $? -eq 0 ]; then
+		sqm_trace "Acquired run lock at pid: `cat ${LOCKFILE}`"
+		trap 'lock -u ${LOCKFILE}' EXIT
+		return 0
+		fi
+	sqm_debug "Unable to get run lock - already held by pid: `cat ${LOCKFILE}`"
+	sleep 1
+	let TRIES++
+	done
+sqm_error "Giving up on getting lock after ${MAX_TRIES} attempts"
+sqm_error "This is a bug: please issue report it"
+exit 1
 }
 
 stop_sqm() {
@@ -230,14 +257,13 @@ splash() {
 cat << _EOF_
 ################################################################################
 # (Cero3 Shaper)
-#   Copyright (C) 2012-6
+#   Copyright (C) 2012-2018
 #       Michael D. Taht, Toke Høiland-Jørgensen, Sebastian Moeller
 #       Eric Luehrsen
 #
 ################################################################################
 #
-#   Copyright (C) 2017
-#       Tony Ambardar
+#   Copyright (C) 2017-2018 Tony Ambardar
 #
 ################################################################################
 #
@@ -301,37 +327,51 @@ Options available
 qos_llayer
 Link layer adaptation: wan connection proper overheads calculation.
 Options available
-'ethernet': VDSL connections.
+'ptm': VDSL connections.
+'ethernet': True ethernet connections (link, cable).
 'atm': ADSL connections.
-'none': FTTH fiber, direct LAN, Cable or other connections.
+'none': FTTH fiber, direct LAN or other connections.
 (Default: none).
 
+qos_framecompprof
+Frame compensation profile settings.
+Choose the wan connection type related profile for the next link layer related settings: 
+qos_overhead, qos_stab_mtu, qos_stab_tsize, qos_stab_mpu .
+This setting is related to web GUI configuration panel only.
+Note that the available profiles are strictly related to the link layer adaptation value (qos_llayer).
+If the profile is unknown or the related settings are different due to ISP tunings & adaptations,
+select: personal (own) and setup the next link layer related settings manually.
+(Default: own).
+
 qos_overhead
-Per-packet size overhead: can be negative. Range possibile is [ -1500 - 1500 ].
+Per-packet size overhead: can be negative and ISP dependent. Range possibile is [ -64 - 256 ].
 This setting may depend from the wan connection type and from the ISP.
 Typical values
-VDSL connections: it starts from 22 bytes + 4 bytes for every vlan tag + 8 bytes for pppoe connection.
-ADSL connections: typically 44 bytes overall; better tuning may be done with atm overhead detector script.
-Other connections (FTTH fiber / LAN / Cable): value is strictly ISP dependent.
+ptm link layer: 30 bytes on pppoe-ptm, 22 bytes on bridged-ptm.
+ethernet link layer: 38 bytes on ethernet link, 18 on cable link.
+atm link layer: values may vary depending on wan atm connection type;
+better tuning may be done with atm overhead detector script.
+For none link layer this setting is not active.
 (Default: 0).
 
 qos_stab_mtu
 Max packet size creating size table for (bytes).
-For ethernet and atm link layer value must be >= (wan_mtu + qos_overhead) .
+For ptm, ethernet and atm link layer value must be >= (wan_mtu + qos_overhead) .
 For none link layer this setting is not active.
 (Default: 2047).
 
 qos_stab_tsize
 Number of entries in size/rates table (slots).
-For ethernet link layer use the default value.
+For ptm & ethernet link layer use the default value.
 For atm link layer value is (qos_stab_mtu + 1) / 16 (typically 128) .
 For none link layer this setting is not active.
 (Default: 512).
 
 qos_stab_mpu
-Min packet size used (bytes).
-For ethernet link layer value must be > 0 (typically 64 is recommended).
-For atm link layer generally not required with exceptions depending from ISP (failsafe value could be 32).
+Min packet size used (bytes). Range possibile is [ 0 - 256 ].
+For ptm link layer value must be > 0 (64 is recommended).
+For ethernet link layer value must be > 0 (64 is recommended for link ethernet and 84 for cable ethernet).
+For atm link layer generally not required (0) with exceptions depending from ISP.
 For none link layer this setting is not active.
 (Default: 0).
 
@@ -386,7 +426,7 @@ Options available
 
 qos_eecn
 Egress Explicit Congestion Notification.
-It's recommended to set ECN on high uplink rates (VDSL connections) and NOECN on low uplink rates (ADSL connections).
+It's recommended to set ECN on high uplink rates (VDSL or ethernet connections) and NOECN on low uplink rates (ADSL connections).
 Note that this option is not available in conjunction with classless shapers (sfq).
 Options available
 'ECN': egress ECN on.
@@ -548,6 +588,9 @@ logging_setup
 . ${SCRIPTSDIR}/qdisc_funcs.qos
 . ${SCRIPTSDIR}/qos_funcs.qos
 . ${SCRIPTSDIR}/legacy_funcs.qos
+
+# LOCKING
+run_lock
 
     case $1 in
     start|restart)
