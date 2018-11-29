@@ -16,8 +16,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 #
-#   Copyright (C) 2017
-#       Tony Ambardar
+#   Copyright (C) 2017-2018 Tony Ambardar
 #
 ################################################################################
 #
@@ -156,6 +155,23 @@ ipt_vtun_dns_ntp_dscp() {
     # but don't bother with it too much.
 
     ipt -t mangle -A OUTPUT -p udp -m multiport --ports 123,53 -j DSCP --set-dscp-class EF
+}
+
+
+# This function is used by ingress() to redirect packets to the ifb device.
+# Custom scripts may override this to add tc filters early on the ingress
+# path. This allows for packet mangling, policing, etc. independent of the
+# selected shaper and leaf qdiscs.
+
+tc_ingress_redirect() {
+    local iface=$1
+    local dev=$2
+
+    $TC qdisc del dev $iface handle ffff: ingress 2> /dev/null
+    $TC qdisc add dev $iface handle ffff: ingress
+
+    # redirect all IP packets arriving in $iface to $dev
+    $TC filter add dev $iface parent ffff: protocol all prio 10 u32 match u32 0 0 flowid 1:1 action mirred egress redirect dev $dev
 }
 
 

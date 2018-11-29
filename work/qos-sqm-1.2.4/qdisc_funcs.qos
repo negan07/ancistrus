@@ -21,8 +21,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 #
-#   Copyright (C) 2017
-#       Tony Ambardar
+#   Copyright (C) 2017-2018 Tony Ambardar
 #
 ################################################################################
 #
@@ -127,7 +126,6 @@ is_multitier_classful() {
 # classful       The shaper is classful and capable of priority tiers
 # ecn            The qdisc is affected by ECN configuration variables
 # diffserv       A supported priority scheme and DIFFSERV_ variable value
-# preset         A qdisc-specific, supplementary configuration option
 
 # All capabilities should be applicable to multiple qdiscs, both simplifying
 # code and supporting decision logic. (And not to be abused as a general
@@ -177,11 +175,11 @@ get_caps_sfq() {
 }
 
 get_caps_htb() {
-    echo "shaper classful diffserv:diffserv3:3-Tier_[diffserv3]"
+    echo "shaper classful diffserv:diffserv3:3-Tier"
 }
 
 get_caps_hfsc() {
-    echo "shaper classful diffserv:diffserv3:3-Tier_[diffserv3]"
+    echo "shaper classful diffserv:diffserv3:3-Tier"
 }
 
 get_caps_tbf() {
@@ -215,17 +213,26 @@ qdisc_tree_build() {
     local rate
     local ignore_dscp
     local diffserv
+    local qdisc_opts
+    local burst_dur_us
+    local quantum_dur_us
 
     case $dir in
     ingress)
-    rate="$DOWNLINK"
-    ignore_dscp="$IGNORE_DSCP_INGRESS"
-    diffserv="$DIFFSERV_INGRESS"
+    rate="${DOWNLINK}"
+    ignore_dscp="${IGNORE_DSCP_INGRESS}"
+    diffserv="${DIFFSERV_INGRESS}"
+    qdisc_opts="${IQDISC_OPTS}"
+    burst_dur_us="${ISHAPER_BURST_DUR_US}"
+    quantum_dur_us="${ISHAPER_QUANTUM_DUR_US}"
     ;;
     egress)
-    rate="$UPLINK"
-    ignore_dscp="$IGNORE_DSCP_EGRESS"
-    diffserv="$DIFFSERV_EGRESS"
+    rate="${UPLINK}"
+    ignore_dscp="${IGNORE_DSCP_EGRESS}"
+    diffserv="${DIFFSERV_EGRESS}"
+    qdisc_opts="${EQDISC_OPTS}"
+    burst_dur_us="${ESHAPER_BURST_DUR_US}"
+    quantum_dur_us="${ESHAPER_QUANTUM_DUR_US}"
     ;;
     *)
     sqm_error "Unknown direction \"$dir\" in qdisc_tree_build()."
@@ -233,19 +240,22 @@ qdisc_tree_build() {
     ;;
     esac
 
+    # Derate bandwidth for PTM if needed
+    rate="$(get_lla_adjusted_rate ${rate})"
+
     $TC qdisc del dev $iface root 2> /dev/null
 
     if ! qdisc_has_cap $SHAPER classful; then
         # Classless shaper, different leaf qdisc, without classification
         sqm_debug "Do not perform DSCP based filtering on ${dir}. (1-tier classless)"
-        $TC qdisc add dev $iface root handle 1: $(tier_shaper_$SHAPER tier_args $dir 1 root)
-        $TC qdisc add dev $iface parent 1: handle 110: $(tier_leaf_$QDISC tier_args $dir 1 1 $(tier_shaper_$SHAPER flow_rate $dir 1 1))
+        $TC qdisc add dev ${iface} root handle 1: $(tier_shaper_${SHAPER} "tier_args" "${dir}" "${iface}" "1" "root" "${rate}" "${burst_dur_us}" "${quantum_dur_us}")
+        $TC qdisc add dev ${iface} parent 1: handle 110: $(tier_leaf_${QDISC} "tier_args" "${dir}" "1" "1" "${qdisc_opts}" "${rate}" $(tier_shaper_${SHAPER} "flow_rate" "${dir}" "${iface}" "1" "1" "${rate}" "${burst_dur_us}" "${quantum_dur_us}"))
 
     else
         # Classful shaper, different leaf qdisc, 1 or n-tier classification
 
         local num_tiers
-        if [ "$ignore_dscp" = "1" ]; then
+        if [ "${ignore_dscp}" = "1" ]; then
             num_tiers="1"
             sqm_debug "Do not perform DSCP based filtering on ${dir}. (1-tier classification)"
         else
@@ -253,16 +263,15 @@ qdisc_tree_build() {
             sqm_debug "Perform DSCP based filtering on ${dir}. (${num_tiers}-tier classification)"
         fi
 
-        $TC qdisc add dev $iface root handle 1: $(tier_shaper_$SHAPER tier_args $dir $num_tiers root) default 1$(tier_shaper_$SHAPER default_tier $dir $num_tiers root)
-        $TC class add dev $iface parent 1: classid 1:1 $(tier_shaper_$SHAPER tier_args $dir $num_tiers 0)
+        $TC qdisc add dev ${iface} root handle 1: $(tier_shaper_${SHAPER} "tier_args" "${dir}" "${iface}" "${num_tiers}" "root" "${rate}" "${burst_dur_us}" "${quantum_dur_us}") default 1$(tier_shaper_${SHAPER} "default_tier" "${dir}" "${iface}" "${num_tiers}" "root" "${rate}" "${burst_dur_us}" "${quantum_dur_us}")
+        $TC class add dev ${iface} parent 1: classid 1:1 $(tier_shaper_${SHAPER} "tier_args" "${dir}" "${iface}" "${num_tiers}" "0" "${rate}" "${burst_dur_us}" "${quantum_dur_us}")
 
-        # no seq on bb so switching to while do
         #for tier in $(seq $num_tiers); do
 	tier=1
         while [ $tier -le $num_tiers ]; do
-            $TC class add dev $iface parent 1:1 classid 1:1${tier} $(tier_shaper_$SHAPER tier_args $dir $num_tiers $tier)
+            $TC class add dev ${iface} parent 1:1 classid 1:1${tier} $(tier_shaper_${SHAPER} "tier_args" "${dir}" "${iface}" "${num_tiers}" "${tier}" "${rate}" "${burst_dur_us}" "${quantum_dur_us}")
 
-            $TC qdisc add dev $iface parent 1:1${tier} handle 1${tier}0: $(tier_leaf_$QDISC tier_args $dir $num_tiers $tier $(tier_shaper_$SHAPER flow_rate $dir $num_tiers $tier))
+            $TC qdisc add dev ${iface} parent 1:1${tier} handle 1${tier}0: $(tier_leaf_${QDISC} tier_args "${dir}" "${num_tiers}" "${tier}" "${qdisc_opts}" "${rate}" $(tier_shaper_${SHAPER} "flow_rate" "${dir}" "${iface}" "${num_tiers}" "${tier}" "${rate}" "${burst_dur_us}" "${quantum_dur_us}"))
 
             tier=$(( $tier + 1 ))
         done
@@ -274,17 +283,21 @@ qdisc_tree_build() {
 # shaper qdiscs supported by the framework. Each function may be called from
 # qdisc_tree_build() dynamically using the SHAPER variable.
 
-# Each function tier_shaper_$SHAPER takes four parameters as follows:
+# Each function tier_shaper_$SHAPER takes parameters as follows:
 #
-# Parameter   Values         Description
-# =========   ======         ===========
-#      func   flow_rate      Rate passed to get_flows() in leaf qdisc setup
-#             default_tier   Default tier of the class hierarchy
-#             tier_args      Generate parameters used by shaper qdisc
-#       dir   ingress        Current tree built for ingress
-#             egress         Current tree built for egress
-# num_tiers   1 .. n         Total number of priority tiers
-#      tier   root, 0 .. n   Current priority tier, described previously
+# Parameter        Values         Description
+# ==============   ======         ===========
+#           func   flow_rate      Rate passed to get_flows() in leaf qdisc setup
+#                  default_tier   Default tier of the class hierarchy
+#                  tier_args      Generate parameters used by shaper qdisc
+#            dir   ingress        Current tree built for ingress
+#                  egress         Current tree built for egress
+#          iface   ...            Interface name
+#      num_tiers   1 .. n         Total number of priority tiers
+#           tier   root, 0 .. n   Current priority tier, described previously
+#           rate   ... (kbps)     Speed rate in kbps (ul/dl), derated for ptm if needed
+#   burst_dur_us   ... (us)       Burst duration in us (ul/dl)
+# quantum_dur_us   ... (us)       Quantum duration in us (ul/dl)
 
 
 # This defines the simple, classless TBF shaper qdisc.
@@ -292,26 +305,11 @@ qdisc_tree_build() {
 tier_shaper_tbf() {
     local func=$1
     local dir=$2
-    local num_tiers=$3
-    local tier=$4
-
-    local rate
-    local burst_dur_us
-
-    case $dir in
-    ingress)
-    rate="$DOWNLINK"
-    burst_dur_us="$ISHAPER_BURST_DUR_US"
-    ;;
-    egress)
-    rate="$UPLINK"
-    burst_dur_us="$ESHAPER_BURST_DUR_US"
-    ;;
-    *)
-    sqm_error "Unknown direction \"$dir\" in tier_shaper_$SHAPER()."
-    return 1
-    ;;
-    esac
+    local iface=$3
+    local num_tiers=$4
+    local tier=$5
+    local rate=$6
+    local burst_dur_us=$7
 
     case $func in
     flow_rate)
@@ -333,7 +331,7 @@ tier_shaper_tbf() {
     local mtu=$(get_mtu $IFACE)
     local burst="$(get_burst ${mtu:-1514} ${rate} ${burst_dur_us})"
     burst=${burst:-1514}
-    local args="$(get_stab_string) $SHAPER rate ${rate}kbit burst $burst latency 300ms $(get_htb_adsll_string)"
+    local args="$(get_stab_string ${iface}) $SHAPER rate ${rate}kbit burst $burst latency 300ms $(get_htb_adsll_string)"
 
     case "$dir $num_tiers $tier" in
     "ingress 1 root"|"egress 1 root")
@@ -353,29 +351,12 @@ tier_shaper_tbf() {
 tier_shaper_htb() {
     local func=$1
     local dir=$2
-    local num_tiers=$3
-    local tier=$4
-
-    local rate
-    local burst_dur_us
-    local quantum_dur_us
-
-    case $dir in
-    ingress)
-    rate="$DOWNLINK"
-    burst_dur_us="$ISHAPER_BURST_DUR_US"
-    quantum_dur_us="$ISHAPER_QUANTUM_DUR_US"
-    ;;
-    egress)
-    rate="$UPLINK"
-    burst_dur_us="$ESHAPER_BURST_DUR_US"
-    quantum_dur_us="$ESHAPER_QUANTUM_DUR_US"
-    ;;
-    *)
-    sqm_error "Unknown direction \"$dir\" in tier_shaper_$SHAPER()."
-    return 1
-    ;;
-    esac
+    local iface=$3
+    local num_tiers=$4
+    local tier=$5
+    local rate=$6
+    local burst_dur_us=$7
+    local quantum_dur_us=$8
 
     local prio_rate=`expr $rate / 3` # Ceiling for priority
     local be_rate=`expr $rate / 6`   # Min for best effort
@@ -429,13 +410,13 @@ tier_shaper_htb() {
 
     local lq="quantum `get_htb_quantum $IFACE $rate $quantum_dur_us`"
     local burst="`get_htb_burst $IFACE $rate $burst_dur_us`"
-    local args="$SHAPER $lq $burst $(get_htb_adsll_string)"
-    local args31="$SHAPER $lq $(get_htb_adsll_string)"
+    local args="$SHAPER $lq $burst $(get_htb_adsll_string ${iface})"
+    local args31="$SHAPER $lq $(get_htb_adsll_string ${iface})"
     local ret=""
 
     case "$num_tiers $tier" in
     "1 root")
-    ret="$(get_stab_string) $SHAPER"
+    ret="$(get_stab_string ${iface}) $SHAPER"
     ;;
     "1 0")
     ret="$args rate ${rate}kbit ceil ${rate}kbit"
@@ -447,7 +428,7 @@ tier_shaper_htb() {
 
     case "$num_tiers $tier" in
     "3 root")
-    ret="$(get_stab_string) $SHAPER"
+    ret="$(get_stab_string ${iface}) $SHAPER"
     ;;
     "3 0")
     ret="$args rate ${rate}kbit ceil ${rate}kbit"
@@ -485,23 +466,10 @@ tier_shaper_htb() {
 tier_shaper_hfsc() {
     local func=$1
     local dir=$2
-    local num_tiers=$3
-    local tier=$4
-
-    local rate
-
-    case $dir in
-    ingress)
-    rate="$DOWNLINK"
-    ;;
-    egress)
-    rate="$UPLINK"
-    ;;
-    *)
-    sqm_error "Unknown direction \"$dir\" in tier_shaper_$SHAPER()."
-    return 1
-    ;;
-    esac
+    local iface=$3
+    local num_tiers=$4
+    local tier=$5
+    local rate=$6
 
 # Parameter comments below from Eric Luehrsen:
 
@@ -572,7 +540,7 @@ tier_shaper_hfsc() {
 
     case "$num_tiers $tier" in
     "1 root")
-    ret="$(get_stab_string) $SHAPER"
+    ret="$(get_stab_string ${iface}) $SHAPER"
     ;;
     "1 0")
     ret="$SHAPER sc m1 ${rate_c}kbit d 1s m2 ${rate}kbit ul rate ${rate_c}kbit"
@@ -584,7 +552,7 @@ tier_shaper_hfsc() {
 
     case "$num_tiers $tier" in
     "3 root")
-    ret="$(get_stab_string) $SHAPER"
+    ret="$(get_stab_string ${iface}) $SHAPER"
     ;;
     "3 0")
     ret="$SHAPER sc m1 ${rate_c}kbit d 1s m2 ${rate}kbit ul rate ${rate_c}kbit"
@@ -614,10 +582,11 @@ tier_leaf_generic() {
     local dir=$2
     local num_tiers=$3
     local tier=$4
-    local rate=$5
+    local qdisc_opts=$5
+    local rate=$6
+    local flow_rate=$7
 
     local args
-    local qdisc_opts
 
     if [ "$func" != "tier_args" ]; then
         sqm_error "Unknown function \"$func\" in tier_leaf_$QDISC()."
@@ -626,12 +595,10 @@ tier_leaf_generic() {
 
     case $dir in
     ingress)
-    args="$QDISC $(get_limit ${ILIMIT}) $(get_target "${ITARGET}" ${DOWNLINK}) $(get_ecn ${IECN}) $(get_flows ${rate})"
-    qdisc_opts="$IQDISC_OPTS"
+    args="$QDISC $(get_limit ${ILIMIT}) $(get_target "${ITARGET}" ${rate}) $(get_ecn ${IECN}) $(get_flows ${flow_rate})"
     ;;
     egress)
-    args="$QDISC $(get_limit ${ELIMIT}) $(get_target "${ETARGET}" ${UPLINK}) $(get_ecn ${EECN}) $(get_flows ${rate})"
-    qdisc_opts="$EQDISC_OPTS"
+    args="$QDISC $(get_limit ${ELIMIT}) $(get_target "${ETARGET}" ${rate}) $(get_ecn ${EECN}) $(get_flows ${flow_rate})"
     ;;
     *)
     sqm_error "Unknown direction \"$dir\" in tier_leaf_$QDISC()."
@@ -673,9 +640,9 @@ tier_leaf_generic() {
 }
 
 tier_leaf_fq_codel() {
-    tier_leaf_generic $*
+    tier_leaf_generic "$@"
 }
 
 tier_leaf_sfq() {
-    tier_leaf_generic $*
+    tier_leaf_generic "$@"
 }

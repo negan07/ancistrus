@@ -20,6 +20,8 @@
 #       Michael D. Taht, Toke Høiland-Jørgensen, Sebastian Moeller
 #       Eric Luehrsen
 #
+#   Copyright (C) 2017-2018 Tony Ambardar
+#
 ################################################################################
 #
 # Revised & adapted:
@@ -33,7 +35,6 @@
 # License: GPLv2
 #
 #
-
 
 sqm_logger() {
     case $1 in
@@ -68,7 +69,7 @@ ipt() {
         [ "$d" != "$*" ] && {
             sqm_trace "iptables ${d}"
             iptables $d >> ${OUTPUT_TARGET} 2>&1
-                [ "$IP6MODE" != "disable" ] && {
+                [ "${IP6MODE}" != "disable" ] && {
                 sqm_trace "ip6tables ${d}"
                 ip6tables $d >> ${OUTPUT_TARGET} 2>&1
                 }
@@ -76,7 +77,7 @@ ipt() {
     done
     sqm_trace "iptables $*"
     iptables $* >> ${OUTPUT_TARGET} 2>&1
-        [ "$IP6MODE" != "disable" ] && {
+        [ "${IP6MODE}" != "disable" ] && {
         sqm_trace "ip6tables $*"
         ip6tables $* >> ${OUTPUT_TARGET} 2>&1
         }
@@ -102,15 +103,13 @@ cmd_wrapper(){
     local LAST_ERROR
     local RET
 
-    CALLERID=$1 ; shift 1   # extract and remove the id string
-    CMD_BINARY=$1 ; shift 1 # extract and remove the binary
+    CALLERID=$1; shift   # extract and remove the id string
+    CMD_BINARY=$1; shift # extract and remove the binary
 
-    #sqm_trace "${CMD_BINARY} $@"
     LAST_ERROR=$( ${CMD_BINARY} "$@" 2>&1 )
     RET=$?
-    #sqm_trace "${LAST_ERROR}"
 
-    if [ "$RET" -eq "0" ] ; then
+    if [ "${RET}" -eq "0" ] ; then
         sqm_debug "cmd_wrapper: ${CALLERID}: SUCCESS: ${CMD_BINARY} $@"
     else
         # this went south, try to capture & report more detail
@@ -118,7 +117,7 @@ cmd_wrapper(){
         sqm_error "cmd_wrapper: ${CALLERID}: LAST ERROR: ${LAST_ERROR}"
     fi
 
-    return $RET
+    return ${RET}
 }
 
 
@@ -287,37 +286,91 @@ verify_qdisc() {
     return $res
 }
 
+# Obtain effective Link Layer adaptation method from raw stored $LLAM value
+get_effective_llam() {
+
+    [ "${LLAM}" = "default" -o "${LLAM}" = "auto" ] && LLAM="tc_stab"
+    sqm_debug "LLA: default link layer adjustment method for ${SHAPER} is ${LLAM}"
+}
+
+# Compensate for kernel-reported packet size with extra 14 bytes on an
+# ethernet interface, and ignore any VLAN just as the kernel seems to do.
+# This is only used with tc_stab or QDISCs relying on kernel-reported sizes.
+get_adjusted_overhead() {
+    local eth_offset=14
+    local iface=$1
+    local rel_overhead=$(( $OVERHEAD - $eth_offset ))
+
+    if [ $(expr "$(ip link show ${iface} 2>/dev/null)" : ".* link/ether ") -gt 0 ]; then
+	echo $rel_overhead
+        sqm_debug "LLA: adjust for kernel-reported packet size on ${iface} ethernet iface, reduce overhead from ${OVERHEAD} to ${rel_overhead} bytes"
+    else
+        echo ${OVERHEAD}
+    fi
+}
+
 
 get_htb_adsll_string() {
-    ADSLL=""
-    if [ "$LLAM" = "htb_private" -a "$LINKLAYER" != "none" ]; then
-        # HTB defaults to MTU 1600 and an implicit fixed TSIZE of 256, but HTB
-        # as of around 3.10.0 does not actually use a table in the kernel
-        ADSLL="mpu ${STAB_MPU} linklayer ${LINKLAYER} overhead ${OVERHEAD} mtu ${STAB_MTU}"
-        sqm_debug "ADSLL: ${ADSLL}"
-    fi
-    echo ${ADSLL}
+
+    get_shaper_string htb_adsll "$@"
 }
 
 get_stab_string() {
-    STABSTRING=""
-    local TMP_LLAM=${LLAM}
-    if [ "${LLAM}" = "default" ]; then
-	sqm_debug "LLA: default link layer adjustment method is tc_stab"
-	TMP_LLAM="tc_stab"
-    fi
 
-    if [ "${TMP_LLAM}" = "tc_stab" -a "$LINKLAYER" != "none" ]; then
-        STABSTRING="stab mtu ${STAB_MTU} tsize ${STAB_TSIZE} mpu ${STAB_MPU} overhead ${OVERHEAD} linklayer ${LINKLAYER}"
-        sqm_debug "STAB: ${STABSTRING}"
+    get_shaper_string stab "$@"
+}
+
+# the conjunction of get_htb_adsll_string() and get_stab_string()
+# acting opportunely with one or another behaviour
+get_shaper_string() {
+    local SHAPERSTRING=""
+    local func=$1
+    local iface=$2
+
+    [ -z "${func}" ] && func="htb_adsll"
+
+    if [ "${LINKLAYER}" != "none" ]; then
+        # HTB defaults to MTU 1600 and an implicit fixed TSIZE of 256,
+        # but HTB as of 3.4.11 does not actually use a table in the kernel
+        case ${LLAM} in
+        htb_private)
+        [ "${func}" = "htb_adsll" ] && SHAPERSTRING="mtu ${STAB_MTU} mpu ${STAB_MPU} overhead $(get_adjusted_overhead ${iface})"
+        ;;
+        tc_stab)
+        [ "${func}" = "stab" ] && SHAPERSTRING="stab mtu ${STAB_MTU} tsize ${STAB_TSIZE} mpu ${STAB_MPU} overhead $(get_adjusted_overhead ${iface})"
+        ;;
+        esac
+        case ${LINKLAYER} in
+        ptm)
+        # no frame compensation for PTM, instead derate bandwidth
+        [ -n "${SHAPERSTRING}" ] && SHAPERSTRING="${SHAPERSTRING} linklayer ethernet"
+        ;;
+        ethernet|atm)
+        [ -n "${SHAPERSTRING}" ] && SHAPERSTRING="${SHAPERSTRING} linklayer ${LINKLAYER}"
+        ;;
+        esac
+        sqm_debug "${func} SHAPERSTRING: \"${SHAPERSTRING}\""
     fi
-    echo ${STABSTRING}
+    echo ${SHAPERSTRING}
+}
+
+
+# Determine rate adjustments needed for link layer adaptation e.g. PTM
+get_lla_adjusted_rate() {
+    local rate=$1
+    local adjrate=$1
+
+    if [ "${LINKLAYER}" = "ptm" -a "${LLAM}" = "tc_stab" ]; then
+        adjrate="$(( ${rate} * 64 / 65 ))"
+        sqm_debug "LLA: derating bandwidth for PTM of 1.54% (from ${rate} to ${adjrate})"
+    fi
+    echo $adjrate
 }
 
 
 # The following three functions provide built-in support for configuring
 # arbitrary shaper, leaf qdisc and prioritisation schemes. They utilize the
-# tree, qdisc and qos functions developed in qdisc_funcs.sh and qos_funcs.sh
+# tree, qdisc and qos functions developed in qdisc_funcs.qos and qos_funcs.qos
 # to cleanly replace functionality of existing scripts. These functions or
 # other subfunctions can be overridden for user customization by passing a
 # supplementary script via the SCRIPT configuration variable.
@@ -333,9 +386,6 @@ egress() {
 
 
 ingress() {
-    $TC qdisc del dev $IFACE handle ffff: ingress 2> /dev/null
-    $TC qdisc add dev $IFACE handle ffff: ingress
-
     qdisc_tree_build ingress $DEV
 
     # setup classful diffserv if necessary
@@ -346,7 +396,7 @@ ingress() {
     $IP link set dev $DEV up
 
     # redirect all IP packets arriving in $IFACE to $DEV
-    $TC filter add dev $IFACE parent ffff: protocol all prio 10 u32 match u32 0 0 flowid 1:1 action mirred egress redirect dev $DEV
+    tc_ingress_redirect $IFACE $DEV
 }
 
 
@@ -358,6 +408,7 @@ sqm_start() {
 
     [ -z "$DEV" ] && DEV=$( get_ifb_for_if ${IFACE} )
 
+    get_effective_llam
     qos_setup_common
 
     if [ "$UPLINK" -ne 0 ]; then
