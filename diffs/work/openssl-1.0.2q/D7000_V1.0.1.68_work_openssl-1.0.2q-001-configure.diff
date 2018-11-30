@@ -1,6 +1,6 @@
-diff -urN work/openssl-1.0.2p/openssl-1.0.2p/Configure work/openssl-1.0.2p/openssl-1.0.2p/Configure
---- work/openssl-1.0.2p/openssl-1.0.2p/Configure	2016-10-11 17:53:15.000000000 +0200
-+++ work/openssl-1.0.2p/openssl-1.0.2p/Configure	2017-04-29 23:16:36.936131266 +0200
+diff -urN work/openssl-1.0.2q/openssl-1.0.2q/Configure work/openssl-1.0.2q/openssl-1.0.2q/Configure
+--- work/openssl-1.0.2q/openssl-1.0.2q/Configure	2016-10-11 17:53:15.000000000 +0200
++++ work/openssl-1.0.2q/openssl-1.0.2q/Configure	2017-04-29 23:16:36.936131266 +0200
 @@ -415,7 +415,7 @@
  "linux64-mips64",   "gcc:-mabi=64 -O3 -Wall -DBN_DIV3W::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHAR RC4_CHUNK DES_INT DES_UNROLL BF_PTR:${mips64_asm}:64:dlfcn:linux-shared:-fPIC:-mabi=64:.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR):::64",
  #### IA-32 targets...
