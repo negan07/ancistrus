@@ -1,0 +1,41 @@
+diff -urN work/iproute2-4.19.0/ip/ipxfrm.c work/iproute2-4.19.0/ip/ipxfrm.c
+--- work/iproute2-4.19.0/ip/ipxfrm.c	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.19.0/ip/ipxfrm.c	2018-04-20 21:38:38.597470630 +0200
+@@ -454,7 +454,6 @@
+ 	switch (sel->proto) {
+ 	case IPPROTO_TCP:
+ 	case IPPROTO_UDP:
+-	case IPPROTO_SCTP:
+ 	case IPPROTO_DCCP:
+ 	default: /* XXX */
+ 		if (sel->sport_mask)
+@@ -1344,7 +1343,6 @@
+ 		switch (sel->proto) {
+ 		case IPPROTO_TCP:
+ 		case IPPROTO_UDP:
+-		case IPPROTO_SCTP:
+ 		case IPPROTO_DCCP:
+ 		case IPPROTO_IP: /* to allow shared SA for different protocols */
+ 			break;
+diff -urN work/iproute2-4.19.0/ip/xfrm_policy.c work/iproute2-4.19.0/ip/xfrm_policy.c
+--- work/iproute2-4.19.0/ip/xfrm_policy.c	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.19.0/ip/xfrm_policy.c	2018-04-20 21:40:50.429080215 +0200
+@@ -68,7 +68,6 @@
+ 	fprintf(stderr, "UPSPEC := proto { { ");
+ 	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_TCP));
+ 	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_UDP));
+-	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_SCTP));
+ 	fprintf(stderr, "%s", strxf_proto(IPPROTO_DCCP));
+ 	fprintf(stderr, " } [ sport PORT ] [ dport PORT ] |\n");
+ 	fprintf(stderr, "                  { ");
+diff -urN work/iproute2-4.19.0/ip/xfrm_state.c work/iproute2-4.19.0/ip/xfrm_state.c
+--- work/iproute2-4.19.0/ip/xfrm_state.c	2018-04-02 19:06:08.000000000 +0200
++++ work/iproute2-4.19.0/ip/xfrm_state.c	2018-04-20 21:40:48.273086640 +0200
+@@ -96,7 +96,6 @@
+ 	fprintf(stderr, "UPSPEC := proto { { ");
+ 	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_TCP));
+ 	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_UDP));
+-	fprintf(stderr, "%s | ", strxf_proto(IPPROTO_SCTP));
+ 	fprintf(stderr, "%s", strxf_proto(IPPROTO_DCCP));
+ 	fprintf(stderr, " } [ sport PORT ] [ dport PORT ] |\n");
+ 	fprintf(stderr, "                  { ");
