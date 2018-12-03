@@ -45,7 +45,7 @@ path_binaries() {
 [ -z "$IP" ] && IP=ip_wrapper
 [ -z "$TC_BINARY" ] && TC_BINARY=${BINDIR}/tc
 [ -z "$IP_BINARY" ] && IP_BINARY=${BINDIR}/ip
-[ -z "$LOCKFILE" ] && LOCKFILE=/tmp/var/lock/qos-sqm.lock
+[ -z "$RUNLOCK" ] && RUNLOCK=/tmp/var/lock/qos-sqm.lock
 [ -z "$STATE_FILE" ] && STATE_FILE=/tmp/qos.state
 [ "$SQM_DEBUG" = "1" ] && QOS_LOG=/tmp/qosdebug.log
 }
@@ -112,18 +112,18 @@ fi
 
 run_lock() {
 # take lock to protect against concurrent runs
-local MAX_TRIES=10
+local MAX_TRIES=15
 local TRIES=0
 
 	while [ ${TRIES} -lt ${MAX_TRIES} ]
 	do
-	lock -n ${LOCKFILE} 2>/dev/null
+	mkdir -m 0755 ${RUNLOCK} 2>/dev/null
 		if [ $? -eq 0 ]; then
-		sqm_trace "Acquired run lock at pid: `cat ${LOCKFILE}`"
-		trap 'lock -u ${LOCKFILE}' EXIT
+		sqm_trace "Acquired run lock"
+		trap 'rm -rf ${RUNLOCK}' EXIT
 		return 0
 		fi
-	sqm_debug "Unable to get run lock - already held by pid: `cat ${LOCKFILE}`"
+	sqm_debug "Unable to get run lock"
 	sleep 1
 	let TRIES++
 	done
