@@ -50,8 +50,8 @@ function checkData() {
 	var cf=document.forms[0];
 	var msg="";
 
-	msg+=hostCheck(cf.testhost.value, "Test host");
-	msg+=hostCheck(cf.pinghost.value, "Ping host");
+	if(!checkipaddr(cf.testhost.value)) msg+=hostCheck(cf.testhost.value, "Test host");
+	if(!checkipaddr(cf.pinghost.value)) msg+=hostCheck(cf.pinghost.value, "Ping host");
 
 	if(msg.length>1) {
 	alert(msg);

@@ -53,47 +53,46 @@
 # If the number of samples is >= 10, also computes median, and 10th and 90th percentile readings.
 
 summarize_pings() {
-	sed 's/^.*time=\([^ ]*\) ms/\1/' < $1 | grep -v "PING" | \
-	awk '{
-	  line[NR] = $0
+	sed 's/^.*time=\([^ ]*\) ms/\1 pingtime/' < $1 | grep -v "PING" | awk '
+BEGIN { line[NR] = $0 }
+END {
+  do {
+    haschanged = 0
+    for(i=1; i < NR; i++) {
+      if ( line[i] > line[i+1] ) {
+	t = line[i]
+	line[i] = line[i+1]
+	line[i+1] = t
+	haschanged = 1
+      }
+    }
+  } while ( haschanged == 1 )
+  for(i=1; i <= NR; i++) {
+    print line[i]
+  }
+}' | awk '
+BEGIN {numdrops=0; numrows=0;}
+{
+	if ( $2 == "pingtime" ) {
+		numrows += 1;
+		arr[numrows]=$1; sum+=$1;
+	} else {
+		numdrops += 1;
 	}
-	END {
-	  do {
-	    haschanged = 0
-	    for(i=1; i < NR; i++) {
-	      if ( line[i] > line[i+1] ) {
-		t = line[i]
-		line[i] = line[i+1]
-		line[i+1] = t
-		haschanged = 1
-	      }
-	    }
-	  } while ( haschanged == 1 )
-	  for(i=1; i <= NR; i++) {
-	    print line[i]
-	  }
-	}' | \
-	awk 'BEGIN {numdrops=0; numrows=0;} \
-		{ \
-			if ( $0 ~ /timeout/ ) { \
-			   	numdrops += 1; \
-			} else { \
-				numrows += 1; \
-				arr[numrows]=$1; sum+=$1; \
-			} \
-		} \
-		END { \
-			pc10="-"; pc90="-"; med="-"; \
-			if (numrows == 0) {numrows=1} \
-			if (numrows>=10) \
-			{ 	ix=int(numrows/10); pc10=arr[ix]; ix=int(numrows*9/10);pc90=arr[ix]; \
-				if (numrows%2==1) med=arr[(numrows+1)/2]; else med=(arr[numrows/2]); \
-			}; \
-			pktloss = numdrops/(numdrops+numrows) * 100; \
-			printf("  Latency: [in msec, %d pings, %4.2f%% packet loss]\n",numrows,pktloss); \
-			printf("%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n%9s: %7.3f\n",
-			"Min",arr[1],"10pct",pc10,"Median",med,"Avg",sum/numrows,"90pct",pc90,"Max",arr[numrows]) \
-		 }'
+}
+END {
+	pc10="-"; pc90="-"; med="-";
+	if (numrows>=10) {
+		ix=int(numrows/10); pc10=arr[ix]; ix=int(numrows*9/10);pc90=arr[ix];
+		if (numrows%2==1) med=arr[(numrows+1)/2]; else med=(arr[numrows/2]);
+	}
+	pktloss = numdrops>0 ? numdrops/(numdrops+numrows) * 100 : 0;
+	printf("  Latency: [in msec, %d pings, %4.2f%% packet loss]\n",numdrops+numrows,pktloss);
+	if (numrows>0) {
+		fmt="%9s: %7.3f\n";
+		printf(fmt fmt fmt fmt fmt fmt, "Min",arr[1],"10pct",pc10,"Median",med,"Avg",sum/numrows,"90pct",pc90,"Max",arr[numrows]);
+	}
+}'
 }
 
 # Summarize the contents of the load file, speedtest process stat file, cpuinfo
@@ -101,9 +100,14 @@ summarize_pings() {
 #   input parameter ($1) file contains CPU load samples
 
 summarize_load() {
-	cat $1 /proc/$$/stat | awk '
+	cat $1 /proc/$$/stat | awk -v SCRIPT_PID=$$ '
+# track CPU frequencies
+$1 == "cpufreq" {
+	sum_freq[$2]+=$3/1000
+	n_freq_samp[$2]++
+}
 # total CPU of speedtest processes
-$1 !~ /cpu/ {
+$1 == SCRIPT_PID {
 	tot=$16+$17
 	if (init_proc_cpu=="") init_proc_cpu=tot
 	proc_cpu=tot-init_proc_cpu
@@ -131,8 +135,10 @@ $1 ~ /cpu[0-9]+/ {
 	last_usg[$1]=usg
 }
 END {
-	n_load_samp--
-	printf(" CPU Load: [in %% busy (avg +/- std dev), %d samples]\n", n_load_samp)
+	printf(" CPU Load: [in %% busy (avg +/- std dev)")
+	if (sum_freq[cpu0]>0) printf(" @ avg frequency")
+	if (n_load_samp>0) n_load_samp--
+	printf(", %d samples]\n", n_load_samp)
 	for (i=0;i<n_cpus;i++) {
 		c=cpus[i]
 		if (n_load_samp>0) {
@@ -140,10 +146,13 @@ END {
 			avg_usg=avg_usg>0 ? (last_usg[c]-init_usg[c])/avg_usg : 0
 			std_usg=sum_usg_2[c]/n_load_samp-avg_usg^2
 			std_usg=std_usg>0 ? sqrt(std_usg) : 0
-			printf("%9s: %5.1f%% +/- %4.1f%%\n", c, avg_usg*100, std_usg*100)
+			printf("%9s: %5.1f%% +/- %4.1f%%", c, avg_usg*100, std_usg*100)
+			avg_freq=n_freq_samp[c]>0 ? sum_freq[c]/n_freq_samp[c] : 0
+			if (avg_freq>0) printf("  @ %4d MHz", avg_freq)
+			printf("\n")
 		}
 	}
-	printf(" Overhead: (in %% total CPU used)\n")
+	printf(" Overhead: [in %% used of total CPU available]\n")
 	printf("%9s: %5.1f%%\n", "netperf", tot_cpu>0 ? proc_cpu/tot_cpu*100 : 0)
 }'
 }
@@ -156,14 +165,22 @@ summarize_speed() {
 	printf "%9s: %6.2f Mbps\n" $1 $(awk '{s+=$1} END {print s}' $2)
 }
 
-# Capture process load info at 1-second intervals.
+# Capture process load, then per-CPU load/frequency info at 1-second intervals.
 
 sample_load() {
+	local cpus="$(find /sys/devices/system/cpu -name 'cpu[0-9]*' 2>/dev/null)"
+	local f="cpufreq/scaling_cur_freq"
+
 	cat /proc/$$/stat
-	while : ; do
+	while :
+	do
 		sleep 1
 #		egrep "^cpu[0-9]*" /proc/stat
 		cat /proc/stat | grep cpu
+		for c in $cpus
+		do
+			[ -r $c/$f ] && echo "cpufreq $(basename $c) $(cat $c/$f)"
+		done
 	done
 }
 
@@ -181,38 +198,40 @@ start_netperf() {
 	done
 }
 
+# Wait until each of the background netperf processes completes
 # Stop the background netperf processes
 
 wait_netperf() {
 	# gets a list of PIDs for processes named 'netperf'
-	# Wait until each of the background netperf processes completes
 #	echo "Process is $$" 1>&2
 #	echo $(pgrep -P $$ netperf) 1>&2
+	local err=0
 #	for i in $(pgrep -P $$ netperf); do
 	for I in `pidof netperf`
 	do
 #	echo "Stopping $i" 1>&2
-		[ -n "$1" ] && kill -9 $I
-		wait $I 2>/dev/null
+		[ "${1}" = "kill" ] && kill -9 $I
+		wait $I 2>/dev/null || err=1
 	done
+	return $err
 }
 
 # Stop the current sample_load() process
 
 kill_load() {
-#	echo "Load: $load_pid" 1>&2
-	kill -9 $load_pid
-	wait $load_pid 2>/dev/null
-	load_pid=0
+#	echo "Load: $LOAD_PID" 1>&2
+	kill -9 $LOAD_PID
+	wait $LOAD_PID 2>/dev/null
+	LOAD_PID=0
 }
 
 # Stop the current ping process
 
 kill_pings() {
-#	echo "Pings: $ping_pid" 1>&2
-	kill -9 $ping_pid
-	wait $ping_pid 2>/dev/null
-	ping_pid=0
+#	echo "Pings: $PING_PID" 1>&2
+	kill -9 $PING_PID
+	wait $PING_PID 2>/dev/null
+	PING_PID=0
 }
 
 # Stop the current load, pings and exit
@@ -246,37 +265,36 @@ measure_direction() {
 	LOADFILE=/tmp/measureload.${DATE} && touch $LOADFILE
 #	echo $ULFILE $DLFILE $PINGFILE $LOADFILE 1>&2
 
-	DIRECTION=$1
+	local dir=$1
+	local ping_cmd
 
 	# Start Ping
-	if [ "${TESTPROTO}" -eq "-4" ]; then
-		ping  $PINGHOST > $PINGFILE &
-	else
-		ping6 $PINGHOST > $PINGFILE &
-	fi
-	ping_pid=$!
-#	echo "Ping PID: $ping_pid" 1>&2
+	[ "${TESTPROTO}" = "-4" ] && ping_cmd=ping || ping_cmd=ping6
+	$ping_cmd $PINGHOST > $PINGFILE &
+	PING_PID=$!
+#	echo "Ping PID: $PING_PID" 1>&2
 
 	# Start CPU load sampling
 	sample_load > $LOADFILE &
-	load_pid=$!
-#	echo "Load PID: $load_pid" 1>&2
+	LOAD_PID=$!
+#	echo "Load PID: $LOAD_PID" 1>&2
 
 	# Start netperf datastreams between client and server
-	if [ "${DIRECTION}" = "Bidirectional" ]; then
-		start_netperf TCP_STREAM $ULFILE
-		start_netperf TCP_MAERTS $DLFILE
-	else
-		# Start unidirectional netperf with the proper direction
-		case $DIRECTION in
-			Download) spd_test="TCP_MAERTS";;
-			Upload) spd_test="TCP_STREAM";;
-		esac
-		start_netperf $spd_test $DLFILE
-	fi
+	case ${dir} in
+	Bidirectional)
+	start_netperf TCP_STREAM $ULFILE
+	start_netperf TCP_MAERTS $DLFILE
+	;;
+	Download)
+	start_netperf TCP_MAERTS $DLFILE
+	;;
+	Upload)
+	start_netperf TCP_STREAM $DLFILE
+	;;
+	esac
 
-	# Wait until each background netperf processes completes
-	wait_netperf
+	# Wait until background netperf processes complete, check errors
+	! wait_netperf && echo 1>&2 && echo "WARNING: netperf returned errors. Results may be inaccurate!" 1>&2
 
 	# When netperf completes, stop the CPU monitor and pings
 	kill_load
@@ -284,11 +302,11 @@ measure_direction() {
 	echo 1>&2
 
 	# Print TCP Download/Upload speed
-	if [ "${DIRECTION}" = "Bidirectional" ]; then
+	if [ "${dir}" = "Bidirectional" ]; then
 		summarize_speed Download $DLFILE
 		summarize_speed Upload $ULFILE
 	else
-		summarize_speed $DIRECTION $DLFILE
+		summarize_speed $dir $DLFILE
 	fi
 
 	# Summarize the ping data
