@@ -2,17 +2,6 @@
 # This script appends/modifies cron job events to /etc/crontab .
 # Consider orig /etc/crontab already created.
 
-skip_jobs() {
-# Skip some builtin cronjobs
-for I in `${BINDIR}/anc nvtotxt anc_sch_rem`; do [ -n "$I" ]  && sed -i "/^[^#]/s/\(.*${I}.*\)/#\1/g" /etc/crontab; done
-}
-
-run_sch_dir() {
-# Check if the cronjob list is there then append it
-for I in ${SCHDIR}/C[0-9][0-9]*; do [ -f $I ] && cat $I >> /etc/crontab; done
-${BINDIR}/anc nvtotxt anc_sch_opt >> /etc/crontab
-}
-
 # Vars
 BINDIR=/usr/sbin
 SCHDIR=/etc/init.d/rc.sch
@@ -27,8 +16,16 @@ eval `nvram get anc_sch_disable` > /dev/null 2>&1
 
 # Avoid modifications on 'stop' as /etc/crontab not created
 if [ "$1" != "stop" ]; then
-skip_jobs
-run_sch_dir
+
+# make crontab & shell PATH var equals
+sed -i "s|PATH=.*|PATH=${PATH}|" /etc/crontab
+
+# Skip some builtin cronjobs
+for I in `${BINDIR}/anc nvtotxt anc_sch_rem`; do [ -n "$I" ]  && sed -i "/^[^#]/s/\(.*${I}.*\)/#\1/g" /etc/crontab; done
+
+# Check if the cronjob list is there then append it
+for I in ${SCHDIR}/C[0-9][0-9]*; do [ -f $I ] && cat $I >> /etc/crontab; done
+${BINDIR}/anc nvtotxt anc_sch_opt >> /etc/crontab
 fi
 
 exit 0
