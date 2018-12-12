@@ -202,9 +202,6 @@ start_netperf() {
 # Stop the background netperf processes
 
 wait_netperf() {
-	# gets a list of PIDs for processes named 'netperf'
-#	echo "Process is $$" 1>&2
-#	echo $(pgrep -P $$ netperf) 1>&2
 	local err=0
 #	for i in $(pgrep -P $$ netperf); do
 	for I in `pidof netperf`
