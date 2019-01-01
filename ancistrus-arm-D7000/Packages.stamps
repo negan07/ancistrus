@@ -3,8 +3,9 @@
 1540419055 xdsl-driver-orig_042n.d26b-001_armD7000.ipk
 1541458695 busybox_1.29.3_armD7000.ipk
 1544656410 network-test_0.9.6-271_armD7000.ipk
-1540820924 mini-snmpd_1.5-pre-127_armD7000.ipk
 1541458694 hdparm_9.58_armD7000.ipk
+1542136546 zlib_1.2.11-001_armD7000.ipk
+1540820924 mini-snmpd_1.5-pre-127_armD7000.ipk
 1543616014 curl_7.62.0_armD7000.ipk
 1543873898 smartmontools_6.7-r4845_armD7000.ipk
 1541458695 ancistrus-core_1.0.8_armD7000.ipk
@@ -12,7 +13,7 @@
 1543616015 openvpn_2.4.6-102_armD7000.ipk
 1543702709 iproute2_4.19.0_armD7000.ipk
 1543616017 openssh_7.9p1-102_armD7000.ipk
-1542136546 zlib_1.2.11-001_armD7000.ipk
+1546360049 dnrd_2.20.4_armD7000.ipk
 1540419055 xdsl-driver-agtef_042u.d26o-001_armD7000.ipk
 1543616014 openssl_1.0.2q_armD7000.ipk
 1543616016 opkg_0.3.6-102_armD7000.ipk
