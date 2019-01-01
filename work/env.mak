@@ -146,6 +146,9 @@ export KERNEL_DIR 	:= $(SOURCE_PATH)/Source/kernel
 export KERNEL_INC 	:= $(KERNEL_DIR)/include
 export KERNEL_BIN	:= $(KERNEL_DIR)/../../bin
 export KERNEL_SRC 	:= $(KERNEL_DIR)
+export APPS_DIR		:= $(SOURCE_PATH)/Source/apps
+export RC_LIBS_DIR	:= $(APPS_DIR)/rc
+export SC_LIBSLINK_DIR	:= $(APPS_DIR)/sc_libs/liblink
 # MIPS
 ifeq ($(PROFILE_ARCH),MIPS)
 export ARCH		:= mips
