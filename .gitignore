@@ -131,4 +131,5 @@ work/mini-snmpd-*/
 work/curl-*/
 work/busybox-*/
 work/openssl-*/
+work/dnrd-*/
 

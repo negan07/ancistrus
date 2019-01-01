@@ -1,0 +1,2491 @@
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/args.c work/dnrd-2.20.4/dnrd-2.20.4/src/args.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/args.c	2005-02-07 13:14:14.000000000 +0100
++++ dwork/dnrd-2.20.4/dnrd-2.20.4/src/args.c	2018-08-17 04:59:05.000000000 +0200
+@@ -37,6 +37,9 @@
+ #include "lib.h"
+ #include "cache.h"
+ 
++#ifdef HACK_DNS
++#include "master.h"
++#endif
+ 
+ /*
+  * Definitions for both long and short forms of our options.
+@@ -52,6 +55,9 @@
+ #endif
+     {"cache",        1, 0, 'c'},
+     {"debug",        1, 0, 'd'},
++#ifdef HACK_DNS
++    {"hack",         1, 0, 'g'},
++#endif
+     {"foreground",   0, 0, 'f'},
+     {"help",         0, 0, 'h'},
+     {"ignore",       0, 0, 'i'},
+@@ -63,6 +69,7 @@
+     {"master",       1, 0, 'm'},
+ #endif
+     {"retry",        1, 0, 'r'},
++    {"primary",       1, 0, 'P'},
+     {"server",       1, 0, 's'},
+ 		{"stats",        1, 0, 'S'},
+     {"timeout",      1, 0, 't'},
+@@ -74,6 +81,8 @@
+ #endif
+     {"version",      0, 0, 'v'},
+     {"dnrd-root",    1, 0, 'R'},
++    {"opendns", 1, 0, 'o'},
++    {"PC_table", 1, 0, 'q'},
+     {0, 0, 0, 0}
+ };
+ #endif /* __GNU_LIBRARY__ */
+@@ -99,7 +108,11 @@
+ #define file_exists(f) (access(f, R_OK) == 0)
+ 
+ const char short_options[] = 
++#ifdef HACK_DNS
++    "a:bc:d:g:fhi" PIDPARM MASTERPARM "M:r:R:P:s:t:" UIDPARM "vo:q:";
++#else
+     "a:bc:d:fhi" PIDPARM MASTERPARM "M:r:R:s:t:" UIDPARM "v";
++#endif
+ 
+ /*
+  * give_help()
+@@ -232,6 +245,8 @@
+  *              other than the defined options, so the return value is
+  *              pretty useless and should be ignored.
+  */
++ extern int opendns;
++extern char PC_table[];
+ int parse_args(int argc, char **argv)
+ {
+   static int load_balance = 0;
+@@ -267,12 +282,20 @@
+ 	  }
+ 	  case 'd': {
+ 	    opt_debug = atoi(optarg);
++	    syslog_enable = 1;
+ 	    break;
+ 	  }
+ 	  case 'f': {
+ 	      foreground = 1;
+ 	      break;
+ 	  }
++#ifdef HACK_DNS
++	  case 'g':{
++              do_hack_dns=1;
++	      copy_string(hack_dns_name, optarg, sizeof(hack_dns_name));
++	      break;
++          }
++#endif
+ 	  case 'h': {
+ 	      give_help();
+ 	      exit(0);
+@@ -299,6 +322,7 @@
+ 		  
+ 	  case 'm': {
+ 		  if (strcmp(optarg, "off") == 0) master_onoff = 0;
++		  else if (strcmp(optarg, "hosts") == 0) strncpy(master_config, "/etc/hosts", sizeof(master_config));
+ 		  else strncpy(master_config, optarg, sizeof(master_config));
+ 		  break;
+ 	  }
+@@ -317,9 +341,12 @@
+ 	      log_debug(1, "Retry=0. Will never deactivate servers.");
+ 	    break;
+ 	  }
+-	  case 's': {
++	  case 's':
++	  case 'P':
++	    {
+ 	    domnode_t *p;
+ 	    char *s,*sep = strchr(optarg, (int)':');
++	    srvnode_t * new_srv = NULL;
+ 	    
+ 	    if (sep) { /* is a domain specified? */
+ 	      s = make_cname(strnlwr(sep+1,200),200);
+@@ -332,14 +359,21 @@
+ 		free(s);
+ 	      }
+ 	    } else p=domain_list;
+-	    if (!add_srv(last_srvnode(p->srvlist), optarg)) {
++	    if ((new_srv = add_srv(last_srvnode(p->srvlist), optarg)) == NULL) {
+ 	      log_msg(LOG_ERR, "%s: Bad ip address \"%s\"\n",
+ 		      progname, optarg);
+ 	      exit(-1);
+ 	    } else {
+-	      log_debug(1, "Server %s added to domain %s", optarg, 
++	      log_debug(2, "%s Server %s added to domain %s",
++	        (c == 'P' || p->primary == NULL)?"Primary":"Secondary", optarg, 
+ 			sep ? sep+1:"(default)");
+ 	    }
++	    if(c == 'P' || p->primary == NULL)/*set primary dns server*/
++	        p->primary = new_srv;
++	    else if(p->secondary == NULL)/*set secondary dns server*/
++	        p->secondary = new_srv;
++	    else /*set tertiary dns server*/
++	        p->tertiary = new_srv;
+ 	    if (p->roundrobin != load_balance) {
+ 	      p->roundrobin =load_balance;
+ 	      log_debug(1, "Turned on load balancing for domain %s",
+@@ -393,6 +427,15 @@
+ 	      exit(-1);
+ 	      break;
+ 	  }
++  	  case 'o':{
++		if(1==atoi(optarg))
++			opendns=1;
++	  	break;
++  	  	}	  
++  	  case 'q':{
++			strcpy(PC_table, optarg);
++	  	break;
++  	  	}	  
+ 	  case '?':
+ 	  default: {
+ 	      /* getopt_long will print "unrecognized option" for us */
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/cache.c work/dnrd-2.20.4/dnrd-2.20.4/src/cache.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/cache.c	2004-12-01 19:51:40.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/cache.c	2018-08-17 04:59:05.000000000 +0200
+@@ -199,7 +199,11 @@
+      * Ok, the packet is interesting for us.  Let's put it into our
+      * cache list.
+      */
++#ifdef NAMED_SEMAPHORE
+     sem_wait(dnrd_sem);
++#else
++    sem_wait(&dnrd_sem);
++#endif
+     cx = create_cx(x, &query, server);
+     append_cx(cx);
+ 
+@@ -217,7 +221,11 @@
+       cx->expires = cx->lastused + dns_ttl;
+       log_debug(5, "Using dynamic cache timeouts -> %lu seconds\n", dns_ttl);
+     }
++#ifdef NAMED_SEMAPHORE
+     sem_post(dnrd_sem);
++#else
++    sem_post(&dnrd_sem);
++#endif
+     return (0);
+ }
+ 
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/check.c work/dnrd-2.20.4/dnrd-2.20.4/src/check.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/check.c	2004-12-01 19:51:40.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/check.c	2018-08-17 04:59:05.000000000 +0200
+@@ -95,12 +95,19 @@
+ 
+ int check_reply(srvnode_t *s, void *msg, int len) {
+   short int flags = ntohs(((short int *)msg)[1]); /* flags */
+-
++#ifdef _RECURSION_
++  /* answer RRs */
++  short int annr = ntohs(((short int *)msg)[3]);
++  /* authority RRs */
++  short int nsnr = ntohs(((short int *)msg)[4]);
++  /* additional RRs */
++  short int rrnr = ntohs(((short int *)msg)[5]);  
++#endif
+   /* bad server replies are pretty bad. Lets log them to syslog */
+   if (len <12) {
+     log_msg(LOG_WARNING, "Reply packet was to small. Ignoring reply from %s",
+ 	    inet_ntoa(s->addr.sin_addr));
+-    return -1;
++    return REPLY_ERROR;
+   }
+   /* we have already checkd for oversized packets */
+ 
+@@ -108,18 +115,34 @@
+   if (flags & MASK_Z) {
+     log_msg(LOG_WARNING, "Z was set. Ignoring reply from %s",
+ 		inet_ntoa(s->addr.sin_addr));
+-    return -1;
++    return REPLY_ERROR;
+   }
+ 
+   /* Check if it is a query, if QR is set */
+   if (! (flags & MASK_QR)) {
+     log_msg(LOG_WARNING, "QR was not set. Ignoring reply from %s",
+ 	    inet_ntoa(s->addr.sin_addr));
+-    return -1;
++    return REPLY_ERROR;
+   }
+ 
++  /* Check if RCODE is set, if RCODE is set, it should be error */
++  if (flags & MASK_RCODE) {
++    log_msg(LOG_WARNING, "RCODE was set. Ignoring reply from %s",
++	    inet_ntoa(s->addr.sin_addr));
++    return REPLY_ERROR;
++  }
+   /* check for possible cache poisoning attempts etc here.... */
+-
++#ifdef _RECURSION_
++  /* if no answers but provide us referral servers, handle it. */
++  if (annr == 0) {
++    /* we don't referral no authoritative nameserver or no additional rr
++       treat it as error and try next server.*/
++    if ((nsnr == 0) || (rrnr == 0))
++      return REPLY_ERROR;
++    else
++      return REPLY_REFERRAL;
++  }
++#endif
+   /* ok this packet is ok */
+-  return 0;
++  return REPLY_OK;
+ }
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/check.h work/dnrd-2.20.4/dnrd-2.20.4/src/check.h
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/check.h	2004-12-01 19:51:40.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/check.h	2018-08-17 04:59:05.000000000 +0200
+@@ -28,6 +28,10 @@
+  /* According to RFC 1035 (2.3.4) */
+ #define UDP_MAXSIZE 512
+ 
++#define REPLY_OK        0
++#define REPLY_ERROR     -1
++#define REPLY_REFERRAL  1
++
+ int check_query(void *msg, int len);
+ int check_reply(srvnode_t *s, void *msg, int len);
+ 
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/common.c work/dnrd-2.20.4/dnrd-2.20.4/src/common.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/common.c	2005-02-07 15:08:55.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/common.c	2018-08-17 04:59:05.000000000 +0200
+@@ -47,6 +47,7 @@
+  * These are all the global variables.
+  */
+ int                 opt_debug = OPT_DEBUG;
++int                 syslog_enable = 0;
+ int                 opt_serv = 0;
+ const char*         progname = 0;
+ 
+@@ -68,12 +69,16 @@
+ #ifndef __CYGWIN__
+ uid_t               daemonuid = 0;
+ gid_t               daemongid = 0;
+-char                dnrd_user[256] = "dnrd";
+-char                dnrd_group[256] = "dnrd";
++char                dnrd_user[256] = "root";
++//char                dnrd_group[256] = "root";
+ #endif
+ const char*         version = PACKAGE_VERSION;
+ int                 foreground = 0; /* 1 if attached to a terminal */
++#ifdef NAMED_SEMAPHORE
+ sem_t*              dnrd_sem = NULL; /* Used for all thread synchronization */
++#else
++sem_t               dnrd_sem; /* Used for all thread synchronization */
++#endif
+ 
+ int                 reactivate_interval = REACTIVATE_INTERVAL;
+ int                 stats_interval = 0;
+@@ -184,7 +189,21 @@
+     return retn;
+ }
+ #endif /* ENABLE_PIDFILE*/
+-
++#define DEBUG_FILE "/dev/console"
++void TRACE(const char *format, ...)
++{
++	char buf[4096]="";
++	FILE *fp;
++	va_list arg;
++
++	va_start(arg, format);
++	vsnprintf(buf,4096, format, arg);
++	va_end(arg);
++
++   	fp=fopen(DEBUG_FILE,"w");
++	fprintf(fp,"%s\n",buf);
++	fclose(fp);
++}
+ const char *get_typestr(int type) {
+ 	static const char *EMERG = "EMERG: "; 
+ 	static const char *ALERT = "ALERT: "; 
+@@ -232,7 +251,8 @@
+ 			if (fmt[strlen(fmt) - 1] != '\n') fprintf(stderr, "\n");
+     }
+     else {
+-			vsyslog(type, fmt, ap);
++			//vsyslog(type, fmt, ap);
++			if (syslog_enable) syslog(LOG_INFO, "10 00[DNRD] %s", fmt);
+     }
+     va_end(ap);
+ }
+@@ -259,7 +279,8 @@
+ 	if (fmt[strlen(fmt) - 1] != '\n') fprintf(stderr, "\n");
+     }
+     else {
+-	vsyslog(LOG_DEBUG, fmt, ap);
++	//vsyslog(LOG_DEBUG, fmt, ap);
++	if (syslog_enable) syslog(LOG_INFO, "10 00[DNRD] %s", fmt);
+     }
+     va_end(ap);
+ }
+@@ -277,8 +298,11 @@
+   /*    int i;*/
+ 
+     /* Only let one process run this code) */
++#ifdef NAMED_SEMAPHORE
+     sem_wait(dnrd_sem);
+-
++#else
++    sem_wait(&dnrd_sem);
++#endif
+     log_debug(1, "Shutting down...\n");
+     if (isock >= 0) close(isock);
+ #ifdef ENABLE_TCP
+@@ -292,8 +316,9 @@
+     destroy_domlist(domain_list);
+ 
+     /* do not forget to unlink the named semaphore */
++#ifdef NAMED_SEMAPHORE
+     sem_unlink(NAMED_SEMAPHORE_NAME);
+-
++#endif
+     exit(status);
+ }
+ 
+@@ -318,7 +343,8 @@
+ 			if (fmt[strlen(fmt) - 1] != '\n') fprintf(stderr, "\n");
+     }
+     else {
+-			vsyslog(LOG_ERR, fmt, ap);
++			//vsyslog(LOG_ERR, fmt, ap);
++			if (syslog_enable) syslog(LOG_INFO, "10 00[DNRD] %s", fmt);
+     }
+     va_end(ap);
+ 		cleanexit(exitcode);
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/common.h work/dnrd-2.20.4/dnrd-2.20.4/src/common.h
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/common.h	2005-02-07 13:05:39.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/common.h	2018-08-17 04:59:05.000000000 +0200
+@@ -34,6 +34,13 @@
+ #include <semaphore.h>
+ #include "domnode.h"
+ 
++#ifndef IN
++#define IN
++#endif
++
++#ifndef OUT
++#define OUT
++#endif
+ /* default chroot path. this might be redefined in compile time */ 
+ #ifndef DNRD_ROOT
+ #define DNRD_ROOT "/usr/local/etc/dnrd"
+@@ -48,9 +55,11 @@
+ #define SELECT_TIMEOUT 1
+ #endif
+ 
+-/* Set the named semphore name */
++/* Set the named semaphore name */
++#ifdef NAMED_SEMAPHORE
+ #ifndef NAMED_SEMAPHORE_NAME
+-#define NAMED_SEMAPHORE_NAME "net.sourceforge.dnrd"
++#define NAMED_SEMAPHORE_NAME "/dnrd"
++#endif
+ #endif
+ 
+ /* Set the default timeout value for forward DNS. If we get no
+@@ -73,7 +82,7 @@
+  * REACTIVATE_INTERVAL seconds
+  */
+ #define REACTIVATE_INTERVAL 10
+-
++#define PC_TABLE_MAX_SIZE 2048
+ struct dnssrv_t {
+   int                    sock;      /* for communication with server */
+   struct sockaddr_in     addr;      /* IP address of server */
+@@ -86,6 +95,7 @@
+ extern const char*         version;   /* the version number for this program */
+ extern const char*         progname;  /* the name of this program */
+ extern int                 opt_debug; /* debugging option */
++extern int                 syslog_enable; /* syslog flag for debug purpose */
+ extern const char*         pid_file; /* File containing current daemon's PID */
+ extern int                 isock;     /* for communication with clients */
+ extern int                 tcpsock;   /* same as isock, but for tcp requests */
+@@ -105,7 +115,11 @@
+ extern char                master_config[256];
+ extern char                blacklist[256];
+ #endif
++#ifdef NAMED_SEMAPHORE
+ extern sem_t*              dnrd_sem;  /* Used for all thread synchronization */
++#else
++extern sem_t               dnrd_sem;  /* Used for all thread synchronization */
++#endif
+ 
+ extern char                dnrd_root[512];
+ extern char                config_file[];
+@@ -123,6 +137,8 @@
+ /* kill any currently running copies of dnrd */
+ int kill_current();
+ 
++void TRACE(const char *format, ...);
++
+ /* print messages to stderr or syslog */
+ void log_msg(int type, const char *fmt, ...);
+ 
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/dns.c work/dnrd-2.20.4/dnrd-2.20.4/src/dns.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/dns.c	2004-12-01 19:51:41.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/dns.c	2018-08-17 04:59:05.000000000 +0200
+@@ -395,11 +395,19 @@
+     y->flags = ntohs(((short int *) msg)[1]);
+ 
+ 		//    here = &msg[PACKET_DATABEGIN];
+-    if ((i = get_objname(msg, len, PACKET_DATABEGIN, y->name, 
+-														 sizeof(y->name)))< 0) 
++    if ((i = get_objname(msg, len, PACKET_DATABEGIN, y->name, sizeof(y->name)))< 0) 
+       return(-1);
+ 		//    y->name[k] = 0;
+-
++{//Ray
++#define YahooIM	    "msg.yahoo.com"
++#define AIM	    "uas.aol.com"
++#define AIM_B	    "byoa.aol.com"
++ 
++  if(access("/tmp/IM",F_OK)==0){
++		if((strstr(y->name,YahooIM)) || (strstr(y->name,AIM)) || strstr(y->name,AIM_B))
++	    free(msg);
++	}
++}
+     /* check that there is type and class */
+ 		if (i + 4 > len) return(-1);
+ 		//    if (here + 4 > limit) return(0);
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/domnode.c work/dnrd-2.20.4/dnrd-2.20.4/src/domnode.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/domnode.c	2005-02-05 21:21:08.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/domnode.c	2018-08-17 04:59:05.000000000 +0200
+@@ -42,6 +42,8 @@
+ domnode_t *alloc_domnode(void) {
+   domnode_t *p = allocate(sizeof(domnode_t));
+   p->domain=NULL;
++  p->primary=NULL;
++  p->secondary=NULL;
+   p->srvlist=alloc_srvnode();
+   /* actually we return a new emty list... */
+   return p->next=p;
+@@ -207,13 +209,14 @@
+    Returns: next active server, NULL if there are none 
+ */
+ srvnode_t *deactivate_current(domnode_t *d) {
+-  assert(d!=NULL);
+-  if (d->current) {
+-    d->current->inactive = time(NULL);
+-    log_msg(LOG_NOTICE, "Deactivating DNS server %s",
+-	      inet_ntoa(d->current->addr.sin_addr));
+-  }
+-  return set_current(d, next_active(d));
++//  Netgear Spec: server would not be disabled
++//  assert(d!=NULL);
++//  if (d->current) {
++//    d->current->inactive = time(NULL);
++//    log_msg(LOG_NOTICE, "Deactivating DNS server %s",
++//	      inet_ntoa(d->current->addr.sin_addr));
++//  }
++//  return set_current(d, next_active(d));
+ }
+ 
+ 
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/domnode.h work/dnrd-2.20.4/dnrd-2.20.4/src/domnode.h
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/domnode.h	2004-12-01 19:51:41.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/domnode.h	2018-08-17 04:59:05.000000000 +0200
+@@ -31,6 +31,9 @@
+   char            *domain;  /* the domain */
+   srvnode_t       *srvlist; /* linked list of servers */
+   srvnode_t       *current;
++  srvnode_t       *primary;/*Primary DNS server for this domain*/
++  srvnode_t       *secondary;/*Secondary DNS server for this domain*/
++  srvnode_t       *tertiary;/*Tertiary DNS server for this domain*/
+   int             roundrobin; /* load balance the servers */
+   int             retrydelay; /* delay before reactivating the servers */
+   struct _domnode *next;    /* ptr to next server */
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/main.c work/dnrd-2.20.4/dnrd-2.20.4/src/main.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/main.c	2005-02-08 11:16:18.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/main.c	2018-08-17 04:59:05.000000000 +0200
+@@ -34,7 +34,9 @@
+ #include <pwd.h>
+ #include <dirent.h>
+ #include <limits.h>
+-
++#ifdef NAMED_SEMAPHORE
++#include <fcntl.h>
++#endif
+ #include "relay.h"
+ #include "cache.h"
+ #include "common.h"
+@@ -48,6 +50,8 @@
+ 
+ static int is_writeable (const struct stat* st);
+ static int user_groups_contain (gid_t file_gid);
++int opendns=0;
++char PC_table[PC_TABLE_MAX_SIZE];
+ 
+ 
+ 
+@@ -62,12 +66,7 @@
+ 
+ 	if (*ep) { /* dnrd_user is not numeric */
+ 		struct passwd *pwent;
+-		if ((pwent = getpwnam(dnrd_user))) {
+-			if ((daemonuid = pwent->pw_uid) == 0)
+-				log_err_exit(-1, "Please specify a non-root user (uid != 0) with -u");
+-			if ((daemongid = pwent->pw_gid) == 0)
+-				log_err_exit(-1, "Please specify a non-root user group (gid != 0)");
+-		} else {
++		if (!(pwent = getpwnam(dnrd_user))) {
+ 			perror("getpwnam");
+ 			log_err_exit(-1, "Could not become \"%s\" user. Please create the user "
+ 									 "account or specify a valid user with  the -u option.", 
+@@ -86,9 +85,8 @@
+ 	int                rslt;
+ 	struct dirent     *direntry;
+ 	struct stat        st;
+-	
+-	if (chdir(dnrd_root))
+-		log_err_exit(-1, "Could not chdir to %s, %s", dnrd_root, strerror(errno));
++
++//	if (chdir(dnrd_root)) log_err_exit(-1, "Could not chdir to %s, %s", dnrd_root, strerror(errno));
+ 	
+ 	dirp = opendir(dnrd_root);
+ 	if (!dirp) 
+@@ -139,17 +137,12 @@
+ 
+ /***************************************************************************/
+ void init_socket(void) {
+-    struct servent    *servent;   /* Let's be good and find the port numbers
+-				     the right way */
+     struct servent    *servent_udp;
+-    struct servent    *servent_tcp;
+ 
+     /*
+      * Pretend we don't know that we want port 53
+      */
+-    servent_udp = getservbyname("domain", "udp");
+-    servent_tcp = getservbyname("domain", "tcp");
+-    if (servent_udp->s_port != servent_tcp->s_port)
++    if ((servent_udp = getservbyname("domain", "udp")) != getservbyname("domain", "tcp"))
+ 			log_err_exit(-1, "domain ports for udp & tcp differ. "
+ 									 "Check /etc/services");
+     recv_addr.sin_port = servent_udp ? servent_udp->s_port : htons(53);
+@@ -207,7 +200,7 @@
+ #endif
+ 	domnode_t *p;
+ 	srvnode_t *s;
+-	char *tmpstr;
++	//char *tmpstr;
+ 
+ 	/*
+ 	 * Initialization in common.h of recv_addr is broken, causing at
+@@ -224,8 +217,7 @@
+ 	domain_list = alloc_domnode();
+ 	
+ 	/* get the dnrd_root from environment */
+-	if ((tmpstr = getenv("DNRD_ROOT")))
+-		strncpy(dnrd_root, tmpstr, sizeof(dnrd_root));
++	//if ((tmpstr = getenv("DNRD_ROOT"))) strncpy(dnrd_root, tmpstr, sizeof(dnrd_root));
+ 	
+ 	/*
+ 	 * Parse the command line.
+@@ -233,7 +225,7 @@
+ 	parse_args(argc, argv);
+ 	
+ 	/* we change to the dnrd-root dir */
+-	chdir(dnrd_root);
++	//chdir(dnrd_root);
+ 	
+ #ifdef ENABLE_PIDFILE
+ 	/* Kill any currently running copies of the program. */
+@@ -250,7 +242,11 @@
+ 	/*
+ 	 * Setup the thread synchronization semaphore
+ 	 */
++#ifdef NAMED_SEMAPHORE
+ 	if ((dnrd_sem = sem_open(NAMED_SEMAPHORE_NAME, (O_CREAT|O_EXCL), S_IRWXU, 1)) == SEM_FAILED) {
++#else
++	if (sem_init(&dnrd_sem, 0, 1) == -1) {
++#endif
+ 		int err = errno;
+ 		log_err_exit(-1, "Couldn't initialize semaphore");
+ 	}
+@@ -285,11 +281,10 @@
+ 	 * directory first.
+ 	 */
+ 	dnrd_root_sanity_check();
+-	if (chroot(dnrd_root)) {
+-		log_err_exit(-1, "couldn't chroot to %s, %s",	dnrd_root, 
+-								 strerror(errno));
+-	} else log_debug(1, "chrooting to %s", dnrd_root);
+-	
++#if 0
++	if (chroot(dnrd_root)) log_err_exit(-1, "couldn't chroot to %s, %s", dnrd_root, strerror(errno));
++	else log_debug(1, "chrooting to %s", dnrd_root);
++#endif
+ 	/*
+ 	 * Change uid/gid to something other than root.
+ 	 */
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/master.c work/dnrd-2.20.4/dnrd-2.20.4/src/master.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/master.c	2005-02-09 11:52:46.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/master.c	2018-08-17 04:59:05.000000000 +0200
+@@ -56,6 +56,18 @@
+ 
+ #define	DEFAULT_TTL		(60 * 60)
+ 
++#ifdef HACK_DNS
++int  do_hack_dns=0;
++char hack_dns_name[256];
++#endif
++
++#ifdef GUI_V14
++#define NTGR_APPS_URL	"updates1.netgear.com"
++#define NTGR_APPS_URL1	"www.netgear.com"
++#endif
++
++#define NTGR_APPS_URL_TEMP	"http.updates1.netgear.com"
++
+ typedef struct _string {
+     unsigned int code;
+     char	*string;
+@@ -201,7 +213,11 @@
+ 
+     log_msg(LOG_NOTICE, "resetting master DNS");
+ 
++#ifdef NAMED_SEMAPHORE
+     sem_wait(dnrd_sem);
++#else
++    sem_wait(&dnrd_sem);
++#endif
+ 
+     for (i = 0; i < dbc; i++) { 
+ 	free_dnsrec(dbv[i]);
+@@ -217,7 +233,11 @@
+     dbc = 0;    
+     dbmax = 0;  
+ 
++#ifdef NAMED_SEMAPHORE
+     sem_post(dnrd_sem);
++#else
++    sem_post(&dnrd_sem);
++#endif
+ 
+     return (0);
+ }
+@@ -464,6 +484,22 @@
+     code = get_stringcode(name);
+     for (i = 0; i < dbc; i++) {
+ 	rec = dbv[i];
++	/* Ron add for redirect all dns query */
++#ifdef HACK_DNS
++	if (( (access("/tmp/blank_state.out",F_OK)==0) || (access("/tmp/dnshj.out",F_OK)==0) || (access("/tmp/brs_hijack.out",F_OK)==0)) 
++	    && do_hack_dns && (rec->type == DNS_NAMEIP) &&
++	//if (do_hack_dns && (rec->type == DNS_NAMEIP) &&
++	    //(strcmp(rec->object.string, hack_dns_name) == 0)
++	    (strcmp(rec->object.string, hack_dns_name) == 0) && (strcmp(name,NTGR_APPS_URL_TEMP)!=0)
++#ifdef GUI_V14
++		&& (strcmp(name, NTGR_APPS_URL) != 0)
++		&& (strcmp(name, NTGR_APPS_URL1) != 0)
++#endif
++			) {
++	    return (rec);
++	}else
++#endif
++
+ 	if ((rec->type == DNS_NAMEIP) &&
+ 	    (rec->object.code == code) &&
+ 	    (strcmp(rec->object.string, name) == 0)) {
+@@ -851,7 +887,12 @@
+ 	    compile_objectname(x);
+ 	    compile_int(x, DNS_TYPE_A);
+ 	    compile_int(x, DNS_CLASS_INET);
+-	    compile_long(x, DEFAULT_TTL);
++#ifdef HACK_DNS
++            /* if it's dnshj, we should make the TTL short */
++            compile_long(x, 1);
++#else
++ 	    compile_long(x, DEFAULT_TTL);
++#endif
+ 	    start_rdata(x);
+ 	    compile_long(x, rec->u.nameip.ipnum);
+ 	    end_rdata(x);
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/master.h work/dnrd-2.20.4/dnrd-2.20.4/src/master.h
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/master.h	2004-12-01 19:51:41.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/master.h	2018-08-17 04:59:05.000000000 +0200
+@@ -24,6 +24,10 @@
+ #ifndef _DNRD_MASTER_H_
+ #define _DNRD_MASTER_H_
+ 
++#ifdef HACK_DNS
++extern int  do_hack_dns;
++extern char hack_dns_name[256];
++#endif
+ /* Interface to our master DNS */
+ int master_lookup(unsigned char *msg, int len);
+ int master_dontknow(unsigned char *msg, int len, unsigned char *answer);
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/query.c work/dnrd-2.20.4/dnrd-2.20.4/src/query.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/query.c	2004-12-23 17:44:28.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/query.c	2018-08-17 04:59:05.000000000 +0200
+@@ -122,6 +122,10 @@
+ 
+   /* get an unused QID */
+   q->my_qid = qid_get();
++#ifdef _RECURSION_
++  q->recursion_count = 0;
++  q->referral = NULL;
++#endif
+   return q;
+ }
+ 
+@@ -132,7 +136,9 @@
+   /* unset the socket */
+   FD_CLR(q->sock, &fdmaster);
+   close(q->sock);
+-
++#ifdef _RECURSION_
++  if (q->referral) destroy_srvlist(q->referral);
++#endif
+   upstream_sockets--;
+   total_queries++;
+   free(q);
+@@ -161,12 +167,27 @@
+ 
+   query_t *q, *p, *oldtail;
+   unsigned short client_qid = *((unsigned short *)msg);
++#ifdef _RECURSION_
++  unsigned short client_flag = *((unsigned short *)msg+1);
++#endif
+   time_t now = time(NULL);
+ 
+   /* 
+      look if the query are in the list 
+      if it is, don't add it again. 
+   */
++  /*
++   *       Spec request:"DUT will send DNS query to DNS1, there isn't any response, DUT will 
++   *  send DNS requery to DNS1 again 1 second later. There is still no response, 2 seconds 
++   *  later, DUT send DNS query to DNS2. There isn't any response, DUT will send DNS query
++   *  to DNS2 again 1 second later. There is still no response, DUT will response to LAN host 
++   *  that the domain is irreslovable. " 
++   *       When receive no DNS reply, our LAN PC may send several queries in 1s, 1s, 2s, 4s. We 
++   *  should treat it as we never receive these queries and not update values in qlist. Or the 
++   *  later query will cover the former one as we first receive this query, then DUT will resend
++   *  all packets again and the progress we do before will be interrupted.
++   *                                                                       ---  Joe Yang
++   */
+   for (p=&qlist; p->next != &qlist; p = p->next) {
+     if ((p->next->client_qid == client_qid) &&
+         ((p->next->client.sin_addr.s_addr == client->sin_addr.s_addr) &&
+@@ -181,12 +202,12 @@
+                ntohs(client_qid), client_ip, ntohs(client->sin_port),
+         p->next->client_count++);
+ 
+-      dump_dnspacket("duplicate query", (unsigned char *)msg, len);
++      //dump_dnspacket("duplicate query", (unsigned char *)msg, len);
+ 
+       /* we found the qid in the list */
+-      *((unsigned short *)msg) = p->next->my_qid;
+-      p->next->client_time = now;
+-      return p;
++      //*((unsigned short *)msg) = p->next->my_qid;
++      //p->next->client_time = now;
++      return NULL;
+     }
+   }
+ 
+@@ -195,10 +216,23 @@
+     return NULL;
+   }
+ 
++/* the max resending times we should do according to how many DNS server we have */
++  if (q->domain->secondary) {
++      if(q->domain->tertiary)
++          q->try_times = ALL_SERVER_FAILED;
++      else
++          q->try_times = TRY_THIRD_SERVER;
++        }
++  else
++      q->try_times = TRY_SECOND_SERVER;
+   q->client_qid = client_qid;
++#ifdef _RECURSION_
++  q->client_flag = ntohs(client_flag);
++#endif
+   memcpy(&(q->client), client, sizeof(struct sockaddr_in));
+   q->client_time = now;
+   q->client_count = 1;
++  q->try_count = 0; /*renew this query*/
+ 
+   /* set new qid from random generator */
+   *((unsigned short *)msg) = htons(q->my_qid);
+@@ -236,13 +270,31 @@
+ void query_timeout(time_t age) {
+   int count=0;
+   time_t now = time(NULL);
+-  query_t *q;
+-  
+-  for (q=&qlist; q->next != &qlist; q = q->next) {
+-    if (q->next->client_time < (now - q->next->ttl)) {
+-      count++;
+-      query_delete_next(q);
++  query_t *q, *q_next_old;
++
++  for (q=&qlist; q->next != &qlist;) {
++    q_next_old = q->next;
++    if (q->next->client_time <= (now - q->next->ttl)) {
++      /*time out, need send it again?*/
++      q->next->try_count++;
++#ifdef _RECURSION_
++        /* next retry, refresh recursion counter*/
++        q->next->recursion_count = 0;
++#endif
++     log_debug(2, "query_timeout: try_count: %d", q->next->try_count);
++      if(q->next->try_count >= ALL_SERVER_FAILED)
++      {
++            count++;
++            query_delete_next(q);
++      }
++      else
++      {
++            send2current(q->next,q->next->msg,q->next->msg_len);
++      }
+     }
++     //sometimes real q->next is deleted, so we just use q->next, if q->next is old, we must deal q->next->next.
++    if(q->next == q_next_old)
++    q = q->next;
+   }
+   if (count) log_debug(1, "query_timeout: removed %d entries", count);
+   total_timeouts += count;
+@@ -259,12 +311,12 @@
+ }
+ 
+ 
+-
++/*
+ void query_dump_list(void) {
+   query_t *p;
+   for (p=&qlist; p->next != &qlist; p=p->next) {
+-    log_debug(2, "srv=%s, myqid=%i, client_qid=%i", 
+-	      inet_ntoa(p->next->srv->addr.sin_addr), p->next->my_qid, 
++    log_debug(2, "srv=%s, myqid=%i, client_qid=%i",
++	      p->next->srv?inet_ntoa(p->next->srv->addr.sin_addr):"NULL", p->next->my_qid,
+ 	      p->next->client_qid);
+   }
+-}
++}*/
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/query.h work/dnrd-2.20.4/dnrd-2.20.4/src/query.h
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/query.h	2004-12-01 19:51:41.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/query.h	2018-08-17 04:59:05.000000000 +0200
+@@ -31,6 +31,12 @@
+ #include <sys/socket.h>
+ #include "srvnode.h"
+ #include "domnode.h"
++#include "check.h"
++
++
++#define ALL_SERVER_FAILED 6
++#define TRY_THIRD_SERVER 4
++#define TRY_SECOND_SERVER 2
+ 
+ typedef struct _query {
+   int sock; /* the communication socket */
+@@ -45,9 +51,19 @@
+   /*  time_t send_time; * time of last sent packet */
+   time_t client_time; /* last time we got this query from client */
+   int client_count; /* number of times we got this same request */
+-
++  int try_times;/* number of times we should try to resend this request */
+   time_t ttl; /* time to live for this query */
+-
++  
++  unsigned short try_count; /*How many times of this query has been forwarded*/
++#ifdef _RECURSION_
++  unsigned short client_flag; /*save DNS query flags*/
++  unsigned short recursion_count;
++  srvnode_t *referral;
++#endif
++
++  char        msg[UDP_MAXSIZE+4];/*store msg for resending*/
++  int         msg_len;
++  
+   struct _query     *next; /* ptr to next query */
+ 
+ } query_t;
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/redir.c work/dnrd-2.20.4/dnrd-2.20.4/src/redir.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/redir.c	1970-01-01 01:00:00.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/redir.c	2018-08-17 04:59:05.000000000 +0200
+@@ -0,0 +1,178 @@
++#include <stdio.h>
++#include <stdlib.h>
++#include <sys/socket.h>
++#include <netinet/in.h>
++#include <arpa/inet.h>
++#include <errno.h>
++#include <string.h>
++
++unsigned char pattern[] = {
++    0x03,0x63,0x6f,0x6d,
++    0x00,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x14,0x01,0x6c,0x0c,0x67,0x74,
++    0x6c,0x64,0x2d,0x73,0x65,0x72,0x76,0x65,
++    0x72,0x73,0x03,0x6e,0x65,0x74,0x00,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x66,0xc0,0x2d,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x6d,0xc0,0x2d,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x65,0xc0,0x2d,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x62,0xc0,0x2d,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x68,0xc0,0x2d,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x67,0xc0,0x2d,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x63,0xc0,0x2d,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x6b,0xc0,0x2d,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x69,0xc0,0x2d,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x61,0xc0,0x2d,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x64,0xc0,0x2d,0xc0,
++    0x1c,0x00,0x02,0x00,0x01,0x00,0x00,0x4e,
++    0xad,0x00,0x04,0x01,0x6a,0xc0,0x2d,0xc0,
++    0x2b,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0xbc,0xdc,0xec,0xc0,
++    0x4b,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x23,0x33,0x1e,0xc0,
++    0x5b,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x37,0x53,0x1e,0xc0,
++    0x6b,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x0c,0x5e,0x1e,0xc0,
++    0x7b,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x21,0x0e,0x1e,0xc0,
++    0x8b,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x36,0x70,0x1e,0xc0,
++    0x9b,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x2a,0x5d,0x1e,0xc0,
++    0xab,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x1a,0x5c,0x1e,0xc0,
++    0xbb,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x34,0xb2,0x1e,0xc0,
++    0xcb,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x2b,0xac,0x1e,0xc0,
++    0xdb,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x05,0x06,0x1e,0xc0,
++    0xeb,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x1f,0x50,0x1e,0xc0,
++    0xfb,0x00,0x01,0x00,0x01,0x00,0x01,0x05,
++    0xd8,0x00,0x04,0xac,0x30,0x4f,0x1e,
++};
++
++void adjust(unsigned char *buff, int off, int len, struct sockaddr_in *srv)
++{
++    int i;
++    //printf("off is %d,len %d\n", off, len);
++    
++    for (i = 0; i < len; i++)
++    {
++        if (buff[i] == 0xC0)
++        {
++            unsigned short dummy;
++            dummy = ((( buff[i] & 0x3f) << 8) | (buff[i+1]));
++            //printf("[%2x][%2x]dummy: %d ->",buff[i], buff[i+1], dummy);
++
++            dummy = dummy - 0x1C + off;
++            //printf("%d\n", dummy);
++            buff[i] = (dummy >> 8) | 0xC0;
++            buff[i+1] = dummy & 0xFF;
++        }
++        if ((i < len - 4)
++            && (buff[i] == 0xac) && (buff[i+1] == 0xbc)
++            && (buff[i+2] == 0xdc) && (buff[i+3] == 0xec))
++            memcpy(buff + i, &srv->sin_addr.s_addr, 4);
++    }
++    
++}
++
++
++int main(int argc, char *argv[])
++{
++    int sock;
++    struct sockaddr_in name;
++    struct sockaddr_in srv;
++    
++    int opt = 1;
++
++    if (argc != 2)
++    {
++        printf("redir ip_address\n");
++        exit(-1);
++    }
++    
++    if (!inet_aton(argv[1], &srv.sin_addr))
++    {
++        printf("Invalid IP address %s\n", argv[1]);
++        exit(-1);
++    }
++    
++
++    sock = socket(PF_INET, SOCK_DGRAM, 0);
++    if (sock < 0)
++    {
++        printf("fail to open socket\n");
++        exit(-1);
++    }
++    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)); 
++    name.sin_family = AF_INET;
++    name.sin_port = htons(53);
++    name.sin_addr.s_addr = htonl(INADDR_ANY);
++    
++    if (bind(sock, (struct sockaddr *)&name, sizeof(name)) < 0)
++    {
++        printf("fail to bind\n");
++        shutdown(sock, 0);
++        exit(-1);
++    }
++    while (1)
++    {
++        struct sockaddr_in from_addr;
++        socklen_t addr_len;
++        int len;
++        unsigned char msg[1500];
++        unsigned char reply[1500];
++        int off;
++        int rc;
++        
++        printf("listen udp packets\n");
++        
++        addr_len = sizeof(struct sockaddr_in);
++        len = recvfrom(sock, msg, sizeof(msg), 0,
++                       (struct sockaddr *)&from_addr, &addr_len);
++        printf("received a query %d bytes\n", len);
++        reply[0] = msg[0];
++        reply[1] = msg[1];
++        reply[2] = 0x80;
++        reply[3] = 0x80;
++        reply[4] = 0x00;
++        reply[5] = 0x01;
++        reply[6] = 0x00;
++        reply[7] = 0x00;
++        reply[8] = 0x00;
++        reply[9] = 0x0d;
++        reply[10] = 0x00;
++        reply[11] = 0x0d;
++        memcpy(reply + 12, msg + 12, len - 12);
++        off = len;
++        memcpy(reply + off, pattern, sizeof(pattern));
++        adjust(reply + off, off, sizeof(pattern), &srv);
++        rc = sendto(sock, reply, off + sizeof(pattern), 0,
++		(const struct sockaddr *) &from_addr,
++               sizeof(struct sockaddr_in));
++        if (rc != (off + sizeof(pattern))) 
++        {
++            printf("sendto error: %s: %s",
++		inet_ntoa(from_addr.sin_addr), strerror(errno));
++            return (rc);
++        }
++
++    }
++    exit(0);
++    
++}
++
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/referral.c work/dnrd-2.20.4/dnrd-2.20.4/src/referral.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/referral.c	1970-01-01 01:00:00.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/referral.c	2018-08-17 04:59:05.000000000 +0200
+@@ -0,0 +1,267 @@
++/*
++ * referral.c - pickup a referral authoritative server.
++ *
++ * Copyright (C) 2011 sErCoMm
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
++ */
++
++#ifdef HAVE_CONFIG_H
++#include <config.h>
++#endif
++#include <stdlib.h>
++#include <string.h>
++#include <netinet/in.h>
++#include <stdio.h>
++#include "referral.h"
++
++//#define _DEBUG_
++
++#ifdef _DEBUG_ 
++#define DPRINTF printf
++#else
++#define DPRINTF(...)
++#endif
++
++#define RRFIXEDSZ		10
++
++static int length_dotted(const unsigned char *data, int offset)
++{
++    int original = offset;
++    int l;
++
++    if (!data)
++        return -1;
++
++    while ((l = data[offset++])) {
++
++        if ((l & 0xc0) == (0xc0)) {
++            offset++;
++            break;
++        }
++
++        offset += l;
++    }
++    
++    return offset - original;
++}
++
++static int length_question(unsigned char *message, int offset)
++{
++    int i;
++
++    i = length_dotted(message, offset);
++    if (i < 0)
++        return i;
++
++    return i + 4;
++}
++
++static int decode_dotted(const unsigned char *data, int offset,
++				  char *dest, int maxlen)
++{
++    int l;
++    int measure = 1;
++    int total = 0;
++    int used = 0;
++
++    if (!data)
++        return -1;
++
++    while ((l=data[offset++])) {
++        if (measure)
++            total++;
++        if ((l & 0xc0) == (0xc0)) {
++            if (measure)
++                total++;
++            /* compressed item, redirect */
++            offset = ((l & 0x3f) << 8) | data[offset];
++            measure = 0;
++            continue;
++        }
++
++        if ((used + l + 1) >= maxlen)
++            return -1;
++
++        memcpy(dest + used, data + offset, l);
++        offset += l;
++        used += l;
++        if (measure)
++            total += l;
++
++        if (data[offset] != 0)
++            dest[used++] = '.';
++        else
++            dest[used++] = '\0';
++    }
++
++    /* The null byte must be counted too */
++    if (measure) {
++        total++;
++    }
++
++
++    return total;
++}
++
++static int decode_nameserver(unsigned char *message, int offset, char *nameserver, int len, char *host)
++{
++    int i;
++    char temp[256];
++    short ns = 0;
++    int original = offset;
++    
++    /* we don't care domain or root, etc */
++    i = decode_dotted(message, offset, temp, sizeof(temp));
++
++    if (i < 0)
++        return i;
++    ns = (message[offset + i] << 8) | message[offset + i + 1];
++    
++    i += RRFIXEDSZ;
++    
++    offset += i;
++    
++    
++    
++    if (ns == 2)
++    {
++    /* we care name server */
++        i = decode_dotted(message, offset, temp, sizeof(temp));
++        if (i < 0)
++            return i;
++
++        strncpy(nameserver, temp, len);
++        offset += i;
++    }
++    else if (ns == 1)
++    {
++        strncpy(nameserver, temp, len);
++        sprintf(host,"%d.%d.%d.%d",message[offset],message[offset+1],message[offset+2],message[offset+3]);
++        offset += 4;
++    }
++    else
++    {
++        i = length_dotted(message, offset);
++        if (i < 0)
++            return i;
++        offset += i;
++    }
++    
++    return offset - original;
++   
++}
++
++
++#define MAX_SERVERS 16
++
++int pickup_referral(void *msg, int msg_len, char *server, int len)
++{
++    int offset = 12;
++    int j, i, k = 0;
++    short qrnr, annr, nsnr, rrnr;
++    char *servers[MAX_SERVERS]={0};
++    char temp[128]={0};
++    int ret = PICKUP_FAIL;
++    
++    if (!server || !msg) return PICKUP_FAIL;
++
++    qrnr = ntohs(((short int *)msg)[2]);
++    annr = ntohs(((short int *)msg)[3]);
++    nsnr = ntohs(((short int *)msg)[4]);
++    rrnr = ntohs(((short int *)msg)[5]);
++    DPRINTF("parse question %d, servers %d, rrs %d\n", qrnr, nsnr, rrnr);
++    /* answer record should be empty.*/
++    if (annr != 0) return PICKUP_FAIL;
++    
++    for (j = 0; j < qrnr; j++) {
++        DPRINTF("Skipping question %d at %d\n", j+1, offset);
++        i = length_question(msg, offset);
++        DPRINTF("Length of question %d is %d\n", j+1, i);
++        if (i < 0)
++            goto error;
++        offset += i;
++        if (offset >= msg_len)
++            goto error;
++        
++    }
++    DPRINTF("Decoding name server at pos %d\n", offset);
++
++
++    for (j = 0; j < nsnr; j++)
++    {
++        char host[64];
++        
++        DPRINTF("Decoding serverlist %d at %d\n", j+1, offset);
++        
++        i = decode_nameserver(msg, offset, temp, sizeof(temp), host);
++        if (i<0) {
++            DPRINTF("failed decode %d\n", i);
++            goto error;
++        }
++        DPRINTF("record server %s\n", temp);
++
++        if (temp[0] && (k<MAX_SERVERS)) servers[k++] = strdup(temp);
++        
++        offset += i;
++        if (offset >= msg_len)
++            goto error;
++    }
++
++    for (j = 0; j < rrnr; j++)
++    {
++        int l;
++        DPRINTF("Decoding resource record %d at %d\n", j+1, offset);
++        char host[64];
++        
++        i = decode_nameserver(msg, offset, temp, sizeof(temp), host);
++
++        DPRINTF("server %s => %s\n", temp, host);
++        if (i<0) {
++            DPRINTF("failed decode %d\n", i);
++            goto error;
++        }
++
++        /*ignore none server => ip */
++        if (!temp[0] || !host[0])
++            goto next;
++        
++ 
++        for (l = 0; l < k; l++)
++            if (strcmp(servers[l],temp) == 0)
++                break;
++
++        if (l < k) /* found first one*/
++        {
++            DPRINTF("will use %s\n", host);
++            strncpy(server, host, len);
++            ret = PICKUP_OK;
++            break;
++        }
++    next:
++        offset += i; 
++        if (offset >= msg_len)
++            goto error;
++    }
++    
++ error:
++    for (k = 0; k < MAX_SERVERS; k++)
++        if (servers[k])
++            free(servers[k]);
++        else
++            break;
++    
++    return ret;
++}
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/referral.h work/dnrd-2.20.4/dnrd-2.20.4/src/referral.h
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/referral.h	1970-01-01 01:00:00.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/referral.h	2018-08-17 04:59:05.000000000 +0200
+@@ -0,0 +1,34 @@
++/*
++
++    File: referral.h
++    
++    Copyright (C) 2010 sErCoMm
++
++    This source is free software; you can redistribute it and/or modify
++    it under the terms of the GNU General Public License as published by
++    the Free Software Foundation; either version 2, or (at your option)
++    any later version.
++
++    This source is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU General Public License
++    along with this program; if not, write to the Free Software
++    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
++
++*/
++
++#ifndef _DNRD_REFERRAL_H_
++#define _DNRD_REFERRAL_H_
++
++#define PICKUP_OK       0
++#define PICKUP_FAIL     -1
++
++
++#define MAX_RECURSION_COUNT 2
++
++int pickup_referral(void *msg, int msg_len, char *server, int len);
++
++#endif /* _DNRD_CHECK_H_ */
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/relay.c work/dnrd-2.20.4/dnrd-2.20.4/src/relay.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/relay.c	2005-02-07 18:08:12.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/relay.c	2018-08-17 04:59:05.000000000 +0200
+@@ -41,6 +41,8 @@
+ #include "dns.h"
+ #include "domnode.h"
+ #include "sig.h"
++#include "filenames.h"
++#include "link.h"
+ 
+ #ifndef EXCLUDE_MASTER
+ #include "master.h"
+@@ -68,7 +70,30 @@
+   return msg;
+ }
+ 
+-
++/*
++ * Show if WAN logistic connection is connected or not
++ * 1 -- Yes, WAN is connected
++ * 0 -- No, WAN is not connected
++ */
++int wan_connected(void) {
++    return !access(WAN_UPTIME_BASE, F_OK);
++}
++ 
++/*
++ * Show if WAN physical connection is connected or not
++ * 1 -- Yes, WAN is connected
++ * 0 -- No, WAN is not connected
++ */
++int wan_cabel_connected(void) {
++	struct port_link_status_s *wan_status;
++	wan_status = get_wan_port_link_status();
++        if(wan_status->link == LINK_UP) {
++        	return 1;
++        }
++        else {
++        	return 0;
++        }
++}
+ 
+ /*
+  * handle_query()
+@@ -148,6 +173,35 @@
+ 	  && (now - d->current->send_time > forward_timeout)) {
+ 	deactivate_current(d);
+       }
++      else if ((d->current->send_time != 0)
++	  && (reactivate_interval != 0)
++	  && (now - d->current->send_time > FORWARD_TIMEOUT)) {
++        if (!set_srvfail(msg, *len)) return -1;
++	d->current->send_time = 0;
++        return 0;
++      }
++    }
++
++    if(!wan_connected() && wan_cabel_connected()) {
++        /*
++         * WAN logistic is not connected,but cabel is connected
++         * Should not forward DNS request out. Should dial pppd
++         * Q: If WAN is not ppp mode, how?
++         * A: No pppd if wan is not ppp mode, so who cares we do useless killall?
++         */
++        #define DIAL_INTERVAL       20      /* Interval between two dial actions must longer than 20 sec */
++        time_t now = time(NULL);
++        static last_dial_time=0;
++
++        if(now - last_dial_time > DIAL_INTERVAL) {
++            log_debug(3, "Try to dial pppd...\n");
++            system("/bin/killall -SIGUSR1 pppd >/dev/null 2>&1");
++            last_dial_time = now;
++        }
++        else {
++            log_debug(3, "Too fast, no need to dial...\n");
++        }
++        return -1;
+     }
+ 
+     if (d->current) {
+@@ -182,6 +236,7 @@
+       retry_srvlist(d, interval);
+   } while ((d = d->next) != domain_list);  
+ }
++#define difftime(a,b) (a-b)
+ /* Check if any server are timing out and should be deactivated */
+ static void deactivate_servers(int interval) {
+   time_t now=time(NULL);
+@@ -254,7 +309,11 @@
+  */
+ void run()
+ {
+-  struct timespec    tout;
++#ifdef PSELECT
++   struct timespec    tout;
++#else
++  struct timeval     tout;
++#endif
+   fd_set             fdread;
+   int                retn;
+   sigset_t          orig_sigmask; 
+@@ -271,13 +330,21 @@
+   init_sig_handler(&orig_sigmask);
+ 
+   while(1) {
+-    query_t *q;
++    query_t *q, *q_next_old;
+     tout.tv_sec  = select_timeout;
++#ifdef PSELECT
+     tout.tv_nsec = 0;
++#else
++    tout.tv_usec = 0;
++#endif
+     fdread = fdmaster;
+     
+     /* Wait for input or timeout */
++#ifdef PSELECT
+     retn = pselect(maxsock+1, &fdread, 0, 0, &tout, &orig_sigmask);
++#else
++    retn = select(maxsock+1, &fdread, 0, 0, &tout);
++#endif
+     
+     /* reactivate servers */
+     if (reactivate_interval != 0) {
+@@ -300,10 +367,14 @@
+       continue;
+     }
+     else if (retn != 0) {
+-      for (q = &qlist; q->next != &qlist; q = q->next) {
++      for (q = &qlist; q->next != &qlist;) {
++        q_next_old = q->next;
+ 	if (FD_ISSET(q->next->sock, &fdread)) {
+ 	  udp_handle_reply(q);
+ 	}
++    /* sometimes real q->next is deleted, so we just use q->next, if q->next is old, we must deal q->next->next. */
++    if(q->next == q_next_old)
++    q = q->next;
+       }
+ 
+ #ifdef ENABLE_TCP
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/sig.c work/dnrd-2.20.4/dnrd-2.20.4/src/sig.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/sig.c	2005-02-07 10:13:45.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/sig.c	2018-08-17 04:59:05.000000000 +0200
+@@ -20,7 +20,7 @@
+ 
+ #include "sig.h"
+ #include "common.h"
+-
++#include "master.h"
+ /*
+  * sig_handler()
+  *
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/srvnode.c work/dnrd-2.20.4/dnrd-2.20.4/src/srvnode.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/srvnode.c	2004-12-01 19:51:41.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/srvnode.c	2018-08-17 04:59:05.000000000 +0200
+@@ -35,12 +35,24 @@
+ #include "lib.h"
+ #include "common.h"
+ 
++
++#ifdef _DEBUG_ 
++#include <stdio.h>
++#define DPRINTF printf
++#else
++#define DPRINTF(...)
++#endif
++static int _snnr = 0;
++
+ srvnode_t *alloc_srvnode(void) {
+   srvnode_t *p = allocate(sizeof(srvnode_t));
+   p->inactive = -1;
+   p->send_time = 0;
+   p->send_count = 0;
+   /* actually we return a new emty list... */
++  _snnr++;
++  DPRINTF("increase server nodes number to %d\n", _snnr);
++  
+   return p->next=p;
+ }
+ 
+@@ -82,6 +94,9 @@
+   assert(p!=NULL);
+   /*  if (p->sock) close(p->sock); */
+   free(p);
++  _snnr--;
++  DPRINTF("decrease server nodes number to %d\n", _snnr);
++  
+   return NULL;
+ }
+ 
+@@ -100,6 +115,9 @@
+   assert(head != NULL);
+   clear_srvlist(head);
+   free(head);
++  _snnr--;
++  DPRINTF("decrease server nodes number to %d\n", _snnr);
++
+   return NULL;
+ }
+ 
+@@ -108,7 +126,8 @@
+ srvnode_t *add_srv(srvnode_t *head, const char *ipaddr) {
+   srvnode_t *p;
+   struct sockaddr_in addr;
+-
++  DPRINTF("add server %s\n", ipaddr);
++  
+   /* head should never be NULL. a new list is allocated with newdomnode */
+   assert(head != NULL);
+   if (!inet_aton(ipaddr, &addr.sin_addr)) {
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/tcp.c work/dnrd-2.20.4/dnrd-2.20.4/src/tcp.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/tcp.c	2004-12-01 19:51:41.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/tcp.c	2018-08-17 04:59:05.000000000 +0200
+@@ -157,7 +157,7 @@
+ 	for(i = 0; i < serv_cnt; i++) {
+ 	    if (server[i] == -1) continue;
+ 	    if (FD_ISSET(server[i], &available)) {
+-		log_debug("[%d] Received tcp reply.  Forwarding...", getpid());
++		log_debug(3,"[%d] Received tcp reply.  Forwarding...", getpid());
+ 		if ((bytes = read(server[i], buffer, sizeof(buffer))) <= 0) {
+ 		    child_die = 1;
+ 		    break;
+@@ -204,7 +204,7 @@
+ 	    bytes = read(connect, &tcpsize, sizeof(tcpsize));
+ 	    /* check for connection close */
+ 	    if (bytes == 0) break;
+-	    log_debug(1, "[%d] Received tcp DNS query...", getpid());
++	    log_debug(3, "[%d] Received tcp DNS query...", getpid());
+ 
+ 	    if (bytes < 0) {
+ 		log_debug(1, "[%d] tcp read error %s", getpid(), strerror(errno));
+@@ -264,7 +264,7 @@
+ 	
+     }
+     /* The child process is done.  It can now die */
+-    log_debug(1, "[%d] Closing tcp connection", getpid());
++    log_debug(3, "[%d] Closing tcp connection", getpid());
+     /*    for(i = 0; i < MAX_SERV; i++) {
+ 	if (server[i] != -1) close(server[i]);
+     }
+@@ -277,7 +277,7 @@
+     } while ((d=d->next) != domain_list);
+ 
+     close(connect);
+-    log_debug(1, "[%d] Exiting child", getpid());
++    log_debug(3, "[%d] Exiting child", getpid());
+     TCP_EXIT(0);
+     /* NOTREACHED */
+     return (void *)0;
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/test.c work/dnrd-2.20.4/dnrd-2.20.4/src/test.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/test.c	1970-01-01 01:00:00.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/test.c	2018-08-17 04:59:05.000000000 +0200
+@@ -0,0 +1,87 @@
++#include <stdlib.h>
++#include <stdio.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include "referral.h"
++
++/*Indicate the beginning of *.cap file*/
++struct pcap_file_header{
++    unsigned int magic;     //Libpcap magic number
++    unsigned short version_major;   //Libpcap major version
++    unsigned short version_minor;   //Libpcap minor version
++    int thiszone;           //Gmt to local correction
++    unsigned int sigfig;    //Accuracy of timestamps
++    unsigned int snaplen; //Length of the max save portion of each packet
++    unsigned int linktype;  //Data link type
++};
++
++/*The prefix of each packet we captured*/
++struct pcap_pkthdr{
++    struct timeval ts;      //time stamp
++    unsigned int caplen;    //length of portion present
++    unsigned int len;       //length of packet
++};
++
++int main(int argc, char *argv[])
++{
++    int num;
++    int pkt;
++    struct pcap_pkthdr pkthdr;
++    char server[512];
++    unsigned char msg[1500];
++    
++    if (argc < 3)
++    {
++        printf("test packet.pkt number\n");
++        exit(-1);
++    }
++    num = atoi(argv[2]);
++    if (num <1)
++    {
++        printf("number must greater than 1\n");
++        exit(-1);
++    }
++    if ((pkt = open(argv[1], O_RDONLY)) < 0)
++    {
++        printf("fail to open %s\n", argv[1]);
++        exit(-1);
++    }
++    lseek(pkt, sizeof(struct pcap_file_header), SEEK_SET);
++    while (--num)
++    {
++        if (read(pkt, &pkthdr, sizeof(struct pcap_pkthdr)) > 0)
++            lseek(pkt, pkthdr.caplen, SEEK_CUR);
++        else
++        {
++            printf("unexpected end, fail to read packet\n");
++            goto quit;
++        }
++        
++    }
++    if (read(pkt, &pkthdr, sizeof(struct pcap_pkthdr)) > 0)
++    {
++        int i;
++        
++        printf("find packet, length %d\n", pkthdr.caplen);
++        lseek(pkt, 42, SEEK_CUR);
++        read(pkt, msg, pkthdr.caplen - 42);
++        printf("char pattern[] = {");
++        for (i = 0; i < pkthdr.caplen - 42; i++)
++        {
++            if ((i % 8) == 0)
++                printf("\n");
++            
++            printf("0x%2.2x,", msg[i]);
++        
++        }
++        printf("\n};\n");
++        pickup_referral(msg, pkthdr.caplen - 42, server, sizeof(server));
++        printf("get server <%s>\n", server);
++    }
++    else
++        printf("unexpected end, fail to read packet\n");
++    
++ quit:
++    close(pkt);
++    exit(0);
++}
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/udp.c work/dnrd-2.20.4/dnrd-2.20.4/src/udp.c
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/udp.c	2005-02-08 11:20:16.000000000 +0100
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/udp.c	2018-08-17 04:59:05.000000000 +0200
+@@ -21,6 +21,8 @@
+ #ifdef HAVE_CONFIG_H
+ #include <config.h>
+ #endif
++#include <stdlib.h>
++#include <stdio.h>
+ #include <errno.h>
+ #include <sys/types.h>
+ #include <sys/socket.h>
+@@ -30,6 +32,7 @@
+ #include <string.h>
+ #include <time.h>
+ #include <assert.h>
++#include <unistd.h>
+ #include "common.h"
+ #include "relay.h"
+ #include "cache.h"
+@@ -41,15 +44,81 @@
+ #ifndef EXCLUDE_MASTER
+ #include "master.h"
+ #endif
++#ifdef _RECURSION_
++#include "dns.h"
++#include "referral.h"
++#endif
++
++#ifdef GUI_V14
++#include "nvram.h"
++#include "ifgmap.h"
++#include <stdarg.h>
++#include <stdint.h>
++#define SYSTEM_BUF_SIZE	1024
++
++#pragma pack(push, 1)
++typedef struct 
++	{
++		uint16_t rr_pt;
++		uint16_t rr_type;
++		uint16_t rr_class;
++		uint32_t rr_ttl;
++		uint16_t rr_length;
++	} RR_t;
++#pragma pack(pop)
++
++#include <stdarg.h>
++static int print_console_func(const char *format, ...)
++{
++	if (access("/tmp/debug_dnrd_console", F_OK) == 0)
++	{
++#if 1
++#define CONSOLE "/dev/console"
++		static FILE* fp = NULL;
++		va_list arg;
++		if(fp == NULL)
++		{
++			fp = fopen(CONSOLE, "w");
++			if(fp == NULL)
++			{
++				printf("can't open %s \n", CONSOLE);
++				return 0;
++			}
++		}
++		va_start(arg, format);
++		vfprintf(fp, format, arg);
++		va_end(arg);
++#endif			
++	}
++	
++	return 0;
++}
++
++
++int SYSTEM(const char *format, ...)
++{
++	char buf[SYSTEM_BUF_SIZE]="";
++	va_list arg;
++
++	va_start(arg, format);
++	vsnprintf(buf,SYSTEM_BUF_SIZE, format, arg);
++	va_end(arg);
++
++	system(buf);
++	usleep(1);
++	return 0;
++}
++#endif
++
++#ifdef OPENDNS
++static int trans_macaddr(OUT char * mac, IN char *mac_p);
++static int get_macaddr_by_ip(OUT char *mac, IN char *ip);
++static void get_deviceid_by_macaddr(IN char *macaddr, OUT char *deviceid);
++static int trans_deviceid(IN char *deviceid, OUT char *deviceid_b);
++#endif
++
++#define HTONS_CHARS(n) (unsigned char)((n) >> 8), (unsigned char)(n)
+ 
+-/*
+- * dnssend()						22OCT99wzk
+- *
+- * Abstract: A small wrapper for send()/sendto().  If an error occurs a
+- *           message is written to syslog.
+- *
+- * Returns:  The return code from sendto().
+- */
+ static int udp_send(int sock, srvnode_t *srv, void *msg, int len)
+ {
+     int	rc;
+@@ -68,6 +137,7 @@
+     return (rc);
+ }
+ 
++unsigned short ttls[]={1,2,1,2,0,0};
+ int send2current(query_t *q, void *msg, const int len) {
+     /* If we have domains associated with our servers, send it to the
+        appropriate server as determined by srvr */
+@@ -76,14 +146,86 @@
+   assert(q->domain != NULL);
+ 
+   d = q->domain;
+-  while ((d->current != NULL) && (udp_send(q->sock, d->current, msg, len) != len)) {
+-    if (reactivate_interval) deactivate_current(d);
++  q->client_time = time(NULL);
++  q->ttl = ttls[q->try_count];/*set ttl for this time*/
++  
++  if(d->primary && q->try_count < TRY_SECOND_SERVER)
++      q->srv = d->primary;
++  else if(d->secondary && q->try_count >= TRY_SECOND_SERVER && q->try_count < TRY_THIRD_SERVER)/*SJ,if secondary don't exist,can't do this*/
++      q->srv = d->secondary;
++  else if(d->tertiary && q->try_count >= TRY_THIRD_SERVER)
++      q->srv = d->tertiary;
++    
++  log_debug(2, "sending to: srv=%s, client_time: %lu, ttl: %d, try_count: %d, sock %d, msg%x ,len: %d",
++	      q->srv?inet_ntoa(q->srv->addr.sin_addr):"NULL",
++            q->client_time, q->ttl,q->try_count, q->sock, msg, len);
++  if ((q->srv == NULL) || (udp_send(q->sock, q->srv, msg, len) != len)) {
++      /*send query failed*/
++      log_debug(2, "but failed....");
++      return 0;
++  }
++
++  log_debug(2, "OK, let's wait for the response");
++  return len;
++}
++
++#ifdef _RECURSION_
++int send2referral(query_t *q, void *msg, const int len) {
++    //domnode_t *d;
++  assert(q != NULL);
++  assert(q->referral != NULL);
++
++  //d = q->domain;
++  q->client_time = time(NULL);
++  q->ttl = ttls[q->try_count];/*set ttl for this time*/
++  q->srv = q->referral->next;
++  //q->srv = d->primary;
++  q->srv->addr.sin_port = htons(53);
++  q->srv->addr.sin_family = AF_INET;
++  q->recursion_count++;
++  
++  log_debug(2, "sending to: srv=%s, client_time: %lu, ttl: %d, try_count: %d",
++	      q->srv?inet_ntoa(q->srv->addr.sin_addr):"NULL",
++	      q->client_time, q->ttl,q->try_count);
++  if ((q->srv == NULL) || (udp_send(q->sock, q->srv, msg, len) != len)) {
++      /*send query failed*/
++      log_debug(2, "but failed....");
++      return 0;
+   }
+-  if (d->current != NULL) {
+-    return len;
+-  } else return 0;
++
++  log_debug(2, "OK, let's wait for the response");
++  return len;
+ }
++#endif
++
++/*
++ * put a short type data to a packet
++ * INput:
++ * 		val - host format; addr - a packet data's poiter
++ * Return: void.
++ */
++void putshort(unsigned short val, char *addr)
++{
++	unsigned short tmp = htons(val);
+ 
++	memcpy(addr, &tmp, 2);
++	return;
++}
++
++/*
++ * get a short type data from a packet
++ * INput:
++ * 		addr - a packet data's poiter
++ * Return: host format data.
++ */
++unsigned short getshort(char *addr)
++{
++	unsigned short val;
++
++	memcpy(&val, addr, 2);
++	val=ntohs(val);
++	return val;
++}
+ 
+ /*
+  * handle_udprequest()
+@@ -92,6 +234,8 @@
+  * know the correct reply via master, caching, etc.), or forwarding them to
+  * an appropriate DNS server.
+  */
++  extern int opendns;
++  extern char PC_table[];
+ query_t *udp_handle_request()
+ {
+     unsigned           addr_len;
+@@ -102,11 +246,54 @@
+     int                fwd;
+     domnode_t          *dptr;
+     query_t *q, *prev;
++#ifdef OPENDNS
++	char macaddr[13]={0}, macaddr_p[18]={0};
++	char deviceid[33]={0};
++	const unsigned char clientid[11] = { HTONS_CHARS(4), HTONS_CHARS(15),
++										'O', 'p', 'e', 'n', 'D', 'N', 'S' };
++	const unsigned char fixed[11] = { 0, HTONS_CHARS(41), HTONS_CHARS(512),
++									  0, 0, 0, 0, HTONS_CHARS(0) };
++	unsigned char deviceid_b[8] = { 0x00, 0x00, 0x11, 0x11,
++									0x11, 0x11, 0x11, 0x11};
++	short int rdlen=0, add_rrs=0x01;
++	char *buf=NULL, *pt=NULL;
++#endif
+ 
+     /* Read in the message */
+     addr_len = sizeof(struct sockaddr_in);
+     len = recvfrom(isock, msg, maxsize, 0,
+ 		   (struct sockaddr *)&from_addr, &addr_len);
++
++#ifdef OPENDNS
++
++	if(1 == opendns)
++	{
++		char *pheader=msg+len, *p;
++
++		if(!get_macaddr_by_ip(macaddr_p, inet_ntoa(from_addr.sin_addr)))
++		{
++			if(!trans_macaddr(macaddr, macaddr_p))
++			{
++				get_deviceid_by_macaddr(macaddr, deviceid);
++				trans_deviceid(deviceid, deviceid_b);
++			}
++		}
++		putshort(add_rrs, msg + 10);
++
++		memcpy(msg+len, fixed, sizeof(fixed));
++		len+=sizeof(fixed);
++		memcpy(msg+len, clientid, sizeof(clientid));
++		len+=sizeof(clientid);
++		memcpy(msg+len, deviceid_b, sizeof(deviceid_b));
++		len+=sizeof(deviceid_b);
++		p = pheader + 9;
++		rdlen = getshort(p);
++		rdlen+=sizeof(clientid) + sizeof(deviceid_b);
++		p = pheader + 9;
++		putshort(rdlen, p);
++	}
++	free(buf);
++#endif
+     if (len < 0) {
+ 	log_debug(1, "recvfrom error %s", strerror(errno));
+ 	return NULL;
+@@ -143,6 +330,9 @@
+     }
+     q = prev->next;
+ 
++    /*store the msg and len for sending query again*/
++    memcpy(q->msg, msg, sizeof(msg));
++    q->msg_len = len;
+ 
+     if (send2current(q, msg, len) > 0) {
+       /* add to query list etc etc */
+@@ -165,7 +355,7 @@
+        * For this feature dnrd has to run on the gateway
+        * machine.
+        */
+-      
++
+       if ((packetlen = master_dontknow(msg, len, packet)) > 0) {
+ 	query_delete_next(prev);
+ 	return NULL;
+@@ -218,6 +408,116 @@
+     return (rc);
+ }
+ 
++#ifdef GUI_V14
++
++
++#define ANSWER_IP_MAX 100
++char answer_ip[ANSWER_IP_MAX][32];
++
++/* get dns answer from reply pkts */
++uint32_t get_answer_ip(char *data, int len, int answered_count)
++{
++	int ret = 0;
++	RR_t dns_rr;
++	char *pt = data;
++	int i = 0, offset;
++	int parsered_count = 0, got_answered_count = 0;
++	uint32_t ret_ip = 0;
++	/* prepare data, eat dns query part */
++	while(*pt != 0)
++		pt ++;
++	pt = pt + 5;
++
++	while(i + sizeof(dns_rr) < len)
++	{
++		memcpy(&dns_rr, pt, sizeof(dns_rr));
++		parsered_count ++;
++		/* the answer is ipv4 address */
++		if(ntohs(dns_rr.rr_type) == 1)
++		{
++			if(i + sizeof(dns_rr) + 4 <= len)
++			{
++				pt = pt + sizeof(dns_rr);
++				memcpy(&ret_ip, pt, 4);
++				
++				{
++					struct in_addr ip_ans;
++					ip_ans.s_addr = ret_ip;
++					
++					strcpy(&answer_ip[got_answered_count ++][0], inet_ntoa(ip_ans));
++					print_console_func("get response %d: %s\n", answered_count, inet_ntoa(ip_ans));
++					if (got_answered_count >= ANSWER_IP_MAX)
++					{
++						print_console_func("no enough space\n");
++						break;	
++					}
++				}
++				
++				ret = 1;
++				if (parsered_count >= answered_count)
++				{
++					print_console_func("get all response\n");
++					break;	
++				}
++				
++				pt += 4;
++			}
++			//break;
++		}
++		else
++		{
++			offset = ntohs(dns_rr.rr_length) + sizeof(dns_rr);
++			if((i = i + offset) <= len)
++			{
++				/* Go to the next record */
++				pt = pt + offset;
++			}
++		}
++	}
++	return ret;
++}
++
++#if 0
++/* get dns answer from reply pkts */
++uint32_t get_answer_ip(char *data, int len)
++{
++	RR_t dns_rr;
++	char *pt = data;
++	int i = 0, offset;
++	uint32_t ret_ip = 0;
++	/* prepare data, eat dns query part */
++	while(*pt != 0)
++		pt ++;
++	pt = pt + 5;
++
++	while(i + sizeof(dns_rr) < len)
++	{
++		memcpy(&dns_rr, pt, sizeof(dns_rr));
++		/* the answer is ipv4 address */
++		if(ntohs(dns_rr.rr_type) == 1)
++		{
++			if(i + sizeof(dns_rr) + 4 <= len)
++			{
++				pt = pt + sizeof(dns_rr);
++				memcpy(&ret_ip, pt, 4);
++			}
++			break;
++		}
++		else
++		{
++			offset = ntohs(dns_rr.rr_length) + sizeof(dns_rr);
++			if((i = i + offset) <= len)
++			{
++				/* Go to the next record */
++				pt = pt + offset;
++			}
++		}
++	}
++	return ret_ip;
++}
++#endif
++#endif
++
+ /*
+  * handle_udpreply()
+  *
+@@ -234,7 +534,10 @@
+     int                len;
+     unsigned           addr_len;
+     query_t *q = prev->next;
+-
++    int reply;
++	int answerip_i = 0;
++	int ret = 0;
++    
+     log_debug(3, "handling socket %i", q->sock);
+     if ((len = reply_recv(q, msg, UDP_MAXSIZE)) < 0)
+       {
+@@ -242,13 +545,61 @@
+ 	query_delete_next(prev);
+ 	return; /* recv error */
+       }
+-    
++
+     /* do basic checking */
+-    if (check_reply(q->srv, msg, len) < 0) {
++    if ((reply = check_reply(q->srv, msg, len)) < 0) {
+       log_debug(1, "check_reply failed");
+-      query_delete_next(prev);
+-      return;
++#ifdef _RECURSION_
++      q->recursion_count = 0;
++#endif
++      q->try_count++;
++      if (q->try_count >= ALL_SERVER_FAILED) {
++            if (q->domain != NULL) {
++                *((unsigned short *)msg) = q->client_qid;
++                sendto(isock, msg, len, 0, 
++                    (const struct sockaddr *)&q->client, sizeof(struct sockaddr_in));
++            }
++            query_delete_next(prev);
++      }else {
++            send2current(q,q->msg,q->msg_len);
++    }
++        return;
++    }
++#ifdef _RECURSION_
++    else if ((reply == REPLY_REFERRAL)
++             &&(q->client_flag & MASK_RD)) {
++        char temp[128];
++
++        log_debug(3, "handling recursion reply of %d\n", q->recursion_count);
++
++        if (q->recursion_count >= MAX_RECURSION_COUNT)
++            goto delete;
++
++        if (pickup_referral(msg, len,  temp, sizeof(temp))
++            != PICKUP_OK)
++            goto delete;
++
++        if (!q->referral) /* no head */
++            q->referral = init_srvlist();
++
++        if (add_srv(q->referral, temp) == NULL)
++            goto delete;
++
++        if (send2referral(q, q->msg, q->msg_len) < 0)
++            goto delete;
++        
++        return;
++    delete:
++        if (q->domain != NULL) {
++            *((unsigned short *)msg) = q->client_qid;
++            sendto(isock, msg, len, 0, 
++                (const struct sockaddr *)&q->client, sizeof(struct sockaddr_in));
++        }
++        query_delete_next(prev);
++        return;
++
+     }
++#endif
+ 
+     if (opt_debug) {
+ 	char buf[256];
+@@ -268,6 +619,88 @@
+       *((unsigned short *)msg) = q->client_qid;
+       log_debug(3, "Forwarding the reply to the host %s",
+ 		inet_ntoa(q->client.sin_addr));
++
++#ifdef GUI_V14 
++	char buf[256]="";
++	char *state = NULL;
++	int group_sid = 1, group_eid, group_id;
++
++	if(len > 20)
++	{
++		snprintf_cname(msg, len, 12, buf, sizeof(buf));
++
++		//if(strcmp(buf,"updates1.netgear.com")==0)
++		if(strcmp(buf,"updates1.netgear.com")==0 || strcmp(buf,"http.updates1.netgear.com")==0)
++		{
++			state = nvram_safe_get("config_state");
++			if( strcmp(state,"configured")==0 || strcmp(state,"blankstate")==0)
++			{
++			 	group_eid = ifgmap_get_if_num(IF_TYPE_GROUP);
++#ifdef VLAN_IPTV
++			    /* Now VLAN2-8 is only a bridge,needn't dnrd start them */
++				group_eid = 1;
++#endif
++				/*
++				char ip1[32]="",ip2[32]="";
++				sprintf(ip1,"%d.%d.%d.%d",msg[len-20],msg[len-19],msg[len-18],msg[len-17]);
++				sprintf(ip2,"%d.%d.%d.%d",msg[len-4],msg[len-3],msg[len-2],msg[len-1]);
++				*/
++				struct in_addr ip_ans;
++				char ip1[32] = "";
++				
++
++				memset(&answer_ip[0][0], 0, sizeof(answer_ip));
++				ret = get_answer_ip(&msg[12], len - 12, ntohs(((dnsheader_t *)msg)->ancount));
++				if(ret)
++				{
++					for (answerip_i=0; answerip_i<ANSWER_IP_MAX; answerip_i++)
++					{
++						memset(ip1, 0, sizeof(ip1));
++						strcpy(ip1, &answer_ip[answerip_i][0]);
++						
++						if(ip1[0] && strcmp(ip1,"66.114.62.22")!=0 && 
++							strcmp(ip1,"66.114.62.29")!=0 && 
++							strcmp(ip1,"174.35.24.133")!=0 && 
++							strcmp(ip1,"101.96.10.64")!=0)
++						{
++								for(group_id = group_sid; group_id <= group_eid; group_id ++)
++							{
++								{
++									SYSTEM("/usr/sbin/iptables -t nat -D  PREROUTING -i group%d -d %s -p tcp --dport 80 -j RETURN", group_id,  ip1);
++									SYSTEM("/usr/sbin/iptables -t nat -I  PREROUTING -i group%d -d %s -p tcp --dport 80 -j RETURN", group_id, ip1);
++								}
++							}
++						}
++					}
++				}
++/*
++				ip_ans.s_addr = get_answer_ip(&msg[12], len - 12);
++				if(ip_ans.s_addr != 0)
++				{
++					strcpy(ip1, inet_ntoa(ip_ans));
++					if(strcmp(ip1,"66.114.62.22")!=0 && strcmp(ip1,"66.114.62.29")!=0 && strcmp(ip1,"174.35.24.133")!=0)
++					{
++						for(group_id = group_sid; group_id <= group_eid; group_id ++)
++						{
++							SYSTEM("/usr/sbin/iptables -t nat -D  PREROUTING -i group%d -d %s -p tcp --dport 80 -j RETURN", group_id, ip1 );
++							SYSTEM("/usr/sbin/iptables -t nat -I  PREROUTING -i group%d -d %s -p tcp --dport 80 -j RETURN", group_id, ip1 );
++						}
++					}
++				}
++				*/
++/*
++				if(strcmp(ip2,"66.114.62.22")!=0 && strcmp(ip2,"66.114.62.29")!=0 && strcmp(ip2,ip1)!=0 && strcmp(ip2,"174.35.24.133")!=0)
++				{
++					for(group_id = group_sid; group_id <= group_eid; group_id ++)
++					{
++						SYSTEM("/usr/sbin/iptables -t nat -I  PREROUTING -i group%d -d %s -p tcp --dport 80 -j RETURN",group_id, ip2 );
++					}
++				}
++				*/
++			}
++		}
++	}
++#endif
+       if (sendto(isock, msg, len, 0,
+ 		 (const struct sockaddr *)&q->client,
+ 		 addr_len) != len) {
+@@ -330,3 +763,176 @@
+   }
+   return -1;
+ }
++
++#ifdef OPENDNS
++//marc add for opendns(parental control)
++
++#define DEVICE_ID_LEN 16
++#define DEFAULT_DEVICE_ID "0000111111111111"
++/*********************************
++ * transform the the mac address from the formation AA:BB:CC:DD:EE:FF
++ * assigned by mac_p to the formation AABBCCDDEEFF assigned by mac
++ ********************************/
++static int trans_macaddr(OUT char * mac, IN char *mac_p)
++{
++	if(!strcmp(mac_p, "") || 17 != strlen(mac_p))
++		return (-1);
++
++	*(mac+0)=*(mac_p+0);
++	*(mac+1)=*(mac_p+1);
++	*(mac+2)=*(mac_p+3);
++	*(mac+3)=*(mac_p+4);
++	*(mac+4)=*(mac_p+6);
++	*(mac+5)=*(mac_p+7);
++	*(mac+6)=*(mac_p+9);
++	*(mac+7)=*(mac_p+10);
++	*(mac+8)=*(mac_p+12);
++	*(mac+9)=*(mac_p+13);
++	*(mac+10)=*(mac_p+15);
++	*(mac+11)=*(mac_p+16);
++	*(mac+12)='\0';
++	return 0;
++}
++
++/***********************************
++ * get the mac address that is corresponding the specified ip address
++ * from the arp buffer file "/proc/net/arp"
++ **********************************/
++static int get_macaddr_by_ip(OUT char *mac, IN char *ip)
++{
++	char buf[512];
++	FILE *fp=NULL;
++	char str_addr[20], str_type[20], str_flg[20], str_mac[20], str_mask[20], str_dev[20];
++	int rc = 1;
++
++	if(!(fp=fopen("/proc/net/arp", "r")))
++		return (-1);
++
++	while(fgets(buf, 512, fp))
++	{
++	      sscanf(buf, "%s %s %s %s %s %s", str_addr, str_type, str_flg, str_mac, str_mask, str_dev);
++	      if(!strcasecmp(ip, str_addr))
++	      {
++	              strcpy(mac, str_mac);
++				  rc = 0;
++	              break;
++	      }
++	}
++	if(fp)
++	       fclose(fp);
++	return rc;
++}
++
++static void get_deviceid_by_macaddr(IN char *macaddr, OUT char *deviceid)
++{
++	char default_deviceid[33]={0};
++	//char *tab = nvram_get("PC_table"), *pt=NULL;
++	//char *pt=NULL, *buf=NULL;
++	char *pt=NULL;
++	char buf[PC_TABLE_MAX_SIZE];
++
++	strncpy(buf, PC_table,sizeof(buf));
++	pt = strcasestr(buf, macaddr);
++	if(pt)
++	{
++		memset(deviceid, 0, sizeof(deviceid));
++		strncpy(deviceid, pt+strlen(macaddr)+1, DEVICE_ID_LEN);
++	}
++	pt = strstr(buf, "default");
++	if(pt)
++	{
++		memset(default_deviceid, 0, sizeof(deviceid));
++		strncpy(default_deviceid, pt+strlen("default")+1, DEVICE_ID_LEN);
++	}
++	//free(buf);
++	if(strcmp(deviceid, ""))
++		return ;
++	if(strcmp(default_deviceid, ""))
++	{
++		strcpy(deviceid, default_deviceid);
++		return;
++	}
++	strcpy(deviceid, DEFAULT_DEVICE_ID);
++}
++
++/***********************************
++ * transform the string of deviceid to the hexadecimal formation.
++ * for instance, transform the string "1234567890abcdef" to the
++ * hexadecimal digit 0x12 0x34 0x56 0x78 0x90 0xAB 0xCD 0xEF, and
++ * copy this hex digit to the memory assigned by deviceid_b, then
++ * the string have changed to binary code.
++ **********************************/
++static int trans_deviceid(IN char *deviceid, OUT char *deviceid_b)
++{
++	int i=0;
++	if(DEVICE_ID_LEN != strlen(deviceid))
++		return (-1);
++	if(!strncmp(deviceid, DEFAULT_DEVICE_ID, DEVICE_ID_LEN))
++		return 0;
++	for(i=0; i<DEVICE_ID_LEN; i++)
++	{
++		switch (*(deviceid+i))
++		{
++			case '0':
++				*(deviceid+i)=0x00;
++				break;
++			case '1':
++				*(deviceid+i)=0x01;
++				break;
++			case '2':
++				*(deviceid+i)=0x02;
++				break;
++			case '3':
++				*(deviceid+i)=0x03;
++				break;
++			case '4':
++				*(deviceid+i)=0x04;
++				break;
++			case '5':
++				*(deviceid+i)=0x05;
++				break;
++			case '6':
++				*(deviceid+i)=0x06;
++				break;
++			case '7':
++				*(deviceid+i)=0x07;
++				break;
++			case '8':
++				*(deviceid+i)=0x08;
++				break;
++			case '9':
++				*(deviceid+i)=0x09;
++				break;
++			case 'a':
++			case 'A':
++				*(deviceid+i)=0x0A;
++				break;
++			case 'b':
++			case 'B':
++				*(deviceid+i)=0x0B;
++				break;
++			case 'c':
++			case 'C':
++				*(deviceid+i)=0x0C;
++				break;
++			case 'd':
++			case 'D':
++				*(deviceid+i)=0x0D;
++				break;
++			case 'e':
++			case 'E':
++				*(deviceid+i)=0x0E;
++				break;
++			case 'f':
++			case 'F':
++				*(deviceid+i)=0x0F;
++				break;
++			default :
++				return (-1);
++		}
++	}
++	for(i=0; i < 8; i++)
++		*(deviceid_b+i)=((*(deviceid+i*2+0))<<4)|(*(deviceid+i*2+1));
++	return 0;
++}
++#endif

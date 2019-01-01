@@ -1,0 +1,32 @@
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/configure.in work/dnrd-2.20.4/dnrd-2.20.4/configure.in
+--- work/dnrd-2.20.4/dnrd-2.20.4/configure.in	2016-10-02 15:02:54.000000000 +0200
++++ work/dnrd-2.20.4/dnrd-2.20.4/configure.in	2018-12-14 22:47:08.958215854 +0100
+@@ -3,7 +3,7 @@
+ AC_CANONICAL_SYSTEM
+ 
+ AM_CONFIG_HEADER(src/config.h)
+-AM_INIT_AUTOMAKE(dnrd,2.21_beta1)
++AM_INIT_AUTOMAKE
+ 
+ dnl Fix "prefix" variable if it hasn't been specified...
+ if test "$prefix" = "NONE"; then
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/Makefile.am work/dnrd-2.20.4/dnrd-2.20.4/Makefile.am
+--- work/dnrd-2.20.4/dnrd-2.20.4/Makefile.am	2016-10-02 15:02:54.000000000 +0200
++++ work/dnrd-2.20.4/dnrd-2.20.4/Makefile.am	2018-12-14 22:51:33.829001370 +0100
+@@ -1,5 +1,4 @@
+ PACKAGE = @PACKAGE_TARNAME@
+-SUBDIRS = src doc
+-doc_DATA = AUTHORS COPYING ChangeLog README NEWS
++SUBDIRS = src
+ 
+-EXTRA_DIST = README cygwin_post_install.sh
++EXTRA_DIST = README.md cygwin_post_install.sh
+diff -urN work/dnrd-2.20.4/dnrd-2.20.4/src/Makefile.am work/dnrd-2.20.4/dnrd-2.20.4/src/Makefile.am
+--- work/dnrd-2.20.4/dnrd-2.20.4/src/Makefile.am	2016-10-02 15:02:54.000000000 +0200
++++ work/dnrd-2.20.4/dnrd-2.20.4/src/Makefile.am	2018-12-14 22:57:53.999484957 +0100
+@@ -1,4 +1,4 @@
+ sbin_PROGRAMS = dnrd
+ dnrd_SOURCES = args.c args.h cache.c cache.h common.c common.h dns.c dns.h lib.c lib.h main.c master.c master.h query.c query.h relay.c relay.h sig.c sig.h tcp.c tcp.h udp.c udp.h srvnode.h srvnode.c domnode.c domnode.h standard.h rand.h rand.c qid.h qid.c check.c check.h
+ dnrd_LDADD = @THREAD_LIBS@
+-INCLUDES = @THREAD_CFLAGS@
++AM_CPPFLAGS = @THREAD_CFLAGS@

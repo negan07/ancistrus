@@ -1,0 +1,59 @@
+diff -urN work/dnrd-2.20.4/Makefile work/dnrd-2.20.4/Makefile
+--- work/dnrd-2.20.4/Makefile	2017-05-23 23:09:40.513449762 +0200
++++ work/dnrd-2.20.4/Makefile	2017-05-01 21:08:42.000000000 +0200
+@@ -0,0 +1,55 @@
++include ../Rules.mak
++
++BINS			:= $(DNRD)/src/dnrd
++STARTUP			:= rc_dnrd
++
++all: config
++	$(MAKE) -C $(DNRD)
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(DNRD) && mv README.md README && mv configure.in configure.ac && aclocal && autoheader && automake -a && autoconf && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) host_alias=$(TARGET_NAME) cross_compiler=yes --enable-tcp --prefix=/ CFLAGS="$(CFLAGS) -Os -s -DHACK_DNS -DOPENDNS -DGUI_V14 -DVLAN_IPTV -DRU_SPEC -Werror" CPPFLAGS="-I$(SHARED_DIR) -I$(RC_LIBS_DIR)/include -I$(WORK_DIR)/$(NVRAM)" LDFLAGS="-L$(RC_LIBS_DIR)/shared_lib -L$(SC_LIBSLINK_DIR) -L$(WORK_DIR)/$(NVRAM) -lrc -llink -lscnvram"
++
++install: control
++	$(SSTRIP) $(BINS)
++	for D in $(BINDIR); do install -m 0755 -d $$D; done
++	install -m 0755 $(BINS) $(BINDIR)
++
++clean:
++	$(MAKE) -C $(DNRD) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(DNRD) distclean
++	mv README README.md && mv configure.ac configure.in
++
++ifndef BUILD
++control:
++else
++PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
++PRERM			:= $(CTRL_DIR)/prerm
++
++control: preinst postinst prerm
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) start >/dev/null 2>&1" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PRERM)
++	@echo "exit 0" >> $(PRERM)
++endif
++
