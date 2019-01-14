@@ -20,7 +20,7 @@
 <!--
 
 function loadPackageList(file) {
-	var pkg="Package: ", ver="Version: ";
+	var pkg="Package: ", desc="Description: ", size="Size: ", instsize="Installed-Size: ", ver="Version: ";
 	var xmlhttp=readFileTags(file);
 
 	if(xmlhttp.readyState==4 && xmlhttp.status==200) {
@@ -31,24 +31,39 @@ function loadPackageList(file) {
 	"<tr><td colspan='2' align='center'><a href='javascript:gotoWiki(\"opkg-package#@opkg_help#\");' tabindex='-1'><b>Select a Package to @opkg_job# then click Apply</b></a></td></tr>"+
 	"<tr><td colspan='2'><table class='tables' border='1' cellpadding='2' cellspacing='0' width='60%' text-align='left' align='center'>"+
 	"<tr class='table_header'>"+
-	"<td nowrap width='10%' align='left'><span class='thead'><b>Select</b></span></td>"+
-	"<td nowrap width='60%' align='left'><span class='thead'><b>Package Name</b></span></td>"+
-	"<td nowrap width='30%' align='left'><span class='thead'><b>Version</b></span></td></tr>";
+	"<td nowrap width='5%' align='left'><span class='thead'><b>Select</b></span></td>"+
+	"<td nowrap width='15%' align='left'><span class='thead'><b>Package Name</b></span></td>"+
+	"<td nowrap width='50%' align='left'><span class='thead'><b>Description</b></span></td>"+
+	"<td nowrap width='10%' align='left'><span class='thead'><b>Size (bytes)</b></span></td>"+
+	"<td nowrap width='20%' align='left'><span class='thead'><b>Version</b></span></td></tr>";
 		for(var i=0;i<linelen;i++) {
 			if(line[i].length>1 && (line[i].indexOf(pkg)>-1 || file=="opkglistupgr")) {
 				if(line[i].indexOf(pkg)>-1) {
-				var pkgname=line[i++].replace(pkg, "");
-				var vernum=line[i].replace(ver, "");
+				var pkgname=line[i].replace(pkg, "");
+				var vernum=line[++i].replace(ver, "");
+				while(line[i].indexOf(size)<0 && line[i].indexOf(instsize)<0) i++;
+					if(file=="opkgstatus") {
+					var sizeval=line[i].replace(instsize, "");
+					var descname="";
+					}
+					else {
+					var sizeval=line[i].replace(size, "");
+					var descname=line[i+=3].replace(desc, "");
+					}
 				}
 				else {
 				var word=line[i].split(" - ");
 				var pkgname=word[0];
 				var vernum=word[1]+" ---> "+word[2];
+				var sizeval="";
+				var descname="";
 				}
 			txt+=
-			"<tr><td nowrap width='10%' align='left'><input type=radio name=pkg_select value='"+pkgname+"'></td>"+
-			"<td nowrap width='60%' align='left'><span class='thead' value='"+pkgname+"'><b>"+pkgname+"</b></span></td>"+
-			"<td nowrap width='30%' align='left'><span class='thead' value='"+vernum+"'><b>"+vernum+"</b></span></td></tr>";
+			"<tr><td nowrap width='5%' align='left'><input type=radio name=pkg_select value='"+pkgname+"'></td>"+
+			"<td nowrap width='15%' align='left'><span class='thead' value='"+pkgname+"'><b>"+pkgname+"</b></span></td>"+
+			"<td nowrap width='50%' align='left'><span class='thead' value='"+descname+"'><b>"+descname+"</b></span></td>"+
+			"<td nowrap width='10%' align='left'><span class='thead' value='"+sizeval+"'><b>"+sizeval+"</b></span></td>"+
+			"<td nowrap width='20%' align='left'><span class='thead' value='"+vernum+"'><b>"+vernum+"</b></span></td></tr>";
 			}
 		}
 	txt+="</table></td></tr>";

@@ -1,0 +1,14 @@
+diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg.c work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg.c
+--- work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg.c	2016-12-22 18:38:14.000000000 +0100
++++ work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg.c	2017-03-22 00:12:25.566249000 +0100
+@@ -895,9 +895,7 @@
+     pkg_formatted_field(file, pkg, "Replaces", NULL);
+     pkg_formatted_field(file, pkg, "Conflicts", NULL);
+     pkg_formatted_field(file, pkg, "Status", NULL);
+-    if (opkg_config->verbose_status_file) {
+-        pkg_formatted_field(file, pkg, "Section", NULL);
+-    }
++    pkg_formatted_field(file, pkg, "Section", NULL);
+     pkg_formatted_field(file, pkg, "Essential", NULL);
+     pkg_formatted_field(file, pkg, "Architecture", NULL);
+     if (opkg_config->verbose_status_file) {

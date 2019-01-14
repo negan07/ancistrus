@@ -1,0 +1,174 @@
+diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c
+--- work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c	2016-12-22 18:38:14.000000000 +0100
++++ work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c	2017-03-24 22:57:03.946704785 +0100
+@@ -367,7 +331,7 @@
+     for (i = 0; i < ordered->len; i++) {
+         pkg = ordered->pkgs[i];
+ 
+-        if (pkg_name && fnmatch(pkg_name, pkg->name, 0))
++        if (pkg_name && fnmatch(pkg_name, pkg->name, opkg_config->nocase))
+             continue;
+ 
+         if (pkg->state_status == SS_UNPACKED) {
+@@ -528,7 +492,7 @@
+     for (i = 0; i < available->len; i++) {
+         pkg = available->pkgs[i];
+         /* if we have package name or pattern and pkg does not match, then skip it */
+-        if (pkg_name && fnmatch(pkg_name, pkg->name, 0) &&
++        if (pkg_name && fnmatch(pkg_name, pkg->name, opkg_config->nocase) &&
+            (!use_desc || !pkg->description || fnmatch(pkg_name, pkg->description, 0)))
+             continue;
+         print_pkg(pkg);
+@@ -564,7 +528,7 @@
+     for (i = 0; i < available->len; i++) {
+         pkg = available->pkgs[i];
+         /* if we have package name or pattern and pkg does not match, then skip it */
+-        if (pkg_name && fnmatch(pkg_name, pkg->name, 0))
++        if (pkg_name && fnmatch(pkg_name, pkg->name, opkg_config->nocase))
+             continue;
+         print_pkg(pkg);
+     }
+@@ -592,7 +556,7 @@
+     for (i = 0; i < available->len; i++) {
+         pkg = available->pkgs[i];
+         /* if we have package name or pattern and pkg does not match, then skip it */
+-        if (pkg_name && fnmatch(pkg_name, pkg->name, 0))
++        if (pkg_name && fnmatch(pkg_name, pkg->name, opkg_config->nocase))
+             continue;
+         if (nv_pair_list_empty(&pkg->conffiles))
+             continue;
+@@ -634,7 +598,7 @@
+ 
+     for (i = 0; i < available->len; i++) {
+         pkg = available->pkgs[i];
+-        if (pkg_name && fnmatch(pkg_name, pkg->name, 0)) {
++        if (pkg_name && fnmatch(pkg_name, pkg->name, opkg_config->nocase)) {
+             continue;
+         }
+ 
+@@ -847,7 +811,7 @@
+         for (j = 0; j < available_pkgs->len; j++) {
+             pkg = available_pkgs->pkgs[j];
+ 
+-            if (fnmatch(argv[i], pkg->name, 0) != 0)
++            if (fnmatch(argv[i], pkg->name, opkg_config->nocase) != 0)
+                 continue;
+ 
+             depends_count = pkg->depends_count + pkg->pre_depends_count +
+@@ -1046,9 +1010,9 @@
+                 int count = pkg->provides_count;
+                 for (k = 0; k < count; k++) {
+                     abstract_pkg_t *apkg = pkg->provides[k];
+-                    if (fnmatch(target, apkg->name, 0) == 0) {
++                    if (fnmatch(target, apkg->name, opkg_config->nocase) == 0) {
+                         opkg_msg(NOTICE, "    %s", pkg->name);
+-                        if (strcmp(target, apkg->name) != 0)
++                        if ((opkg_config->nocase ? strcasecmp(target, apkg->name) : strcmp(target, apkg->name)) != 0)
+                             opkg_msg(NOTICE, "\tprovides %s\n", apkg->name);
+                         opkg_message(NOTICE, "\n");
+                     }
+@@ -1091,7 +1055,7 @@
+         for (iter = file_list_first(installed_files); iter;
+                 iter = file_list_next(installed_files, iter)) {
+             installed_file = (file_info_t *)iter->data;
+-            if (fnmatch(argv[0], installed_file->path, 0) == 0)
++            if (fnmatch(argv[0], installed_file->path, opkg_config->nocase) == 0)
+                 print_pkg(pkg);
+         }
+ 
+diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.c work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.c
+--- work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.c	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.c	2018-03-19 23:02:24.135480676 +0100
+@@ -75,6 +75,7 @@
+     {"download_only", OPKG_OPT_TYPE_BOOL, &_conf.download_only},
+     {"download_first", OPKG_OPT_TYPE_BOOL, &_conf.download_first}, /* Not available on internal solver */
+     {"nodeps", OPKG_OPT_TYPE_BOOL, &_conf.nodeps},
++    {"nocase", OPKG_OPT_TYPE_BOOL, &_conf.nocase },
+     {"no_install_recommends", OPKG_OPT_TYPE_BOOL, &_conf.no_install_recommends},
+     {"offline_root", OPKG_OPT_TYPE_STRING, &_conf.offline_root},
+     {"overlay_root", OPKG_OPT_TYPE_STRING, &_conf.overlay_root},
+diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.h work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.h
+--- work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.h	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.h	2018-03-19 23:03:50.142966116 +0100
+@@ -20,6 +20,7 @@
+ #define OPKG_CONF_H
+ 
+ #include <stdarg.h>
++#include <fnmatch.h> /* FNM_CASEFOLD */
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -105,6 +106,7 @@
+     char *gpg_trust_level;
+     char *signature_type;
+     int nodeps;             /* do not follow dependencies */
++    int nocase;             /* perform case insensitive matching */
+     int no_install_recommends;
+     char *offline_root;
+     char *overlay_root;
+diff -urN work/opkg-0.4.0/opkg-0.4.0/src/opkg.c work/opkg-0.4.0/opkg-0.4.0/src/opkg.c
+--- work/opkg-0.4.0/opkg-0.4.0/src/opkg.c	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.0/opkg-0.4.0/src/opkg.c	2018-03-19 23:07:10.981458627 +0100
+@@ -54,6 +54,7 @@
+     ARGS_OPT_NOACTION,
+     ARGS_OPT_DOWNLOAD_ONLY,
+     ARGS_OPT_NODEPS,
++    ARGS_OPT_NOCASE,
+     ARGS_OPT_AUTOREMOVE,
+     ARGS_OPT_VOLATILE_CACHE,
+     ARGS_OPT_COMBINE,
+@@ -105,6 +106,7 @@
+     {"noaction", 0, 0, ARGS_OPT_NOACTION},
+     {"download-only", 0, 0, ARGS_OPT_DOWNLOAD_ONLY},
+     {"nodeps", 0, 0, ARGS_OPT_NODEPS},
++    {"nocase", 0, 0, ARGS_OPT_NOCASE},
+     {"no-install-recommends", 0, 0, ARGS_OPT_NO_INSTALL_RECOMMENDS},
+     {"offline", 1, 0, 'o'},
+     {"offline-root", 1, 0, 'o'},
+@@ -136,7 +138,7 @@
+     char *solver_version = NULL;
+ 
+     while (1) {
+-        c = getopt_long(argc, argv, "Ad:f:no:p:l:t:vV::", long_options,
++        c = getopt_long(argc, argv, "Ad:f:ino:p:l:t:vV::", long_options,
+                              &option_index);
+         if (c == -1)
+             break;
+@@ -151,6 +153,9 @@
+         case 'f':
+             opkg_config->conf_file = xstrdup(optarg);
+             break;
++        case 'i':
++            opkg_config->nocase = FNM_CASEFOLD;
++            break;
+         case 'o':
+             opkg_config->offline_root = xstrdup(optarg);
+             break;
+@@ -219,6 +224,9 @@
+         case ARGS_OPT_NODEPS:
+             opkg_config->nodeps = 1;
+             break;
++        case ARGS_OPT_NOCASE:
++            opkg_config->nocase = FNM_CASEFOLD;
++            break;
+         case ARGS_OPT_ADD_ARCH:
+         case ARGS_OPT_ADD_DEST:
+             tuple = xstrdup(optarg);
+@@ -275,6 +283,9 @@
+         }
+     }
+ 
++	if(!opkg_config->conf_file && !opkg_config->offline_root)
++		opkg_config->conf_file = xstrdup("/usr/etc/opkg.conf");
++
+     if (parse_err)
+         return parse_err;
+     else
+@@ -367,6 +378,7 @@
+     printf("\t--noaction                      No action -- test only\n");
+     printf("\t--download-only                 No action -- download only\n");
+     printf("\t--nodeps                        Do not follow dependencies\n");
++    printf("\t--nocase                        Perform case insensitive pattern matching\n");
+     printf("\t--no-install-recommends         Do not install any recommended packages\n");
+     printf("\t--force-removal-of-dependent-packages\n");
+     printf("\t                                Remove package and all dependencies\n");
