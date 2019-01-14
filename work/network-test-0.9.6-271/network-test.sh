@@ -53,46 +53,48 @@
 # If the number of samples is >= 10, also computes median, and 10th and 90th percentile readings.
 
 summarize_pings() {
-	sed 's/^.*time=\([^ ]*\) ms/\1 pingtime/' < $1 | grep -v "PING" | awk '
-BEGIN { line[NR] = $0 }
-END {
-  do {
-    haschanged = 0
-    for(i=1; i < NR; i++) {
-      if ( line[i] > line[i+1] ) {
-	t = line[i]
-	line[i] = line[i+1]
-	line[i+1] = t
-	haschanged = 1
-      }
-    }
-  } while ( haschanged == 1 )
-  for(i=1; i <= NR; i++) {
-    print line[i]
-  }
-}' | awk '
-BEGIN {numdrops=0; numrows=0;}
-{
-	if ( $2 == "pingtime" ) {
-		numrows += 1;
-		arr[numrows]=$1; sum+=$1;
-	} else {
-		numdrops += 1;
+	sed 's/^.*time=\([^ ]*\) ms/\1 pingtime/' < $1 | grep -v "PING" | \
+	awk '{
+	  line[NR] = $0
 	}
-}
-END {
-	pc10="-"; pc90="-"; med="-";
-	if (numrows>=10) {
-		ix=int(numrows/10); pc10=arr[ix]; ix=int(numrows*9/10);pc90=arr[ix];
-		if (numrows%2==1) med=arr[(numrows+1)/2]; else med=(arr[numrows/2]);
-	}
-	pktloss = numdrops>0 ? numdrops/(numdrops+numrows) * 100 : 0;
-	printf("  Latency: [in msec, %d pings, %4.2f%% packet loss]\n",numdrops+numrows,pktloss);
-	if (numrows>0) {
-		fmt="%9s: %7.3f\n";
-		printf(fmt fmt fmt fmt fmt fmt, "Min",arr[1],"10pct",pc10,"Median",med,"Avg",sum/numrows,"90pct",pc90,"Max",arr[numrows]);
-	}
-}'
+	END {
+	  do {
+	    haschanged = 0
+	    for(i=1; i < NR; i++) {
+	      if ( line[i] > line[i+1] ) {
+		t = line[i]
+		line[i] = line[i+1]
+		line[i+1] = t
+		haschanged = 1
+	      }
+	    }
+	  } while ( haschanged == 1 )
+	  for(i=1; i <= NR; i++) {
+	    print line[i]
+	  }
+	}' | \
+	awk 'BEGIN {numdrops=0; numrows=0;} \
+		{ \
+			if ( $2 == "pingtime" ) { \
+				numrows += 1; \
+				arr[numrows]=$1; sum+=$1; \
+			} else { \
+			numdrops += 1; \
+			} \
+		} \
+		END { \
+			pc10="-"; pc90="-"; med="-"; \
+			if (numrows>=10) { \
+				ix=int(numrows/10); pc10=arr[ix]; ix=int(numrows*9/10);pc90=arr[ix]; \
+				if (numrows%2==1) med=arr[(numrows+1)/2]; else med=(arr[numrows/2]); \
+			} \
+			pktloss = numdrops>0 ? numdrops/(numdrops+numrows) * 100 : 0; \
+			printf("  Latency: [in msec, %d pings, %4.2f%% packet loss]\n",numdrops+numrows,pktloss); \
+			if (numrows>0) { \
+				fmt="%9s: %7.3f\n"; \
+				printf(fmt fmt fmt fmt fmt fmt, "Min",arr[1],"10pct",pc10,"Median",med,"Avg",sum/numrows,"90pct",pc90,"Max",arr[numrows]); \
+			} \
+		 }'
 }
 
 # Summarize the contents of the load file, speedtest process stat file, cpuinfo
@@ -136,7 +138,7 @@ $1 ~ /cpu[0-9]+/ {
 }
 END {
 	printf(" CPU Load: [in %% busy (avg +/- std dev)")
-	if (sum_freq[cpu0]>0) printf(" @ avg frequency")
+	for (i in sum_freq) if (sum_freq[i]>0) {printf(" @ avg frequency"); break}
 	if (n_load_samp>0) n_load_samp--
 	printf(", %d samples]\n", n_load_samp)
 	for (i=0;i<n_cpus;i++) {
@@ -299,12 +301,15 @@ measure_direction() {
 	echo 1>&2
 
 	# Print TCP Download/Upload speed
-	if [ "${dir}" = "Bidirectional" ]; then
-		summarize_speed Download $DLFILE
-		summarize_speed Upload $ULFILE
-	else
-		summarize_speed $dir $DLFILE
-	fi
+	case ${dir} in
+	Bidirectional)
+	summarize_speed Download $DLFILE
+	summarize_speed Upload $ULFILE
+	;;
+	*)
+	summarize_speed ${dir} $DLFILE
+	;;
+	esac
 
 	# Summarize the ping data
 	summarize_pings $PINGFILE
