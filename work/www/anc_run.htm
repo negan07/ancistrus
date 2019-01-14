@@ -22,14 +22,14 @@ function loadReturnButton() {
 	var cf=document.forms[0];
 
 	if("@pipe_cmd#".indexOf("/usr/sbin/opkg ")>-1) 
-	document.write("<input class='common_bt' type='button' name='refresh' value='Refresh GUI' onClick='window.top.location.reload(true)'>");
-	else document.write("<input class='cancel_bt' type='RESET' name='back' value='Back' onClick='location.href=\"anc.cgi?next_file=@old_file#\"'>");
+	document.write("<input class='common_bt' id='button' type='button' disabled name='refresh' value='Refresh GUI' onClick='window.top.location.reload(true)'>");
+	else document.write("<input class='cancel_bt' id='button' type='RESET' disabled name='back' value='Back' onClick='location.href=\"anc.cgi?next_file=@old_file#\"'>");
 }
 
 //-->
 </script>
 </head>
-<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="document.forms[0].elements[0].focus();">
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="document.forms[0].button.disabled=false;document.forms[0].elements[0].focus();">
 <form name="pipe" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
 <div class="page_title">Output Results</div>
 <div class="fix_button">
