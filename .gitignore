@@ -132,4 +132,6 @@ work/curl-*/
 work/busybox-*/
 work/openssl-*/
 work/dnrd-*/
+work/dnsmasq-*/
+work/e2fsck-*/
 
