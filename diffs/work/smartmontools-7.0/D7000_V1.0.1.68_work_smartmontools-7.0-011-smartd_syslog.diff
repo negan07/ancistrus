@@ -1,6 +1,6 @@
-diff -urN work/smartmontools-6.7/smartmontools-6.7/smartd.cpp work/smartmontools-6.7/smartmontools-6.7/smartd.cpp
---- work/smartmontools-6.7/smartmontools-6.7/smartd.cpp	2017-10-15 19:31:30.000000000 +0200
-+++ work/smartmontools-6.7/smartmontools-6.7/smartd.cpp	2018-04-19 22:45:26.645467722 +0200
+diff -urN work/smartmontools-7.0/smartmontools-7.0/smartd.cpp work/smartmontools-7.0/smartmontools-7.0/smartd.cpp
+--- work/smartmontools-7.0/smartmontools-7.0/smartd.cpp	2017-10-15 19:31:30.000000000 +0200
++++ work/smartmontools-7.0/smartmontools-7.0/smartd.cpp	2018-04-19 22:45:26.645467722 +0200
 @@ -142,6 +142,7 @@
  
  #define EXIT_SIGNAL    254 // abort on signal

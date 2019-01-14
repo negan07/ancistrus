@@ -31,6 +31,13 @@ function varInit() {
 	setDefs();
 }
 
+function gen_opts() {
+	var devl="abcdefgh", txt="";
+
+	for(var i=0;i<devl.length;i++) txt+="<option value=\"/dev/sd"+devl[i]+"\">Usb Device #"+(i+1)+" (/dev/sd"+devl[i]+")</option>";
+	document.write(txt);
+}
+
 function checkTimeout(hdidle) {
 	var cf=document.forms[0];
 	var msg="";
@@ -71,7 +78,7 @@ function checkTimeout(hdidle) {
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#smartdconf')" tabindex="-1"><b>Modify S.M.A.R.T. Daemon Configuration</b></a></td></tr>
 <tr><td colspan="2" align="center">
-<input class="common_bt" type="button" value="Edit Config" onClick="this.form.edit_file.value='/usr/etc/smartd.conf';AncstdAction(this.form,'anc_editfile.htm','smartmontools.htm','edit','');">
+<input class="common_bt" type="button" value="Edit Config" onClick="AncstdAction(this.form,'anc_editfile.htm','smartmontools.htm','edit','');">
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#update-devices-database')" tabindex="-1"><b>Update Device Database List</b></a></td></tr>
@@ -79,18 +86,17 @@ function checkTimeout(hdidle) {
 <input class="common_bt" type="button" value="Update Database" onClick="AncstdAction(this.form,'smartmontools.htm','','','/usr/sbin/rc_app/rc_smontools updatedb');">
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
-<tr><td nowrap colspan="2"><a href="javascript:gotoWiki('smartmontools-package#smartctl')" tabindex="-1"><b>S.M.A.R.T. Control and Monitor Utility (smartctl)</b></a></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#smartctl')" tabindex="-1"><b>S.M.A.R.T. Control and Monitor Utility (smartctl)</b></a></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#select-device')" tabindex="-1"><b>Select the Device to Analyze</b></a>
 &nbsp; &nbsp; &nbsp; &nbsp;
-<select name="dev_sel" size=1>
-	<option value="/dev/sda">Usb Device #1 (/dev/sda)</option>
-	<option value="/dev/sdb">Usb Device #2 (/dev/sdb)</option>
-</select></td></tr>
+<select name="dev_sel" size=1><script>gen_opts();</script></select></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#show-device-infos')" tabindex="-1"><b>Show Device Infos</b></a></td></tr>
 <tr><td colspan="2" align="center"><select name="infocmd" size=1>
 	<option value="/usr/sbin/smartctl -a ">Show S.M.A.R.T. data</option>
+	<option value="/usr/sbin/smartctl -x ">Show Device data</option>
+	<option value="/usr/sbin/smartctl -i ">Show Device ID info</option>
 	<option value="/usr/sbin/smartctl -H ">Show Health status</option>
 	<option value="/usr/sbin/smartctl -g aam ">Show AAM status</option>
 	<option value="/usr/sbin/smartctl -g apm ">Show APM status</option>
@@ -125,7 +131,7 @@ function checkTimeout(hdidle) {
 <input type="hidden" name="todo" value="/usr/sbin/rc smontools start">
 <input type="hidden" name="next_file" value="smartmontools.htm">
 <input type="hidden" name="old_file" value="">
-<input type="hidden" name="edit_file" value="">
+<input type="hidden" name="edit_file" value="/usr/etc/smartd.conf">
 <input type="hidden" name="pipe_cmd" value="">
 <input type="hidden" name="h_smartd_enable" value="@h_smartd_enable#">
 </div>
