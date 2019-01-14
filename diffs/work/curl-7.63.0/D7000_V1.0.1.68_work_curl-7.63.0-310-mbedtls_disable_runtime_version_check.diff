@@ -1,0 +1,12 @@
+diff -urN work/curl-7.63.0/curl-7.63.0/lib/vtls/mbedtls.c work/curl-7.63.0/curl-7.63.0/lib/vtls/mbedtls.c
+--- work/curl-7.63.0/curl-7.63.0/lib/vtls/mbedtls.c	2018-10-23 23:00:46.662292000 +0200
++++ work/curl-7.63.0/curl-7.63.0/lib/vtls/mbedtls.c	2018-10-23 23:01:08.566300143 +0200
+@@ -811,7 +811,7 @@
+ 
+ static size_t Curl_mbedtls_version(char *buffer, size_t size)
+ {
+-  unsigned int version = mbedtls_version_get_number();
++  unsigned int version = MBEDTLS_VERSION_NUMBER;
+   return msnprintf(buffer, size, "mbedTLS/%u.%u.%u", version>>24,
+                    (version>>16)&0xff, (version>>8)&0xff);
+ }
