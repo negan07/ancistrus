@@ -1,0 +1,30 @@
+diff -urN work/dnsmasq-2.80/src/option.c work/dnsmasq-2.80/src/option.c
+--- work/dnsmasq-2.80/src/option.c
++++ work/dnsmasq-2.80/src/option.c
+@@ -3434,7 +3434,7 @@ static int one_opt(int option, char *arg
+       {
+ 	struct dhcp_netid *id = dhcp_tags(&arg);
+ 	
+-	if (!id)
++	if (!arg)
+ 	  {
+ 	    ret_err(gen_err);
+ 	  }
+@@ -3485,7 +3485,7 @@ static int one_opt(int option, char *arg
+       {
+ 	struct dhcp_netid *id = dhcp_tags(&arg);
+ 	
+-	if (!id)
++	if (!arg)
+ 	  {
+ 	    ret_err(gen_err);
+ 	  }
+@@ -3515,7 +3515,7 @@ static int one_opt(int option, char *arg
+ 	 new->opt = 10; /* PXE_MENU_PROMPT */
+ 	 new->netid = dhcp_tags(&arg);
+ 	 
+-	 if (!new->netid)
++	 if (!arg)
+ 	   {
+ 	     dhcp_opt_free(new);
+ 	     ret_err(gen_err);

@@ -1,0 +1,39 @@
+diff -urN work/dnsmasq-2.80/src/rfc1035.c work/dnsmasq-2.80/src/rfc1035.c
+--- work/dnsmasq-2.80/src/rfc1035.c
++++ work/dnsmasq-2.80/src/rfc1035.c
+@@ -1276,7 +1276,7 @@ size_t answer_request(struct dns_header
+   int q, ans, anscount = 0, addncount = 0;
+   int dryrun = 0;
+   struct crec *crecp;
+-  int nxdomain = 0, auth = 1, trunc = 0, sec_data = 1;
++  int nxdomain = 0, notimp = 0, auth = 1, trunc = 0, sec_data = 1;
+   struct mx_srv_record *rec;
+   size_t len;
+ 
+@@ -1355,6 +1355,17 @@ size_t answer_request(struct dns_header
+ 	    }
+ 	}
+ 
++      if (qclass == C_CHAOS)
++	{
++	  /* don't forward *.bind and *.server chaos queries */
++	  if (hostname_issubdomain("bind", name) || hostname_issubdomain("server", name))
++	    {
++	      if (!ans)
++		notimp = 1, auth = 0;
++	      ans = 1;
++	    }
++	}
++
+       if (qclass == C_IN)
+ 	{
+ 	  struct txt_record *t;
+@@ -1903,6 +1914,8 @@ size_t answer_request(struct dns_header
+   
+   if (nxdomain)
+     SET_RCODE(header, NXDOMAIN);
++  else if (notimp)
++    SET_RCODE(header, NOTIMP);
+   else
+     SET_RCODE(header, NOERROR); /* no error */
+   header->ancount = htons(anscount);

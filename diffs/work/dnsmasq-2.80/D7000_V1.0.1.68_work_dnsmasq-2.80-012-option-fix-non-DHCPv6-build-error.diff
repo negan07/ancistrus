@@ -1,0 +1,13 @@
+diff -urN work/dnsmasq-2.80/src/option.c work/dnsmasq-2.80/src/option.c
+--- work/dnsmasq-2.80/src/option.c
++++ work/dnsmasq-2.80/src/option.c
+@@ -1039,7 +1039,9 @@ static void dhcp_context_free(struct dhc
+     {
+       dhcp_netid_free(ctx->filter);
+       free(ctx->netid.net);
++#ifdef HAVE_DHCP6
+       free(ctx->template_interface);
++#endif
+       free(ctx);
+     }
+ }

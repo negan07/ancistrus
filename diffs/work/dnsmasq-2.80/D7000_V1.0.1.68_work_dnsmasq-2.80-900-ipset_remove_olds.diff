@@ -1,0 +1,53 @@
+diff -urN work/dnsmasq-2.80/src/ipset.c work/dnsmasq-2.80/src/ipset.c
+--- work/dnsmasq-2.80/src/ipset.c	2017-05-23 23:09:40.513449762 +0200
++++ work/dnsmasq-2.80/src/ipset.c	2017-05-01 21:08:42.000000000 +0200
+@@ -143,48 +143,6 @@
+   return errno == 0 ? 0 : -1;
+ }
+ 
+-
+-static int old_add_to_ipset(const char *setname, const struct all_addr *ipaddr, int remove)
+-{
+-  socklen_t size;
+-  struct ip_set_req_adt_get {
+-    unsigned op;
+-    unsigned version;
+-    union {
+-      char name[IPSET_MAXNAMELEN];
+-      uint16_t index;
+-    } set;
+-    char typename[IPSET_MAXNAMELEN];
+-  } req_adt_get;
+-  struct ip_set_req_adt {
+-    unsigned op;
+-    uint16_t index;
+-    uint32_t ip;
+-  } req_adt;
+-  
+-  if (strlen(setname) >= sizeof(req_adt_get.set.name)) 
+-    {
+-      errno = ENAMETOOLONG;
+-      return -1;
+-    }
+-  
+-  req_adt_get.op = 0x10;
+-  req_adt_get.version = 3;
+-  strcpy(req_adt_get.set.name, setname);
+-  size = sizeof(req_adt_get);
+-  if (getsockopt(ipset_sock, SOL_IP, 83, &req_adt_get, &size) < 0)
+-    return -1;
+-  req_adt.op = remove ? 0x102 : 0x101;
+-  req_adt.index = req_adt_get.set.index;
+-  req_adt.ip = ntohl(ipaddr->addr.addr4.s_addr);
+-  if (setsockopt(ipset_sock, SOL_IP, 83, &req_adt, sizeof(req_adt)) < 0)
+-    return -1;
+-  
+-  return 0;
+-}
+-
+-
+-
+ int add_to_ipset(const char *setname, const struct all_addr *ipaddr, int flags, int remove)
+ {
+   int ret = 0, af = AF_INET;
+

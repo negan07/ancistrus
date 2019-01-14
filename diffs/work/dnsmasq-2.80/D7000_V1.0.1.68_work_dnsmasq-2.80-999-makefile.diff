@@ -1,0 +1,88 @@
+diff -urN work/dnsmasq-2.80/Makefile work/dnsmasq-2.80/Makefile
+--- work/dnsmasq-2.80/Makefile	2017-05-23 23:09:40.513449762 +0200
++++ work/dnsmasq-2.80/Makefile	2017-05-01 21:08:42.000000000 +0200
+@@ -15,18 +15,19 @@
+ 
+ # NOTE: Building the i18n targets requires GNU-make 
+ 
++BINS			:= src/dnsmasq
++STARTUP			:= rc_dnrd
+ 
+ # Variables you may well want to override.
+ 
+-PREFIX        = /usr/local
+-BINDIR        = $(PREFIX)/sbin
++PREFIX        = /usr
++BINDIR        ?= $(PREFIX)/sbin
+ MANDIR        = $(PREFIX)/share/man
+ LOCALEDIR     = $(PREFIX)/share/locale
+ BUILDDIR      = $(SRC)
+ DESTDIR       = 
+-CFLAGS        = -Wall -W -O2
+ LDFLAGS       = 
+-COPTS         = 
++COPTS         = -Os -s -Wall -W
+ RPM_OPT_FLAGS = 
+ LIBS          = 
+ 
+@@ -87,7 +88,7 @@
+  top="$(top)" \
+  build_cflags="$(version) $(dbus_cflags) $(idn2_cflags) $(idn_cflags) $(ct_cflags) $(lua_cflags) $(nettle_cflags)" \
+  build_libs="$(dbus_libs) $(idn2_libs) $(idn_libs) $(ct_libs) $(lua_libs) $(sunos_libs) $(nettle_libs) $(gmp_libs) $(ubus_libs)" \
+- -f $(top)/Makefile dnsmasq 
++ -f $(top)/Makefile -f $(top)/../Rules.mak dnsmasq 
+ 
+ mostly_clean :
+ 	rm -f $(BUILDDIR)/*.mo $(BUILDDIR)/*.pot 
+@@ -98,7 +99,10 @@
+ 	rm -f core */core
+ 	rm -f *~ contrib/*/*~ */*~
+ 
+-install : all install-common
++install: control
++	$(SSTRIP) $(BINS)
++	for D in $(BINDIR); do install -m 0755 -d $$D; done
++	install -m 0755 $(BINS) $(BINDIR)
+ 
+ install-common :
+ 	$(INSTALL) -d $(DESTDIR)$(BINDIR)
+@@ -161,7 +165,7 @@
+ 	$(CC) $(CFLAGS) $(COPTS) $(i18n) $(build_cflags) $(RPM_OPT_FLAGS) -c $<	
+ 
+ dnsmasq : $(objs)
+-	$(CC) $(LDFLAGS) -o $@ $(objs) $(build_libs) $(LIBS) 
++	$(CC) $(CFLAGS) $(COPTS) $(LDFLAGS) -o $@ $(objs) $(build_libs) $(LIBS) 
+ 
+ dnsmasq.pot : $(objs:.o=.c) $(hdrs)
+ 	$(XGETTEXT) -d dnsmasq --foreign-user --omit-header --keyword=_ -o $@ -i $(objs:.o=.c)
+@@ -170,3 +174,30 @@
+ 	$(MSGMERGE) -o - $(top)/$(PO)/$*.po dnsmasq.pot | $(MSGFMT) -o $*.mo -
+ 
+ .PHONY : all clean mostly_clean install install-common all-i18n install-i18n merge baseline bloatcheck
++
++ifndef BUILD
++control:
++else
++include ../Rules.mak
++PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
++PRERM			:= $(CTRL_DIR)/prerm
++
++control: preinst postinst prerm
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) start >/dev/null 2>&1" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PRERM)
++	@echo "exit 0" >> $(PRERM)
++endif
++
