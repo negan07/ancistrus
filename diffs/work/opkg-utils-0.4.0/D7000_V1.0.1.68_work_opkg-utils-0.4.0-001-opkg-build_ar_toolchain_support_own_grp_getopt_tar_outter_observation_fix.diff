@@ -1,0 +1,72 @@
+diff -urN work/opkg-utils-0.4.0/opkg-build work/opkg-utils-0.4.0/opkg-build
+--- work/opkg-utils-0.4.0/opkg-build	2017-04-04 23:21:46.566819127 +0200
++++ work/opkg-utils-0.4.0/opkg-build	2017-04-05 21:21:17.549018779 +0200
+@@ -193,20 +193,20 @@
+ : <<=cut
+ =head1 SYNOPSIS
+ 
+-B<opkg-build> [B<-c>] [B<-C>] [B<-Z> I<compressor>] [B<-a>] [B<-O>] [B<-o> I<owner>] [B<-g> I<group>] I<pkg_directory> [I<destination_directory>]
++B<opkg-build> [B<-c>] [B<-C>] [B<-Z> I<compressor>] [B<-T> I<toolchain_prefix_path>] [B<-a>] [B<-O>] [B<-o> I<owner>] [B<-g> I<group>] I<pkg_directory> [I<destination_directory>]
+ 
+ =cut
+ 
+-usage="Usage: $0 [-c] [-C] [-Z compressor] [-a] [-O] [-o owner] [-g group] <pkg_directory> [<destination_directory>]"
+-while getopts "a:cCg:ho:vOZ:" opt; do
++usage="Usage: $0 [-c] [-C] [-Z compressor] [-T toolchain_prefix_path] [-a] [-O] [-o owner] [-g group] <pkg_directory> [<destination_directory>]"
++while getopts "a:cCg:ho:vOZ:T:" opt; do
+     case $opt in
+ 	o ) owner=$OPTARG
+-	    ogargs="--owner=$owner"
++	    [ -z "${ogargs}" ] && ogargs="--owner=${owner}" || ogargs="${ogargs} --owner=${owner}"
+ 	    ;;
+ 	O ) opkext=1
+ 	    ;;
+ 	g ) group=$OPTARG
+-	    ogargs="$ogargs --group=$group"
++	    [ -z "${ogargs}" ] && ogargs="--group=${group}" || ogargs="${ogargs} --group=${group}"
+ 	    ;;
+ 	c ) outer=tar
+ 	    ;;
+@@ -214,6 +214,8 @@
+ 	    ;;
+	Z ) compressor=$OPTARG
+	    ;;
++	T ) [ "$outer" = "ar" ] && outer=${OPTARG}ar && [ ! -x $outer ] && echo "*** Error: unable to find ar path: $outer" >&2 && exit 1
++	    ;;
+ 	a ) compressorargs=$OPTARG
+ 	    ;;
+ 	v ) echo $version
+@@ -313,11 +315,17 @@
+ fi
+ 
+ rm -f $pkg_file
+-if [ "$outer" = "ar" ] ; then
+-  ( cd $tmp_dir && ar -crfD $pkg_file ./debian-binary ./control.tar.gz ./data.tar.$cext )
+-else
+-  ( cd $tmp_dir && tar -c $tsortargs --mtime=@$build_date $tarformat ./debian-binary ./control.tar.gz ./data.tar.$cext | gzip $zipargs > $pkg_file )
+-fi
++case $outer in
++tar)
++( cd $tmp_dir && $outer -c $tsortargs --mtime=@$build_date $tarformat ./debian-binary ./control.tar.gz ./data.tar.$cext | gzip $zipargs > $pkg_file )
++;;
++ar)
++( cd $tmp_dir && $outer -crfD $pkg_file ./debian-binary ./control.tar.gz ./data.tar.$cext )
++;;
++*)
++( cd $tmp_dir && $outer -crf $pkg_file ./debian-binary ./control.tar.gz ./data.tar.$cext )
++;;
++esac
+ 
+ rm $tmp_dir/debian-binary $tmp_dir/data.tar.$cext $tmp_dir/control.tar.gz
+ rmdir $tmp_dir
+@@ -354,6 +359,10 @@
+ 
+ Specify which compression type to use when building a package. Allowed values are B<gzip>, B<pigz>, B<bzip2>, B<lz4> and B<xz> (default is B<gzip>).
+ 
++=item B<-T> I<toolchain_prefix_path>
++
++Specify a path toolchain prefix for B<ar>, relative or absolute. Typical values are B</opt/toolchain/usr/bin/arm-linux->, B<mips-linux-uclibc-> and so on (default is B<no toolchain prefix>). Note that this option is always overrided by B<-c> one (generate a binary in older B<tar> format).
++
+ =item B<-a> I<compressor-args>
+ 
+ Specify the arguments used by the compressor. Overrides the default values.

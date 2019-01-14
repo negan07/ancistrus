@@ -1,15 +1,15 @@
-diff -urN work/opkg-utils-0.3.6/Makefile work/opkg-utils-0.3.6/Makefile
---- work/opkg-utils-0.3.6/Makefile	2016-10-07 18:29:53.000000000 +0200
-+++ work/opkg-utils-0.3.6/Makefile	2017-03-30 13:45:35.456313977 +0200
-@@ -1,29 +1,25 @@
+diff -urN work/opkg-utils-0.4.0/Makefile work/opkg-utils-0.4.0/Makefile
+--- work/opkg-utils-0.4.0/Makefile	2016-10-07 18:29:53.000000000 +0200
++++ work/opkg-utils-0.4.0/Makefile	2017-03-30 13:45:35.456313977 +0200
+@@ -1,29 +1,36 @@
 +include ../Rules.mak
 +
  UTILS = opkg-build opkg-unbuild opkg-make-index opkg.py opkg-list-fields \
  	arfile.py opkg-buildpackage opkg-diff opkg-extract-file opkg-show-deps \
 -	opkg-compare-indexes update-alternatives
--
--MANPAGES = opkg-build.1
 +	opkg-compare-indexes update-alternatives opkg-update-index
+ 
+ MANPAGES = opkg-build.1
  
 -DESTDIR =
 -PREFIX ?= /usr/local
@@ -17,19 +17,25 @@ diff -urN work/opkg-utils-0.3.6/Makefile work/opkg-utils-0.3.6/Makefile
 -mandir ?= $(PREFIX)/man
 +DESTDIR = ../../$(SCRIPTS_DIR)/$(OPKG_UTILS)
  
--.SUFFIXES: .1
+ .SUFFIXES: .1
+ 
+ %.1: %
+ 	pod2man -r "" -c "opkg-utils Documentation" $< $@
+ 
+-all: $(UTILS) $(MANPAGES)
 +all:
 +	@if [ ! -f .installed ]; then \
 +	$(MAKE) prepare || exit 1; \
 +	touch .installed; \
 +	fi
- 
--%.1: %
--	pod2man -r "" -c "opkg-utils Documentation" $< $@
++
 +install:
 +	@echo "Nothing to install"
- 
--all: $(UTILS) $(MANPAGES)
++
++man-install:
++	$(MAKE) $(MANPAGES)
++	@for M in $(MANPAGES); do gzip $$M; sudo mv $${M}.gz /usr/share/man/man$${M##*.}/; done
++
 +prepare:
 +	install -m 0755 -d $(DESTDIR)
 +	install -m 0755 $(UTILS) $(DESTDIR)
@@ -47,4 +53,4 @@ diff -urN work/opkg-utils-0.3.6/Makefile work/opkg-utils-0.3.6/Makefile
 +	@echo "Nothing to clean"
  
 -.PHONY: install all
-+.PHONY: clean prepare install all
++.PHONY: clean prepare install man-install all

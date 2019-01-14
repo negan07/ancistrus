@@ -228,7 +228,7 @@ DIRLIST				+= $(LIBARCHIVE)
 TARLIST				+= $(TAR_$(LIBARCHIVE))
 # OPKGUTILS
 OPKG_UTILS_NAME			:= opkg-utils
-VER_$(OPKG_UTILS_NAME)		:= 0.3.6
+VER_$(OPKG_UTILS_NAME)		:= 0.4.0
 OPKG_UTILS			:= $(OPKG_UTILS_NAME)-$(VER_$(OPKG_UTILS_NAME))
 NAME_$(OPKG_UTILS)		:= $(OPKG_UTILS_NAME)$(DBG)
 SUBVER_$(OPKG_UTILS)		:= 
@@ -396,6 +396,23 @@ DEP_$(DNRD)			:=
 DESC_$(DNRD)			:= Caching, forwarding DNS proxy server
 DIRLIST				+= $(DNRD)
 TARLIST				+= $(TAR_$(DNRD))
+# DNSMASQ
+DNSMASQ_NAME			:= dnsmasq
+VER_$(DNSMASQ_NAME)		:= 2.80
+DNSMASQ				:= $(DNSMASQ_NAME)-$(VER_$(DNSMASQ_NAME))
+NAME_$(DNSMASQ)			:= $(DNSMASQ_NAME)$(DBG)
+SUBVER_$(DNSMASQ)		:= 
+VER_$(DNSMASQ)			:= $(VER_$(DNSMASQ_NAME))$(SUBVER_$(DNSMASQ))
+DL_$(DNSMASQ)			:= http://www.thekelleys.org.uk/dnsmasq
+TAR_$(DNSMASQ)			:= $(DNSMASQ).tar.gz
+HOME_$(DNSMASQ)			:= http://thekelleys.org.uk/dnsmasq/doc.html
+LIC_$(DNSMASQ)			:= GPLv2
+SEC_$(DNSMASQ)			:= base
+PRIO_$(DNSMASQ)			:= optional
+DEP_$(DNSMASQ)			:= 
+DESC_$(DNSMASQ)			:= A lightweight DHCP and caching DNS server
+DIRLIST				+= $(DNSMASQ)
+TARLIST				+= $(TAR_$(DNSMASQ))
 # E2FSPROGS
 E2FSPROGS_NAME			:= e2fsprogs
 VER_$(E2FSPROGS_NAME)		:= 1.44.5
