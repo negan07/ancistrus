@@ -1,0 +1,12 @@
+diff -urN work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/e2fsck/e2fsck.h work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/e2fsck/e2fsck.h
+--- work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/e2fsck/e2fsck.h	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/e2fsck/e2fsck.h	2018-10-23 23:01:08.566300143 +0200
+@@ -73,7 +73,7 @@
+  * Exit codes used by fsck-type programs
+  */
+ #define FSCK_OK          0	/* No errors */
+-#define FSCK_NONDESTRUCT 1	/* File system errors corrected */
++#define FSCK_NONDESTRUCT 0	/* File system errors corrected */
+ #define FSCK_REBOOT      2	/* System should be rebooted */
+ #define FSCK_UNCORRECTED 4	/* File system errors left uncorrected */
+ #define FSCK_ERROR       8	/* Operational error */

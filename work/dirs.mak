@@ -396,6 +396,23 @@ DEP_$(DNRD)			:=
 DESC_$(DNRD)			:= Caching, forwarding DNS proxy server
 DIRLIST				+= $(DNRD)
 TARLIST				+= $(TAR_$(DNRD))
+# E2FSPROGS
+E2FSPROGS_NAME			:= e2fsprogs
+VER_$(E2FSPROGS_NAME)		:= 1.44.5
+E2FSPROGS			:= $(E2FSPROGS_NAME)-$(VER_$(E2FSPROGS_NAME))
+NAME_$(E2FSPROGS)		:= $(E2FSPROGS_NAME)$(DBG)
+SUBVER_$(E2FSPROGS)		:= 
+VER_$(E2FSPROGS)		:= $(VER_$(E2FSPROGS_NAME))$(SUBVER_$(E2FSPROGS))
+DL_$(E2FSPROGS)			:= https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v$(VER_$(E2FSPROGS_NAME))
+TAR_$(E2FSPROGS)		:= $(E2FSPROGS).tar.gz
+HOME_$(E2FSPROGS)		:= http://e2fsprogs.sourceforge.net
+LIC_$(E2FSPROGS)		:= GPLv2
+SEC_$(E2FSPROGS)		:= storage
+PRIO_$(E2FSPROGS)		:= optional
+DEP_$(E2FSPROGS)		:= 
+DESC_$(E2FSPROGS)		:= Ext2/3/4 Filesystem Utilities
+DIRLIST				+= $(E2FSPROGS)
+TARLIST				+= $(TAR_$(E2FSPROGS))
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
@@ -423,6 +440,7 @@ THIRDPARTY			+= $(OPKG)
 THIRDPARTY			+= $(SMONTOOLS)
 THIRDPARTY			+= $(OPEN_SSH)
 THIRDPARTY			+= $(MINI_SNMPD)
+THIRDPARTY			+= $(E2FSPROGS)
 # EXCLUDED FROM MONOLITHIC
 ifndef MONOLITHIC
 BUILTIN				+= $(XDSL_042N_D26B)
