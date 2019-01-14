@@ -85,7 +85,7 @@ DIRLIST				+= $(NETPERF)
 TARLIST				+= $(TAR_$(NETPERF))
 # NETWORK TEST
 NETWORKTEST_NAME		:= network-test
-VER_$(NETWORKTEST_NAME)		:= 0.9.6-271
+VER_$(NETWORKTEST_NAME)		:= 0.9.7
 NETWORKTEST			:= $(NETWORKTEST_NAME)-$(VER_$(NETWORKTEST_NAME))
 NAME_$(NETWORKTEST)		:= $(NETWORKTEST_NAME)$(DBG)
 SUBVER_$(NETWORKTEST)		:= 
@@ -112,8 +112,8 @@ LIC_$(XDSL_042N_D26B)		:= Broadcom inc
 SEC_$(XDSL_042N_D26B)		:= dsl
 PRIO_$(XDSL_042N_D26B)		:= required
 DEP_$(XDSL_042N_D26B)		:= 
-DESC_$(XDSL_042N_D26B)		:= Install the original XDSL driverset version A2pvbH$(VER_$(XDSL_042N_D26B_NAME))
-# XDSL DRIVER AGEV DGA4130
+DESC_$(XDSL_042N_D26B)		:= Install the original XDSL driverset
+# XDSL DRIVER AGTEF DGA4130
 XDSL_042U_D26O_NAME		:= xdsl-driver-agtef
 VER_$(XDSL_042U_D26O_NAME)	:= 042u.d26o
 XDSL_042U_D26O			:= $(XDSL_042U_D26O_NAME)-$(VER_$(XDSL_042U_D26O_NAME))
@@ -127,7 +127,7 @@ LIC_$(XDSL_042U_D26O)		:= Broadcom inc
 SEC_$(XDSL_042U_D26O)		:= dsl
 PRIO_$(XDSL_042U_D26O)		:= required
 DEP_$(XDSL_042U_D26O)		:= 
-DESC_$(XDSL_042U_D26O)		:= Install the Agtef DGA4130 XDSL driverset version A2pvbH$(VER_$(XDSL_042U_D26O_NAME))
+DESC_$(XDSL_042U_D26O)		:= Install the Agtef DGA4130 XDSL driverset
 # QOS NG
 QOS_NG_NAME			:= qos-netgear
 VER_$(QOS_NG_NAME)		:= 36_42n
