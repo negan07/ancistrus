@@ -279,19 +279,19 @@ DIRLIST				+= $(HDPARM)
 TARLIST				+= $(TAR_$(HDPARM))
 # SMARTMONTOOLS
 SMONTOOLS_NAME			:= smartmontools
-VER_$(SMONTOOLS_NAME)		:= 6.7
+VER_$(SMONTOOLS_NAME)		:= 7.0
 SMONTOOLS			:= $(SMONTOOLS_NAME)-$(VER_$(SMONTOOLS_NAME))
 NAME_$(SMONTOOLS)		:= $(SMONTOOLS_NAME)$(DBG)
-SUBVER_$(SMONTOOLS)		:= -r4845
+SUBVER_$(SMONTOOLS)		:= 
 VER_$(SMONTOOLS)		:= $(VER_$(SMONTOOLS_NAME))$(SUBVER_$(SMONTOOLS))
-DL_$(SMONTOOLS)			:= https://573-105252244-gh.circle-artifacts.com/0/builds
-TAR_$(SMONTOOLS)		:= $(SMONTOOLS)$(SUBVER_$(SMONTOOLS)).src.tar.gz
+DL_$(SMONTOOLS)			:= https://sourceforge.net/projects/smartmontools/files/smartmontools/$(VER_$(SMONTOOLS_NAME))
+TAR_$(SMONTOOLS)		:= $(SMONTOOLS).tar.gz
 HOME_$(SMONTOOLS)		:= https://www.smartmontools.org/
 LIC_$(SMONTOOLS)		:= GPLv2
 SEC_$(SMONTOOLS)		:= storage
 PRIO_$(SMONTOOLS)		:= optional
 DEP_$(SMONTOOLS)		:= $(NAME_$(CORE_WORK)),$(NAME_$(HDPARM))
-DESC_$(SMONTOOLS)		:= Control and Monitor Utility for SMART Disks
+DESC_$(SMONTOOLS)		:= Control and Monitor Utility for S.M.A.R.T. Disks
 DIRLIST				+= $(SMONTOOLS)
 TARLIST				+= $(TAR_$(SMONTOOLS))
 # LIBLZO
