@@ -1,0 +1,11 @@
+diff -urN work/iproute2-4.20.0/lib/bpf.c work/iproute2-4.20.0/lib/bpf.c
+--- work/iproute2-4.20.0/lib/bpf.c	2016-12-13 00:07:42.000000000 +0100
++++ work/iproute2-4.20.0/lib/bpf.c	2017-02-15 23:42:50.657173101 +0100
+@@ -38,6 +38,7 @@
+ #include <sys/resource.h>
+ 
+ #include <arpa/inet.h>
++#include <linux/fs.h>
+ 
+ #include "utils.h"
+ #include "json_print.h"
