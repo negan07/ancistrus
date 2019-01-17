@@ -1,0 +1,16 @@
+diff -urN work/libiconv-1.15/libiconv-1.15/Makefile.in work/libiconv-1.15/libiconv-1.15/Makefile.in
+--- work/libiconv-1.15/libiconv-1.15/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/libiconv-1.15/libiconv-1.15/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -31,12 +31,6 @@
+ 
+ all : lib/localcharset.h force
+ 	cd lib && $(MAKE) all
+-	cd preload && $(MAKE) all
+-	cd srclib && $(MAKE) all
+-	cd src && $(MAKE) all
+-	cd po && $(MAKE) all
+-	cd man && $(MAKE) all
+-	if test -d tests; then cd tests && $(MAKE) all; fi
+ 
+ lib/localcharset.h :
+ 	builddir="`pwd`"; cd libcharset && $(MAKE) all && $(MAKE) install-lib libdir="$$builddir/lib" includedir="$$builddir/lib"

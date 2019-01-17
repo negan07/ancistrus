@@ -413,12 +413,29 @@ DEP_$(DNSMASQ)			:=
 DESC_$(DNSMASQ)			:= A lightweight DHCP and caching DNS server
 DIRLIST				+= $(DNSMASQ)
 TARLIST				+= $(TAR_$(DNSMASQ))
+# LIBICONV
+LIBICONV_NAME			:= libiconv
+VER_$(LIBICONV_NAME)		:= 1.15
+LIBICONV			:= $(LIBICONV_NAME)-$(VER_$(LIBICONV_NAME))
+NAME_$(LIBICONV)		:= $(LIBICONV_NAME)$(DBG)
+SUBVER_$(LIBICONV)		:= 
+VER_$(LIBICONV)			:= $(VER_$(LIBICONV_NAME))$(SUBVER_$(LIBICONV))
+DL_$(LIBICONV)			:= https://ftp.gnu.org/pub/gnu/libiconv
+TAR_$(LIBICONV)			:= $(LIBICONV).tar.gz
+HOME_$(LIBICONV)		:= https://www.gnu.org/software/libiconv
+LIC_$(LIBICONV)			:= GPLv2
+SEC_$(LIBICONV)			:= base
+PRIO_$(LIBICONV)		:= required
+DEP_$(LIBICONV)			:= 
+DESC_$(LIBICONV)		:= Character set conversion
+DIRLIST				+= $(LIBICONV)
+TARLIST				+= $(TAR_$(LIBICONV))
 # E2FSPROGS
 E2FSPROGS_NAME			:= e2fsprogs
 VER_$(E2FSPROGS_NAME)		:= 1.44.5
 E2FSPROGS			:= $(E2FSPROGS_NAME)-$(VER_$(E2FSPROGS_NAME))
 NAME_$(E2FSPROGS)		:= $(E2FSPROGS_NAME)$(DBG)
-SUBVER_$(E2FSPROGS)		:= 
+SUBVER_$(E2FSPROGS)		:= -001
 VER_$(E2FSPROGS)		:= $(VER_$(E2FSPROGS_NAME))$(SUBVER_$(E2FSPROGS))
 DL_$(E2FSPROGS)			:= https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v$(VER_$(E2FSPROGS_NAME))
 TAR_$(E2FSPROGS)		:= $(E2FSPROGS).tar.gz
@@ -442,6 +459,7 @@ BUILTINLIB			+= $(LZO)
 BUILTINLIB			+= $(ZLIB)
 BUILTINLIB			+= $(OPENSSL)
 BUILTINLIB			+= $(CURL)
+BUILTINLIB			+= $(LIBICONV)
 BUILTIN				+= $(UTELNETD)
 BUILTIN				+= $(IPROUTE2)
 BUILTIN				+= $(HDPARM)
@@ -463,6 +481,7 @@ ifndef MONOLITHIC
 BUILTIN				+= $(XDSL_042N_D26B)
 BUILTIN				+= $(XDSL_042U_D26O)
 THIRDPARTY			+= $(QOS_NG)
+#THIRDPARTY			+= $(DNSMASQ)
 endif
 # SUM OF THE ABOVES
 SUBDIRS				:=

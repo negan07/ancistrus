@@ -1,0 +1,56 @@
+diff -urN work/libiconv-1.15/Makefile work/libiconv-1.15/Makefile
+--- work/libiconv-1.15/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/libiconv-1.15/Makefile	2018-10-23 23:01:08.566300143 +0200
+@@ -0,0 +1,52 @@
++include ../Rules.mak
++
++LIBSNAME		:= libiconv.so
++LIBSMAINVER		:= 2
++LIBSVER			:= 6.0
++LIBSDIRNAME		:= $(LIBICONV)/lib/.libs
++LIBSORIGNAME		:= $(LIBSNAME).$(LIBSMAINVER).$(LIBSVER)
++LIBS			:= $(LIBSNAME).0.0
++
++all: config
++	$(MAKE) -C $(LIBICONV)
++	[ ! -f $(LIBSDIRNAME)/$(LIBSORIGNAME) ] || mv $(LIBSDIRNAME)/$(LIBSORIGNAME) $(LIBSDIRNAME)/$(LIBS)
++	rm -f $(LIBSDIRNAME)/$(LIBSNAME) $(LIBSDIRNAME)/$(LIBSNAME).$(LIBSMAINVER)
++	ln -sf $(LIBS) $(LIBSDIRNAME)/$(LIBSNAME)
++	ln -sf $(LIBS) $(LIBSDIRNAME)/$(LIBSNAME).0
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(LIBICONV) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" --disable-rpath --disable-nls
++
++install: control
++	$(STRIP) $(LIBSDIRNAME)/$(LIBS)
++	for D in $(LIBDIR); do install -m 0755 -d $$D; done
++	install -m 0755 $(LIBSDIRNAME)/$(LIBS) $(LIBDIR)
++
++clean:
++	$(MAKE) -C $(LIBICONV) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(LIBICONV) distclean
++
++ifndef BUILD
++control:
++else
++POSTINST		:= $(CTRL_DIR)/postinst
++
++control: postinst
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "ln -sf $(LIBS) $(LDLIB)/$(LIBSNAME)" >> $(POSTINST)
++	@echo "ln -sf $(LIBS) $(LDLIB)/$(LIBSNAME).0" >> $(POSTINST)
++	@echo "sync" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++endif
++
