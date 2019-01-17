@@ -4,7 +4,7 @@ diff -urN work/e2fsprogs-1.44.5/Makefile work/e2fsprogs-1.44.5/Makefile
 @@ -0,0 +1,57 @@
 +include ../Rules.mak
 +
-+BINS			:= $(E2FSPROGS)/e2fsck/e2fsck
++BINS			:= $(E2FSPROGS)/e2fsck/e2fsck $(E2FSPROGS)/misc/blkid
 +STARTUP			:= rc_e2fsck
 +WEB			:= ../www/e2fsprogs.htm
 +E2FSCK_CONF		:= e2fsck.conf
@@ -20,7 +20,7 @@ diff -urN work/e2fsprogs-1.44.5/Makefile work/e2fsprogs-1.44.5/Makefile
 +	fi
 +
 +configure:
-+	cd $(E2FSPROGS) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" --prefix=$(USRDIR) --disable-elf-shlibs --disable-backtrace --disable-debugfs --disable-imager --disable-resizer --disable-defrag --disable-e2initrd-helper --enable-fsck --disable-uuidd --disable-mmp --disable-tdb --disable-tls --disable-nls --disable-rpath --disable-bmap-stats --disable-fuse2fs
++	cd $(E2FSPROGS) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" --prefix=$(USRDIR) --disable-elf-shlibs --disable-backtrace --disable-debugfs --disable-imager --disable-resizer --disable-defrag --disable-e2initrd-helper --enable-fsck --disable-uuidd --disable-mmp --disable-tdb --disable-tls --disable-nls --disable-rpath --disable-bmap-stats --disable-fuse2fs --with-libiconv-prefix=$(WORK_DIR)/$(LIBICONV)
 +
 +e2fsck.conf:
 +	@echo "[options]" > $(E2FSCK_CONF)

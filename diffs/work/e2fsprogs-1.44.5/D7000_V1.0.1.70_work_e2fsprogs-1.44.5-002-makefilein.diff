@@ -10,7 +10,7 @@ diff -urN work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/Makefile.in work/e2fsprogs-1.44
  
 -PROG_SUBDIRS=e2fsck $(DEBUGFS_DIR) misc $(RESIZE_DIR) tests/progs po
 -SUBDIRS=util $(LIB_SUBDIRS) $(PROG_SUBDIRS) tests
-+PROG_SUBDIRS=e2fsck
++PROG_SUBDIRS=e2fsck misc
 +SUBDIRS=$(LIB_SUBDIRS) $(PROG_SUBDIRS)
  
  SUBS= util/subst.conf lib/config.h $(top_builddir)/lib/dirpaths.h \
@@ -26,3 +26,16 @@ diff -urN work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/Makefile.in work/e2fsprogs-1.44
  
  subs: $(DEP_SUBSTITUTE)
  	@for i in $(SUBS) ; do if test -d `dirname $$i` ; \
+diff -urN work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/misc/Makefile.in work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/misc/Makefile.in
+--- work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/misc/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/misc/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -131,8 +131,7 @@
+ 	$(Q) $(CPPCHECK_CMD) $(CPPFLAGS) $<
+ @PROFILE_CMT@	$(Q) $(CC) $(ALL_CFLAGS) -g -pg -o profiled/$*.o -c $<
+ 
+-all:: profiled $(SPROGS) $(UPROGS) $(USPROGS) $(SMANPAGES) $(UMANPAGES) \
+-	$(FMANPAGES) $(LPROGS) $(E4DEFRAG_PROG) $(E4CRYPT_PROGS) e2fuzz
++all:: blkid
+ 
+ @PROFILE_CMT@all:: tune2fs.profiled blkid.profiled e2image.profiled \
+ 	e2undo.profiled mke2fs.profiled dumpe2fs.profiled fsck.profiled \
