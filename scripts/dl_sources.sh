@@ -22,7 +22,7 @@
 ERR=0
 
 UNZIP() {										#check integrity and unzip: set error exit code
-zip -T $2 && echo "Extracting: $2 ..." && unzip -qq $2
+zip -T "${2}" && echo "Extracting: \"${2}\" ..." && unzip -qq "${2}"
 ERR=$?
 	if [ -f "${1}.tar.gz" ]; then							#.zip archive may include another
 	UNTARGZ "${1}.tar.gz"
@@ -39,25 +39,25 @@ ERR=$?
 }
 
 UNTARGZ() {										#check integrity and untar gz: set error exit code
-tar xzf $1 -O > /dev/null 2>&1 && echo "Extracting: $1 ..." && tar xzf $1
+tar xzf "${1}" -O > /dev/null 2>&1 && echo "Extracting: \"${1}\" ..." && tar xzf "${1}"
 ERR=$?
 }
 
 UNTARBZ2() {										#check integrity and untar bz2: set error exit code
-tar xjf $1 -O > /dev/null 2>&1 && echo "Extracting: $1 ..." && tar xjf $1
+tar xjf "${1}" -O > /dev/null 2>&1 && echo "Extracting: \"${1}\" ..." && tar xjf "${1}"
 ERR=$?
 }
 
 	case $# in									#Makefile param check compatibility
 	1|2)										#no download needed
-	DSTDIR="$1"
+	DSTDIR="${1}"
 	URL="void"
 	SRCFILE="void"
 	;;
 	3)										#standard usage
-	DSTDIR="$1"
-	URL="$2"
-	SRCFILE="$3"
+	DSTDIR="${1}"
+	URL="${2}"
+	SRCFILE="${3}"
 	;;
 	*)										#too params: show usage
 	DSTDIR=""
@@ -67,35 +67,35 @@ ERR=$?
 	esac
 	if [ ! -d $DSTDIR ]; then
 	echo "$DSTDIR not present"
-		if [ ! -f $SRCFILE ]; then						#avoid dir overwritings
-		echo "$SRCFILE not present"
+		if [ ! -f "${SRCFILE}" ]; then						#avoid dir overwritings
+		echo "\"${SRCFILE}\" not present"
 			case $URL in
 			http*|ftp*|sftp*)						#download from http/ftp
-			echo "Downloading: ${URL}/${SRCFILE} ..."
-			wget ${URL}/${SRCFILE}						#set error flag on download error
+			echo "Downloading: ${URL}/\"${SRCFILE}\" ..."
+			wget ${URL}/"${SRCFILE}"					#set error flag on download error
 			ERR=$?
 			;;
 			void)								#no need to copy or dload anything (own sources)
 			;;
 			*)								#local copy (typically from orig sources)
-			echo "Copying local: ${URL}/${SRCFILE} ..."
-			cp -rf ${URL}/${SRCFILE} ./${DSTDIR}
+			echo "Copying local: ${URL}/\"${SRCFILE}\" ..."
+			cp -rf "${URL}/${SRCFILE}" ./${DSTDIR}
 			ERR=$?								#set error flag on copy error
 			;;
 			esac
 		fi
-		case $SRCFILE in							#extract archive
+		case "${SRCFILE}" in							#extract archive
 		*.zip)
-		UNZIP $DSTDIR $SRCFILE
+		UNZIP $DSTDIR "${SRCFILE}"
 		;;
 		*.tar.gz|*.tgz)
-		UNTARGZ $SRCFILE
+		UNTARGZ "${SRCFILE}"
 		;;
 		*.tar.bz2)
-		UNTARBZ2 $SRCFILE
+		UNTARBZ2 "${SRCFILE}"
 		;;
 		*.sh)									#move script only
-		mv -f $SRCFILE $DSTDIR
+		mv -f "${SRCFILE}" $DSTDIR
 		ERR=$?
 		;;
 		*)
