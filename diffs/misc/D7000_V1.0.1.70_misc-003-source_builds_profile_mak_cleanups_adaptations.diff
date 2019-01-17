@@ -1,0 +1,12 @@
+diff -urN D7000_V1.0.1.70_WW_src/Source/Builds/D7000.mak D7000_V1.0.1.70_WW_src/Source/Builds/D7000.mak
+--- D7000_V1.0.1.70_WW_src/Source/Builds/D7000.mak	2016-10-20 12:58:51.000000000 +0200
++++ D7000_V1.0.1.70_WW_src/Source/Builds/D7000.mak	2017-01-12 13:00:50.826027755 +0100
+@@ -28,7 +28,7 @@
+ #------------------------------------------------#
+ 
+ MULTI_PVC=0
+-VPN=1
++VPN=0
+ ADSL2=0
+ BRIDGE=0
+ SNMP=0

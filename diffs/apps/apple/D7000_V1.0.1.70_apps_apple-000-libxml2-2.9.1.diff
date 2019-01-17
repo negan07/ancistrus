@@ -1,0 +1,12 @@
+diff -urN D7000_V1.0.1.70_WW_src/Source/apps/apple/libxml2-2.9.1/build.sh D7000_V1.0.1.70_WW_src/Source/apps/apple/libxml2-2.9.1/build.sh
+--- D7000_V1.0.1.70_WW_src/Source/apps/apple/libxml2-2.9.1/build.sh	2016-10-11 17:54:20.000000000 +0200
++++ D7000_V1.0.1.70_WW_src/Source/apps/apple/libxml2-2.9.1/build.sh	2017-05-04 20:53:03.771753087 +0200
+@@ -2,7 +2,7 @@
+ build_dir=build_sc
+ cd $build_dir
+ 
+-CPPFLAGS="-I`pwd`/../../../mediaserver/library/zlib-1.2.3/include/ " CFLAGS="-I`pwd`/../../../mediaserver/library/zlib-1.2.3/include/ -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS=" -L`pwd`/../../../mediaserver/library/zlib-1.2.3/ -lz -L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --enable-static --prefix= \
++CPPFLAGS="-I`pwd`/../../../mediaserver/library/zlib-1.2.3/include/ " CFLAGS="${1} -I`pwd`/../../../mediaserver/library/zlib-1.2.3/include/ -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS=" -L`pwd`/../../../mediaserver/library/zlib-1.2.3/ -lz -L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --enable-static --prefix= \
+   --with-c14n=yes \
+   --with-catalog=no \
+   --with-debug=yes \

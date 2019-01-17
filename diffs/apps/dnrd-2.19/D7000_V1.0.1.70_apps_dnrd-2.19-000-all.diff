@@ -1,0 +1,45 @@
+diff -urN D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/doc/Makefile D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/doc/Makefile
+--- D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/doc/Makefile	2016-10-11 17:57:01.000000000 +0200
++++ D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/doc/Makefile	2017-05-01 21:49:32.129800577 +0200
+@@ -73,7 +73,7 @@
+ AWK = gawk
+ CC = ../../tools/mips-linux-uclibc/bin/mips-uclibc-gcc
+ CCDEPMODE = depmode=none
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPP = ../../tools/mips-linux-uclibc/bin/mips-uclibc-gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+diff -urN D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/Makefile D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/Makefile
+--- D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/Makefile	2016-10-11 17:57:01.000000000 +0200
++++ D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/Makefile	2017-05-01 21:49:32.133800454 +0200
+@@ -92,7 +92,7 @@
+ AWK = gawk
+ CC = ../../tools/mips-linux-uclibc/bin/mips-uclibc-gcc
+ CCDEPMODE = depmode=none
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPP = ../../tools/mips-linux-uclibc/bin/mips-uclibc-gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+diff -urN D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/src/Makefile D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/src/Makefile
+--- D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/src/Makefile	2016-10-11 17:57:01.000000000 +0200
++++ D7000_V1.0.1.70_WW_src/Source/apps/dnrd-2.19/src/Makefile	2017-05-02 14:07:01.020750617 +0200
+@@ -89,7 +89,7 @@
+ 
+ 
+ CCDEPMODE = depmode=none
+-CFLAGS = -g -O2
++CFLAGS += -Os
+ CFLAGS += -DHACK_DNS
+ CFLAGS += -DENABLE_TCP
+ ifeq ($(OPENDNS),1)
+@@ -381,7 +381,7 @@
+ 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
+ 	done
+ install:
+-	$(STRIP) dnrd
++	$(SSTRIP) dnrd
+ 	cp -a dnrd ../../../target/usr/sbin
+ install-exec: install-exec-am
+ install-data: install-data-am

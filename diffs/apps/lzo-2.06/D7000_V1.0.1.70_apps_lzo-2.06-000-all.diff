@@ -1,0 +1,35 @@
+diff -urN D7000_V1.0.1.70_WW_src/Source/apps/lzo-2.06/B/generic/build.sh D7000_V1.0.1.70_WW_src/Source/apps/lzo-2.06/B/generic/build.sh
+--- D7000_V1.0.1.70_WW_src/Source/apps/lzo-2.06/B/generic/build.sh	2016-10-11 17:56:19.000000000 +0200
++++ D7000_V1.0.1.70_WW_src/Source/apps/lzo-2.06/B/generic/build.sh	2017-04-29 13:39:28.111071977 +0200
+@@ -10,7 +10,7 @@
+ 
+ test "X${AR}" = X && AR="ar"
+ test "X${CC}" = X && CC="cc"
+-test "X${CFLAGS+set}" = Xset || CFLAGS="-O"
++test "X${CFLAGS+set}" = Xset || CFLAGS="$(CFLAGS) -Os -s"
+ # CPPFLAGS, LDFLAGS, LIBS
+ # LZO_EXTRA_CPPFLAGS, LZO_EXTRA_CFLAGS, LZO_EXTRA_LDFLAGS
+ # LZO_EXTRA_SOURCES, LZO_EXTRA_OBJECTS, LZO_EXTRA_LIBS
+diff -urN D7000_V1.0.1.70_WW_src/Source/apps/lzo-2.06/Makefile D7000_V1.0.1.70_WW_src/Source/apps/lzo-2.06/Makefile
+--- D7000_V1.0.1.70_WW_src/Source/apps/lzo-2.06/Makefile	2016-10-11 17:56:20.000000000 +0200
++++ D7000_V1.0.1.70_WW_src/Source/apps/lzo-2.06/Makefile	2017-05-02 14:17:07.253236787 +0200
+@@ -258,9 +258,9 @@
+ CC = $(CROSS)gcc
+ CCAS = $(CROSS)gcc
+ CCASDEPMODE = depmode=gcc3
+-CCASFLAGS = -g -O2
++CCASFLAGS = -Os
+ CCDEPMODE = depmode=gcc3
+-CFLAGS = -g -O2
++CFLAGS += -Os
+ CPP = $(CROSS) -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+@@ -1354,6 +1354,7 @@
+ check: check-am
+ all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA) $(HEADERS) \
+ 		config.h
++	$(STRIP) $(STRIPFLAGS) src/.libs/liblzo2.a
+ 	cp src/.libs/liblzo2.a .
+ installdirs:
+ 	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(pkgincludedir)"; do \
