@@ -311,6 +311,23 @@ DEP_$(LZO)			:=
 DESC_$(LZO)			:= A portable lossless data compression library
 DIRLIST				+= $(LZO)
 TARLIST				+= $(TAR_$(LZO))
+# EASYRSA
+EASYRSA_NAME			:= easy-rsa
+VER_$(EASYRSA_NAME)		:= 3.0.5
+EASYRSA				:= $(EASYRSA_NAME)-$(VER_$(EASYRSA_NAME))
+NAME_$(EASYRSA)			:= $(EASYRSA_NAME)$(DBG)
+SUBVER_$(EASYRSA)		:= 
+VER_$(EASYRSA)			:= $(VER_$(EASYRSA_NAME))$(SUBVER_$(EASYRSA))
+DL_$(EASYRSA)			:= https://github.com/OpenVPN/easy-rsa/archive
+TAR_$(EASYRSA)			:= v$(VER_$(EASYRSA_NAME)).tar.gz
+HOME_$(EASYRSA)			:= https://github.com/OpenVPN/easy-rsa
+LIC_$(EASYRSA)			:= GPLv2
+SEC_$(EASYRSA)			:= base
+PRIO_$(EASYRSA)			:= required
+DEP_$(EASYRSA)			:= 
+DESC_$(EASYRSA)			:= Simple shell based CA utility
+DIRLIST				+= $(EASYRSA)
+TARLIST				+= $(TAR_$(EASYRSA))
 # OPENVPN
 OPEN_VPN_NAME			:= openvpn
 VER_$(OPEN_VPN_NAME)		:= 2.4.6
@@ -463,6 +480,7 @@ BUILTINLIB			+= $(LIBICONV)
 BUILTIN				+= $(UTELNETD)
 BUILTIN				+= $(IPROUTE2)
 BUILTIN				+= $(HDPARM)
+BUILTIN				+= $(EASYRSA)
 BUILTIN				+= $(OPEN_VPN)
 BUILTIN				+= $(BUSYBOX)
 BUILTIN				+= $(DNRD)
@@ -490,5 +508,5 @@ SUBDIRS				+= $(THIRDPARTYLIB)
 SUBDIRS				+= $(BUILTIN)
 SUBDIRS				+= $(THIRDPARTY)
 # SKIP FROM IPK CREATION
-PKG_RM_LIST			:= $(NVRAM) $(LIBARCHIVE) $(OPKG_UTILS) $(LZO) $(NETPERF)
+PKG_RM_LIST			:= $(NVRAM) $(LIBARCHIVE) $(OPKG_UTILS) $(LZO) $(NETPERF) $(EASYRSA)
 

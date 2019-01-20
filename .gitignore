@@ -133,6 +133,7 @@ work/busybox-*/
 work/openssl-*/
 work/dnrd-*/
 work/dnsmasq-*/
-work/e2fsck-*/
+work/e2fsprogs-*/
 work/libiconv-*/
+work/easy-rsa-*/
 

@@ -1,0 +1,24 @@
+diff -urN work/easy-rsa-3.0.5/easyrsa3/generate.sh work/easy-rsa-3.0.5/easyrsa3/generate.sh
+--- work/easy-rsa-3.0.5/easyrsa3/generate.sh	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.5/easyrsa3/generate.sh	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,20 @@
++#!/bin/sh
++
++KEYDIR=pki
++KEYDIROUTPUT=keys
++
++rm -rf ${KEYDIR} safessl-easyrsa.cnf
++./easyrsa init-pki || exit 1
++touch ${KEYDIR}/index.txt.attr && chmod 600 ${KEYDIR}/index.txt.attr
++./easyrsa build-ca nopass || exit 2
++./easyrsa build-server-full server nopass || exit 3
++./easyrsa build-client-full client nopass || exit 4
++./easyrsa gen-dh || exit 5
++mkdir -p -m 0755 ${KEYDIROUTPUT}
++mv -f ${KEYDIR}/ca.crt ${KEYDIROUTPUT}/ >/dev/null 2>&1
++mv -f ${KEYDIR}/issued/server.crt ${KEYDIR}/issued/client.crt ${KEYDIROUTPUT}/ >/dev/null 2>&1
++mv -f ${KEYDIR}/private/ca.key ${KEYDIR}/private/server.key ${KEYDIR}/private/client.key ${KEYDIROUTPUT}/ >/dev/null 2>&1
++mv -f ${KEYDIR}/reqs/server.req ${KEYDIROUTPUT}/server.csr >/dev/null 2>&1
++mv -f ${KEYDIR}/reqs/client.req ${KEYDIROUTPUT}/client.csr >/dev/null 2>&1
++mv -f ${KEYDIR}/dh.pem ${KEYDIROUTPUT}/dh2048.pem >/dev/null 2>&1
++chmod 600 ${KEYDIROUTPUT}/*

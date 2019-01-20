@@ -1,0 +1,30 @@
+diff -urN work/easy-rsa-3.0.5/Makefile work/easy-rsa-3.0.5/Makefile
+--- work/easy-rsa-3.0.5/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.5/Makefile	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,26 @@
++include ../Rules.mak
++
++EASYRSADIR		:= easyrsa3
++GENKEYDIR		:= $(EASYRSADIR)/keys
++PKIKEYDIR		:= $(EASYRSADIR)/pki
++SSLCNF			:= $(EASYRSADIR)/safessl-*.cnf
++KEYDESTDIR 		:= $(WORK_DIR)/$(OPEN_VPN)/$(OPEN_VPN)/keys
++
++all:
++	@echo "Nothing to make: run 'make genkeys' to generate keys & certs"
++
++genkeys:
++	cd $(EASYRSADIR) && chmod 755 generate.sh && ./generate.sh && cd ..
++
++install: install-keys
++
++install-keys:
++	[ ! -d $(GENKEYDIR) ] || install -m 0755 -d $(KEYDESTDIR)
++	[ ! -d $(GENKEYDIR) ] || install -m 0600 $(GENKEYDIR)/* $(KEYDESTDIR)
++
++keysclean:
++	rm -rf $(GENKEYDIR) $(PKIKEYDIR) $(SSLCNF)
++
++clean:
++	@echo "Nothing to clean: run 'make keysclean' to cleanup keys & certs"
++
