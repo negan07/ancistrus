@@ -1,10 +1,11 @@
 diff -urN work/openvpn-2.4.6/Makefile work/openvpn-2.4.6/Makefile
 --- work/openvpn-2.4.6/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/openvpn-2.4.6/Makefile	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,67 @@
+@@ -0,0 +1,66 @@
 +include ../Rules.mak
 +
-+#USROVPNDIR 		:= $(BINDIR)/../openvpn
++USROVPNDIR 		:= $(BINDIR)/../openvpn
++BINS			:= $(OPEN_VPN)/src/openvpn/openvpn
 +STARTUP			:= rc_openvpn
 +LEGSTARTUP		:= rc_vpn
 +TUNKO			:= tun.ko
@@ -22,15 +23,13 @@ diff -urN work/openvpn-2.4.6/Makefile work/openvpn-2.4.6/Makefile
 +	cd $(OPEN_VPN) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -lssl -lcrypto" LZO_LIBS="-L$(WORK_DIR)/$(LZO)/$(LZO)/src/.libs -llzo2" LDFLAGS="-L$(WORK_DIR)/$(NVRAM)" LIBS="-lscnvram" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include -I$(WORK_DIR)/$(LZO)/$(LZO)/include -I$(WORK_DIR)/$(NVRAM) -I$(GIT_ROOT_DIR)/$(SRC_ROOT_DIR)" --disable-lz4 --enable-lzo --enable-crypto --enable-server --disable-plugins --enable-management --enable-fragment --enable-multihome --enable-port-share --enable-pf --enable-debug
 +
 +install: control
-+	$(SSTRIP) $(OPEN_VPN)/src/openvpn/openvpn
-+	install -m 0755 -d $(BINDIR)
-+	install -m 0755 -d $(MODDIR)
-+	#install -m 0755 -d $(USROVPNDIR)
-+	install -m 0755 $(OPEN_VPN)/src/openvpn/openvpn $(BINDIR)
++	$(SSTRIP) $(BINS)
++	for D in $(BINDIR) $(MODDIR) $(USROVPNDIR); do install -m 0755 -d $$D; done
++	install -m 0755 $(BINS) $(BINDIR)
 +	install -m 0755 $(KERNEL_DIR)/drivers/net/$(TUNKO) $(MODDIR)
 +	$(STRIP) $(STRIPKOFLAGS) $(MODDIR)/$(TUNKO);
-+	#install -m 0644 $(OPEN_VPN)/keys/* $(USROVPNDIR)
-+	@if [ -f $(STARTUP) ] && [ -x $(STARTUP) ]; then \
++	[ ! -d $(OPEN_VPN)/keys ] || install -m 0600 $(OPEN_VPN)/keys/* $(USROVPNDIR)
++	@if [ -x $(STARTUP) ]; then \
 +	install -m 0755 -d $(APPDIR); \
 +	install -m 0755 $(STARTUP) $(APPDIR); \
 +	rm -f $(APPDIR)/$(LEGSTARTUP); \
