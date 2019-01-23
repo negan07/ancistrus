@@ -18,6 +18,15 @@
 <script language="javascript" type="text/javascript">
 <!--
 
+function varInit() {
+	var cf=document.forms[0];
+	AncdataToVisible(cf);
+
+	cf.digest.value="sha256";
+	cf.keylen.value="2048";
+	cf.days.value="3650";
+}
+
 function runEdit() {
 	var cf=document.forms[0];
 	var msg="";
@@ -32,6 +41,15 @@ function runEdit() {
 	cf.edit_file.value=cf.absfilename.value;
 	if(!confirm("Warning! Editing a binary file or doing an incorrect file modification can bring to system failure: proceed ?")) return false;
 	AncstdAction(cf,'anc_editfile.htm','anc_utils.htm','edit','');
+	return true;
+}
+
+function check_pem() {
+	var cf=document.forms[0];
+
+	if(!confirm("Installing new web GUI encryption key & cert: proceed ?")) return false;
+	cf.pipe_cmd.value="/usr/sbin/scripts/pem_gen.sh "+cf.digest.value+" "+cf.keylen.value+" "+cf.days.value;
+	AncstdAction(cf,'anc_run.htm','anc_utils.htm','pipe','');
 	return true;
 }
 
@@ -54,12 +72,12 @@ function check_restore() {
 
 //-->
 </script></head>
-<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="document.forms[0].elements[0].focus();">
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
 <div><a class="page_title" href="javascript:gotoWiki('Utilities/');">Utilities</a></div>
 <div class="fix_button"><table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
 <input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)"></td></tr></table></div>
 <div id="main" class="main_top_button">
-<form name="utils" method="POST" action="anc.cgi" onSubmit="return false">
+<form name="utils" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
 <table border="0" cellpadding="0" cellspacing="3" width="100%"><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><span><a href="javascript:gotoWiki('Utilities#router-infos');"><b>Router Infos</b></a></span></td></tr>
 <tr><td colspan="2" align="center"><select name="infocmd" size=1>
@@ -67,8 +85,11 @@ function check_restore() {
 	<option value="/bin/top -n 1 -b">CPU usage task list (top)</option>
 	<option value="/bin/cat /proc/meminfo">RAM Memory Usage (cat /proc/meminfo)</option>
 	<option value="/bin/dmesg">Kernel Log (dmesg)</option>
+	<option value="/bin/df">Filesystem Usage Stats (df)</option>
 	<option value="/bin/cat /proc/net/nf_conntrack">Conntracks (cat /proc/net/nf_conntrack)</option>
 	<option value="/bin/cat /proc/cnapt_serv">Napt Rules (cat /proc/cnapt_serv)</option>
+	<option value="/bin/iptables -t nat -nL -v">Firewall Nat Rules (iptables -t nat -nL -v)</option>
+	<option value="/bin/iptables -nL -v">Firewall Rules (iptables -nL -v)</option>
 	<option value="/bin/nvram show">Settings (nvram show)</option>
 </select></td></tr>
 <tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Show" onclick="this.form.pipe_cmd.value=infocmd.value;AncstdAction(this.form,'anc_run.htm','anc_utils.htm','pipe','');"></td></tr>
@@ -76,6 +97,32 @@ function check_restore() {
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Utilities#file-editing')" tabindex="-1"><b>Edit a File</b></a></td></tr>
 <tr><td colspan="2" align="center"><input type="text" name="absfilename" size="40" maxlength="128" value=""></td></tr>
 <tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Edit File" onClick="runEdit()"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Utilities#regenerate-web-gui-encryption-key-and-cert')" tabindex="-1"><b>Regenerate Web GUI Encryption Key and Cert</b></a></td></tr>
+<tr><td nowrap><span><a href="javascript:gotoWiki('Utilities#digest-encryption-algorithm');"><b>Digest encryption algorithm:</b></a></span></td>
+<td nowrap align="right"><select name="digest" size=1>
+	<option value="sha1">sha1</option>
+	<option value="sha256">sha256</option>
+	<option value="sha512">sha512</option>
+</td></tr>
+<tr><td nowrap><span><a href="javascript:gotoWiki('Utilities#key-length');"><b>Key length:</b></a></span></td>
+<td nowrap align="right"><select name="keylen" size=1>
+	<option value="1024">1024 bits</option>
+	<option value="2048">2048 bits</option>
+	<option value="3072">3072 bits</option>
+	<option value="4096">4096 bits</option>
+</td></tr>
+<tr><td nowrap><span><a href="javascript:gotoWiki('Utilities#certificate-duration');"><b>Certificate duration:</b></a></span></td>
+<td nowrap align="right"><select name="days" size=1>
+	<option value="90">3 Months</option>
+	<option value="180">6 Months</option>
+	<option value="365">1 Year</option>
+	<option value="1825">5 Years</option>
+	<option value="3650">10 Years</option>
+	<option value="7300">20 Years</option>
+	<option value="36500">100 Years</option>
+</td></tr>
+<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Regenerate" onClick="return check_pem();"></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Utilities#download-nvram-settings')" tabindex="-1"><b>Download Nvram Settings</b></a></td></tr>
 <tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Download" onclick="window.location.href='anc.cgi?gen_file=nvram&next_file=anc_utils.htm&job=upload';"></td></tr>
