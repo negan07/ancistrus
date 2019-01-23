@@ -192,8 +192,8 @@ function readInfo() {
 			else if(line[i].indexOf("Package: ")>-1) numpack++;
 		}
 	}
-	var varname=["DSL Driver version number:", "Chipset Vendor ID:", "Chipset Vendor version number:", "Vdsl2 Profile:", "Vectoring state:", "Max Downstream Data Rate:", "Max Upstream Data Rate:", "Current Downstream Data Rate:", "Current Upstream Data Rate:", "Line Attenuation (DS / US):", "SNR Margin (DS / US):", "Current Aggregate Tx Power (DS / US):", "Web-GUI core version number:", "Opkg package manager version number:", "Number of packages installed:", "Rootfs partition space used:", "Runlevel boot partition space used:", "Opkg package manager partition space used:"];
-	var varval=[dslver, vendorid, vendorver, profile, vectoring, carrymax[0], carrymax[1], carryb0[0], carryb0[1], attn, snr, pwr, ancver, opkgver, numpack, "@part_/#", "@part_/usr/etc/init.d#", "@part_/usr/lib/opkg#"];
+	var varname=["DSL Driver version number:", "Chipset Vendor ID:", "Chipset Vendor version number:", "Vdsl2 Profile:", "Vectoring state:", "Max Downstream Data Rate:", "Max Upstream Data Rate:", "Current Downstream Data Rate:", "Current Upstream Data Rate:", "Line Attenuation (DS / US):", "SNR Margin (DS / US):", "Current Aggregate Tx Power (DS / US):", "Web-GUI core version number:", "Package manager version number:", "Number of packages installed:", "Rootfs partition space used:", "Runlevel boot partition space used:", "Package manager partition space used:", "Nvram settings partition space used:"];
+	var varval=[dslver, vendorid, vendorver, profile, vectoring, carrymax[0], carrymax[1], carryb0[0], carryb0[1], attn, snr, pwr, ancver, opkgver, numpack, "@part_/#", "@part_/usr/etc/init.d#", "@part_/usr/lib/opkg#", "@part_/config/nvram#"];
 	var uom=[" dB", " dB", " dBm"];
 	txt+="<tr></tr>";
 	for(i=0;i<3;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
