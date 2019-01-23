@@ -243,7 +243,7 @@ qdisc_tree_build() {
     # Derate bandwidth for PTM if needed
     rate="$(get_lla_adjusted_rate ${rate})"
 
-    $TC qdisc del dev $iface root 2> /dev/null
+    SILENT=1 $TC qdisc del dev $iface root
 
     if ! qdisc_has_cap $SHAPER classful; then
         # Classless shaper, different leaf qdisc, without classification

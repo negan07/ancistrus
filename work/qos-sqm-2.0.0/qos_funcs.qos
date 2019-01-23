@@ -167,7 +167,7 @@ tc_ingress_redirect() {
     local iface=$1
     local dev=$2
 
-    $TC qdisc del dev $iface handle ffff: ingress 2> /dev/null
+    SILENT=1 $TC qdisc del dev $iface handle ffff: ingress
     $TC qdisc add dev $iface handle ffff: ingress
 
     # redirect all IP packets arriving in $iface to $dev

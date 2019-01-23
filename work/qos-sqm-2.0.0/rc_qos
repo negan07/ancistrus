@@ -86,6 +86,9 @@ done
 
 # These are the modules that do_modules() will attempt to load
 [ -z "$ALL_MODULES" ] && ALL_MODULES="act_ipt sch_$QDISC cls_flow sch_$SHAPER"
+
+# Can be overridden by callers that want to silence error output for a particular command
+[ -z "$SILENT" ] && SILENT=0
 }
 
 logging_setup() {
