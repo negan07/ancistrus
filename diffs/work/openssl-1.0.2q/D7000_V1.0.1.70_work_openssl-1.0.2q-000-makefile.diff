@@ -1,7 +1,7 @@
 diff -urN work/openssl-1.0.2q/Makefile work/openssl-1.0.2q/Makefile
 --- work/openssl-1.0.2q/Makefile	2017-04-06 18:00:46.662292000 +0200
 +++ work/openssl-1.0.2q/Makefile	2017-04-06 18:01:08.566300143 +0200
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,66 @@
 +include ../Rules.mak
 +
 +LIBCRYPTONAME		:= libcrypto.so
@@ -12,6 +12,7 @@ diff -urN work/openssl-1.0.2q/Makefile work/openssl-1.0.2q/Makefile
 +LIBCRYPTO		:= $(LIBCRYPTONAME).$(SHLIB_EXT)
 +LIBSSL			:= $(LIBSSLNAME).$(SHLIB_EXT)
 +BINS			:= openssl
++SSLCNF			:= $(BINS).cnf
 +
 +all: config
 +	$(MAKE) -C $(OPENSSL)
@@ -24,13 +25,13 @@ diff -urN work/openssl-1.0.2q/Makefile work/openssl-1.0.2q/Makefile
 +	fi
 +
 +configure:
-+	cd $(OPENSSL) && CROSS_COMPILE="" && ./Configure linux-elf --with-zlib-include=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-zlib-lib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) enable-shared enable-threads no-static-engine no-asm no-gmp no-jpake no-krb5 no-md2 no-rc5 no-rfc3779 no-ssl3 no-store zlib-dynamic
++	cd $(OPENSSL) && CROSS_COMPILE="" && ./Configure linux-elf --openssldir=$(USRETC) --with-zlib-include=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-zlib-lib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) zlib-dynamic enable-shared enable-threads no-static-engine no-asm no-gmp no-jpake no-krb5 no-md2 no-rc5 no-rfc3779 no-ssl3 no-store
 +
 +install: control
 +	$(STRIP) $(OPENSSL)/$(LIBCRYPTO) $(OPENSSL)/$(LIBSSL)
 +	$(SSTRIP) $(OPENSSL)/apps/$(BINS)
 +	install -m 0755 -d $(TMPINSTDIR)
-+	install -m 0755 $(OPENSSL)/$(LIBCRYPTO) $(OPENSSL)/$(LIBSSL) $(OPENSSL)/apps/$(BINS) $(TMPINSTDIR)
++	install -m 0755 $(OPENSSL)/$(LIBCRYPTO) $(OPENSSL)/$(LIBSSL) $(OPENSSL)/apps/$(BINS) $(OPENSSL)/apps/$(SSLCNF) $(TMPINSTDIR)
 +
 +clean:
 +	$(MAKE) -C $(OPENSSL) clean
@@ -60,6 +61,7 @@ diff -urN work/openssl-1.0.2q/Makefile work/openssl-1.0.2q/Makefile
 +	@echo "echo \"Updating $(BINS) lib & bins ...\"" >> $(POSTINST)
 +	@echo "mv -f $(TMPDIR)/$(LIBCRYPTO) $(TMPDIR)/$(LIBSSL) $(LDLIB)/" >> $(POSTINST)
 +	@echo "mv -f $(TMPDIR)/$(BINS) $(USRSBIN)/" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(SSLCNF) $(USRETC)/" >> $(POSTINST)
 +	@echo "ln -sf $(LIBCRYPTO) $(LDLIB)/$(LIBCRYPTONAME)" >> $(POSTINST)
 +	@echo "ln -sf $(LIBSSL) $(LDLIB)/$(LIBSSLNAME)" >> $(POSTINST)
 +	@echo "sync" >> $(POSTINST)
