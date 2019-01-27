@@ -1,0 +1,19 @@
+diff -urN work/openssh-7.9p1/openssh-7.9p1/scp.c work/openssh-7.9p1/openssh-7.9p1/scp.c
+--- work/openssh-7.9p1/openssh-7.9p1/scp.c	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-7.9p1/openssh-7.9p1/scp.c	2018-01-05 12:00:11.000000000 +0100
+@@ -1,4 +1,4 @@
+-/* $OpenBSD: scp.c,v 1.197 2018/06/01 04:31:48 dtucker Exp $ */
++/* $OpenBSD: scp.c,v 1.198 2018/11/16 03:03:10 djm Exp $ */
+ /*
+  * scp - secure remote copy.  This is basically patched BSD rcp which
+  * uses ssh to do the data transfer (instead of using rcmd).
+@@ -1106,7 +1106,8 @@ sink(int argc, char **argv)
+ 			SCREWUP("size out of range");
+ 		size = (off_t)ull;
+ 
+-		if ((strchr(cp, '/') != NULL) || (strcmp(cp, "..") == 0)) {
++		if (*cp == '\0' || strchr(cp, '/') != NULL ||
++		    strcmp(cp, ".") == 0 || strcmp(cp, "..") == 0) {
+ 			run_err("error: unexpected filename: %s", cp);
+ 			exit(1);
+ 		}
