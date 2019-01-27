@@ -17,6 +17,21 @@ diff -urN work/iproute2-4.20.0/Makefile work/iproute2-4.20.0/Makefile
  BASH_COMPDIR?=$(DATADIR)/bash-completion/completions
  
  # Path to db_185.h include
+@@ -31,12 +32,12 @@
+ 
+ SHARED_LIBS = y
+ 
+-DEFINES= -DRESOLVE_HOSTNAMES -DLIBDIR=\"$(LIBDIR)\"
++DEFINES= -DRESOLVE_HOSTNAMES -DLIBDIR=\"$(LDLIB)\"
+ ifneq ($(SHARED_LIBS),y)
+ DEFINES+= -DNO_SHARED_LIBS
+ endif
+ 
+-DEFINES+=-DCONFDIR=\"$(CONFDIR)\" \
++DEFINES+=-DCONFDIR=\"$(TMPETC)/iproute2\" \
+          -DNETNS_RUN_DIR=\"$(NETNS_RUN_DIR)\" \
+          -DNETNS_ETC_DIR=\"$(NETNS_ETC_DIR)\"
+ 
 @@ -49,19 +50,19 @@
  #options for mpls
  ADDLIB+=mpls_ntop.o mpls_pton.o
@@ -24,7 +39,8 @@ diff -urN work/iproute2-4.20.0/Makefile work/iproute2-4.20.0/Makefile
 -CC := gcc
 +CC := $(CROSS)gcc
  HOSTCC ?= $(CC)
- DEFINES += -D_GNU_SOURCE
+-DEFINES += -D_GNU_SOURCE
++DEFINES += -D_GNU_SOURCE -D_SC_BUILD_
  # Turn on transparent support for LFS
  DEFINES += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
 -CCOPTS = -O2
@@ -50,7 +66,7 @@ diff -urN work/iproute2-4.20.0/Makefile work/iproute2-4.20.0/Makefile
  
  help:
  	@echo "Make Targets:"
-@@ -87,22 +88,16 @@
+@@ -87,22 +88,14 @@
  config.mk:
  	sh configure $(KERNEL_INCLUDE)
  
@@ -75,15 +91,13 @@ diff -urN work/iproute2-4.20.0/Makefile work/iproute2-4.20.0/Makefile
 +	if [ -e $(ETCDIR)/iproute2 ]; then \
 +	rm -rf $(ETCDIR)/iproute2;\
 +	fi
-+	install -m 0755 -d $(ETCDIR)
-+	install -m 0755 -d $(BINDIR)
-+	install -m 0755 tc/tc $(BINDIR)
-+	install -m 0755 ip/ip $(BINDIR)
++	for D in $(ETCDIR) $(BINDIR); do install -m 0755 -d $$D; done
++	install -m 0755 tc/tc ip/ip $(BINDIR)
 +	cp -rf etc/iproute2 $(ETCDIR)/iproute2
  
  snapshot:
  	echo "static const char SNAPSHOT[] = \""`date +%y%m%d`"\";" \
-@@ -125,4 +120,17 @@
+@@ -125,4 +118,17 @@
  cscope:
  	cscope -b -q -R -Iinclude -sip -slib -smisc -snetem -stc
  
