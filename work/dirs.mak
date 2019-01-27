@@ -51,7 +51,7 @@ DIRLIST				+= $(UTELNETD)
 TARLIST				+= $(TAR_$(UTELNETD))
 # IPROUTE2
 IPROUTE2_NAME			:= iproute2
-VER_$(IPROUTE2_NAME)		:= 4.20.0
+VER_$(IPROUTE2_NAME)		:= 3.5.1
 IPROUTE2			:= $(IPROUTE2_NAME)-$(VER_$(IPROUTE2_NAME))
 NAME_$(IPROUTE2)		:= $(IPROUTE2_NAME)$(DBG)
 SUBVER_$(IPROUTE2)		:= 
@@ -148,7 +148,7 @@ QOS_SQM_NAME			:= qos-sqm
 VER_$(QOS_SQM_NAME)		:= 2.0.0
 QOS_SQM				:= $(QOS_SQM_NAME)-$(VER_$(QOS_SQM_NAME))
 NAME_$(QOS_SQM)			:= $(QOS_SQM_NAME)$(DBG)
-SUBVER_$(QOS_SQM)		:= -130
+SUBVER_$(QOS_SQM)		:= -351
 VER_$(QOS_SQM)			:= $(VER_$(QOS_SQM_NAME))$(SUBVER_$(QOS_SQM))
 DL_$(QOS_SQM)			:= void
 TAR_$(QOS_SQM)			:= void
@@ -156,7 +156,7 @@ HOME_$(QOS_SQM)			:= https://github.com/tohojo/sqm-scripts
 LIC_$(QOS_SQM)			:= GPLv2
 SEC_$(QOS_SQM)			:= net
 PRIO_$(QOS_SQM)			:= standard
-DEP_$(QOS_SQM)			:= $(NAME_$(CORE_WORK)),$(NAME_$(IPROUTE2))
+DEP_$(QOS_SQM)			:= $(NAME_$(CORE_WORK))
 DESC_$(QOS_SQM)			:= Quality Of Service SQM scripts traffic shaper tool
 # ZLIB
 ZLIB_NAME			:= zlib
@@ -508,5 +508,5 @@ SUBDIRS				+= $(THIRDPARTYLIB)
 SUBDIRS				+= $(BUILTIN)
 SUBDIRS				+= $(THIRDPARTY)
 # SKIP FROM IPK CREATION
-PKG_RM_LIST			:= $(NVRAM) $(LIBARCHIVE) $(OPKG_UTILS) $(LZO) $(NETPERF) $(EASYRSA)
+PKG_RM_LIST			:= $(NVRAM) $(LIBARCHIVE) $(OPKG_UTILS) $(LZO) $(IPROUTE2) $(NETPERF) $(EASYRSA)
 
