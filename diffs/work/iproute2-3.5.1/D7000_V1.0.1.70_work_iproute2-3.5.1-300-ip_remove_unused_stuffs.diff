@@ -1,0 +1,12 @@
+diff -urN work/iproute2-3.5.1/ip/Makefile work/iproute2-3.5.1/ip/Makefile
+--- work/iproute2-3.5.1/ip/Makefile	2016-12-13 00:07:42.000000000 +0100
++++ work/iproute2-3.5.1/ip/Makefile	2017-02-15 14:03:20.593464080 +0100
+@@ -17,7 +17,7 @@
+ SCRIPTS=ifcfg rtpr routel routef
+ TARGETS=ip rtmon
+ 
+-all: $(TARGETS) $(SCRIPTS)
++all: ip
+ 
+ ip: $(IPOBJ) $(LIBNETLINK)
+ 

@@ -1,0 +1,48 @@
+diff -urN work/iproute2-3.5.1/configure work/iproute2-3.5.1/configure
+--- work/iproute2-3.5.1/configure	2018-08-13 21:11:32.000000000 +0200
++++ work/iproute2-3.5.1/configure	2018-10-06 23:26:15.681053749 +0200
+@@ -17,7 +17,7 @@
+ 	return 0;
+ }
+ EOF
+-gcc -I$INCLUDE -o $TMPDIR/atmtest $TMPDIR/atmtest.c -latm >/dev/null 2>&1 
++${CC} -I$INCLUDE -o $TMPDIR/atmtest $TMPDIR/atmtest.c -latm >/dev/null 2>&1 
+ if [ $? -eq 0 ]
+ then
+     echo "TC_CONFIG_ATM:=y" >>Config
+@@ -51,7 +51,7 @@
+ 
+ EOF
+ 
+-if gcc -I$INCLUDE $IPTC -o $TMPDIR/ipttest $TMPDIR/ipttest.c $IPTL $(pkg-config xtables --cflags --libs) -ldl >/dev/null 2>&1
++if ${CC} -I$INCLUDE $IPTC -o $TMPDIR/ipttest $TMPDIR/ipttest.c $IPTL $(pkg-config xtables --cflags --libs) -ldl >/dev/null 2>&1
+ then
+ 	echo "TC_CONFIG_XT:=y" >>Config
+ 	echo "using xtables"
+@@ -88,7 +88,7 @@
+ }
+ 
+ EOF
+-gcc -I$INCLUDE $IPTC -o $TMPDIR/ipttest $TMPDIR/ipttest.c $IPTL -ldl >/dev/null 2>&1
++${CC} -I$INCLUDE $IPTC -o $TMPDIR/ipttest $TMPDIR/ipttest.c $IPTL -ldl >/dev/null 2>&1
+ 
+ if [ $? -eq 0 ]
+ then
+@@ -128,7 +128,7 @@
+ }
+ 
+ EOF
+-gcc -I$INCLUDE $IPTC -o $TMPDIR/ipttest $TMPDIR/ipttest.c $IPTL -ldl >/dev/null 2>&1
++${CC} -I$INCLUDE $IPTC -o $TMPDIR/ipttest $TMPDIR/ipttest.c $IPTL -ldl >/dev/null 2>&1
+ 
+ if [ $? -eq 0 ]
+ then
+@@ -172,7 +172,7 @@
+ 	return 0;
+ }
+ EOF
+-gcc -I$INCLUDE -o $TMPDIR/setnstest $TMPDIR/setnstest.c >/dev/null 2>&1
++${CC} -I$INCLUDE -o $TMPDIR/setnstest $TMPDIR/setnstest.c >/dev/null 2>&1
+ if [ $? -eq 0 ]
+ then
+ 	echo "IP_CONFIG_SETNS:=y" >>Config
