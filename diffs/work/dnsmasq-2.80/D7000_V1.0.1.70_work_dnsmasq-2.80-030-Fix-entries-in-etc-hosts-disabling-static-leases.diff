@@ -1,0 +1,36 @@
+diff -urN work/dnsmasq-2.80/src/dhcp-common.c work/dnsmasq-2.80/src/dhcp-common.c
+--- work/dnsmasq-2.80/src/dhcp-common.c
++++ work/dnsmasq-2.80/src/dhcp-common.c
+@@ -372,7 +372,11 @@ void dhcp_update_configs(struct dhcp_con
+ 
+   for (config = configs; config; config = config->next)
+     if (config->flags & CONFIG_ADDR_HOSTS)
+-      config->flags &= ~(CONFIG_ADDR | CONFIG_ADDR6 | CONFIG_ADDR_HOSTS);
++      config->flags &= ~(CONFIG_ADDR | CONFIG_ADDR_HOSTS);
++#ifdef HAVE_DHCP6
++    if (config->flags & CONFIG_ADDR6_HOSTS)
++      config->flags &= ~(CONFIG_ADDR6 | CONFIG_ADDR6_HOSTS);
++#endif
+ 
+ #ifdef HAVE_DHCP6 
+  again:  
+@@ -421,7 +425,7 @@ void dhcp_update_configs(struct dhcp_con
+ 		(!(conf_tmp = config_find_by_address6(configs, &crec->addr.addr6, 128, 0)) || conf_tmp == config))
+ 	      {
+ 		memcpy(&config->addr6, &crec->addr.addr6, IN6ADDRSZ);
+-		config->flags |= CONFIG_ADDR6 | CONFIG_ADDR_HOSTS;
++		config->flags |= CONFIG_ADDR6 | CONFIG_ADDR6_HOSTS;
+ 		continue;
+ 	      }
+ #endif
+diff -urN work/dnsmasq-2.80/src/dnsmasq.h work/dnsmasq-2.80/src/dnsmasq.h
+--- work/dnsmasq-2.80/src/dnsmasq.h
++++ work/dnsmasq-2.80/src/dnsmasq.h
+@@ -789,6 +789,7 @@ struct dhcp_config {
+ #define CONFIG_BANK           2048    /* from dhcp hosts file */
+ #define CONFIG_ADDR6          4096
+ #define CONFIG_WILDCARD       8192
++#define CONFIG_ADDR6_HOSTS   16384    /* address added by from /etc/hosts */
+ 
+ struct dhcp_opt {
+   int opt, len, flags;
