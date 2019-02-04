@@ -1,14 +1,16 @@
 diff -urN work/openvpn-2.4.6/Makefile work/openvpn-2.4.6/Makefile
 --- work/openvpn-2.4.6/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/openvpn-2.4.6/Makefile	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,79 @@
 +include ../Rules.mak
 +
 +USROVPNDIR 		:= $(BINDIR)/../openvpn
 +BINS			:= $(OPEN_VPN)/src/openvpn/openvpn
++POSTSCRIPT		:= openvpn_post
 +STARTUP			:= rc_openvpn
 +LEGSTARTUP		:= rc_vpn
 +TUNKO			:= tun.ko
++WEB			:= ../www/$(OPEN_VPN_NAME).htm
 +
 +all: config
 +	$(MAKE) -C $(OPEN_VPN)
@@ -20,14 +22,16 @@ diff -urN work/openvpn-2.4.6/Makefile work/openvpn-2.4.6/Makefile
 +	fi
 +
 +configure:
-+	cd $(OPEN_VPN) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -lssl -lcrypto" LZO_LIBS="-L$(WORK_DIR)/$(LZO)/$(LZO)/src/.libs -llzo2" LDFLAGS="-L$(WORK_DIR)/$(NVRAM)" LIBS="-lscnvram" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include -I$(WORK_DIR)/$(LZO)/$(LZO)/include -I$(WORK_DIR)/$(NVRAM) -I$(GIT_ROOT_DIR)/$(SRC_ROOT_DIR)" --disable-lz4 --enable-lzo --enable-crypto --enable-server --disable-plugins --enable-management --enable-fragment --enable-multihome --enable-port-share --enable-pf --enable-debug
++	cd $(OPEN_VPN) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -lssl -lcrypto" LZO_LIBS="-L$(WORK_DIR)/$(LZO)/$(LZO)/src/.libs -llzo2" LDFLAGS="-L$(WORK_DIR)/$(NVRAM)" LIBS="-lscnvram" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include -I$(WORK_DIR)/$(LZO)/$(LZO)/include -I$(WORK_DIR)/$(NVRAM) -I$(GIT_ROOT_DIR)/$(SRC_ROOT_DIR)" --disable-lz4 --enable-lzo --enable-crypto --enable-server --disable-plugins --enable-management --enable-fragment --enable-multihome --enable-port-share --enable-pf --disable-debug --enable-iproute2
 +
 +install: control
 +	$(SSTRIP) $(BINS)
-+	for D in $(BINDIR) $(MODDIR) $(USROVPNDIR); do install -m 0755 -d $$D; done
++	for D in $(BINDIR) $(MODDIR) $(POSTDIR) $(USROVPNDIR) $(WWWDIR); do install -m 0755 -d $$D; done
 +	install -m 0755 $(BINS) $(BINDIR)
++	install -m 0755 $(POSTSCRIPT) $(POSTDIR)
 +	install -m 0755 $(KERNEL_DIR)/drivers/net/$(TUNKO) $(MODDIR)
-+	$(STRIP) $(STRIPKOFLAGS) $(MODDIR)/$(TUNKO);
++	$(STRIP) $(STRIPKOFLAGS) $(MODDIR)/$(TUNKO)
++	install -m 0664 $(WEB) $(WWWDIR)
 +	[ ! -d $(OPEN_VPN)/keys ] || install -m 0600 $(OPEN_VPN)/keys/* $(USROVPNDIR)
 +	@if [ -x $(STARTUP) ]; then \
 +	install -m 0755 -d $(APPDIR); \
@@ -49,8 +53,9 @@ diff -urN work/openvpn-2.4.6/Makefile work/openvpn-2.4.6/Makefile
 +PREINST			:= $(CTRL_DIR)/preinst
 +POSTINST		:= $(CTRL_DIR)/postinst
 +PRERM			:= $(CTRL_DIR)/prerm
++POSTRM			:= $(CTRL_DIR)/postrm
 +
-+control: preinst postinst prerm
++control: preinst postinst prerm postrm
 +
 +preinst:
 +	@echo "#!/bin/sh" > $(PREINST)
@@ -59,12 +64,20 @@ diff -urN work/openvpn-2.4.6/Makefile work/openvpn-2.4.6/Makefile
 +
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
-+	@echo "$(USRSBINRCAPP)/$(STARTUP) start >/dev/null 2>&1" >> $(POSTINST)
++	@echo "cp -f $(USRETCINITDPOST)/$(POSTSCRIPT) $(TMPETC)/$(INITD)/$(RCPOST)/" >> $(POSTINST)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) restart >/dev/null 2>&1" >> $(POSTINST)
++	@echo "while pidof $(STARTUP); do :; done" >> $(POSTINST)
++	@echo "[ ! -z \"\`pidof openvpn\`\" ] && kill -9 \`pidof $(PROJ_TAG).cgi\` >/dev/null 2>&1" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +
 +prerm:
 +	@echo "#!/bin/sh" > $(PRERM)
 +	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PRERM)
 +	@echo "exit 0" >> $(PRERM)
++
++postrm:
++	@echo "#!/bin/sh" > $(POSTRM)
++	@echo "rm -f $(TMPETC)/$(INITD)/$(RCPOST)/$(POSTSCRIPT)" >> $(POSTRM)
++	@echo "exit 0" >> $(POSTRM)
 +endif
 +
