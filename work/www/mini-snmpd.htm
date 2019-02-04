@@ -2,9 +2,9 @@
 <html><head>
 <meta name="description" content="D7000">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Cache-Control" content="no-cache">
-<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<meta http-equiv="Expires" content="0">
 <title>NETGEAR Router D7000</title>
 <link rel="stylesheet" href="style/form.css">
 <style type="text/javascript">
@@ -19,19 +19,18 @@
 <!--
 
 function setDefs() {
-	var cf=document.forms[0];
+	var cf=document.forms[0], i;
+	var nflg=[cf.minisnmpd_enable, cf.minisnmpd_auth, cf.minisnmpd_remote_enable];
+	var nflgval=[false, false, false];
+	var nvar=[cf.minisnmpd_timeout, cf.minisnmpd_description, cf.minisnmpd_vendor, cf.minisnmpd_location, cf.minisnmpd_contact, cf.minisnmpd_remote_port];
+	var nval=["10", "router", ".1.3.6.1.4.1", "here", "mynum", ""];
+	var h_nvar=[cf.h_minisnmpd_ip6, cf.h_minisnmpd_community];
+	var hnvar=[cf.minisnmpd_ip6, cf.minisnmpd_community];
+	var hnval=["0", "public"];
 
-	if(cf.minisnmpd_enable.value=="") cf.minisnmpd_enable.checked=false;
-	if(cf.minisnmpd_ip6.value=="") cf.minisnmpd_ip6.value="0";
-	if(cf.minisnmpd_auth.value=="") cf.minisnmpd_auth.checked=false;
-	if(cf.minisnmpd_timeout.value=="") cf.minisnmpd_timeout.value="1";
-	if(cf.minisnmpd_community.value=="") cf.minisnmpd_community.value="public";
-	if(cf.minisnmpd_description.value=="") cf.minisnmpd_description.value="router";
-	if(cf.minisnmpd_vendor.value=="") cf.minisnmpd_vendor.value=".1.3.6.1.4.1";
-	if(cf.minisnmpd_location.value=="") cf.minisnmpd_location.value="here";
-	if(cf.minisnmpd_contact.value=="") cf.minisnmpd_contact.value="mynum";
-	if(cf.minisnmpd_remote_enable.value=="") cf.minisnmpd_remote_enable.checked=false;
-	if(cf.minisnmpd_remote_port.value=="") cf.minisnmpd_remote_port.value="";
+	for(i=0;i<nflg.length;i++) if(nflg[i].value=="") nflg[i].checked=nflgval[i];
+	for(i=0;i<nvar.length;i++) if(nvar[i].value=="") nvar[i].value=nval[i];
+	for(i=0;i<h_nvar.length;i++) if(h_nvar[i].value=="") hnvar[i].value=hnval[i];
 }
 
 function loadCheck() {
@@ -54,14 +53,13 @@ function varInit() {
 }
 
 function checkData() {
-	var cf=document.forms[0];
+	var cf=document.forms[0], i;
 	var msg="";
+	var nvar=[cf.minisnmpd_description, cf.minisnmpd_vendor, cf.minisnmpd_location, cf.minisnmpd_contact];
+	var nmsg=["SNMP Description", "SNMP Vendor", "SNMP Location", "SNMP Contact"];
 
 	msg+=checkInt(cf.minisnmpd_timeout, "SNMP MIB Poll Timeout", 1, 999, true);
-	msg+=checkBlank(cf.minisnmpd_description, "SNMP Description");
-	msg+=checkBlank(cf.minisnmpd_vendor, "SNMP Vendor");
-	msg+=checkBlank(cf.minisnmpd_location, "SNMP Location");
-	msg+=checkBlank(cf.minisnmpd_contact, "SNMP Contact");
+	for(i=0;i<nvar.length;i++) msg+=checkBlank(nvar[i], nmsg[i]);
 	if(cf.minisnmpd_remote_enable.checked || cf.minisnmpd_remote_port.value!="") msg+=checkInt(cf.minisnmpd_remote_port, "SNMP remote port number", 1, 65534, true);
 
 	if(msg.length>1) {
@@ -106,7 +104,7 @@ function checkData() {
 		<option value="public">Public (DEF)</option>
 		<option value="private">Private</option>
 	</select>
-</td>
+</td></tr>
 <tr><td nowrap><a href="javascript:gotoWiki('mini-snmpd-package#description');"><b>SNMP Description:</b></a></td>
 <td nowrap align="right"><input type="text" name="minisnmpd_description" value="@minisnmpd_description#" size=20 maxlength=40></td></tr>
 <tr><td nowrap><a href="javascript:gotoWiki('mini-snmpd-package#vendor');"><b>SNMP Vendor:</b></a></td>
