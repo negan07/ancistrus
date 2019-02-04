@@ -2,9 +2,9 @@
 <html><head>
 <meta name="description" content="D7000">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Cache-Control" content="no-cache">
-<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<meta http-equiv="Expires" content="0">
 <title>NETGEAR Router D7000</title>
 <link rel="stylesheet" href="style/form.css">
 <style type="text/javascript">
@@ -19,52 +19,33 @@
 <!--
 
 function setDefs() {
-	var cf=document.forms[0];
+	var cf=document.forms[0], i;
+	var nflg=[cf.anc_snrtweak_enable, cf.anc_maxdataratetweak_enable, cf.anc_dslprofile_enable];
+	var nflgval=[false, false, false];
+	var nvar=[cf.snr, cf.maxdataratedl, cf.maxdatarateul];
+	var nval=["", "0", "0"];
+	var h_nvar=[cf.h_anc_dslconfprofile, cf.h_bitswap, cf.h_sra, cf.h_trellis, cf.h_sesdrop, cf.h_cominmgn, cf.h_sos, cf.h_dynamicd, cf.h_dynamicf, cf.h_i24k, cf.h_monitortone, cf.h_phyrexmt, cf.h_ginp, cf.h_tpstc, cf.h_profile, cf.h_us0];
+	var hnvar=[cf.anc_dslconfprofile, cf.bitswap, cf.sra, cf.trellis, cf.sesdrop, cf.cominmgn, cf.sos, cf.dynamicd, cf.dynamicf, cf.i24k, cf.monitortone, cf.phyrexmt, cf.ginp, cf.tpstc, cf.profile, cf.us0];
+	var hnval=["netgear", "on", "on", "on", "off", "off", "on", "on", "off", "on", "on", "1", "3", "14", "17a", "on"];
 
-	if(cf.h_anc_dslconfprofile.value=="") cf.anc_dslconfprofile.value="netgear";
-	if(cf.h_wan_dsl_mode.value=="" || (cf.h_wan_dsl_mode.value=="VDSL" && cf.h_wan_traffic_type.value!="ptm")) 
-	cf.wan_dsl_mode.value="MMODE";
-	if(cf.anc_snrtweak_enable.value=="") cf.anc_snrtweak_enable.checked=false;
-	if(cf.snr.value=="") cf.snr.value="";
-	if(cf.anc_maxdataratetweak_enable.value=="") cf.anc_maxdataratetweak_enable.checked=false;
-	if(cf.maxdataratedl.value=="") cf.maxdataratedl.value="0";
-	if(cf.maxdatarateul.value=="") cf.maxdatarateul.value="0";
-	if(cf.h_bitswap.value=="") cf.bitswap.value="on";
-	if(cf.h_sra.value=="") cf.sra.value="on";
-	if(cf.h_trellis.value=="") cf.trellis.value="on";
-	if(cf.h_sesdrop.value=="") cf.sesdrop.value="off";
-	if(cf.h_cominmgn.value=="") cf.cominmgn.value="off";
-	if(cf.h_sos.value=="") cf.sos.value="on";
-	if(cf.h_dynamicd.value=="") cf.dynamicd.value="on";
-	if(cf.h_dynamicf.value=="") cf.dynamicf.value="off";
-	if(cf.h_i24k.value=="") cf.i24k.value="on";
-	if(cf.h_monitortone.value=="") cf.monitortone.value="on";
-	if(cf.h_phyrexmt.value=="") cf.phyrexmt.value="1";
-	if(cf.h_ginp.value=="") cf.ginp.value="3";
-	if(cf.h_tpstc.value=="") cf.tpstc.value="14";
-	if(cf.anc_dslprofile_enable.value=="") cf.anc_dslprofile_enable.checked=false;
-	if(cf.h_profile.value=="") cf.profile.value="17a";
-	if(cf.h_us0.value=="") cf.us0.value="on";
+	for(i=0;i<nflg.length;i++) if(nflg[i].value=="") nflg[i].checked=nflgval[i];
+	for(i=0;i<nvar.length;i++) if(nvar[i].value=="") nvar[i].value=nval[i];
+	for(i=0;i<h_nvar.length;i++) if(h_nvar[i].value=="") hnvar[i].value=hnval[i];
+if(cf.h_wan_dsl_mode.value=="" || (cf.h_wan_dsl_mode.value=="VDSL" && cf.h_wan_traffic_type.value!="ptm")) cf.wan_dsl_mode.value="MMODE";
 }
 
 function loadCheck() {
-	var cf=document.forms[0];
+	var cf=document.forms[0], i;
+	var data=[cf.anc_dslconfprofile, cf.snr, cf.maxdataratedl, cf.maxdatarateul, cf.wan_dsl_mode];
 
 		if(cf.anc_dslconfprofile.value=="own") allToEnabled(cf);
 		else if(cf.anc_dslconfprofile.value=="broadcom") {
 		notbuttonToDisabled(cf);
-		cf.anc_dslconfprofile.disabled=false;
-		cf.snr.disabled=false;
-		cf.maxdataratedl.disabled=false;
-		cf.maxdatarateul.disabled=false;
+		for(i=0;i<(data.length-1);i++) data[i].disabled=false;
 		}
 		else {
 		notbuttonToDisabled(cf);
-		cf.anc_dslconfprofile.disabled=false;
-		cf.snr.disabled=false;
-		cf.maxdataratedl.disabled=false;
-		cf.maxdatarateul.disabled=false;
-		cf.wan_dsl_mode.disabled=false;
+		for(i=0;i<data.length;i++) data[i].disabled=false;
 		}
 }
 
@@ -78,23 +59,25 @@ function dslModeCheck() {
 		}
 }
 
-function VdslDivSetup(name) {
+function dslDivSetup(dsltype, name) {
 	var div_obj=document.getElementById(name);
 
-	((div_obj!=null && "@h_wan_traffic_type#"=="ptm") ? div_obj.style.display="inline" : div_obj.style.display="none");
+	((div_obj!=null && "@h_wan_traffic_type#"==dsltype) ? div_obj.style.display="inline" : div_obj.style.display="none");
 }
 
-function vdslLineSep() {
+function dslLineSep(dsltype) {
 
-	if("@h_wan_traffic_type#"!="ptm") return;
+	if("@h_wan_traffic_type#"!=dsltype) return;
 	document.write("<tr><td colspan='2' background='liteblue.gif' height='12'></td></tr>");
 }
 
 function varInit() {
-	var prof=["vdslinfos", "profinfos", "profile_flag", "profile_text", "profile_list", "profile_us0_text", "profile_us0_list", "maxdatarate_flag", "maxdatarate_dl", "maxdatarate_dlval", "maxdatarate_ul", "maxdatarate_ulval"];
+	var vdslprof=["vdslinfos", "profinfos", "profile_flag", "profile_text", "profile_list", "profile_us0_text", "profile_us0_list", "maxdatarate_flag", "maxdatarate_dl", "maxdatarate_dlval", "maxdatarate_ul", "maxdatarate_ulval"];
+	var adslprof=["snr_flag", "snr_var", "snr_val"];
 
 	AncdataToVisible(document.forms[0]);
-	for(var i=0;i<prof.length;i++) VdslDivSetup(prof[i]);
+	for(var i=0;i<vdslprof.length;i++) dslDivSetup("ptm", vdslprof[i]);
+	for(i=0;i<adslprof.length;i++) dslDivSetup("atm", adslprof[i]);
 	setDefs();
 	loadCheck();
 }
@@ -218,10 +201,10 @@ function checkData() {
 	</select>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td nowrap colspan="2"><input type="checkbox" name="anc_snrtweak_enable" value="@h_anc_snrtweak_enable#"><a href="javascript:gotoWiki('Dsl-Tweaking#signal-noise-ratio');"><b>Turn SNR Tweak On</b></a></td></tr>
-<tr><td nowrap><a href="javascript:gotoWiki('Dsl-Tweaking#signal-noise-ratio');"><b>Signal Noise Ratio</b></a></td>
-<td nowrap align="right"><input type="text" class="num" name="snr" value="@snr#" size=6 maxlength=5></td></tr>
-<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap colspan="2"><div id="snr_flag"><input type="checkbox" name="anc_snrtweak_enable" value="@h_anc_snrtweak_enable#"><a href="javascript:gotoWiki('Dsl-Tweaking#signal-noise-ratio');"><b>Turn SNR Tweak On</b></a></div></td></tr>
+<tr><td nowrap><div id="snr_var"><a href="javascript:gotoWiki('Dsl-Tweaking#signal-noise-ratio');"><b>Signal Noise Ratio</b></a></div></td>
+<td nowrap align="right"><div id="snr_val"><input type="text" class="num" name="snr" value="@snr#" size=6 maxlength=5></div></td></tr>
+<script>dslLineSep('atm')</script>
 <tr><td nowrap colspan="2"><div id="maxdatarate_flag"><input type="checkbox" name="anc_maxdataratetweak_enable" value="@h_anc_maxdataratetweak_enable#"><a href="javascript:gotoWiki('Dsl-Tweaking#max-data-rate-limiter');"><b>Turn VDSL Data Rate Limiter Tweak On</b></a></div></td></tr>
 <tr><td nowrap><div id="maxdatarate_dl"><a href="javascript:gotoWiki('Dsl-Tweaking#max-data-rate-limiter');"><b>Limit Downlink Data Rate to:</b></a></div></td>
 <td nowrap align="right"><div id="maxdatarate_dlval"><input type="text" class="num" name="maxdataratedl" value="@maxdataratedl#" size=6 maxlength=6>
@@ -231,7 +214,7 @@ function checkData() {
 <td nowrap align="right"><div id="maxdatarate_ulval"><input type="text" class="num" name="maxdatarateul" value="@maxdatarateul#" size=6 maxlength=6>
 &nbsp;<span>Kbps</span></div>
 </td></tr>
-<script>vdslLineSep()</script>
+<script>dslLineSep('ptm')</script>
 <tr><td nowrap colspan="2"><div id="profile_flag"><input type="checkbox" name="anc_dslprofile_enable" value="@h_anc_dslprofile_enable#"><a href="javascript:gotoWiki('Dsl-Tweaking#vdsl-profile');"><b>Turn VDSL Profile Tweak On</b></a></div></td></tr>
 <tr><td align="left"><div id="profile_text"><span><a href="javascript:gotoWiki('Dsl-Tweaking#vdsl-profile');"><b>VDSL Profile</b></a></span></div></td>
 	<td align="right"><div id="profile_list">
@@ -254,7 +237,7 @@ function checkData() {
 		<option value="off">Off</option>
 	</select>
 </div></td></tr>
-<script>vdslLineSep()</script>
+<script>dslLineSep('ptm')</script>
 </table>
 <input type="hidden" name="job" value="save">
 <input type="hidden" name="todo" value="/usr/sbin/xdslctl configure">
