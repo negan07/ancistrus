@@ -1,0 +1,37 @@
+diff -urN work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/options.c work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/options.c
+--- work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/options.c
++++ work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/options.c
+@@ -58,7 +58,7 @@
+ #include "ssl_verify.h"
+ #include "platform.h"
+ #include <ctype.h>
+-
++#include "nvram.h"
+ #include "memdbg.h"
+ 
+ const char title_string[] =
+@@ -4594,6 +4593,14 @@
+         }
+         else
+         {
++            /* write more options to server config file */
++            char *pers_srv_opt=nvram_safe_get("openvpn_server_opt");
++            if (pers_srv_opt!=NULL && *pers_srv_opt && access(file, R_OK|W_OK)!=-1 && (fp=platform_fopen(file, "a"))!=NULL)
++            {
++                char *s, *s_str;
++                for (s=(char*)strtok_r(pers_srv_opt, "\1", &s_str);s!=NULL;s=(char*)strtok_r(NULL, "\1", &s_str)) fprintf(fp, "%s\n", s);
++                fclose(fp);
++            }
+             fp = platform_fopen(file, "r");
+         }
+         if (fp)
+@@ -4604,6 +4611,9 @@
+                 int offset = 0;
+                 CLEAR(p);
+                 ++line_num;
++                /* override some line options created by rc_openvpn on /etc/server*.conf */
++                if(!strncmp(line,"cipher ",7)) snprintf(line, sizeof(line), "cipher %s\n", nvram_safedef_get("openvpn_cipher", "AES-256-CBC"));
++                else if(!strncmp(line,"auth ",5)) snprintf(line, sizeof(line), "auth %s\n", nvram_safedef_get("openvpn_auth", "sha256"));
+                 if (strlen(line) == OPTION_LINE_SIZE)
+                 {
+                     msg(msglevel, "In %s:%d: Maximum option line length (%d) exceeded, line starts with %s",
