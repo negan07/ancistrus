@@ -2,9 +2,9 @@
 <html><head>
 <meta name="description" content="D7000">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Cache-Control" content="no-cache">
-<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<meta http-equiv="Expires" content="0">
 <title>NETGEAR Router D7000</title>
 <link rel="stylesheet" href="style/form.css">
 <style type="text/javascript">
@@ -81,18 +81,18 @@ function check_restore() {
 <table border="0" cellpadding="0" cellspacing="3" width="100%"><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><span><a href="javascript:gotoWiki('Utilities#router-infos');"><b>Router Infos</b></a></span></td></tr>
 <tr><td colspan="2" align="center"><select name="infocmd" size=1>
-	<option value="/bin/ps">Process list (ps)</option>
-	<option value="/bin/top -n 1 -b">CPU usage task list (top)</option>
-	<option value="/bin/cat /proc/meminfo">RAM Memory Usage (cat /proc/meminfo)</option>
-	<option value="/bin/dmesg">Kernel Log (dmesg)</option>
-	<option value="/bin/df">Filesystem Usage Stats (df)</option>
-	<option value="/bin/cat /proc/net/nf_conntrack">Conntracks (cat /proc/net/nf_conntrack)</option>
-	<option value="/bin/cat /proc/cnapt_serv">Napt Rules (cat /proc/cnapt_serv)</option>
-	<option value="/bin/iptables -t nat -nL -v">Firewall Nat Rules (iptables -t nat -nL -v)</option>
-	<option value="/bin/iptables -nL -v">Firewall Rules (iptables -nL -v)</option>
-	<option value="/bin/nvram show">Settings (nvram show)</option>
+	<option value="ps">Process list (ps)</option>
+	<option value="top -n 1 -b">CPU usage task list (top)</option>
+	<option value="cat /proc/meminfo">RAM Memory Usage (cat /proc/meminfo)</option>
+	<option value="dmesg">Kernel Log (dmesg)</option>
+	<option value="df">Filesystem Usage Stats (df)</option>
+	<option value="cat /proc/net/nf_conntrack">Conntracks (cat /proc/net/nf_conntrack)</option>
+	<option value="cat /proc/cnapt_serv">Napt Rules (cat /proc/cnapt_serv)</option>
+	<option value="iptables -t nat -nL -v">Firewall Nat Rules (iptables -t nat -nL -v)</option>
+	<option value="iptables -nL -v">Firewall Rules (iptables -nL -v)</option>
+	<option value="nvram show">Settings (nvram show)</option>
 </select></td></tr>
-<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Show" onclick="this.form.pipe_cmd.value=infocmd.value;AncstdAction(this.form,'anc_run.htm','anc_utils.htm','pipe','');"></td></tr>
+<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Show" onclick="this.form.pipe_cmd.value='/bin/'+infocmd.value;AncstdAction(this.form,'anc_run.htm','anc_utils.htm','pipe','');"></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Utilities#file-editing')" tabindex="-1"><b>Edit a File</b></a></td></tr>
 <tr><td colspan="2" align="center"><input type="text" name="absfilename" size="40" maxlength="128" value=""></td></tr>
