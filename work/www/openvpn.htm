@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript" src="langs.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+function setDefs() {
+	var cf=document.forms[0], i;
+	var nvar=[cf.openvpn_port, cf.openvpn_tun_port];
+	var nval=["12974", "12973"];
+	var h_nvar=[cf.h_openvpn_protocol, cf.h_openvpn_tun_protocol, cf.h_openvpn_type, cf.h_openvpn_cipher, cf.h_openvpn_auth];
+	var hnvar=[cf.openvpn_protocol, cf.openvpn_tun_protocol, cf.openvpn_type, cf.openvpn_cipher, cf.openvpn_auth];
+	var hnval=["udp", "udp", "0", "AES-256-CBC", "sha256"];
+
+	if(cf.openvpn_enable.value=="") cf.openvpn_enable.checked=false;
+	for(i=0;i<nvar.length;i++) if(nvar[i].value=="") nvar[i].value=nval[i];
+	for(i=0;i<h_nvar.length;i++) if(h_nvar[i].value=="") hnvar[i].value=hnval[i];
+}
+
+function varInit() {
+
+	AncdataToVisible(document.forms[0]);
+	setDefs();
+}
+
+function ddns_check() {
+	var cf=document.forms[0];
+
+	if(cf.openvpn_enable.value!="1") {
+	alert(getErrorMsgByVar("gsm_msg_openvpn_apply"));
+	return false;
+	}
+	if(cf.h_ddns_enable.value=="0") alert(getErrorMsgByVar("gsm_msg_openvpn_ddns_not_enable"));
+	return true;
+}
+
+function checkData() {
+	var cf=document.forms[0];
+	var msg="";
+
+		if(cf.openvpn_enable.checked) {
+			if(cf.h_ddns_enable.value=="0" && cf.h_wan_iptype.value!="Fixed" && cf.h_wan_iptype!="ipoa") {
+			alert(getErrorMsgByVar("gsm_msg_openvpn_need_ddns_or_static_ip_1"));
+			return false;
+			}
+			if(cf.h_ip6_mode.value!="disable") {
+			alert(getErrorMsgByVar("gsm_msg_openvpn_not_with_ipv6_2"));
+			return false;
+			}
+		if(cf.h_ddns_enable.value=="0") alert(getErrorMsgByVar("gsm_msg_openvpn_need_ddns_or_static_ip_2"));
+		}
+	msg+=checkInt(cf.openvpn_port, getErrorMsgByVar("gsm_msg_rmt_port_num"), 1, 65534, true);
+	msg+=checkInt(cf.openvpn_tun_port, getErrorMsgByVar("gsm_msg_rmt_port_num"), 1, 65534, true);
+	if(cf.openvpn_tun_port.value==cf.openvpn_port.value) msg+="TUN port must be different from TAP port";
+
+	if(msg.length > 1) {
+	alert(msg);
+	return false;
+	}
+
+	if((cf.openvpn_protocol.value!="@h_openvpn_protocol#") || (cf.openvpn_port.value!="@openvpn_port#") || (cf.openvpn_tun_protocol.value!="@h_openvpn_tun_protocol#") || (cf.openvpn_tun_port.value!="@openvpn_tun_port#") || (cf.openvpn_type.value!="@h_openvpn_type#")) alert(getErrorMsgByVar("gsm_msg_openvpn_change_settings"));
+
+	AncdataToHidden(cf);
+	return true;
+}
+
+// -->
+</script></head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
+<form name="openvpn" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<div> <a class="page_title" href="javascript:gotoWiki('openvpn-package/');">OPENVPN</a></div>
+<div class="fix_button">
+<table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)" languageCode="19">
+&nbsp;
+<input class="common_bt" type="button" name="show_log" value="Show Log" onClick="this.form.pipe_cmd.value='/bin/cat /tmp/openvpn_log';if(this.form.openvpn_enable.value!='1') {alert(getErrorMsgByVar('gsm_msg_openvpn_apply'));return false;}else AncstdAction(this.form,'anc_run.htm','openvpn.htm','pipe','');">
+&nbsp;
+<input class="common_bt" type="button" name="delete_log" value="Delete Log" onClick="AncstdAction(this.form,'openvpn.htm','openvpn.htm','home','/bin/echo -n > /tmp/openvpn_log');">
+&nbsp;
+<input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return checkData();" languageCode="18">
+</td></tr></table>
+</div>
+<div id="main" class="main_top_button">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td nowrap colspan="2"><input type="checkbox" name="openvpn_enable" value="@h_openvpn_enable#"><a href="javascript:gotoWiki('openvpn-package#openvpn');"><b languageCode="4001">Enable VPN Service</b></a>
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>	
+<tr><td colspan="2"><span languageCode="4002">To install VPN client on your client devices</span></td></tr>
+<tr><td colspan="2"><span languageCode="4010">Step 1: Select the Enable VPN Service check box and click the Apply button.</span></td></tr>
+<tr><td colspan="2"><span languageCode="4011">Step 2: Download the client utility from </span>
+<a style="color:#0000EE" href=http://openvpn.net/index.php/download/community-downloads.html target="_blank">http://openvpn.net/index.php/download/community-downloads.html</a>
+<span languageCode="4012"> and install it on the devices where you want to run the VPN client.</span></td></tr>
+<tr><td colspan="2"><span languageCode="4014">Step 3: Click the proper button below to download the configuration files for your VPN clients. </span></td></tr>
+<tr><td colspan="2" align="left">
+<input type="button" class="common_bt" value="Windows" languagecode="10710" onclick="if(!ddns_check()) return false; window.location.href='setup.cgi?next_file=windows.zip&todo=generate_client_config';">
+<input type="button" class="common_bt" value="Linux/Other" languagecode="10711" onclick="if(!ddns_check()) return false; window.location.href='setup.cgi?next_file=non-windows.zip&todo=generate_client_config';">
+<input type="button" class="common_bt" value="Smartphone" languagecode="4028" onclick="if(!ddns_check()) return false; window.location.href='setup.cgi?next_file=smartphone.zip&todo=generate_client_config';">
+</td></tr>
+<tr><td colspan="2"><span languageCode="4015">Step 4: Unzip the configuration files you have just downloaded and copy them to the folder where the VPN client is installed on your device.For a client device with Windows64-bit system, the VPN client is installed at &quot;C:\Program files\OpenVPN\config\&quot; by default.</span></td></tr>
+<tr><td colspan="2"><span languageCode="4016">Step 5: For a client device with Windows, you need to modify the VPN interface name to &quot;NETGEAR-VPN&quot;. The VPN interface usually has a Device Name as &quot;TAP-Windows Adapter&quot;.</span></td></tr>
+<tr><td colspan="2"><span languageCode="4017">Step 6: Client utility must be installed and run by a user who has administrative privileges. </span><br/><img src="image/pvpn.jpg" width="950" ><br/></td></tr>
+<tr><td colspan="2"><span languageCode="4018">Step 7: For help connecting using OpenVPN clients, please refer to </span> <a style="color:#0000EE" href=http://openvpn.net/index.php/open-source/documentation/howto.html#quick target="_blank">http://openvpn.net/index.php/open-source/documentation/howto.html#quick</a><br/><span languageCode="4019">Note: if you want to make any change in Advanced Configurations section, please make the changes before you download the configuration files in Step 3.</span></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td align="left" colspan="2"><a href="javascript:gotoWiki('openvpn-package#advanced-configurations');"><b languageCode="4003">Advanced Configurations</b></a></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('openvpn-package#tap-mode-service-port');"><b languageCode="4005">TAP Mode Service Port</b></a></td>
+<td nowrap align="right"><input type="text" class="num" name="openvpn_port" value="@openvpn_port#" size=6 maxlength=5>
+&nbsp;
+	<select name="openvpn_protocol" size=1>
+		<option value="udp">UDP</option>
+		<option value="tcp">TCP</option>
+	</select>
+</td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('openvpn-package#tun-mode-service-port');"><b languageCode="4027">TUN Mode Service Port</b></a></td>
+<td nowrap align="right"><input type="text" class="num" name="openvpn_tun_port" value="@openvpn_tun_port#" size=6 maxlength=5>
+&nbsp;
+	<select name="openvpn_tun_protocol" size=1>
+		<option value="udp">UDP</option>
+		<option value="tcp">TCP</option>
+	</select>
+</td></tr>
+<tr><td align="left"><a href="javascript:gotoWiki('openvpn-package#access-type');"><b languageCode="4006">Clients will use this VPN connection to access</b></a></td>
+	<td align="right"><select name="openvpn_type" size=1>
+		<option value="1" languageCode="4007">All sites on the Internet & Home Network</option>
+		<option value="2" languageCode="4008">Home Network only</option>
+		<option value="0" languageCode="4009">Auto</option>
+	</select>
+</td></tr>
+<tr><td align="left"><a href="javascript:gotoWiki('openvpn-package#cipher-algorithm');"><b>Cipher Encryption Algorithm</b></a></td>
+	<td align="right"><select name="openvpn_cipher" size=1>
+		<option value="AES-128-CBC">AES-128-CBC (128 bit key, 128 bit block)</option>
+		<option value="AES-192-CBC">AES-192-CBC (192 bit key, 128 bit block)</option>
+		<option value="AES-256-CBC">AES-256-CBC (256 bit key, 128 bit block)</option>
+		<option value="CAMELLIA-128-CBC">CAMELLIA-128-CBC (128 bit key, 128 bit block)</option>
+		<option value="CAMELLIA-192-CBC">CAMELLIA-192-CBC (192 bit key, 128 bit block)</option>
+		<option value="CAMELLIA-256-CBC">CAMELLIA-256-CBC (256 bit key, 128 bit block)</option>
+		<option value="SEED-CBC">SEED-CBC (128 bit key, 128 bit block)</option>
+	</select>
+</td></tr>
+<tr><td align="left"><a href="javascript:gotoWiki('openvpn-package#digest-algorithm');"><b>Digest Message Algorithm</b></a></td>
+	<td align="right"><select name="openvpn_auth" size=1>
+		<option value="rsa-sha256">RSA-SHA256 (256 bit size)</option>
+		<option value="rsa-sha384">RSA-SHA384 (384 bit size)</option>
+		<option value="rsa-sha512">RSA-SHA512 (512 bit size)</option>
+		<option value="sha256">SHA256 (256 bit size)</option>
+		<option value="sha512">SHA512 (512 bit size)</option>
+	</select>
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><span><a href="javascript:gotoWiki('openvpn-package#show-config-files');"><b>Show Config files</b></a></span></td></tr>
+<tr><td colspan="2" align="center"><select name="configfile" size=1>
+	<option value="server.conf">Pc Server</option>
+	<option value="server_phone.conf">Smartphone Server</option>
+	<option value="client.ovpn">Windows Client</option>
+	<option value="client.conf">Unix/Other Client</option>
+	<option value="client_phone.ovpn">Smartphone Client</option>
+</select></td></tr>
+<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Show Config" onclick="this.form.pipe_cmd.value='/bin/cat /etc/'+configfile.value;if(this.form.openvpn_enable.value!='1'){alert(getErrorMsgByVar('gsm_msg_openvpn_apply'));return false;}else AncstdAction(this.form,'anc_run.htm','openvpn.htm','pipe','');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('openvpn-package#personal-server-options')" tabindex="-1"><b>Type a personal server option here</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="text" name="openvpn_server_opt" size="40" maxlength="80" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="long_add_bt" type="button" value="Add server opt" onClick="addOpt(this.form,'list_openvpn_server_opt',openvpn_server_opt,'Option','openvpn.htm','')"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('openvpn-package#personal-server-options-list')" tabindex="-1"><b>Personal server options list</b></a></td></tr>
+<tr><td colspan="2" align="center">
+	<select name="list_openvpn_server_opt" size="3" multiple>
+	@list_openvpn_server_opt#
+	</select>
+</td></tr>
+<tr><td colspan="2" align="center">
+<input class="block_delete_bt" type="button" value="Delete server opt" onClick="delOpt(this.form,'list_openvpn_server_opt',list_openvpn_server_opt,'No Option selected !\n','openvpn.htm','')">
+&nbsp;
+<input class="common_bt" type="button" value="Clear server list" onClick="this.form.clear.value='list_openvpn_server_opt';AncstdAction(this.form,'openvpn.htm','','clear','');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('openvpn-package#personal-client-options')" tabindex="-1"><b>Type a personal client option here</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="text" name="openvpn_client_opt" size="40" maxlength="80" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="long_add_bt" type="button" value="Add client opt" onClick="addOpt(this.form,'list_openvpn_client_opt',openvpn_client_opt,'Option','openvpn.htm','')"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('openvpn-package#personal-client-options-list')" tabindex="-1"><b>Personal client options list</b></a></td></tr>
+<tr><td colspan="2" align="center">
+	<select name="list_openvpn_client_opt" size="3" multiple>
+	@list_openvpn_client_opt#
+	</select>
+</td></tr>
+<tr><td colspan="2" align="center">
+<input class="block_delete_bt" type="button" value="Delete client opt" onClick="delOpt(this.form,'list_openvpn_client_opt',list_openvpn_client_opt,'No Option selected !\n','openvpn.htm','')">
+&nbsp;
+<input class="common_bt" type="button" value="Clear client list" onClick="this.form.clear.value='list_openvpn_client_opt';AncstdAction(this.form,'openvpn.htm','','clear','');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="save">
+<input type="hidden" name="todo" value="/usr/sbin/rc openvpn restart">
+<input type="hidden" name="next_file" value="openvpn.htm">
+<input type="hidden" name="old_file" value="">
+<input type="hidden" name="pipe_cmd" value="">
+<input type="hidden" name="add" value="">
+<input type="hidden" name="del" value="">
+<input type="hidden" name="clear" value="">
+<input type="hidden" name="selected" value="">
+<input type="hidden" name="h_openvpn_enable" value="@h_openvpn_enable#">
+<input type="hidden" name="h_openvpn_protocol" value="@h_openvpn_protocol#">
+<input type="hidden" name="h_openvpn_tun_protocol" value="@h_openvpn_tun_protocol#">
+<input type="hidden" name="h_openvpn_type" value="@h_openvpn_type#">
+<input type="hidden" name="h_openvpn_cipher" value="@h_openvpn_cipher#">
+<input type="hidden" name="h_openvpn_auth" value="@h_openvpn_auth#">
+<input type="hidden" name="h_ip6_mode" value="@h_ip6_mode#">
+<input type="hidden" name="h_ddns_enable" value="@h_ddns_enable#">
+<input type="hidden" name="h_wan_iptype" value="@h_wan_iptype#">
+</div>
+</form>
+<script>printHelp();</script>
+</body></html>
