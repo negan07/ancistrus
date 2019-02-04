@@ -383,6 +383,41 @@ function AncdataToHidden(form_obj)  // both hidden & visible fields in same form
 
 // =================================== Development ========================
 
+function addOpt(fObj, cjname, cj, checkmsg, page, cmd) {
+	var msg="";
+
+	msg+=printable_ch_chk(cj.value);
+		if(msg.length>1) {
+		alert(msg);
+		return false;
+		}
+
+	msg+=checkBlank(cj, checkmsg);
+	cj.focus();
+		if(msg.length>1) {
+		alert(msg);
+		return false;
+		}
+
+	fObj.add.value=cjname;
+	AncstdAction(fObj, page, '', 'add', cmd);
+	return true;
+}
+
+function delOpt(fObj, cjname, cj, alertmsg, page, cmd) {
+
+		if(optionSelected(cj)) {
+		fObj.selected.value=AncgetMultiSelected(cj, "\3", 0);
+		fObj.del.value=cjname;
+		AncstdAction(fObj, page, '', 'del', cmd);
+		return true;
+		}
+		else {
+		alert(alertmsg);
+		return false;
+		}
+}
+
 function mac1to6(macaddr,mac1,mac2,mac3,mac4,mac5,mac6)
 {
 	var len;
