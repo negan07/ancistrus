@@ -313,15 +313,15 @@ if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *
 		if((err=fetchformvar(raw, nvar, fd))) return err;				//fetch vars & check if webpage is malformed
 			if(!*job || !strcmp(job, "upload")||!strcmp(job, "home")) getnvar(nvar);//### GET METHOD || HOME/UPLOAD FILE ###
 			else if(!strcmp(job, "save")) {						//### POST METHOD - SAVE ###
-			if(*(val=QSGET(raw))!='@') NV_SET(nvar, val);				//if not unassigned set value to nvram
+			if(*(val=QSGET(raw))!='@' && strncmp(nvar, "list_", 5)) NV_SET(nvar, val);//if not unassigned or list nvram set value
 			CGIDBG("populatepage(): ----------------------------------------> anc nvram set %s \"%s\"\n", nvar, val);
-			TYPE(val);								//refresh webpage with queryval in place of raw
+			getnvar(nvar);								//retrieve nvram value like GET
 			}
 			else if(!strcmp(job, "add") || !strcmp(job, "del")) {			//### ADD/DELETE ###
 			val=QSGET(job);
 			if(!strcmp(raw, val))							//add/del nvram subvalue(s)
 			(!strcmp(job, "add") ? savelist(ADD, val+5, QSGET(val+5)) : savelist(DELETE, val+5, QSGET("selected")));
-			getnvar(nvar);								//retrieve nvram values like GET
+			getnvar(nvar);								//retrieve nvram value like GET
 			}			
 			else if(!strcmp(job, "clear")) {					//### CLEAR ###
 			val=QSGET(job);								//fetch list name to clear
