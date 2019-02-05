@@ -90,7 +90,7 @@ function checkData() {
 &nbsp;
 <input class="common_bt" type="button" name="show_log" value="Show Log" onClick="this.form.pipe_cmd.value='/bin/cat /tmp/openvpn_log';if(this.form.openvpn_enable.value!='1') {alert(getErrorMsgByVar('gsm_msg_openvpn_apply'));return false;}else AncstdAction(this.form,'anc_run.htm','openvpn.htm','pipe','');">
 &nbsp;
-<input class="common_bt" type="button" name="delete_log" value="Delete Log" onClick="AncstdAction(this.form,'openvpn.htm','openvpn.htm','home','/bin/echo -n > /tmp/openvpn_log');">
+<input class="common_bt" type="button" name="delete_log" value="Delete Log" onClick="AncstdAction(this.form,'openvpn.htm','openvpn.htm','home','/bin/echo -n >/tmp/openvpn_log');">
 &nbsp;
 <input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return checkData();" languageCode="18">
 </td></tr></table>
@@ -220,5 +220,27 @@ function checkData() {
 <input type="hidden" name="h_wan_iptype" value="@h_wan_iptype#">
 </div>
 </form>
-<script>printHelp();</script>
+<div id="help" style="display: none">
+<iframe name="help_iframe" id="helpframe" src="openvpn_h.htm" allowtransparency="true" width="100%" frameborder="0"></iframe>
+</div>
+<div id="help_switch" class="close_help"><img class="help_switch_img" src="image/help/help-bar.gif">
+<script>var help_flag=0;
+if(isIE()){
+	show_hidden_help_top_button(1);
+	var frame_div = top.document.getElementById("formframe_div");
+	frame_div.onresize =  function(){
+		if(help_flag == 0)  show_hidden_help_top_button(1);
+		else{show_hidden_help_top_button(--help_flag);help_flag++;}
+};}
+if(get_browser() == "Opera"){
+	window.onresize =  function(){
+		if(help_flag == 0)  show_hidden_help_top_button(1);
+		else{show_hidden_help_top_button(--help_flag);help_flag++;}
+};}</script>
+<div id="help_space" onClick="show_hidden_help_top_button(help_flag); help_flag++;"></div>
+<div id="help_center"><span languageCode="3016">Help Center</span></div>
+<div id="help_button" onClick="show_hidden_help_top_button(help_flag); help_flag++;"></div>
+<div id="help_show_hidden"><a href="javascript:void(0)" onClick="show_hidden_help_top_button(help_flag); help_flag++;"><span languageCode="3017">Show/Hide Help Center</span></a></div>
+</div>
+<script language="javascript" type="text/javascript" src="langs.js"></script>
 </body></html>
