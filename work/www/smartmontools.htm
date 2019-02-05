@@ -2,9 +2,9 @@
 <html><head>
 <meta name="description" content="D7000">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Cache-Control" content="no-cache">
-<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<meta http-equiv="Expires" content="0">
 <title>NETGEAR Router D7000</title>
 <link rel="stylesheet" href="style/form.css">
 <style type="text/javascript">
@@ -94,15 +94,15 @@ function checkTimeout(hdidle) {
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#show-device-infos')" tabindex="-1"><b>Show Device Infos</b></a></td></tr>
 <tr><td colspan="2" align="center"><select name="infocmd" size=1>
-	<option value="/usr/sbin/smartctl -a ">Show S.M.A.R.T. data</option>
-	<option value="/usr/sbin/smartctl -x ">Show Device data</option>
-	<option value="/usr/sbin/smartctl -i ">Show Device ID info</option>
-	<option value="/usr/sbin/smartctl -H ">Show Health status</option>
-	<option value="/usr/sbin/smartctl -g aam ">Show AAM status</option>
-	<option value="/usr/sbin/smartctl -g apm ">Show APM status</option>
+	<option value="a">Show S.M.A.R.T. data</option>
+	<option value="x">Show Device data</option>
+	<option value="i">Show Device ID info</option>
+	<option value="H">Show Health status</option>
+	<option value="g aam">Show AAM status</option>
+	<option value="g apm">Show APM status</option>
 </select></td></tr>
 <tr><td colspan="2" align="center">
-<input class="common_bt" type="button" value="Show Info" onclick="this.form.pipe_cmd.value=infocmd.value+this.form.dev_sel.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');">
+<input class="common_bt" type="button" value="Show Info" onclick="this.form.pipe_cmd.value='/usr/sbin/smartctl -'+infocmd.value+' '+this.form.dev_sel.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');">
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#aam-status')" tabindex="-1"><b>Change AAM Status</b></a>
@@ -117,11 +117,11 @@ function checkTimeout(hdidle) {
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#device-test')" tabindex="-1"><b>Device Test</b></a></td></tr>
 <tr><td colspan="2" align="center"><select name="testcmd" size=1>
-	<option value="/usr/sbin/smartctl --test=short ">Short data Test</option>
-	<option value="/usr/sbin/smartctl --test=long ">Long data Test</option>
+	<option value="short">Short data Test</option>
+	<option value="long">Long data Test</option>
 </select></td></tr>
 <tr><td colspan="2" align="center">
-<input class="common_bt" type="button" value="Run Test" onclick="this.form.pipe_cmd.value=testcmd.value+this.form.dev_sel.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');">
+<input class="common_bt" type="button" value="Run Test" onclick="this.form.pipe_cmd.value='/usr/sbin/smartctl --test='+testcmd.value+' '+this.form.dev_sel.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');">
 <input class="common_bt" type="button" value="Show Results" onclick="this.form.pipe_cmd.value='/usr/sbin/smartctl -l selftest ' +this.form.dev_sel.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');">
 <input class="common_bt" type="button" value="Abort Test" onclick="this.form.pipe_cmd.value='/usr/sbin/smartctl -X '+this.form.dev_sel.value;AncstdAction(this.form,'anc_run.htm','smartmontools.htm','pipe','');">
 </td></tr>
