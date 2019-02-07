@@ -1,12 +1,13 @@
 diff -urN work/openvpn-2.4.6/Makefile work/openvpn-2.4.6/Makefile
 --- work/openvpn-2.4.6/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/openvpn-2.4.6/Makefile	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,79 @@
+@@ -0,0 +1,80 @@
 +include ../Rules.mak
 +
 +USROVPNDIR 		:= $(BINDIR)/../openvpn
 +BINS			:= $(OPEN_VPN)/src/openvpn/openvpn
 +POSTSCRIPT		:= openvpn_post
++SCRIPTS			:= openvpn.sh
 +STARTUP			:= rc_openvpn
 +LEGSTARTUP		:= rc_vpn
 +TUNKO			:= tun.ko
@@ -26,8 +27,9 @@ diff -urN work/openvpn-2.4.6/Makefile work/openvpn-2.4.6/Makefile
 +
 +install: control
 +	$(SSTRIP) $(BINS)
-+	for D in $(BINDIR) $(MODDIR) $(POSTDIR) $(USROVPNDIR) $(WWWDIR); do install -m 0755 -d $$D; done
++	for D in $(BINDIR) $(SCRDIR) $(MODDIR) $(POSTDIR) $(USROVPNDIR) $(WWWDIR); do install -m 0755 -d $$D; done
 +	install -m 0755 $(BINS) $(BINDIR)
++	install -m 0755 $(SCRIPTS) $(SCRDIR)
 +	install -m 0755 $(POSTSCRIPT) $(POSTDIR)
 +	install -m 0755 $(KERNEL_DIR)/drivers/net/$(TUNKO) $(MODDIR)
 +	$(STRIP) $(STRIPKOFLAGS) $(MODDIR)/$(TUNKO)
@@ -65,8 +67,7 @@ diff -urN work/openvpn-2.4.6/Makefile work/openvpn-2.4.6/Makefile
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
 +	@echo "cp -f $(USRETCINITDPOST)/$(POSTSCRIPT) $(TMPETC)/$(INITD)/$(RCPOST)/" >> $(POSTINST)
-+	@echo "$(USRSBINRCAPP)/$(STARTUP) restart >/dev/null 2>&1" >> $(POSTINST)
-+	@echo "while pidof $(STARTUP); do :; done" >> $(POSTINST)
++	@echo "$(USRSBINSCR)/$(SCRIPTS)" >> $(POSTINST)
 +	@echo "[ ! -z \"\`pidof openvpn\`\" ] && kill -9 \`pidof $(PROJ_TAG).cgi\` >/dev/null 2>&1" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +
