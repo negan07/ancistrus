@@ -75,7 +75,9 @@ function check_restore() {
 <body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
 <div><a class="page_title" href="javascript:gotoWiki('Utilities/');">Utilities</a></div>
 <div class="fix_button"><table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
-<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)"></td></tr></table></div>
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
+<input class="common_bt" type="button" name="refresh" value="Refresh GUI" onClick="window.top.location.reload(true)">
+</td></tr></table></div>
 <div id="main" class="main_top_button">
 <form name="utils" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
 <table border="0" cellpadding="0" cellspacing="3" width="100%"><tr></tr><tr></tr>
@@ -122,7 +124,7 @@ function check_restore() {
 	<option value="7300">20 Years</option>
 	<option value="36500">100 Years</option>
 </td></tr>
-<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Regenerate" onClick="return check_pem();"></td></tr>
+<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Regenerate PEM" onClick="return check_pem();"></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Utilities#download-nvram-settings')" tabindex="-1"><b>Download Nvram Settings</b></a></td></tr>
 <tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Download" onclick="window.location.href='anc.cgi?gen_file=nvram&next_file=anc_utils.htm&job=upload';"></td></tr>
