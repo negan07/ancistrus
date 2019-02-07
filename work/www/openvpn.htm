@@ -38,6 +38,12 @@ function varInit() {
 	setDefs();
 }
 
+function enableConfButtons() {
+	var but=["windows", "linux", "smartphone", "showconf"];
+
+	for(var i=0;i<but.length;i++) document.getElementById(but[i]).disabled=false;
+}
+
 function ddns_check() {
 	var cf=document.forms[0];
 
@@ -81,7 +87,7 @@ function checkData() {
 
 // -->
 </script></head>
-<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="enableConfButtons();varInit();document.forms[0].elements[0].focus();">
 <form name="openvpn" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
 <div> <a class="page_title" href="javascript:gotoWiki('openvpn-package/');">OPENVPN</a></div>
 <div class="fix_button">
@@ -107,9 +113,9 @@ function checkData() {
 <span languageCode="4012"> and install it on the devices where you want to run the VPN client.</span></td></tr>
 <tr><td colspan="2"><span languageCode="4014">Step 3: Click the proper button below to download the configuration files for your VPN clients. </span></td></tr>
 <tr><td colspan="2" align="left">
-<input type="button" class="common_bt" value="Windows" languagecode="10710" onclick="if(!ddns_check()) return false; window.location.href='setup.cgi?next_file=windows.zip&todo=generate_client_config';">
-<input type="button" class="common_bt" value="Linux/Other" languagecode="10711" onclick="if(!ddns_check()) return false; window.location.href='setup.cgi?next_file=non-windows.zip&todo=generate_client_config';">
-<input type="button" class="common_bt" value="Smartphone" languagecode="4028" onclick="if(!ddns_check()) return false; window.location.href='setup.cgi?next_file=smartphone.zip&todo=generate_client_config';">
+<input type="button" class="common_bt" value="Windows" id="windows" languagecode="10710" onclick="if(!ddns_check()) return false; window.location.href='setup.cgi?next_file=windows.zip&todo=generate_client_config';" disabled>
+<input type="button" class="common_bt" value="Linux/Other" id="linux" languagecode="10711" onclick="if(!ddns_check()) return false; window.location.href='setup.cgi?next_file=non-windows.zip&todo=generate_client_config';" disabled>
+<input type="button" class="common_bt" value="Smartphone" id="smartphone" languagecode="4028" onclick="if(!ddns_check()) return false; window.location.href='setup.cgi?next_file=smartphone.zip&todo=generate_client_config';" disabled>
 </td></tr>
 <tr><td colspan="2"><span languageCode="4015">Step 4: Unzip the configuration files you have just downloaded and copy them to the folder where the VPN client is installed on your device.For a client device with Windows64-bit system, the VPN client is installed at &quot;C:\Program files\OpenVPN\config\&quot; by default.</span></td></tr>
 <tr><td colspan="2"><span languageCode="4016">Step 5: For a client device with Windows, you need to modify the VPN interface name to &quot;NETGEAR-VPN&quot;. The VPN interface usually has a Device Name as &quot;TAP-Windows Adapter&quot;.</span></td></tr>
@@ -169,7 +175,7 @@ function checkData() {
 	<option value="client.conf">Unix/Other Client</option>
 	<option value="client_phone.ovpn">Smartphone Client</option>
 </select></td></tr>
-<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Show Config" onclick="this.form.pipe_cmd.value='/bin/cat /etc/'+configfile.value;if(this.form.openvpn_enable.value!='1'){alert(getErrorMsgByVar('gsm_msg_openvpn_apply'));return false;}else AncstdAction(this.form,'anc_run.htm','openvpn.htm','pipe','');"></td></tr>
+<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Show Config" id="showconf" onclick="this.form.pipe_cmd.value='/bin/cat /etc/'+configfile.value;if(this.form.openvpn_enable.value!='1'){alert(getErrorMsgByVar('gsm_msg_openvpn_apply'));return false;}else AncstdAction(this.form,'anc_run.htm','openvpn.htm','pipe','');" disabled></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('openvpn-package#personal-server-options')" tabindex="-1"><b>Type a personal server option here</b></a></td></tr>
 <tr><td colspan="2" align="center"><input type="text" name="openvpn_server_opt" size="40" maxlength="80" value=""></td></tr>
@@ -201,7 +207,7 @@ function checkData() {
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 </table>
 <input type="hidden" name="job" value="save">
-<input type="hidden" name="todo" value="/usr/sbin/rc openvpn restart">
+<input type="hidden" name="todo" value="/usr/sbin/scripts/openvpn.sh">
 <input type="hidden" name="next_file" value="openvpn.htm">
 <input type="hidden" name="old_file" value="">
 <input type="hidden" name="pipe_cmd" value="">
