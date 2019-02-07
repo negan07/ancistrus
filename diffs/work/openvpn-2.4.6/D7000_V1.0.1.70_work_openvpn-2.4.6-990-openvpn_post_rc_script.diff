@@ -1,7 +1,7 @@
 diff -urN work/openvpn-2.4.6/openvpn_post work/openvpn-2.4.6/openvpn_post
 --- work/openvpn-2.4.6/openvpn_post	2017-09-26 11:27:35.000000000 +0200
 +++ work/openvpn-2.4.6/openvpn_post	2017-11-28 17:45:53.442033301 +0100
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,27 @@
 +#!/bin/sh
 +
 +if [ "$1" = "start" -o "$1" = "restart" ]; then
@@ -11,11 +11,16 @@ diff -urN work/openvpn-2.4.6/openvpn_post work/openvpn-2.4.6/openvpn_post
 +	CONFFILE="/etc/${F}"
 +	[ ! -r ${CONFFILE} -o ! -w ${CONFFILE} ] && continue
 +
-+		# Change some original options
++	# Change some original options
++	set -- AES-256-CBC sha256
 +		for OPT in cipher auth
 +		do
 +		VAL=`anc nvram rget openvpn_${OPT}`
-+		[ ! -z "${VAL}" ] && sed -i "s|${OPT} .*|${OPT} ${VAL}|" ${CONFFILE}
++		[ -z "${VAL}" ] && VAL=$1
++		shift
++		# Repeat until conf file lock is released
++		while [ -e /var/lock/${F}.lock ]; do sleep 1; done
++		sed -i "s|${OPT} .*|${OPT} ${VAL}|" ${CONFFILE}
 +		done
 +
 +	# Append personal settings on client .conf files only
