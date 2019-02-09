@@ -57,7 +57,7 @@ return err;
  * Input: rel service name, argc, argv, locked fd.
  * Exit: 2 if fork error - on parent thread: 1 if no POST script, waitpid errcode on waitpid error or runprepost() retval - on child thread 1 .
  */
-static void run(const char *serv, int argc, char **argv ,int fd, const char *lock_path) __attribute__ ((noreturn));
+static void run(const char *serv, int argc, char **argv ,int fd, const char *lock_path) NORETURN;
 static void run(const char *serv, int argc, char **argv, int fd, const char *lock_path) {
 int pid, status, err=1;
 pid_t p;

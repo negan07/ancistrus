@@ -41,7 +41,7 @@
 #define ACTION argv[2]
 
 #define UNUSED __attribute((unused))					/* attributes */
-#define NORETURN __attribute__ ((noreturn)
+#define NORETURN __attribute__ ((noreturn))
 
 #define MAINARGS int argc, char** argv					/* main() arguments */
 #define MAINUNUSEDARGS int argc UNUSED, char** argv UNUSED		/* unused args */
