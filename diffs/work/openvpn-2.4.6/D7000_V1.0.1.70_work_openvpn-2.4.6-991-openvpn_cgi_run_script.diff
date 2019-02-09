@@ -1,11 +1,10 @@
 diff -urN work/openvpn-2.4.6/openvpn.sh work/openvpn-2.4.6/openvpn.sh
 --- work/openvpn-2.4.6/openvpn.sh	2017-09-26 11:27:35.000000000 +0200
 +++ work/openvpn-2.4.6/openvpn.sh	2017-11-28 17:45:53.442033301 +0100
-@@ -0,0 +1,7 @@
+@@ -0,0 +1,6 @@
 +#!/bin/sh
 +
 +# run from cgi to avoid race condition on config file show & download
 +/usr/sbin/rc_app/rc_openvpn restart >/dev/null 2>&1
-+while /bin/pidof rc >/dev/null 2>&1 || /bin/pidof rc_openvpn >/dev/null 2>&1 || /bin/pidof openvpn_post >/dev/null 2>&1; do :; done
 +
 +exit 0

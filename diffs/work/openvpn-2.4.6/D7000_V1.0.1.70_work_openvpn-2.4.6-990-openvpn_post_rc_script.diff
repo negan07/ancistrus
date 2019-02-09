@@ -5,6 +5,8 @@ diff -urN work/openvpn-2.4.6/openvpn_post work/openvpn-2.4.6/openvpn_post
 +#!/bin/sh
 +
 +if [ "$1" = "start" -o "$1" = "restart" ]; then
++ENABLE=`anc nvram rget openvpn_enable`
++[ "${ENABLE}" != "1" ] && exit 0
 +	# Parsing client configs
 +	for F in server.conf server_phone.conf client.conf client.ovpn client_phone.ovpn
 +	do
@@ -18,8 +20,6 @@ diff -urN work/openvpn-2.4.6/openvpn_post work/openvpn-2.4.6/openvpn_post
 +		VAL=`anc nvram rget openvpn_${OPT}`
 +		[ -z "${VAL}" ] && VAL=$1
 +		shift
-+		# Repeat until conf file lock is released
-+		while [ -e /var/lock/${F}.lock ]; do sleep 1; done
 +		sed -i "s|${OPT} .*|${OPT} ${VAL}|" ${CONFFILE}
 +		done
 +
