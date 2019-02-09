@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+var data_array=[@reclist_dhcp_reserved#];
+
+function getData() {
+	var cf=document.forms[0];
+	var index=radioSelectedIndex(cf.MacSelect);
+
+	if((index>-1)&&(index<data_array.length)) cf.rsv_mac.value=data_array[index][2];
+	else cf.rsv_mac.value="";
+}
+
+function populateMacTable() {
+	var txt="";
+
+		for(var i=0;i<data_array.length;i++) {
+		txt+="<tr><td width='10%' align='center'><input type='radio' value='#"+i+"' name='MacSelect' OnClick='getData()'></td>";
+		txt+="<td width='30%' align='left'><b>"+data_array[i][1]+"</b></td>";
+		txt+="<td width='30%' align='left'><b>"+data_array[i][0]+"</b></td>";
+		txt+="<td width='30%' align='left'><b>"+data_array[i][2]+"</b></td></tr>";
+		}
+	document.write(txt);
+}
+
+function checkMac(macField, mactype) {
+
+	if(macField.value.length==0) return false;
+	if(mactype!="pw") mactype="mac";
+
+	var MacStrOrg=macField.value;
+	var MacStrNoSep=MacStrOrg;
+	var macArray, c=":", i;
+
+	if(MacStrOrg.indexOf("-")>-1 || MacStrOrg.indexOf(":")<0) return false;
+
+	macArray=MacStrOrg.split(c);
+	if((mactype=="mac" && macArray.length!=6) || (mactype=="pw" && macArray.length!=4 && macArray.length!=6)) return false;
+
+	for(i=0;i<macArray.length;i++) if(macArray[i].length!=2) return false;
+
+	MacStrNoSep=MacStrNoSep.replace(/:/g,"");
+	return isValidMAC(MacStrNoSep,"ABCDEFabcdef0123456789",macArray.length*2);
+}
+
+function checkData() {
+	var cf=document.forms[0];
+	var msg="";
+
+	if(!checkMac(cf.rsv_mac, "mac")) msg+=getErrorMsgByVar("gsm_msg_eth_inv_mac")+"\n";
+	if(cf.pw.value.length>1 && !checkMac(cf.pw, "pw")) msg+="Wake-On-LAN password must be in the form: aa:bb:cc:dd[:ee:ff]\n";
+
+	if(msg.length>1) {
+	alert(msg);
+	return false;
+	}
+
+	cf.todo.value="/usr/sbin/ether-wake -b -i "+cf.h_lan_if.value+" ";
+	if(cf.pw.value.length>1) cf.todo.value+="-p "+cf.pw.value+" ";
+	cf.todo.value+=cf.rsv_mac.value+" >/dev/null 2>&1";
+
+	AncdataToHidden(cf);
+	return true;
+}
+
+//-->
+</script></head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="AncdataToVisible(document.forms[0]);document.forms[0].elements[0].focus();">
+<form name="wol" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<div><a class="page_title" href="javascript:gotoWiki('wake-on-lan/');">WAKE ON LAN</a></div>
+<div class="fix_button"><table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('AncdataToVisible(document.forms[0])',250)">
+<input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return checkData();">
+</td></tr></table></div>
+<div id="main" class="main_top_button">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('wake-on-lan#device-list');" tabindex="-1"><b>Select a Device to Wake-up or type the Mac Address then click Apply</b></a></td></tr>
+<tr></tr><tr></tr>
+<tr><td colspan="2"><table class="tables" border="1" cellpadding="2" cellspacing="0" width="60%" text-align="left" align="center">
+	<tr class="table_header">
+	<td nowrap width="10%" align="left"><span class="thead"></span></td>
+	<td nowrap width="30%" align="left"><span class="thead"><b>IP Address</b></span></td>
+	<td nowrap width="30%" align="left"><span class="thead"><b>Device Name</b></span></td>
+	<td nowrap width="30%" align="left"><span class="thead"><b>MAC Address</b></span></td>
+	</tr>
+	<script>populateMacTable();</script>
+</table></td></tr>
+<tr></tr><tr></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('wake-on-lan#mac-address')" tabindex="-1"><b>MAC Address</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="text" name="rsv_mac" size="17" maxlength="17" value=""></td></tr>
+<tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('wake-on-lan#password')" tabindex="-1"><b>Password (if any)</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="password" autocomplete="off" name="pw" size="17" maxlength="17" value=""></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+</table>
+<input type="hidden" name="job" value="home">
+<input type="hidden" name="todo" value="">
+<input type="hidden" name="next_file" value="anc_wol.htm">
+<input type="hidden" name="h_lan_if" value="@h_lan_if#">
+</div>
+</form>
+<script>printHelp();</script>
+</body></html>

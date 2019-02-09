@@ -38,7 +38,9 @@ function opkgMenuSet() {
 }
 
 function coreMenuSet() {
-	var txt="", pagename=["dsltweak", "inhibit", "sched", "pers", "utils"], menuname=["DSL Tweak", "Service Inhibitions", "Schedule Events", "Personal Instructions", "Utilities"];
+	var txt="";
+	var pagename=["dsltweak", "inhibit", "sched", "pers", "wol", "utils"];
+	var menuname=["DSL Tweak", "Service Inhibitions", "Schedule Events", "Personal Instructions", "Wake On Lan", "Utilities"];
 
 	for(var i=0;i<pagename.length;i++) txt+="<dt id='"+pagename[i]+"' class='sub_back'><a target='formframe' onclick='linksetup(\""+pagename[i]+"\", \"core\")'><b><span>"+menuname[i]+"</span></b></a></dt>";
 	document.write(txt);
