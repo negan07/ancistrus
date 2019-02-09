@@ -103,7 +103,7 @@ char *exargs[ARGNUMMAX], *s, *s_cmd;
 int i=0;
 
 	if(cmd!=NULL && *cmd) {									//avoid null/void string passed
-	TOKENIZE(cmd, " ", s_cmd) exargs[i++]=s;						//assign an argument for each token
+	TOKENIZE(cmd, s, " ", s_cmd) exargs[i++]=s;						//assign an argument for each token
 	exargs[i]=NULL;										//set last arg as null
 	execve(*exargs, exargs, envp);
 	DBG("runexecve(): execve() fail, cmd: %s, error number: %d\n", cmd, errno);

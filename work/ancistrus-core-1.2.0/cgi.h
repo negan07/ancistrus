@@ -14,6 +14,7 @@
 
 #define QUERYFORMATCONV										\
 (hex[0]>'9'?(hex[0]&0xDF)-'A'+10:hex[0]-'0')*16+(hex[1]>'9'?(hex[1]&0xDF)-'A'+10:hex[1]-'0')	//query format conversion
+#define BOOLLISTTYPE			(!strncmp(nvar, "reclist_", 8) ? (fde=8) : (fde=5))	//choose between list or reclist
 
 #define QSGET(name)			qram_safe_get(name)					//not reentrant
 #define QSGETR(name)			qram_safe_get_r(name)					//reentrant (return must be free)

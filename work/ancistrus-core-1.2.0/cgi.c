@@ -179,7 +179,7 @@ static int savelist(const int add, const char *listname, char *listval) {
 char *s, *s_listval;
 
 if(listname==NULL || !*listname) return 1;
-	TOKENIZE(listval, "\3", s_listval) {
+	TOKENIZE(listval, s, "\3", s_listval) {
 	(!add ? NV_ADD(listname, s) : NV_DEL(listname, s));
 	CGIDBG("savelist(): -------------------------------------------> anc nvram %s %s \"%s\"\n", !add ? "add" : "delete", listname, s);
 	}
@@ -201,14 +201,40 @@ return 0;
 /*
  * GETNVLIST
  * Write an option tag list on stdout.
- * Input: compound variable raw content (divided by separator).
- * Return: '0' on success, '1' on void/null variable.
+ * Input: compound array of variables raw content (divided by separator).
+ * Return: '0' on success, '1' on void/null list.
  */
 static int getnvlist(char *list) {
 char *s, *s_list;
 
 if(list==NULL || !*list) return 1;
-TOKENIZE(list, "\1", s_list) {TYPE("<option value=\"");TYPE(s);TYPE("\">");TYPE(s);TYPE("</option>");}//chop div separator & create options
+TOKENIZE(list, s, "\1", s_list) {TYPE("<option value=\"");TYPE(s);TYPE("\">");TYPE(s);TYPE("</option>");}//chop div separator & create options
+return 0;
+}
+
+/*
+ * GETNVRECLIST
+ * Write a record list array var.
+ * Input: compound array of records raw content (divided by separator and subseparator).
+ * Return: '0' on success, '1' on void/null reclist.
+ */
+static int getnvreclist(char *reclist) {
+char *s, *s_reclist, *t, *s_subreclist;
+int next=0, subnext;
+
+if(reclist==NULL || !*reclist) return 1;
+	TOKENIZE(reclist, s, "\1", s_reclist) {
+	if(next) TYPECH(",");
+	TYPECH("[");
+	subnext=0;
+		TOKENIZE(s, t, "\2", s_subreclist) {
+		if(subnext) TYPECH(",");
+		TYPECH("\"");TYPE(t);TYPECH("\"");
+		subnext=1;
+		}
+	TYPECH("]");
+	next=1;
+	}
 return 0;
 }
 
@@ -220,12 +246,15 @@ return 0;
  */
 static int getnvar(const char *nvar) {
 char *val, perc[5];
+int fde;
 
 if(nvar==NULL || !*nvar) return 1;
-	if(!strncmp(nvar, "list_", 5)) {							//list (compound variable) found
-	val=NV_SGET(nvar+5);
+	if(!strncmp(nvar, "reclist_", 8) || !strncmp(nvar, "list_", 5)) {			//compound variable found
+	BOOLLISTTYPE;
+	val=NV_SGET(nvar+fde);
 	CGIDBG("getnvar():      val   %s\n", val);
-	if(getnvlist(val)) return 1;
+	if(fde==8 && getnvreclist(val)) return 1;
+	else if(fde==5 && getnvlist(val)) return 1;
 	}
 	else if(!strncmp(nvar, "part_", 5)) {							//flash partition for % used space
 	partperc(nvar+5, perc);
@@ -313,19 +342,21 @@ if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *
 		if((err=fetchformvar(raw, nvar, fd))) return err;				//fetch vars & check if webpage is malformed
 			if(!*job || !strcmp(job, "upload")||!strcmp(job, "home")) getnvar(nvar);//### GET METHOD || HOME/UPLOAD FILE ###
 			else if(!strcmp(job, "save")) {						//### POST METHOD - SAVE ###
-			if(*(val=QSGET(raw))!='@' && strncmp(nvar, "list_", 5)) NV_SET(nvar, val);//if not unassigned or list nvram set value
+			if(*(val=QSGET(raw))!='@' && strncmp(nvar, "list_", 5) && strncmp(nvar, "reclist_", 8)) NV_SET(nvar, val);//store value
 			CGIDBG("populatepage(): ----------------------------------------> anc nvram set %s \"%s\"\n", nvar, val);
 			getnvar(nvar);								//retrieve nvram value like GET
 			}
 			else if(!strcmp(job, "add") || !strcmp(job, "del")) {			//### ADD/DELETE ###
 			val=QSGET(job);
+			BOOLLISTTYPE;								//choose between list or reclist
 			if(!strcmp(raw, val))							//add/del nvram subvalue(s)
-			(!strcmp(job, "add") ? savelist(ADD, val+5, QSGET(val+5)) : savelist(DELETE, val+5, QSGET("selected")));
+			(!strcmp(job, "add") ? savelist(ADD, val+fde, QSGET(val+fde)) : savelist(DELETE, val+fde, QSGET("selected")));
 			getnvar(nvar);								//retrieve nvram value like GET
 			}			
 			else if(!strcmp(job, "clear")) {					//### CLEAR ###
 			val=QSGET(job);								//fetch list name to clear
-			(!strcmp(raw, val) ? NV_SET(val+5, "") : getnvar(nvar));		//void list on nvram (skip 'list_') or GET
+			BOOLLISTTYPE;								//switch between list or reclist
+			(!strcmp(raw, val) ? NV_SET(val+fde, "") : getnvar(nvar));		//void list on nvram (skip '(rec)list_') or GET
 			}
 			else if(!strcmp(job, "edit") && !strcmp(raw, "file_content")) {		//### EDIT FILE ###
 			SFDOPEN(fde, QSGET("edit_file"), O_RDONLY) return 10;

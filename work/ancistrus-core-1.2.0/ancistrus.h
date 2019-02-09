@@ -92,7 +92,7 @@ exit(3);													\
 #define TYPECH(ch) write(1, &ch, 1)					/* low-level write a char to stdout */
 #define READ(str) read(0, str, sizeof(str))				/* low-level read a string from stdin */
 #define TYPE(str) write(1, str, strlen(str))				/* low-level write a string to stdout */
-#define TOKENIZE(str, tag, s_str) for(s=(char*)strtok_r(str, tag, &s_str);s!=NULL;s=(char*)strtok_r(NULL, tag, &s_str))	/* tokenizer loop */
+#define TOKENIZE(str, tok, tag, s_str) for(tok=(char*)strtok_r(str, tag, &s_str);tok!=NULL;tok=(char*)strtok_r(NULL, tag, &s_str))/* tokens */
 #define NULLRED " >/dev/null 2>&1;"					/* null output redirections */
 
 #define NV_GET nvram_get						/* various nvram redefs */
