@@ -102,6 +102,8 @@ pre_inst:
 	@mkdir -p -m 777 $(IMAGEDIR)/opkg $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR) || exit 1
 	echo -e "\\e[35m$(CUR_REL_PATH): removing old shared lib references on \\e[36m$(BUILD_TARGET) \\e[0m"
 	rm $(BUILD_TARGET)$(RCLDLIB)/libz.so* $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so* $(BUILD_TARGET)$(RCLDLIB)/libssl.so* $(BUILD_TARGET)$(RCLDLIB)/libcurl.so* || exit 1
+	echo -e "\\e[35m$(CUR_REL_PATH): removing old $(RCBOOTDIR)/iproute2 dir on \\e[36m$(BUILD_TARGET) \\e[0m"
+	rm -r $(BUILD_TARGET)$(RCBOOTDIR)/iproute2 || exit 1
 
 opkg_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(BUILD_TARGET) \\e[0m"
@@ -110,6 +112,9 @@ opkg_inst:
 	@$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf update || exit 1
 	@$(foreach P, $(SUBDIRS), echo "$(PKG_RM_LIST)" | grep "$(P)" > /dev/null 2>&1 || \
 	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf install $(NAME_$(P)) || exit 1;)
+	@echo -e "\\e[35m$(CUR_REL_PATH): cleanup temp opkg inst files on \\e[36m$(BUILD_TARGET) \\e[0m"
+	@$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf clean || exit 1
+	@rm -rf $(BUILD_TARGET)$(RCTMPDIR)/opkg/ $(BUILD_TARGET)$(RCTMPDIR)/usr/
 
 post_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): making FS post install modifications on \\e[36m$(BUILD_TARGET) \\e[0m"
@@ -122,9 +127,10 @@ post_inst:
 	@ln -sf libcurl.so.$(RCCURLVER) $(BUILD_TARGET)$(RCLDLIB)/libcurl.so || exit 1
 	@ln -sf libcurl.so.$(RCCURLVER) $(BUILD_TARGET)$(RCLDLIB)/libcurl.so.$(RCCURLMAINVER) || exit 1
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBOOTDIR)/$(RCAPPSNAME) || exit 1
+	@mv $(BUILD_TARGET)$(RCTMPDIR)/openssl.cnf $(BUILD_TARGET)$(RCTMPDIR)/profile $(BUILD_TARGET)$(RCTMPDIR)/iproute2 $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1
 	@mv $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMDBIN) || exit 1
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) || exit 1
-	@mv $(BUILD_TARGET)$(RCTMPDIR)/openssl $(BUILD_TARGET)$(RCTMPDIR)/curl $(BUILD_TARGET)$(RCTMPDIR)/busybox $(BUILD_TARGET)$(RCBINDIR)/ || exit 1
+	@mv $(BUILD_TARGET)$(RCTMPDIR)/openssl $(BUILD_TARGET)$(RCTMPDIR)/curl $(BUILD_TARGET)$(RCTMPDIR)/busybox $(BUILD_TARGET)$(RCTMPDIR)/ip $(BUILD_TARGET)$(RCTMPDIR)/tc $(BUILD_TARGET)$(RCBINDIR)/ || exit 1
 	@for F in `cat $(BUSYBOX)/busybox.links`; do mv $(BUILD_TARGET)$(RCTMPDIR)/`basename $$F` $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; done
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep xdsl-driver`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
@@ -142,8 +148,8 @@ post_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): moving $(RCINITD) & opkg dirs content from \\e[36m$(BUILD_TARGET) \\e[0m"
 	@mv $(BUILD_TARGET)$(RCINITDIR)/* $(IMAGEDIR)/$(RCINITD) || exit 1
 	@mv $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/* $(IMAGEDIR)/opkg || exit 1
-	@echo -e "\\e[35m$(CUR_REL_PATH): removing tmp files from \\e[36m$(BUILD_TARGET) \\e[0m"
-	@rm -rf $(BUILD_TARGET)$(RCTMPDIR)/*
+	@echo -e "\\e[35m$(CUR_REL_PATH): checking for tmp inst file presence on \\e[36m$(BUILD_TARGET)$(RCTMPDIR)/ \\e[0m"
+	@[ -z "$$(ls -A $(BUILD_TARGET)$(RCTMPDIR)/)" ] || exit 1
 
 clean_build:
 	@if [ -d $(BUILD_DIR_PATH) ]; then \
