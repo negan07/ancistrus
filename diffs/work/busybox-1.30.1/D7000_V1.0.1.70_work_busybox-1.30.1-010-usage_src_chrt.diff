@@ -1,7 +1,7 @@
-diff -urN work/busybox-1.29.3/include/usage.src.h work/busybox-1.29.3/include/usage.src.h
---- work/busybox-1.29.3/include/usage.src.h	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.29.3/include/usage.src.h	2018-10-31 21:56:14.837218353 +0100
-@@ -28,3 +28,12 @@
+diff -urN work/busybox-1.30.1/include/usage.src.h work/busybox-1.30.1/include/usage.src.h
+--- work/busybox-1.30.1/include/usage.src.h	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.30.1/include/usage.src.h	2018-10-31 21:56:14.837218353 +0100
+@@ -31,3 +31,12 @@
         "Hello world!\n"
  
  #endif
@@ -14,9 +14,9 @@ diff -urN work/busybox-1.29.3/include/usage.src.h work/busybox-1.29.3/include/us
 +     "\n	-s DEVNAME	src device name." \
 +     "\n	-d DEVNAME	dst device name." \
 +
-diff -urN work/busybox-1.29.3/util-linux/chrt.c work/busybox-1.29.3/util-linux/chrt.c
---- work/busybox-1.29.3/util-linux/chrt.c	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.29.3/util-linux/chrt.c	2018-10-31 22:15:36.748785153 +0100
+diff -urN work/busybox-1.30.1/util-linux/chrt.c work/busybox-1.30.1/util-linux/chrt.c
+--- work/busybox-1.30.1/util-linux/chrt.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.30.1/util-linux/chrt.c	2018-10-31 22:15:36.748785153 +0100
 @@ -131,12 +131,8 @@
  		pol = sched_getscheduler(pid);
  		if (pol < 0)

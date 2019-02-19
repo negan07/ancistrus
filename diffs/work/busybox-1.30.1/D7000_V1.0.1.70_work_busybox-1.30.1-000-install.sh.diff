@@ -1,6 +1,6 @@
-diff -urN work/busybox-1.29.3/applets/install.sh work/busybox-1.29.3/applets/install.sh
---- work/busybox-1.29.3/applets/install.sh	2018-09-09 20:56:44.000000000 +0200
-+++ work/busybox-1.29.3/applets/install.sh	2018-10-31 22:11:47.013674367 +0100
+diff -urN work/busybox-1.30.1/applets/install.sh work/busybox-1.30.1/applets/install.sh
+--- work/busybox-1.30.1/applets/install.sh	2018-09-09 20:56:44.000000000 +0200
++++ work/busybox-1.30.1/applets/install.sh	2018-10-31 22:11:47.013674367 +0100
 @@ -18,6 +18,7 @@
  h=`sort busybox.links | uniq`
  
@@ -36,7 +36,7 @@ diff -urN work/busybox-1.29.3/applets/install.sh work/busybox-1.29.3/applets/ins
  for i in $h; do
 -	appdir=`dirname "$i"`
  	app=`basename "$i"`
- 	if [ x"$noclobber" = x"1" ] && [ -e "$prefix/$i" ]; then
+ 	if [ x"$noclobber" = x"1" ] && ([ -e "$prefix/$i" ] || [ -h "$prefix/$i" ]); then
  		echo "  $prefix/$i already exists"
  		continue
  	fi
