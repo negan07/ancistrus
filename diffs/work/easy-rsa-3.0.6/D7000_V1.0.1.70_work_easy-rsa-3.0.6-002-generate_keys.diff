@@ -1,6 +1,6 @@
-diff -urN work/easy-rsa-3.0.5/easyrsa3/generate.sh work/easy-rsa-3.0.5/easyrsa3/generate.sh
---- work/easy-rsa-3.0.5/easyrsa3/generate.sh	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.5/easyrsa3/generate.sh	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/easy-rsa-3.0.6/easyrsa3/generate.sh work/easy-rsa-3.0.6/easyrsa3/generate.sh
+--- work/easy-rsa-3.0.6/easyrsa3/generate.sh	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.6/easyrsa3/generate.sh	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,20 @@
 +#!/bin/sh
 +

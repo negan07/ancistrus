@@ -1,7 +1,7 @@
-diff -urN work/easy-rsa-3.0.5/easyrsa3/vars work/easy-rsa-3.0.5/easyrsa3/vars
---- work/easy-rsa-3.0.5/easyrsa3/vars	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.5/easyrsa3/vars	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,206 @@
+diff -urN work/easy-rsa-3.0.6/easyrsa3/vars work/easy-rsa-3.0.6/easyrsa3/vars
+--- work/easy-rsa-3.0.6/easyrsa3/vars	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.6/easyrsa3/vars	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,210 @@
 +# Easy-RSA 3 parameter settings
 +
 +# NOTE: If you installed Easy-RSA from your distro's package manager, don't edit
@@ -130,6 +130,10 @@ diff -urN work/easy-rsa-3.0.5/easyrsa3/vars work/easy-rsa-3.0.5/easyrsa3/vars
 +# How many days until the next CRL publish date?  Note that the CRL can still be
 +# parsed after this timeframe passes. It is only used for an expected next
 +# publication date.
++
++# How many days before its expiration date a certificate is allowed to be
++# renewed?
++#set_var EASYRSA_CERT_RENEW	30
 +
 +#set_var EASYRSA_CRL_DAYS	180
 +

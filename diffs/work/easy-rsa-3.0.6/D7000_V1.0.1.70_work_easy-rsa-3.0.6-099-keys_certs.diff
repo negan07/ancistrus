@@ -1,6 +1,6 @@
-diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/ca.crt work/easy-rsa-3.0.5/easyrsa3/keys/ca.crt
---- work/easy-rsa-3.0.5/easyrsa3/keys/ca.crt	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.5/easyrsa3/keys/ca.crt	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/easy-rsa-3.0.6/easyrsa3/keys/ca.crt work/easy-rsa-3.0.6/easyrsa3/keys/ca.crt
+--- work/easy-rsa-3.0.6/easyrsa3/keys/ca.crt	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.6/easyrsa3/keys/ca.crt	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,37 @@
 +-----BEGIN CERTIFICATE-----
 +MIIGfjCCBGagAwIBAgIJAPlFg9VlfE9BMA0GCSqGSIb3DQEBCwUAMIGBMQswCQYD
@@ -39,9 +39,9 @@ diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/ca.crt work/easy-rsa-3.0.5/easyrsa3/
 +LqZhctZWg4V4gr6ILeND7fwKC4aXMv+RmWamZ1JC81cQZcwW7Z+BxxabpxovwaLJ
 +8DIVMTpG00LlURiIq1sjZCqYhhOaO9IplZv7I0VUFYPpqA==
 +-----END CERTIFICATE-----
-diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/server.crt work/easy-rsa-3.0.5/easyrsa3/keys/server.crt
---- work/easy-rsa-3.0.5/easyrsa3/keys/server.crt	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.5/easyrsa3/keys/server.crt	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/easy-rsa-3.0.6/easyrsa3/keys/server.crt work/easy-rsa-3.0.6/easyrsa3/keys/server.crt
+--- work/easy-rsa-3.0.6/easyrsa3/keys/server.crt	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.6/easyrsa3/keys/server.crt	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,135 @@
 +Certificate:
 +    Data:
@@ -178,9 +178,9 @@ diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/server.crt work/easy-rsa-3.0.5/easyr
 +vu21100tzSyZYLFIJPc88cIzJjeyn+AzZkcBmidFZ5ZtXEOBgW54mkgmW7zBfVEV
 +Kfnw1QfHQMuIH4WwdClztyBqUUXcDzYWIDGXgg==
 +-----END CERTIFICATE-----
-diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/client.crt work/easy-rsa-3.0.5/easyrsa3/keys/client.crt
---- work/easy-rsa-3.0.5/easyrsa3/keys/client.crt	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.5/easyrsa3/keys/client.crt	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/easy-rsa-3.0.6/easyrsa3/keys/client.crt work/easy-rsa-3.0.6/easyrsa3/keys/client.crt
+--- work/easy-rsa-3.0.6/easyrsa3/keys/client.crt	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.6/easyrsa3/keys/client.crt	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,133 @@
 +Certificate:
 +    Data:
@@ -315,9 +315,9 @@ diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/client.crt work/easy-rsa-3.0.5/easyr
 +xvXCrjanvRQD+nHgm+bmofeJ7fmk15SccNhAo01BqI8JZlgrxUTe6qkhrqXsMSb1
 +8/dafMoOiaE=
 +-----END CERTIFICATE-----
-diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/ca.key work/easy-rsa-3.0.5/easyrsa3/keys/ca.key
---- work/easy-rsa-3.0.5/easyrsa3/keys/ca.key	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.5/easyrsa3/keys/ca.key	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/easy-rsa-3.0.6/easyrsa3/keys/ca.key work/easy-rsa-3.0.6/easyrsa3/keys/ca.key
+--- work/easy-rsa-3.0.6/easyrsa3/keys/ca.key	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.6/easyrsa3/keys/ca.key	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,51 @@
 +-----BEGIN RSA PRIVATE KEY-----
 +MIIJKAIBAAKCAgEA2GMwBpJUy+NvcMHRkmEku1pJ/PMppddNpo5YmnhGn/fnLTOz
@@ -370,9 +370,9 @@ diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/ca.key work/easy-rsa-3.0.5/easyrsa3/
 +LtxgPimtgXj0wbWhwLEusavqNOIWy6/Okwq1CHZXNpsxbd1ghzS/zzpojr9rfiRR
 +/0mcKEpNg3njWx4iOk3l5A7SPvH0yjjNy95Cz2F+KOH/r/jXNHyNGauD7P8=
 +-----END RSA PRIVATE KEY-----
-diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/server.key work/easy-rsa-3.0.5/easyrsa3/keys/server.key
---- work/easy-rsa-3.0.5/easyrsa3/keys/server.key	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.5/easyrsa3/keys/server.key	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/easy-rsa-3.0.6/easyrsa3/keys/server.key work/easy-rsa-3.0.6/easyrsa3/keys/server.key
+--- work/easy-rsa-3.0.6/easyrsa3/keys/server.key	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.6/easyrsa3/keys/server.key	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,52 @@
 +-----BEGIN PRIVATE KEY-----
 +MIIJQgIBADANBgkqhkiG9w0BAQEFAASCCSwwggkoAgEAAoICAQDL155KX2VwnVtQ
@@ -426,9 +426,9 @@ diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/server.key work/easy-rsa-3.0.5/easyr
 ++7LWJqHAGWcauhEQxomWGGQwAgxC/mXniYfqB1pHHgY39qbMcnN3FEmaJDmZh3Qt
 +qKNbpfOZQ79satGQHXcdAy6JKCsw6g==
 +-----END PRIVATE KEY-----
-diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/client.key work/easy-rsa-3.0.5/easyrsa3/keys/client.key
---- work/easy-rsa-3.0.5/easyrsa3/keys/client.key	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.5/easyrsa3/keys/client.key	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/easy-rsa-3.0.6/easyrsa3/keys/client.key work/easy-rsa-3.0.6/easyrsa3/keys/client.key
+--- work/easy-rsa-3.0.6/easyrsa3/keys/client.key	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.6/easyrsa3/keys/client.key	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,52 @@
 +-----BEGIN PRIVATE KEY-----
 +MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQCyPaHLg+i7hpn7
@@ -482,9 +482,9 @@ diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/client.key work/easy-rsa-3.0.5/easyr
 +ePNO91zfBVO8zGuM4FIFiYawikNecIlRDQmXCkR4zS2lSe8j0sVM8HQHYRlfHIPu
 +2LP6KFHrnlU2VO7Lt8nbP8U8BC/RFUI=
 +-----END PRIVATE KEY-----
-diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/server.csr work/easy-rsa-3.0.5/easyrsa3/keys/server.csr
---- work/easy-rsa-3.0.5/easyrsa3/keys/server.csr	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.5/easyrsa3/keys/server.csr	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/easy-rsa-3.0.6/easyrsa3/keys/server.csr work/easy-rsa-3.0.6/easyrsa3/keys/server.csr
+--- work/easy-rsa-3.0.6/easyrsa3/keys/server.csr	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.6/easyrsa3/keys/server.csr	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,28 @@
 +-----BEGIN CERTIFICATE REQUEST-----
 +MIIEwjCCAqoCAQAwfTELMAkGA1UEBhMCQ04xCzAJBgNVBAgMAkpTMQswCQYDVQQH
@@ -514,9 +514,9 @@ diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/server.csr work/easy-rsa-3.0.5/easyr
 +Vl7F44G/KUeUDjpCJgTWfnozjv6PE6VWvv0N3GJC3mom2sH3AIzgMjAzd8BfGhWh
 +M0d8Ry2ztCO4zQ6m1rgXbnNUAlE1Fw==
 +-----END CERTIFICATE REQUEST-----
-diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/client.csr work/easy-rsa-3.0.5/easyrsa3/keys/client.csr
---- work/easy-rsa-3.0.5/easyrsa3/keys/client.csr	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.5/easyrsa3/keys/client.csr	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/easy-rsa-3.0.6/easyrsa3/keys/client.csr work/easy-rsa-3.0.6/easyrsa3/keys/client.csr
+--- work/easy-rsa-3.0.6/easyrsa3/keys/client.csr	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.6/easyrsa3/keys/client.csr	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,28 @@
 +-----BEGIN CERTIFICATE REQUEST-----
 +MIIEwjCCAqoCAQAwfTELMAkGA1UEBhMCQ04xCzAJBgNVBAgMAkpTMQswCQYDVQQH
@@ -546,9 +546,9 @@ diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/client.csr work/easy-rsa-3.0.5/easyr
 +deUcFwIZox1FyY3mLYECpvkIqPAnhB/lZwkiE081pTNhhSNQq8tKEurR64gke22N
 +WZcvT/E7diQT3WA/ECbyyscUXYNhTw==
 +-----END CERTIFICATE REQUEST-----
-diff -urN work/easy-rsa-3.0.5/easyrsa3/keys/dh2048.pem work/easy-rsa-3.0.5/easyrsa3/keys/dh2048.pem
---- work/easy-rsa-3.0.5/easyrsa3/keys/dh2048.pem	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.5/easyrsa3/keys/dh2048.pem	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/easy-rsa-3.0.6/easyrsa3/keys/dh2048.pem work/easy-rsa-3.0.6/easyrsa3/keys/dh2048.pem
+--- work/easy-rsa-3.0.6/easyrsa3/keys/dh2048.pem	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.6/easyrsa3/keys/dh2048.pem	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,13 @@
 +-----BEGIN DH PARAMETERS-----
 +MIICCAKCAgEA8nGfZvaHNDreodIHyd1SMJ93RymsIcCFFUCuIz/A7bieSdREKjTY
