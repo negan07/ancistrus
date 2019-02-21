@@ -1,7 +1,7 @@
-diff -urN work/openvpn-2.4.6/openvpn-2.4.6/Makefile.in work/openvpn-2.4.6/openvpn-2.4.6/Makefile.in
---- work/openvpn-2.4.6/openvpn-2.4.6/Makefile.in	2017-09-26 11:27:50.000000000 +0200
-+++ work/openvpn-2.4.6/openvpn-2.4.6/Makefile.in	2017-11-28 22:53:11.029489996 +0100
-@@ -473,7 +473,7 @@
+diff -urN work/openvpn-2.4.7/openvpn-2.4.7/Makefile.in work/openvpn-2.4.7/openvpn-2.4.7/Makefile.in
+--- work/openvpn-2.4.7/openvpn-2.4.7/Makefile.in	2017-09-26 11:27:50.000000000 +0200
++++ work/openvpn-2.4.7/openvpn-2.4.7/Makefile.in	2017-11-28 22:53:11.029489996 +0100
+@@ -472,7 +472,7 @@
  @GIT_CHECKOUT_TRUE@BUILT_SOURCES = \
  @GIT_CHECKOUT_TRUE@	config-version.h
  
@@ -10,7 +10,7 @@ diff -urN work/openvpn-2.4.6/openvpn-2.4.6/Makefile.in work/openvpn-2.4.6/openvp
  dist_doc_DATA = \
  	README \
  	README.IPv6 \
-@@ -497,8 +497,8 @@
+@@ -496,8 +496,8 @@
  	config-msvc.h \
  	config-msvc-version.h.in
  
@@ -21,7 +21,7 @@ diff -urN work/openvpn-2.4.6/openvpn-2.4.6/Makefile.in work/openvpn-2.4.6/openvp
  all: $(BUILT_SOURCES) config.h
  	$(MAKE) $(AM_MAKEFLAGS) all-recursive
  
-@@ -518,15 +518,15 @@
+@@ -517,15 +517,15 @@
  	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile'; \
  	$(am__cd) $(top_srcdir) && \
  	  $(AUTOMAKE) --foreign Makefile
@@ -31,8 +31,8 @@ diff -urN work/openvpn-2.4.6/openvpn-2.4.6/Makefile.in work/openvpn-2.4.6/openvp
 -	    echo ' $(SHELL) ./config.status'; \
 -	    $(SHELL) ./config.status;; \
 -	  *) \
--	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
--	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
+-	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles)'; \
+-	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles);; \
 -	esac;
 +#Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 +#	@case '$?' in \
@@ -40,13 +40,13 @@ diff -urN work/openvpn-2.4.6/openvpn-2.4.6/Makefile.in work/openvpn-2.4.6/openvp
 +#	    echo ' $(SHELL) ./config.status'; \
 +#	    $(SHELL) ./config.status;; \
 +#	  *) \
-+#	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
-+#	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
++#	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles)'; \
++#	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles);; \
 +#	esac;
  
  $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
  	$(SHELL) ./config.status --recheck
-@@ -537,9 +537,9 @@
+@@ -536,9 +536,9 @@
  	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
  $(am__aclocal_m4_deps):
  
@@ -59,7 +59,7 @@ diff -urN work/openvpn-2.4.6/openvpn-2.4.6/Makefile.in work/openvpn-2.4.6/openvp
  
  stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
  	@rm -f stamp-h1
-@@ -909,7 +909,7 @@
+@@ -911,7 +911,7 @@
  	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
  	done
  install: $(BUILT_SOURCES)
@@ -68,10 +68,10 @@ diff -urN work/openvpn-2.4.6/openvpn-2.4.6/Makefile.in work/openvpn-2.4.6/openvp
  install-exec: install-exec-recursive
  install-data: install-data-recursive
  uninstall: uninstall-recursive
-diff -urN work/openvpn-2.4.6/openvpn-2.4.6/src/Makefile.in work/openvpn-2.4.6/openvpn-2.4.6/src/Makefile.in
---- work/openvpn-2.4.6/openvpn-2.4.6/src/Makefile.in	2017-09-26 11:27:50.000000000 +0200
-+++ work/openvpn-2.4.6/openvpn-2.4.6/src/Makefile.in	2017-11-28 22:53:11.029489996 +0100
-@@ -380,7 +380,7 @@
+diff -urN work/openvpn-2.4.7/openvpn-2.4.7/src/Makefile.in work/openvpn-2.4.7/openvpn-2.4.7/src/Makefile.in
+--- work/openvpn-2.4.7/openvpn-2.4.7/src/Makefile.in	2017-09-26 11:27:50.000000000 +0200
++++ work/openvpn-2.4.7/openvpn-2.4.7/src/Makefile.in	2017-11-28 22:53:11.029489996 +0100
+@@ -379,7 +379,7 @@
  MAINTAINERCLEANFILES = \
  	$(srcdir)/Makefile.in
  

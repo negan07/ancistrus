@@ -1,6 +1,6 @@
-diff -urN work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/syshead.h work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/syshead.h
---- work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/syshead.h
-+++ work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/syshead.h
+diff -urN work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/syshead.h work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/syshead.h
+--- work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/syshead.h
++++ work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/syshead.h
 @@ -597,11 +597,11 @@ socket_defined(const socket_descriptor_t
  /*
   * Should we include NTLM proxy functionality
@@ -17,9 +17,9 @@ diff -urN work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/syshead.h work/openvpn-2.
  
  /*
   * Should we include proxy digest auth functionality
-diff -urN work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/crypto_mbedtls.c work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/crypto_mbedtls.c
---- work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/crypto_mbedtls.c
-+++ work/openvpn-2.4.6/openvpn-2.4.6/src/openvpn/crypto_mbedtls.c
+diff -urN work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/crypto_mbedtls.c work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/crypto_mbedtls.c
+--- work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/crypto_mbedtls.c
++++ work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/crypto_mbedtls.c
 @@ -319,6 +319,7 @@ int
  key_des_num_cblocks(const mbedtls_cipher_info_t *kt)
  {
