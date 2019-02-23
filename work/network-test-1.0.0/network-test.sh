@@ -148,14 +148,14 @@ END {
 			avg_usg=avg_usg>0 ? (last_usg[c]-init_usg[c])/avg_usg : 0
 			std_usg=sum_usg_2[c]/n_load_samp-avg_usg^2
 			std_usg=std_usg>0 ? sqrt(std_usg) : 0
-			printf("%9s: %5.1f%% +/- %4.1f%%", c, avg_usg*100, std_usg*100)
+			printf("%9s: %5.1f +/- %4.1f", c, avg_usg*100, std_usg*100)
 			avg_freq=n_freq_samp[c]>0 ? sum_freq[c]/n_freq_samp[c] : 0
 			if (avg_freq>0) printf("  @ %4d MHz", avg_freq)
 			printf("\n")
 		}
 	}
 	printf(" Overhead: [in %% used of total CPU available]\n")
-	printf("%9s: %5.1f%%\n", "netperf", tot_cpu>0 ? proc_cpu/tot_cpu*100 : 0)
+	printf("%9s: %5.1f\n", "netperf", tot_cpu>0 ? proc_cpu/tot_cpu*100 : 0)
 }'
 }
 
@@ -364,6 +364,12 @@ do
 		*) echo "Usage: $0 [ -s | -c ] [-4 | -6] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-sessions ]" 1>&2 ; exit 1 ;;
 	esac
 done
+
+# Check dependencies
+
+if ! netperf -V >/dev/null 2>&1; then
+	echo "Missing netperf program, please install" ; exit 1
+fi
 
 # Start the main test
 
