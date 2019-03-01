@@ -1,6 +1,6 @@
-diff -urN work/openssl-1.0.2q/openssl-1.0.2q/Makefile.org work/openssl-1.0.2q/openssl-1.0.2q/Makefile.org
---- work/openssl-1.0.2q/openssl-1.0.2q/Makefile.org
-+++ work/openssl-1.0.2q/openssl-1.0.2q/Makefile.org
+diff -urN work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
+--- work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
++++ work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
 @@ -282,17 +282,17 @@
  build_libssl: build_ssl libssl.pc
  
@@ -81,9 +81,9 @@ diff -urN work/openssl-1.0.2q/openssl-1.0.2q/Makefile.org work/openssl-1.0.2q/op
  	@pod2man="`cd ./util; ./pod2mantest $(PERL)`"; \
  	here="`pwd`"; \
  	filecase=; \
-diff -urN work/openssl-1.0.2q/openssl-1.0.2q/Makefile.shared work/openssl-1.0.2q/openssl-1.0.2q/Makefile.shared
---- work/openssl-1.0.2q/openssl-1.0.2q/Makefile.shared
-+++ work/openssl-1.0.2q/openssl-1.0.2q/Makefile.shared
+diff -urN work/openssl-1.0.2r/openssl-1.0.2r/Makefile.shared work/openssl-1.0.2r/openssl-1.0.2r/Makefile.shared
+--- work/openssl-1.0.2r/openssl-1.0.2r/Makefile.shared
++++ work/openssl-1.0.2r/openssl-1.0.2r/Makefile.shared
 @@ -120,6 +120,7 @@
  			done; \
  		fi; \
@@ -92,9 +92,9 @@ diff -urN work/openssl-1.0.2q/openssl-1.0.2q/Makefile.shared work/openssl-1.0.2q
  			( $(SET_X); rm -f $$SHLIB$$SHLIB_SUFFIX; \
  			  ln -s $$prev $$SHLIB$$SHLIB_SUFFIX ); \
  		fi; \
-diff -urN work/openssl-1.0.2q/openssl-1.0.2q/crypto/Makefile work/openssl-1.0.2q/openssl-1.0.2q/crypto/Makefile
---- work/openssl-1.0.2q/openssl-1.0.2q/crypto/Makefile
-+++ work/openssl-1.0.2q/openssl-1.0.2q/crypto/Makefile
+diff -urN work/openssl-1.0.2r/openssl-1.0.2r/crypto/Makefile work/openssl-1.0.2r/openssl-1.0.2r/crypto/Makefile
+--- work/openssl-1.0.2r/openssl-1.0.2r/crypto/Makefile
++++ work/openssl-1.0.2r/openssl-1.0.2r/crypto/Makefile
 @@ -87,11 +87,11 @@
  	@if [ -z "$(THIS)" ]; then $(MAKE) -f $(TOP)/Makefile reflect THIS=$@; fi
  
@@ -136,9 +136,9 @@ diff -urN work/openssl-1.0.2q/openssl-1.0.2q/crypto/Makefile work/openssl-1.0.2q
  
  lint:
  	@target=lint; $(RECURSIVE_MAKE)
-diff -urN work/openssl-1.0.2q/openssl-1.0.2q/engines/Makefile work/openssl-1.0.2q/openssl-1.0.2q/engines/Makefile
---- work/openssl-1.0.2q/openssl-1.0.2q/engines/Makefile
-+++ work/openssl-1.0.2q/openssl-1.0.2q/engines/Makefile
+diff -urN work/openssl-1.0.2r/openssl-1.0.2r/engines/Makefile work/openssl-1.0.2r/openssl-1.0.2r/engines/Makefile
+--- work/openssl-1.0.2r/openssl-1.0.2r/engines/Makefile
++++ work/openssl-1.0.2r/openssl-1.0.2r/engines/Makefile
 @@ -72,7 +72,7 @@
  
  all:	lib subdirs
@@ -166,9 +166,9 @@ diff -urN work/openssl-1.0.2q/openssl-1.0.2q/engines/Makefile work/openssl-1.0.2
  
  tags:
  	ctags $(SRC)
-diff -urN work/openssl-1.0.2q/openssl-1.0.2q/test/Makefile work/openssl-1.0.2q/openssl-1.0.2q/test/Makefile
---- work/openssl-1.0.2q/openssl-1.0.2q/test/Makefile
-+++ work/openssl-1.0.2q/openssl-1.0.2q/test/Makefile
+diff -urN work/openssl-1.0.2r/openssl-1.0.2r/test/Makefile work/openssl-1.0.2r/openssl-1.0.2r/test/Makefile
+--- work/openssl-1.0.2r/openssl-1.0.2r/test/Makefile
++++ work/openssl-1.0.2r/openssl-1.0.2r/test/Makefile
 @@ -145,7 +145,7 @@
  tags:
  	ctags $(SRC)

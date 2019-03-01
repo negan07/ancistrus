@@ -1,0 +1,12 @@
+diff -urN work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
+--- work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
++++ work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
+@@ -137,7 +137,7 @@
+ 
+ BASEADDR=
+ 
+-DIRS=   crypto ssl engines apps test tools
++DIRS=   crypto ssl apps
+ ENGDIRS= ccgost
+ SHLIBDIRS= crypto ssl
+ 

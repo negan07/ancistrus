@@ -1,6 +1,6 @@
-diff -urN work/openssl-1.0.2q/openssl-1.0.2q/Makefile work/openssl-1.0.2q/openssl-1.0.2q/Makefile
---- work/openssl-1.0.2q/openssl-1.0.2q/Makefile
-+++ work/openssl-1.0.2q/openssl-1.0.2q/Makefile
+diff -urN work/openssl-1.0.2r/openssl-1.0.2r/Makefile work/openssl-1.0.2r/openssl-1.0.2r/Makefile
+--- work/openssl-1.0.2r/openssl-1.0.2r/Makefile
++++ work/openssl-1.0.2r/openssl-1.0.2r/Makefile
 @@ -139,7 +139,7 @@
  
  BASEADDR=0xFB00000
@@ -46,9 +46,9 @@ diff -urN work/openssl-1.0.2q/openssl-1.0.2q/Makefile work/openssl-1.0.2q/openss
  
  install_sw:
  	@$(PERL) $(TOP)/util/mkdir-p.pl $(INSTALL_PREFIX)$(INSTALLTOP)/bin \
-diff -urN work/openssl-1.0.2q/openssl-1.0.2q/Makefile.org work/openssl-1.0.2q/openssl-1.0.2q/Makefile.org
---- work/openssl-1.0.2q/openssl-1.0.2q/Makefile.org
-+++ work/openssl-1.0.2q/openssl-1.0.2q/Makefile.org
+diff -urN work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
+--- work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
++++ work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
 @@ -540,7 +540,7 @@
  	@$(MAKE) SDIRS='$(SDIRS)' clean
  	@$(MAKE) TAR='$(TAR)' TARFLAGS='$(TARFLAGS)' $(DISTTARVARS) tar

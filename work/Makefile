@@ -114,7 +114,7 @@ opkg_inst:
 	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf install $(NAME_$(P)) || exit 1;)
 	@echo -e "\\e[35m$(CUR_REL_PATH): cleanup temp opkg inst files on \\e[36m$(BUILD_TARGET) \\e[0m"
 	@$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf clean || exit 1
-	@rm -rf $(BUILD_TARGET)$(RCTMPDIR)/opkg/ $(BUILD_TARGET)$(RCTMPDIR)/usr/
+	@rm -rf $(BUILD_TARGET)$(RCTMPDIR)/opkg/ $(BUILD_TARGET)$(RCTMPDIR)/$(USRDIR)/
 
 post_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): making FS post install modifications on \\e[36m$(BUILD_TARGET) \\e[0m"
