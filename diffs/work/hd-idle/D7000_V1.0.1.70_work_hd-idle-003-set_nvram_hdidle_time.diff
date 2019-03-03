@@ -1,0 +1,21 @@
+diff -urN work/hd-idle/hd-idle.c work/hd-idle/hd-idle.c
+--- work/hd-idle/hd-idle.c	2017-05-23 23:09:40.513449762 +0200
++++ work/hd-idle/hd-idle.c	2017-05-01 21:08:42.000000000 +0200
+@@ -140,6 +140,8 @@
+ #include <scsi/sg.h>
+ #include <scsi/scsi.h>
+ 
++#include "nvram.h"
++
+ #define STAT_FILE "/proc/diskstats"
+ #define DEFAULT_IDLE_TIME 1800
+ #define HDPARM_CMD "hdparm"
+@@ -225,7 +227,7 @@
+ 
+     case 'i':
+       /* set idle-time parameters for current (or default) disk */
+-      it->idle_time = atoi(optarg);
++      it->idle_time = atoi(nvram_safedef_get("hdidle_timeout", "30"))*60;
+       break;
+ 
+     case 'l':

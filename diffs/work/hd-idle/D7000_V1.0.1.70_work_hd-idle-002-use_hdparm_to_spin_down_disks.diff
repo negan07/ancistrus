@@ -1,0 +1,138 @@
+diff -urN work/hd-idle/hd-idle.c work/hd-idle/hd-idle.c
+--- work/hd-idle/hd-idle.c	2017-05-23 23:09:40.513449762 +0200
++++ work/hd-idle/hd-idle.c	2017-05-01 21:08:42.000000000 +0200
+@@ -141,7 +141,8 @@
+ #include <scsi/scsi.h>
+ 
+ #define STAT_FILE "/proc/diskstats"
+-#define DEFAULT_IDLE_TIME 600
++#define DEFAULT_IDLE_TIME 1800
++#define HDPARM_CMD "hdparm"
+ 
+ #define dprintf if (debug) printf
+ 
+@@ -172,8 +173,6 @@
+ static void	   log_remonitor   ();
+ static void        log_mondisk     (DISKSTATS *ds);
+ static char       *disk_name       (char *name);
+-static void        phex            (const void *p, int len,
+-                                    const char *fmt, ...);
+ 
+ /* global/static variables */
+ IDLE_TIME *it_root;
+@@ -441,47 +440,15 @@
+ /* spin-down a disk */
+ static void spindown_disk(const char *name)
+ {
+-  struct sg_io_hdr io_hdr;
+-  unsigned char sense_buf[255];
+-  char dev_name[100];
+-  int fd;
++  char exec_command[100];
+ 
+   dprintf("spindown: %s\n", name);
+ 
+-  /* fabricate SCSI IO request */
+-  memset(&io_hdr, 0x00, sizeof(io_hdr));
+-  io_hdr.interface_id = 'S';
+-  io_hdr.dxfer_direction = SG_DXFER_NONE;
+-
+-  /* SCSI stop unit command */
+-  io_hdr.cmdp = (unsigned char *) "\x1b\x00\x00\x00\x00\x00";
+-
+-  io_hdr.cmd_len = 6;
+-  io_hdr.sbp = sense_buf;
+-  io_hdr.mx_sb_len = (unsigned char) sizeof(sense_buf);
+-
+-  /* open disk device (kernel 2.4 will probably need "sg" names here) */
+-  snprintf(dev_name, sizeof(dev_name), "/dev/%s", name);
+-  if ((fd = open(dev_name, O_RDONLY)) < 0) {
+-    perror(dev_name);
+-    return;
+-  }
+-
+-  /* execute SCSI request */
+-  if (ioctl(fd, SG_IO, &io_hdr) < 0) {
+-    char buf[100];
+-    snprintf(buf, sizeof(buf), "ioctl on %s:", name);
+-    perror(buf);
+-
+-  } else if (io_hdr.masked_status != 0) {
+-    fprintf(stderr, "error: SCSI command failed with status 0x%02x\n",
+-            io_hdr.masked_status);
+-    if (io_hdr.masked_status == CHECK_CONDITION) {
+-      phex(sense_buf, io_hdr.sb_len_wr, "sense buffer:\n");
+-    }
+-  }
++  /* disk device name (kernel 2.4 will probably need "sg" names here) */
++  snprintf(exec_command, sizeof(exec_command), "%s -y /dev/%s &", HDPARM_CMD, name);
++  dprintf("Issuing command: %s\n", exec_command);
+ 
+-  close(fd);
++  system(exec_command);
+ }
+ 
+ /* write a spin-up event message to the log file */
+@@ -623,41 +590,3 @@
+   return(s);
+ }
+ 
+-/* print hex dump to stderr (e.g. sense buffers) */
+-static void phex(const void *p, int len, const char *fmt, ...)
+-{
+-  va_list va;
+-  const unsigned char *buf = p;
+-  int pos = 0;
+-  int i;
+-
+-  /* print header */
+-  va_start(va, fmt);
+-  vfprintf(stderr, fmt, va);
+-
+-  /* print hex block */
+-  while (len > 0) {
+-    fprintf(stderr, "%08x ", pos);
+-
+-    /* print hex block */
+-    for (i = 0; i < 16; i++) {
+-      if (i < len) {
+-        fprintf(stderr, "%c%02x", ((i == 8) ? '-' : ' '), buf[i]);
+-      } else {
+-        fprintf(stderr, "   ");
+-      }
+-    }
+-
+-    /* print ASCII block */
+-    fprintf(stderr, "   ");
+-    for (i = 0; i < ((len > 16) ? 16 : len); i++) {
+-      fprintf(stderr, "%c", (buf[i] >= 32 && buf[i] < 128) ? buf[i] : '.');
+-    }
+-    fprintf(stderr, "\n");
+-
+-    pos += 16;
+-    buf += 16;
+-    len -= 16;
+-  }
+-}
+-
+diff -urN work/hd-idle/README work/hd-idle/README
+--- work/hd-idle/README	2017-05-23 23:09:40.513449762 +0200
++++ work/hd-idle/README	2017-05-01 21:08:42.000000000 +0200
+@@ -1,3 +1,8 @@
++hd-idle utility, modified to use hdparm tool to spin down disks
++This allows hd-idle to work properly with external HDD enclosures based on Norelsys NS1066/NS1066X chip (for example, Orico 2588US3).
++Based on version 1.05
++Original URL: https://sourceforge.net/projects/hd-idle/
++
+ Hard Disk Idle Spin-Down Utility
+ ==============================================================================
+ 
+@@ -11,7 +16,7 @@
+ to spin down after a few seconds you may damage the disk over time due to the
+ stress the spin-up causes on the spindle motor and bearings. It seems that
+ manufacturers recommend a minimum idle time of 3-5 minutes, the default in
+-hd-idle is 10 minutes.
++hd-idle is 30 minutes.
+ 
+ One more word of caution: hd-idle will spin down any disk accessible via the
+ SCSI layer (USB, IEEE1394, ...) but it will NOT work with real SCSI disks

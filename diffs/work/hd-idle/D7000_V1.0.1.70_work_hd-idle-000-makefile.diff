@@ -1,0 +1,96 @@
+diff -urN work/hd-idle/Makefile work/hd-idle/Makefile
+--- work/hd-idle/Makefile	2017-05-23 23:09:40.513449762 +0200
++++ work/hd-idle/Makefile	2017-05-01 21:08:42.000000000 +0200
+@@ -4,22 +4,11 @@
+ #
+ ###############################################################################
+ 
+-ifdef DESTDIR
+-# dh_auto_install (Debian) sets this variable
+-  TARGET_DIR = $(DESTDIR)/usr
+-else
+-  TARGET_DIR ?= /usr/local
+-endif
+-
+-LIB_DIRS   = 
+-
+-INC_DIRS   = 
+-
+-CC        ?= gcc
+-CFLAGS    += $(INC_DIRS) -Wall
++include ../Rules.mak
+ 
+-LD         = $(CC)
+-LDFLAGS   += $(LIB_DIRS)
++CFLAGS	+= -Os -Wall
++CPPFLAGS:= -I$(WORK_DIR)/$(NVRAM)
++LDFLAGS	:= -L$(WORK_DIR)/$(NVRAM) -lscnvram
+ 
+ ###############################################################################
+ #
+@@ -27,28 +16,50 @@
+ #
+ ###############################################################################
+ 
+-TARGET  = hd-idle
++BINS	:= hd-idle
++STARTUP	:= usb_service
++SRCS	:= hd-idle.c
++OBJS	:= $(SRCS:.c=.o)
+ 
+-LIBS    = 
+-
+-SRCS    = hd-idle.c
+-
+-OBJS    = $(SRCS:.c=.o)
+-
+-all: $(TARGET)
++all: $(BINS)
+ 
+ distclean: clean
+ 
+ clean:
+-	rm -f $(OBJS) $(TARGET)
++	rm -f $(OBJS) $(BINS)
+ 
+-install: $(TARGET)
+-	install -D -g root -o root $(TARGET) $(TARGET_DIR)/sbin/$(TARGET)
+-	install -D -g root -o root $(TARGET).1 $(TARGET_DIR)/share/man/man1/$(TARGET).1
++install: control
++	$(SSTRIP) $(BINS)
++	install -m 0755 -d $(BINDIR)
++	install -m 0755 $(BINS) $(BINDIR)
+ 
+-hd-idle.o:     hd-idle.c
++hd-idle.o: $(SRCS)
+ 
+-$(TARGET): $(OBJS)
+-	$(LD) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LIB_DIRS) $(LIBS)
++$(BINS): $(OBJS)
++	$(CC) $(LDFLAGS) $(OBJS) -o $(BINS)
+ 
++ifndef BUILD
++control:
++else
++PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
++PRERM			:= $(CTRL_DIR)/prerm
++
++control: preinst postinst prerm
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "for PID in \`pidof $(BINS)\`; do [ -e /proc/\$$PID/stat ] && while kill -9 \$$PID >/dev/null 2>&1; do :; done; done" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "$(RC) $(STARTUP) reconfig" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "for PID in \`pidof $(BINS)\`; do [ -e /proc/\$$PID/stat ] && while kill -9 \$$PID >/dev/null 2>&1; do :; done; done" >> $(PRERM)
++	@echo "exit 0" >> $(PRERM)
++endif
+ 

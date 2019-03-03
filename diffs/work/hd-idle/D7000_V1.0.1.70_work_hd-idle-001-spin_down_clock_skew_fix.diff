@@ -1,0 +1,160 @@
+diff -urN work/hd-idle/hd-idle.c work/hd-idle/hd-idle.c
+--- work/hd-idle/hd-idle.c	2017-05-23 23:09:40.513449762 +0200
++++ work/hd-idle/hd-idle.c	2017-05-01 21:08:42.000000000 +0200
+@@ -41,6 +41,17 @@
+  *
+  * You have been warned...
+  *
++ * MMurdock
++ * ------------
++ * Revision: 2018/01/21 mmurdock
++ * Version 1.06
++ *
++ * Monitor the skew between monitoring cycles, on discovery of clock skew
++ * reset the drive spin_down status to "spun up" and reset the time to current
++ * in order to capture potential high loading or (more likely) recovery from
++ * suspend or sleep
++ *
++ *
+  * CVS Change Log:
+  * ---------------
+  *
+@@ -158,6 +169,8 @@
+ static DISKSTATS  *get_diskstats   (const char *name);
+ static void        spindown_disk   (const char *name);
+ static void        log_spinup      (DISKSTATS *ds);
++static void	   log_remonitor   ();
++static void        log_mondisk     (DISKSTATS *ds);
+ static char       *disk_name       (char *name);
+ static void        phex            (const void *p, int len,
+                                     const char *fmt, ...);
+@@ -175,7 +188,10 @@
+   int have_logfile = 0;
+   int min_idle_time;
+   int sleep_time;
++  int skew_time; 
+   int opt;
++  time_t now;
++  time_t lastnow;
+ 
+   /* create default idle-time parameter entry */
+   if ((it = malloc(sizeof(*it))) == NULL) {
+@@ -247,12 +263,17 @@
+     sleep_time = 1;
+   }
+ 
++  /* set skew time between scans as a multiple of sleep_time */
++  skew_time = sleep_time * 3;
++
+   /* daemonize unless we're running in debug mode */
+   if (!debug) {
+     daemonize();
+   }
+ 
+   /* main loop: probe for idle disks and stop them */
++  lastnow = time(NULL);
++
+   for (;;) {
+     DISKSTATS tmp;
+     FILE *fp;
+@@ -265,11 +286,30 @@
+ 
+     memset(&tmp, 0x00, sizeof(tmp));
+ 
++    now = time(NULL);
++    if (now - lastnow > skew_time) {
++      /* we slept too long, assume a suspend event and disks may be spun up */
++      for (it = it_root; it != NULL; it = it->next) {
++        /* reset spin status and timers */
++        if (it->name != NULL) {
++          DISKSTATS *ds;
++          ds = get_diskstats(it->name);
++          ds->spinup = now;
++          ds->last_io = now;
++          ds->spun_down = 0;
++          log_mondisk(ds);
++        }	
++      }
++      log_remonitor();
++    }
++
+     while (fgets(buf, sizeof(buf), fp) != NULL) {
+       if (sscanf(buf, "%*d %*d %s %*u %*u %u %*u %*u %*u %u %*u %*u %*u %*u",
+                  tmp.name, &tmp.reads, &tmp.writes) == 3) {
+         DISKSTATS *ds;
+-        time_t now = time(NULL);
++
++        now = time(NULL);
++
+         const char *s;
+ 
+         /* make sure this is a SCSI disk (sd[a-z]+) without partition number */
+@@ -310,6 +350,7 @@
+               break;
+             }
+           }
++	 log_mondisk(ds);
+ 
+         } else if (ds->reads == tmp.reads && ds->writes == tmp.writes) {
+           if (!ds->spun_down) {
+@@ -338,6 +379,7 @@
+       }
+     }
+ 
++    lastnow = now;
+     fclose(fp);
+     sleep(sleep_time);
+   }
+@@ -477,6 +519,52 @@
+   }
+ }
+ 
++/* write a drive spin monitor reset message to the log file */
++static void log_remonitor()
++{
++  FILE *fp;
++  
++  if ((fp = fopen(logfile, "a")) != NULL) {
++    /* Print wakeup to the logfile
++     */
++    time_t now = time(NULL);
++    char tstr[20];
++    char dstr[20];
++
++    strftime(dstr, sizeof(dstr), "%Y-%m-%d", localtime(&now));
++    strftime(tstr, sizeof(tstr), "%H:%M:%S", localtime(&now));
++    fprintf(fp,
++            "date: %s, time: %s: assuming disks spun up after long sleep\n",
++            dstr, tstr);
++    /* Sync to make sure writing to the logfile won't case another
++     * spinup
++     */
++    fclose(fp);
++    sleep(1);
++    sync();
++  }
++}
++
++/* write a drive monitoring message when a new disk is discovered */
++static void log_mondisk(DISKSTATS *ds)
++{
++  FILE *fp;
++  if ((fp = fopen(logfile, "a")) != NULL) {
++    /* Print disk statistic to logfile */
++    time_t now = time(NULL);
++    char tstr[20];
++    char dstr[20];
++
++    strftime(dstr, sizeof(dstr), "%Y-%m-%d", localtime(&now));
++    strftime(tstr, sizeof(tstr), "%H:%M:%S", localtime(&now));
++    fprintf(fp,
++            "date: %s, time: %s, disk: %s, monitoring started with idle timout: %ld\n",
++            dstr, tstr, ds->name, (long) ds->idle_time);
++    fclose(fp);
++    sync(); /* sync without sleep */
++  }
++}
++
+ /* Resolve disk names specified as "/dev/disk/by-xxx" or some other symlink.
+  * Please note that this function is only called during command line parsing
+  * and hd-idle per se does not support dynamic disk additions or removals at

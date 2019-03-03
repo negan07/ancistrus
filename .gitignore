@@ -16,6 +16,7 @@
 *.7z
 *.dmg
 *.gz
+*.tgz
 *.iso
 *.jar
 *.rar
@@ -136,4 +137,5 @@ work/dnsmasq-*/
 work/e2fsprogs-*/
 work/libiconv-*/
 work/easy-rsa-*/
+work/hd-idle*/
 

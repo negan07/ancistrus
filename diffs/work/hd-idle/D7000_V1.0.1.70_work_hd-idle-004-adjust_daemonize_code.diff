@@ -1,0 +1,64 @@
+diff -urN work/hd-idle/hd-idle.c work/hd-idle/hd-idle.c
+--- work/hd-idle/hd-idle.c	2017-05-23 23:09:40.513449762 +0200
++++ work/hd-idle/hd-idle.c	2017-05-01 21:08:42.000000000 +0200
+@@ -168,6 +168,7 @@
+ } DISKSTATS;
+ 
+ /* function prototypes */
++static void        do_fork         (const char *perrmsg);
+ static void        daemonize       (void);
+ static DISKSTATS  *get_diskstats   (const char *name);
+ static void        spindown_disk   (const char *name);
+@@ -388,6 +389,18 @@
+   return(0);
+ }
+ 
++/* do fork() */
++static void do_fork(const char *perrmsg)
++{
++  int i;
++
++  if ((i = fork()) < 0) {
++    if(perrmsg) perror(perrmsg);
++    exit(2);
++  }
++  else if (i > 0) _exit(0);
++}
++
+ /* become a daemon */
+ static void daemonize(void)
+ {
+@@ -395,29 +408,16 @@
+   int i;
+ 
+   /* fork #1: exit parent process and continue in the background */
+-  if ((i = fork()) < 0) {
+-    perror("couldn't fork");
+-    exit(2);
+-  } else if (i > 0) {
+-    _exit(0);
+-  }
++  do_fork("couldn't fork");
+ 
+-  /* fork #2: detach from terminal and fork again so we can never regain
+-   * access to the terminal */
++  /* fork #2: detach from terminal and fork again so we can never regain access to the terminal */
+   setsid();
+-  if ((i = fork()) < 0) {
+-    perror("couldn't fork #2");
+-    exit(2);
+-  } else if (i > 0) {
+-    _exit(0);
+-  }
++  do_fork("couldn't fork #2");
+ 
+   /* change to root directory and close file descriptors */
+   chdir("/");
+   maxfd = getdtablesize();
+-  for (i = 0; i < maxfd; i++) {
+-    close(i);
+-  }
++  for (i = 0; i < maxfd; i++) close(i);
+ 
+   /* use /dev/null for stdin, stdout and stderr */
+   open("/dev/null", O_RDONLY);

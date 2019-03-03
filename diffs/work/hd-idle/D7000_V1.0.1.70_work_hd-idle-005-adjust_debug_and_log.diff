@@ -1,0 +1,238 @@
+diff -urN work/hd-idle/hd-idle.c work/hd-idle/hd-idle.c
+--- work/hd-idle/hd-idle.c	2017-05-23 23:09:40.513449762 +0200
++++ work/hd-idle/hd-idle.c	2017-05-01 21:08:42.000000000 +0200
+@@ -132,7 +132,7 @@
+ #include <errno.h>
+ #include <unistd.h>
+ #include <stdarg.h>
+-
++#include <syslog.h>
+ #include <fcntl.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+@@ -148,6 +148,8 @@
+ 
+ #define dprintf if (debug) printf
+ 
++#define NETGEAR_SYSLOG(fmt, args...) syslog(LOG_INFO, fmt, ##args)
++
+ /* typedefs and structures */
+ typedef struct IDLE_TIME {
+   struct IDLE_TIME  *next;
+@@ -172,22 +174,20 @@
+ static void        daemonize       (void);
+ static DISKSTATS  *get_diskstats   (const char *name);
+ static void        spindown_disk   (const char *name);
+-static void        log_spinup      (DISKSTATS *ds);
+-static void	   log_remonitor   ();
+-static void        log_mondisk     (DISKSTATS *ds);
++static void        log_msg         (const int type, DISKSTATS *ds);
+ static char       *disk_name       (char *name);
+ 
+ /* global/static variables */
+ IDLE_TIME *it_root;
+ DISKSTATS *ds_root;
+-char *logfile = "/dev/null";
+-int debug;
++static int debug = 0;
++enum { SPINUP = 0, REMONITOR, MONDISK };
+ 
+ /* main function */
+ int main(int argc, char *argv[])
+ {
+   IDLE_TIME *it;
+-  int have_logfile = 0;
++  int have_log = 0;
+   int min_idle_time;
+   int sleep_time;
+   int skew_time; 
+@@ -206,7 +206,7 @@
+   it_root = it;
+ 
+   /* process command line options */
+-  while ((opt = getopt(argc, argv, "t:a:i:l:dh")) != -1) {
++  while ((opt = getopt(argc, argv, "t:a:i:ldh")) != -1) {
+     switch (opt) {
+ 
+     case 't':
+@@ -232,8 +232,7 @@
+       break;
+ 
+     case 'l':
+-      logfile = optarg;
+-      have_logfile = 1;
++      have_log = 1;
+       break;
+ 
+     case 'd':
+@@ -241,7 +240,7 @@
+       break;
+ 
+     case 'h':
+-      printf("usage: hd-idle [-t <disk>] [-a <name>] [-i <idle_time>] [-l <logfile>] [-d] [-h]\n");
++      printf("usage: hd-idle [-t <disk>] [-a <name>] [-i <idle_time>] [-l] [-d] [-h]\n");
+       return(0);
+ 
+     case ':':
+@@ -299,10 +298,10 @@
+           ds->spinup = now;
+           ds->last_io = now;
+           ds->spun_down = 0;
+-          log_mondisk(ds);
++          if (have_log) log_msg(MONDISK, ds);
+         }	
+       }
+-      log_remonitor();
++      if (have_log) log_msg(REMONITOR, NULL);
+     }
+ 
+     while (fgets(buf, sizeof(buf), fp) != NULL) {
+@@ -352,7 +351,7 @@
+               break;
+             }
+           }
+-	 log_mondisk(ds);
++	 if (have_log) log_msg(MONDISK, ds);
+ 
+         } else if (ds->reads == tmp.reads && ds->writes == tmp.writes) {
+           if (!ds->spun_down) {
+@@ -368,9 +367,7 @@
+           /* disk had some activity */
+           if (ds->spun_down) {
+             /* disk was spun down, thus it has just spun up */
+-            if (have_logfile) {
+-              log_spinup(ds);
+-            }
++            if (have_log) log_msg(SPINUP, ds);
+             ds->spinup = now;
+           }
+           ds->reads = tmp.reads;
+@@ -453,85 +450,39 @@
+   system(exec_command);
+ }
+ 
+-/* write a spin-up event message to the log file */
+-static void log_spinup(DISKSTATS *ds)
++/* write log event message to syslog */
++static void log_msg(const int type, DISKSTATS *ds)
+ {
+-  FILE *fp;
+-
+-  if ((fp = fopen(logfile, "a")) != NULL) {
+-    /* Print statistics to logfile
+-     *
+-     * Note: This doesn't work too well if there are multiple disks
+-     *       because the I/O we're dealing with might be on another
+-     *       disk so we effectively wake up the disk the log file is
+-     *       stored on as well. Then again the logfile is a debugging
+-     *       option, so what...
+-     */
+-    time_t now = time(NULL);
+-    char tstr[20];
+-    char dstr[20];
+-
+-    strftime(dstr, sizeof(dstr), "%Y-%m-%d", localtime(&now));
+-    strftime(tstr, sizeof(tstr), "%H:%M:%S", localtime(&now));
+-    fprintf(fp,
+-            "date: %s, time: %s, disk: %s, running: %ld, stopped: %ld\n",
+-            dstr, tstr, ds->name,
+-            (long) ds->spindown - (long) ds->spinup,
+-            (long) time(NULL) - (long) ds->spindown);
+-
+-    /* Sync to make sure writing to the logfile won't cause another
+-     * spinup in 30 seconds (or whatever bdflush uses as flush interval).
+-     */
+-    fclose(fp);
+-    sleep(1);
+-    sync();
+-  }
+-}
+-
+-/* write a drive spin monitor reset message to the log file */
+-static void log_remonitor()
+-{
+-  FILE *fp;
+-  
+-  if ((fp = fopen(logfile, "a")) != NULL) {
+-    /* Print wakeup to the logfile
+-     */
+-    time_t now = time(NULL);
+-    char tstr[20];
+-    char dstr[20];
+-
+-    strftime(dstr, sizeof(dstr), "%Y-%m-%d", localtime(&now));
+-    strftime(tstr, sizeof(tstr), "%H:%M:%S", localtime(&now));
+-    fprintf(fp,
+-            "date: %s, time: %s: assuming disks spun up after long sleep\n",
+-            dstr, tstr);
+-    /* Sync to make sure writing to the logfile won't case another
+-     * spinup
+-     */
+-    fclose(fp);
+-    sleep(1);
+-    sync();
+-  }
+-}
+-
+-/* write a drive monitoring message when a new disk is discovered */
+-static void log_mondisk(DISKSTATS *ds)
+-{
+-  FILE *fp;
+-  if ((fp = fopen(logfile, "a")) != NULL) {
+-    /* Print disk statistic to logfile */
+-    time_t now = time(NULL);
+-    char tstr[20];
+-    char dstr[20];
+-
+-    strftime(dstr, sizeof(dstr), "%Y-%m-%d", localtime(&now));
+-    strftime(tstr, sizeof(tstr), "%H:%M:%S", localtime(&now));
+-    fprintf(fp,
+-            "date: %s, time: %s, disk: %s, monitoring started with idle timout: %ld\n",
+-            dstr, tstr, ds->name, (long) ds->idle_time);
+-    fclose(fp);
+-    sync(); /* sync without sleep */
+-  }
++	switch(type) {
++	case SPINUP:	/* write a spin-up event message to syslog */
++	/* Print statistics to syslog
++	*
++	* Note: This doesn't work too well if there are multiple disks
++	*       because the I/O we're dealing with might be on another
++	*       disk so we effectively wake up the disk the log file is
++	*       stored on as well. Then again the syslog is a debugging
++	*       option, so what...
++	*
++	* Sync to make sure writing to syslog won't cause another
++	* spinup in 30 seconds (or whatever bdflush uses as flush interval).
++	*/
++	NETGEAR_SYSLOG("10 00[HD-IDLE] disk: %s, running: %ld, stopped: %ld", ds->name, (long) ds->spindown - (long) ds->spinup, (long) time(NULL) - (long) ds->spindown);
++	sleep(1);
++	break;
++	case REMONITOR:	/* write a drive spin monitor reset message to syslog */
++	/* Print wakeup to syslog
++	*
++	* Sync to make sure writing to syslog won't case another spinup
++	*/
++	NETGEAR_SYSLOG("10 00[HD-IDLE] assuming disks spun up after long sleep");
++	sleep(1);
++	break;
++	case MONDISK:	/* write a drive monitoring message to syslog when a new disk is discovered */
++	/* Print disk statistic to syslog */
++	NETGEAR_SYSLOG("10 00[HD-IDLE] disk: %s, monitoring started with idle timeout: %ld", ds->name, (long) ds->idle_time);
++	break;
++	}
++  sync();
+ }
+ 
+ /* Resolve disk names specified as "/dev/disk/by-xxx" or some other symlink.
+@@ -586,9 +537,7 @@
+     exit(2);
+   }
+ 
+-  if (debug) {
+-    printf("using %s for %s\n", s, path);
+-  }
++    dprintf("using %s for %s\n", s, path);
+   return(s);
+ }
+ 
