@@ -127,10 +127,10 @@ post_inst:
 	@ln -sf libcurl.so.$(RCCURLVER) $(BUILD_TARGET)$(RCLDLIB)/libcurl.so || exit 1
 	@ln -sf libcurl.so.$(RCCURLVER) $(BUILD_TARGET)$(RCLDLIB)/libcurl.so.$(RCCURLMAINVER) || exit 1
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBOOTDIR)/$(RCAPPSNAME) || exit 1
-	@mv $(BUILD_TARGET)$(RCTMPDIR)/openssl.cnf $(BUILD_TARGET)$(RCTMPDIR)/profile $(BUILD_TARGET)$(RCTMPDIR)/iproute2 $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1
+	@mv $(BUILD_TARGET)$(RCTMPDIR)/openssl.cnf $(BUILD_TARGET)$(RCTMPDIR)/profile $(BUILD_TARGET)$(RCTMPDIR)/iproute2 $(BUILD_TARGET)$(RCTMPDIR)/mini_httpd.pem $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1
 	@mv $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMDBIN) || exit 1
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) || exit 1
-	@mv $(BUILD_TARGET)$(RCTMPDIR)/openssl $(BUILD_TARGET)$(RCTMPDIR)/curl $(BUILD_TARGET)$(RCTMPDIR)/busybox $(BUILD_TARGET)$(RCTMPDIR)/ip $(BUILD_TARGET)$(RCTMPDIR)/tc $(BUILD_TARGET)$(RCBINDIR)/ || exit 1
+	@mv $(BUILD_TARGET)$(RCTMPDIR)/openssl $(BUILD_TARGET)$(RCTMPDIR)/curl $(BUILD_TARGET)$(RCTMPDIR)/busybox $(BUILD_TARGET)$(RCTMPDIR)/ip $(BUILD_TARGET)$(RCTMPDIR)/tc $(BUILD_TARGET)$(RCTMPDIR)/mini_httpd $(BUILD_TARGET)$(RCBINDIR)/ || exit 1
 	@for F in `cat $(BUSYBOX)/busybox.links`; do mv $(BUILD_TARGET)$(RCTMPDIR)/`basename $$F` $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; done
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep xdsl-driver`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
