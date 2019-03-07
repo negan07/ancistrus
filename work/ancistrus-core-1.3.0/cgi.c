@@ -341,7 +341,7 @@ if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *
 		if(c=='@') {									//search for raw var initalizer ('@')
 		if((err=fetchformvar(raw, nvar, fd))) return err;				//fetch vars & check if webpage is malformed
 			if(!*job || !strcmp(job, "upload")||!strcmp(job, "home")) getnvar(nvar);//### GET METHOD || HOME/UPLOAD FILE ###
-			else if(!strcmp(job, "save")) {						//### POST METHOD - SAVE ###
+			else if(!strcmp(job, "save") || !strcmp(job, "savesys")) {		//### POST METHOD - SAVE ###
 			if(*(val=QSGET(raw))!='@' && strncmp(nvar, "list_", 5) && strncmp(nvar, "reclist_", 8)) NV_SET(nvar, val);//store value
 			CGIDBG("populatepage(): ----------------------------------------> anc nvram set %s \"%s\"\n", nvar, val);
 			getnvar(nvar);								//retrieve nvram value like GET
@@ -393,6 +393,7 @@ int fd;
 	for(text=QSGET("text");*text;text++) if(*text!=LF_SYMBOL) write(fd, text, 1);		//update file skipping '0D' char
 	close(fd);
 	}
+	else if(!strcmp(job, "savesys")) return runsyscmd(todo);				//exec save job with todo cmd system() call
 	else if(strcmp(job, "opkg") && strcmp(job, "home")) return runexecve(todo);		//exec todo cmd if not done before
 return 0;
 }
