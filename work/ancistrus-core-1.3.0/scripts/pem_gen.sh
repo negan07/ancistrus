@@ -40,4 +40,8 @@ cp -f $PEM $CONFDIR
 mv -f $PEM $PEMDIR
 echo "New $PEM key & cert created !"
 rm -f $CRT
+echo
+echo "Restarting GUI..."
+rc httpd restart
+sleep 3
 exit 0
