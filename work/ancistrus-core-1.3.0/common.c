@@ -89,7 +89,7 @@ char c;
 		}
 		else {										//child thread
 		close(fd[0]);									//close input side of pipe
-		runexecve(cmd);
+		runsyscmd(cmd);
 		DBG("runpipe(): child execve() fail\n");
 		exit(1);
 		}
