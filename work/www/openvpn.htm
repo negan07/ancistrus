@@ -206,8 +206,8 @@ function checkData() {
 <input class="common_bt" type="button" value="Clear client list" onClick="this.form.clear.value='list_openvpn_client_opt';AncstdAction(this.form,'openvpn.htm','','clear','');"></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 </table>
-<input type="hidden" name="job" value="save">
-<input type="hidden" name="todo" value="/usr/sbin/scripts/openvpn.sh">
+<input type="hidden" name="job" value="savesys">
+<input type="hidden" name="todo" value="/usr/sbin/rc_app/rc_openvpn restart >/dev/null 2>&1">
 <input type="hidden" name="next_file" value="openvpn.htm">
 <input type="hidden" name="old_file" value="">
 <input type="hidden" name="pipe_cmd" value="">
