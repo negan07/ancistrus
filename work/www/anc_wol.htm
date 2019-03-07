@@ -72,11 +72,10 @@ function checkData() {
 	return false;
 	}
 
-	cf.todo.value="/usr/sbin/ether-wake -b -i "+cf.h_lan_if.value+" ";
-	if(cf.pw.value.length>1) cf.todo.value+="-p "+cf.pw.value+" ";
-	cf.todo.value+=cf.rsv_mac.value+" >/dev/null 2>&1";
+	if(cf.pw.value.length>1) cf.pipe_cmd.value+="-p "+cf.pw.value+" ";
+	cf.pipe_cmd.value+=cf.rsv_mac.value;
 
-	AncdataToHidden(cf);
+	AncstdAction(cf,'anc_run.htm','anc_wol.htm','pipe','');
 	return true;
 }
 
@@ -111,10 +110,11 @@ function checkData() {
 <tr><td colspan="2" align="center"><input type="password" autocomplete="off" name="pw" size="17" maxlength="17" value=""></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 </table>
-<input type="hidden" name="job" value="home">
+<input type="hidden" name="job" value="pipe">
 <input type="hidden" name="todo" value="">
+<input type="hidden" name="pipe_cmd" value="/usr/sbin/scripts/wol.sh ">
 <input type="hidden" name="next_file" value="anc_wol.htm">
-<input type="hidden" name="h_lan_if" value="@h_lan_if#">
+<input type="hidden" name="old_file" value="">
 </div>
 </form>
 <script>printHelp();</script>
