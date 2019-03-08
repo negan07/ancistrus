@@ -85,7 +85,7 @@ diff -urN work/hd-idle/Makefile work/hd-idle/Makefile
 +
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
-+	@echo "$(RC) $(STARTUP) reconfig" >> $(POSTINST)
++	@echo "$(RC) $(STARTUP) remount" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +
 +prerm:
