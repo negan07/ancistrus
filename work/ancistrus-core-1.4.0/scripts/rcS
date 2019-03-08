@@ -192,27 +192,30 @@ echo "insmod finish" > /dev/console
 sleep 5
 
 # Print server
+eval `nvram get printserver_disable` >/dev/null 2>&1
+if [ "${printserver_disable}" != "1" ]; then
 KC_BONJOUR &
 KC_PRINT &
 /etc/turn_on_printer_led
+fi
 
 # ancistrus
 # Vars
 RCDIR=/etc/init.d/rcS.d
 
 # Runlevel script section can be skipped with this flag
-eval `nvram get anc_boot_disable` > /dev/null 2>&1
+eval `nvram get anc_boot_disable` >/dev/null 2>&1
 
 # Running the additional scripts at boot stage
 if [ -d ${RCDIR} -a "${anc_boot_disable}" != "1" ]; then
 
 # Decide if disabling K-scripts
-eval `nvram get anc_kscripts_disable` > /dev/null 2>&1
+eval `nvram get anc_kscripts_disable` >/dev/null 2>&1
 # KILL scripts: check if the script is there then run 'script stop' (single runlevel so force this)
 [ "${anc_kscripts_disable}" != "1" ] && for I in ${RCDIR}/K[0-9][0-9]*; do [ -f $I ] && $I stop; done
 
 # Decide if disabling S-scripts
-eval `nvram get anc_sscripts_disable` > /dev/null 2>&1
+eval `nvram get anc_sscripts_disable` >/dev/null 2>&1
 # START scripts: check if the script is there then run 'script start'
 [ "${anc_sscripts_disable}" != "1" ] && for I in ${RCDIR}/S[0-9][0-9]*; do [ -f $I ] && $I start; done
 fi

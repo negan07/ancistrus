@@ -18,9 +18,7 @@ KC_PRINT &
 /etc/turn_on_printer_led
 }
 
-[ -z "$1" ] && echo "Usage: $0 <disablekill|enablekill|stop>" && exit 1
-
-eval `nvram get printserver_disable` >/dev/null 2>&1
+[ -z "$1" ] && echo "Usage: $0 <disablekill|enablekill>" && exit 1
 
 case "$1" in
 disablekill)											#stop, enable, then run printserver
@@ -31,9 +29,6 @@ RUN_PS >/dev/null 2>&1
 enablekill)											#disable & stop printserver
 nvram set printserver_disable=1
 KILL_PS
-;;
-stop)												#for runlevel
-[ "${printserver_disable}" = "1" ] && KILL_PS
 ;;
 esac
 

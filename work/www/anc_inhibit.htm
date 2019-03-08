@@ -55,7 +55,7 @@ function runPSCmd(psflag) {
 	msg="Warning! Print Server killing service is about to be "+flgset+"d :proceed ?";
 	if(!confirm(msg)) return false;
 
-	cmd="/etc/init.d/printserverkill.sh "+flgset+"kill >/dev/null 2>&1";
+	cmd="/usr/sbin/scripts/printserverkill.sh "+flgset+"kill >/dev/null 2>&1";
 	AncstdAction(cf,'anc_inhibit.htm','','inhibit',cmd);
 	return true;
 }
