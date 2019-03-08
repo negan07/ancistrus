@@ -49,7 +49,7 @@ LANGSDIR=${WWW}/langs
 URL=https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/tools/ancistrus-arm-D7000
 [ ! -z "$1" ] && URL=$1
 
-[ -x ${BINDIR}/${BIN} ] && mount | grep ${MNTPART} ] && echo "${BIN} looks already installed." && exit 4
+[ -x ${BINDIR}/${BIN} ] || mount | grep ${MNTPART} ] && echo "${BIN} looks already installed." && exit 4
 
 cd ${ETCDIR}
 echo "Cleaning up some garbage/orphan dirs & files..."
