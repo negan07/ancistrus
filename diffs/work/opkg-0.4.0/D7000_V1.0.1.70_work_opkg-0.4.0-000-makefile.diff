@@ -1,7 +1,7 @@
 diff -urN work/opkg-0.4.0/Makefile work/opkg-0.4.0/Makefile
 --- work/opkg-0.4.0/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/opkg-0.4.0/Makefile	2017-03-23 20:35:42.745736890 +0100
-@@ -0,0 +1,153 @@
+@@ -0,0 +1,156 @@
 +include ../Rules.mak
 +
 +ifdef DEBUG
@@ -45,6 +45,9 @@ diff -urN work/opkg-0.4.0/Makefile work/opkg-0.4.0/Makefile
 +
 +configure-cross:
 +	cd $(OPKG) && ACLOCAL_FLAGS="-I /usr/share/aclocal" ./autogen.sh && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -lssl -lcrypto" CURL_LIBS="-L$(WORK_DIR)/$(CURL)/$(CURL)/lib/.libs -lcurl" LIBARCHIVE_LIBS="-L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -larchive" LDFLAGS="-L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -L$(WORK_DIR)/$(CURL)/$(CURL)/lib/.libs -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -L$(WORK_DIR)/$(ZLIB)/$(ZLIB)" LIBS="-lssl -lcrypto -lcurl -larchive -lz" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include -I$(WORK_DIR)/$(CURL)/$(CURL)/include -I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive -I$(WORK_DIR)/$(ZLIB)/$(ZLIB)" --disable-gpg --disable-shared --with-static-libopkg --prefix=$(PREFIX_STATE_DIR) --localstatedir=$(PREFIX_STATE_DIR)
++
++static:
++	cd $(OPKG) && ACLOCAL_FLAGS="-I /usr/share/aclocal" ./autogen.sh && rm -f $(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/libcrypto.so* $(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/libssl.so* $(WORK_DIR)/$(CURL)/$(CURL)/lib/.libs/libcurl.so* $(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs/libarchive.so* $(WORK_DIR)/$(ZLIB)/$(ZLIB)/libz.so* && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-Bstatic -L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -Wl,-Bstatic -lssl -Wl,-Bstatic -lcrypto" CURL_LIBS="-Bstatic -L$(WORK_DIR)/$(CURL)/$(CURL)/lib/.libs -Wl,-Bstatic -lcurl" LIBARCHIVE_LIBS="-Bstatic -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -Wl,-Bstatic -larchive" LDFLAGS="-Bstatic -L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -Bstatic -L$(WORK_DIR)/$(CURL)/$(CURL)/lib/.libs -Bstatic -L$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/.libs -Bstatic -L$(WORK_DIR)/$(ZLIB)/$(ZLIB) -Bdynamic" LIBS="-Wl,-Bstatic -lssl -Wl,-Bstatic -lcrypto -Wl,-Bstatic -lcurl -Wl,-Bstatic -larchive -Wl,-Bstatic -lz -Wl,-Bstatic -ldl -Wl,-Bdynamic" CFLAGS="$(CFLAGS) -Os -static" CPPFLAGS="-I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include -I$(WORK_DIR)/$(CURL)/$(CURL)/include -I$(WORK_DIR)/$(LIBARCHIVE)/$(LIBARCHIVE)/libarchive -I$(WORK_DIR)/$(ZLIB)/$(ZLIB)" --disable-gpg --disable-shared --with-static-libopkg --prefix=$(PREFIX_STATE_DIR) --localstatedir=$(PREFIX_STATE_DIR) && cd .. && $(MAKE) -C $(OPKG) && $(SSTRIP) $(OPKG)/src/opkg
 +
 +install-local: opkg_conf-local
 +	install -m 0755 -d $(GIT_ROOT_DIR)/$(LBIN_DIR)
