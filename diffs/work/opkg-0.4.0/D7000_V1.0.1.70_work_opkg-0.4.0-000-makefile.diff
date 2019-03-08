@@ -129,7 +129,7 @@ diff -urN work/opkg-0.4.0/Makefile work/opkg-0.4.0/Makefile
 +
 +preinst:
 +	@echo "#!/bin/sh" > $(PREINST)
-+	@echo "mount | grep $(OPKGPART) && exit 0" >> $(PREINST)
++	@echo "mount | grep $(OPKGPART) >/dev/null 2>&1 && exit 0" >> $(PREINST)
 +	@echo "echo \"Preparing $(OPKG) package installation...\"" >> $(PREINST)
 +	@echo "echo" >> $(PREINST)
 +	@echo "echo \"Mounting opkg info & status files partition...\"" >> $(PREINST)
