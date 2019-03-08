@@ -31,6 +31,9 @@
 ETCDIR=/etc
 USRETCDIR=/usr${ETCDIR}
 BINDIR=/usr/sbin
+MNTDIR=/usr/lib/opkg
+MNTPART=mtd20
+MNTLANGPART=/config/language_TUR
 
 BIN=opkg
 OPKG=${ETCDIR}/${BIN}
@@ -46,7 +49,7 @@ LANGSDIR=${WWW}/langs
 URL=https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/tools/ancistrus-arm-D7000
 [ ! -z "$1" ] && URL=$1
 
-[ -x ${BINDIR}/${BIN} ] && echo "${BIN} looks already installed." && exit 3
+[ -x ${BINDIR}/${BIN} ] && mount | grep ${MNTPART} ] && echo "${BIN} looks already installed." && exit 4
 
 cd ${ETCDIR}
 echo "Cleaning up some garbage/orphan dirs & files..."
@@ -60,9 +63,18 @@ echo
 echo "Downloading & extracting: ${ARC} ..."
 curl -k -O ${URL}/${ABSARC}
 unzip ${ARC}
-[ $? -ne 0 -o ! -f ${OPKG} -o ! -f ${CONF} ] && echo "Problem has occurred: check either connection or download urls." && exit 2
+[ $? -ne 0 -o ! -f ${OPKG} -o ! -f ${CONF} ] && echo "Problem has occurred: check either connection or download urls." && exit 3
 chmod 755 ${OPKG}
 chmod 644 ${CONF}
+echo
+echo "Mounting opkg info & status files partition..."
+[ ! -d ${MNTDIR} ] && mkdir -m 0777 ${MNTDIR}
+umount ${MNTDIR} >/dev/null 2>&1
+umount ${MNTLANGPART} >/dev/null 2>&1
+mount -n -t jffs2 ${MNTPART} ${MNTDIR}
+[ $? -ne 0 ] && echo "Problem has occurred: opkg partition not mounted." && exit 2
+rm -rf ${MNTDIR}/*
+sync
 echo
 echo "Installing essential packages: ${TOINST}"
 ${OPKGCMD} update && sleep 1
