@@ -1,6 +1,6 @@
 ancistrus
 
-Netgear's D7000 Nighthawk Router Experience Distributed Project
+Netgear's D7000 (V1) Nighthawk Router Experience Distributed Project
 
 https://github.com/negan07/ancistrus
 
