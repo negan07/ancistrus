@@ -196,7 +196,7 @@ diff -urN work/openssh-7.9p1/Makefile work/openssh-7.9p1/Makefile
 +	@echo "if [ -z \"\$$SSH_TTY\" ]; then" >> $(PRERM)
 +	@echo "killall -9 sshd >/dev/null 2>&1" >> $(PRERM)
 +	@echo "else" >> $(PRERM)
-+	@echo "echo \"When finished, kill manually sshd typing: 'killall -9 sshd'\"" >> $(PRERM)
++	@echo "echo \"openssh package removed, kill manually sshd typing: 'killall -9 sshd'\"" >> $(PRERM)
 +	@echo "fi" >> $(PRERM)
 +	@echo "exit 0" >> $(PRERM)
 +endif

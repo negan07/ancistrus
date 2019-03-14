@@ -1,12 +1,12 @@
 diff -urN work/openssh-7.9p1/rc_ssh work/openssh-7.9p1/rc_ssh
 --- work/openssh-7.9p1/rc_ssh	1970-01-01 01:00:00.000000000 +0100
 +++ work/openssh-7.9p1/rc_ssh	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,211 @@
+@@ -0,0 +1,214 @@
 +#!/bin/sh
 +#
 +# ancistrus
 +#
-+# Netgear's D7000 (V1) Nighthawk Router Experience Distributed Project
++# Netgear's D7000 Nighthawk Router Experience Distributed Project
 +#
 +# https://github.com/negan07/ancistrus
 +#
@@ -21,112 +21,115 @@ diff -urN work/openssh-7.9p1/rc_ssh work/openssh-7.9p1/rc_ssh
 +#
 +
 +stop() {
-+    # Kill all clients
-+    for PID in `pidof sshd`
-+    do
-+    [ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
-+    done
-+    rm -rf ${VARDIR} /tmp/sshd.pid ${CONFDIR}/moduli
++	# Kill all clients
++	for PID in `pidof sshd`
++	do
++	[ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
++	done
++	rm -rf ${VARDIR} /tmp/sshd.pid ${CONFDIR}/moduli
 +
-+    # Stop remote service
-+    remotedown
++	# Stop remote service
++	remotedown
 +}
 +
 +start() {
-+    # Checking if service is enabled
-+    eval `nvram get ssh_enable` > /dev/null 2>&1
-+    [ "${ssh_enable}" = "1" ] || [ ! -z "$1" ] || return 1
++	# Checking if service is enabled
++	eval `nvram get ssh_enable` >/dev/null 2>&1
++	[ "${ssh_enable}" = "1" ] || [ ! -z "$1" ] || return 1
 +
-+    # Checking if the service is already running
-+    [ ! -z "`pidof sshd`" ] && echo "sshd already running..." && exit 1
++	# Checking if the service is already running
++	[ ! -z "`pidof sshd`" ] && echo "sshd already running..." && exit 1
 +
-+    # Checking nvram dir
-+    [ ! -d ${NVRAMDIR} ] && echo "$0: Nvram error !" && exit 2
++	# Checking nvram dir
++	[ ! -d ${NVRAMDIR} ] && echo "$0: Nvram error !" && exit 2
 +
-+    # Preliminary fs operations
-+    [ ! -d ${VARDIR} ] && mkdir -p -m 0700 ${VARDIR}
-+    [ -f ${CONFETCDIR}/${CONF} ] && cp -f ${CONFETCDIR}/${CONF} ${CONFDIR}/
-+    [ -f ${KEYSDIR}/moduli ] && cp -f ${KEYSDIR}/moduli ${CONFDIR}/ && chmod 600 ${CONFDIR}/moduli
++	# Preliminary fs operations
++	[ ! -d ${VARDIR} ] && mkdir -p -m 0700 ${VARDIR}
++	[ -f ${CONFETCDIR}/${CONF} ] && cp -f ${CONFETCDIR}/${CONF} ${CONFDIR}/
++	[ -f ${KEYSDIR}/moduli ] && cp -f ${KEYSDIR}/moduli ${CONFDIR}/ && chmod 600 ${CONFDIR}/moduli
 +
-+    # Retrocompatibility
-+    [ -d /.ssh ] && rm -rf /.ssh
++	# Retrocompatibility
++	[ -d /.ssh ] && rm -rf /.ssh
 +
-+    # Renew auth login
-+    rm -f ${CONFDIR}/nologin
-+    eval `nvram get http_password` > /dev/null 2>&1
-+    echo "${USR}:${http_password}" | chpasswd > /dev/null 2>&1
++	# Update hostname
++	hostname D7000 >/dev/null 2>&1
 +
-+    # Keys generation
-+    genkeys
++	# Renew auth login
++	rm -f ${CONFDIR}/nologin
++	eval `nvram get http_password` >/dev/null 2>&1
++	echo "${USR}:${http_password}" | chpasswd >/dev/null 2>&1
 +
-+    # Starting 'sshd'
-+    $SSHD
++	# Keys generation
++	genkeys
 +
-+    # Sanity check
-+    SSHD_RC=$?
-+    [ $SSHD_RC -ne 0 ] && echo "$0: Error ${SSHD_RC} starting ${SSHD}..." && exit $SSHD_RC
++	# Starting 'sshd'
++	$SSHD
 +
-+    # Starting remote service
-+    remoteup
++	# Sanity check
++	SSHD_RC=$?
++	[ $SSHD_RC -ne 0 ] && echo "$0: Error ${SSHD_RC} starting ${SSHD}..." && exit $SSHD_RC
++
++	# Starting remote service
++	remoteup
 +}
 +
 +remotedown() {
-+    # Stopping remote service
-+    eval `nvram get ssh_remote_port` > /dev/null 2>&1
-+    [ ! -z "${ssh_remote_port}" ] && ${ANC} fw remote del ls SSH tcp $ssh_remote_port 22
++	# Stopping remote service
++	eval `nvram get ssh_remote_port` >/dev/null 2>&1
++	[ ! -z "${ssh_remote_port}" ] && ${ANC} fw remote del ls SSH tcp $ssh_remote_port 22
 +}
 +
 +remoteup() {
-+    # Checking if remote service is enabled
-+    eval `nvram get ssh_remote_enable` > /dev/null 2>&1
-+    eval `nvram get ssh_remote_port` > /dev/null 2>&1
-+    [ ! -z "`pidof sshd`" ] && [ "${ssh_remote_enable}" = "1" ] && [ ! -z "${ssh_remote_port}" ] && ${ANC} fw remote add ls SSH tcp $ssh_remote_port 22
++	# Checking if remote service is enabled
++	eval `nvram get ssh_remote_enable` >/dev/null 2>&1
++	eval `nvram get ssh_remote_port` >/dev/null 2>&1
++	[ ! -z "`pidof sshd`" ] && [ "${ssh_remote_enable}" = "1" ] && [ ! -z "${ssh_remote_port}" ] && ${ANC} fw remote add ls SSH tcp $ssh_remote_port 22
 +}
 +
 +genkeys() {
-+    # Preliminary fs operations
-+    [ -d ${TMPKEYSDIR} ] && rm -rf ${TMPKEYSDIR}
-+    [ ! -d ${KEYSDIR} ] && chown ${USR}:${USR} / ${CONFIG} ${NVRAMDIR} && chmod 0755 ${CONFIG} ${NVRAMDIR} && mkdir -p -m 0600 ${KEYSDIR}
-+    # Key check & generation if missed
-+    for KTYPE in $KEYTYPES
-+    do
-+    KEY=${KEYSDIR}/${LABEL}.${KTYPE}
-+        if [ ! -f $KEY ]; then
-+        TMPKEY=${TMPKEYSDIR}/${LABEL}.${KTYPE}
-+        # Creating tmp key dir
-+        [ ! -d ${TMPKEYSDIR} ] && mkdir -p -m 0600 ${TMPKEYSDIR}
-+        # Creating auth key file
-+	${SSH_KEYGEN} -q -t ${KTYPE} -f ${TMPKEY} -N '' && chmod 600 ${TMPKEY} ${TMPKEY}.pub
-+        fi
-+    done
-+    # Store new keys
-+    [ -d ${TMPKEYSDIR} ] && mv -f ${TMPKEYSDIR}/* ${KEYSDIR} && rm -rf ${TMPKEYSDIR} && genauth
++	# Preliminary fs operations
++	[ -d ${TMPKEYSDIR} ] && rm -rf ${TMPKEYSDIR}
++	[ ! -d ${KEYSDIR} ] && chown ${USR}:${USR} / ${CONFIG} ${NVRAMDIR} && chmod 0755 ${CONFIG} ${NVRAMDIR} && mkdir -p -m 0600 ${KEYSDIR}
++	# Key check & generation if missed
++	for KTYPE in $KEYTYPES
++	do
++	KEY=${KEYSDIR}/${LABEL}.${KTYPE}
++		if [ ! -f $KEY ]; then
++		TMPKEY=${TMPKEYSDIR}/${LABEL}.${KTYPE}
++		# Creating tmp key dir
++		[ ! -d ${TMPKEYSDIR} ] && mkdir -p -m 0600 ${TMPKEYSDIR}
++		# Creating auth key file
++		${SSH_KEYGEN} -q -t ${KTYPE} -f ${TMPKEY} -N '' && chmod 600 ${TMPKEY} ${TMPKEY}.pub
++		fi
++	done
++	# Store new keys
++	[ -d ${TMPKEYSDIR} ] && mv -f ${TMPKEYSDIR}/* ${KEYSDIR} && rm -rf ${TMPKEYSDIR} && genauth
 +}
 +
 +genauth() {
-+    # Regenerate auth keys file from existents .pub
-+    [ ! -d ${KEYSDIR} ] && echo "Auth key dir: '${KEYSDIR}' missed..." && exit 3
-+    rm -f ${AUTHKEYS} && touch ${AUTHKEYS} && chmod 600 ${AUTHKEYS}
-+    find ${KEYSDIR} -type f -name *.pub -exec cat '{}' >> ${AUTHKEYS} \;
-+    sync
-+    return 0
++	# Regenerate auth keys file from existents .pub
++	[ ! -d ${KEYSDIR} ] && echo "Auth key dir: '${KEYSDIR}' missed..." && exit 3
++	rm -f ${AUTHKEYS} && touch ${AUTHKEYS} && chmod 600 ${AUTHKEYS}
++	find ${KEYSDIR} -type f -name *.pub -exec cat '{}' >> ${AUTHKEYS} \;
++	sync
++	return 0
 +}
 +
 +genmoduli() {
-+    # Regenerate moduli file in low-priority-background mode as it takes long time
-+    sync
-+    echo 3 > /proc/sys/vm/drop_caches
-+    nice -n 18 ssh-keygen -q -G /tmp/moduli.all -b 4096
-+    nice -n 18 ssh-keygen -q -T /tmp/moduli.safe -f /tmp/moduli.all
-+    chmod 600 /tmp/moduli.safe
-+    rm -f /tmp/moduli.all
-+    mv -f /tmp/moduli.safe ${KEYSDIR}/moduli
-+    sync
++	# Regenerate moduli file in low-priority-background mode as it takes long time
++	sync
++	echo 3 > /proc/sys/vm/drop_caches
++	nice -n 18 ssh-keygen -q -G /tmp/moduli.all -b 4096
++	nice -n 18 ssh-keygen -q -T /tmp/moduli.safe -f /tmp/moduli.all
++	chmod 600 /tmp/moduli.safe
++	rm -f /tmp/moduli.all
++	mv -f /tmp/moduli.safe ${KEYSDIR}/moduli
++	sync
 +}
 +
 +zipkeys() {
-+    # Create a zip file containing keys
-+    [ -d ${KEYSDIR} ] && zip -jrq9 ${TMPKEYSDIR}.zip ${KEYSDIR} >/dev/null 2>&1
++	# Create a zip file containing keys
++	[ -d ${KEYSDIR} ] && zip -jrq9 ${TMPKEYSDIR}.zip ${KEYSDIR} >/dev/null 2>&1
 +}
 +
 +# Dirs
