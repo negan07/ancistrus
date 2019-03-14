@@ -1,7 +1,7 @@
 diff -urN work/utelnetd-0.1.11/rc_debug_mode work/utelnetd-0.1.11/rc_debug_mode
 --- work/utelnetd-0.1.11/rc_debug_mode	1970-01-01 01:00:00.000000000 +0100
 +++ work/utelnetd-0.1.11/rc_debug_mode	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,79 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -15,31 +15,41 @@ diff -urN work/utelnetd-0.1.11/rc_debug_mode work/utelnetd-0.1.11/rc_debug_mode
 +#
 +# Rc script for utelnetd daemon. Originally it linked '${APPDIR}/rc_apps' to run 'telnetenabled' .
 +#
-+# Usage: $0 < start restart startforced restartforced stop >
++# Usage: $0 < start restart startforced restartforced stop authhostrenew >
++#
++# This script is invoked at every boot inside 'rc start' service.
 +#
 +
 +stop() {
-+    # Kill all clients
-+    for PID in `pidof utelnetd`
-+    do
-+    [ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
-+    done
++	# Kill all clients
++	for PID in `pidof utelnetd`
++	do
++	[ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
++	done
 +}
 +
 +start() {
-+    # Checking if the service is already running
-+    [ ! -z "`pidof utelnetd`" ] && echo "telnet already running..." && exit 1
++	# Checking if the service is already running
++	[ ! -z "`pidof utelnetd`" ] && echo "telnet already running..." && exit 1
 +
-+    # Renew auth login
-+    eval `nvram get http_password` > /dev/null 2>&1
-+    echo "root:${http_password}" | chpasswd > /dev/null 2>&1
++	# Renew auth login
++	authhostrenew
 +
-+    # Starting utelnetd
-+    ${UTELNETD} -l ${BINDIR}/login -d
++	# Starting utelnetd
++	${UTELNETD} -l ${BINDIR}/login -d
 +
-+    # Sanity check
-+    TELD_RC=$?
-+    [ $TELD_RC -ne 0 ] && echo "$0: Error $TELD_RC starting ${UTELNETD} ..." && exit $TELD_RC
++	# Sanity check
++	TELD_RC=$?
++	[ $TELD_RC -ne 0 ] && echo "$0: Error $TELD_RC starting ${UTELNETD} ..." && exit $TELD_RC
++}
++
++authhostrenew() {
++	# Update hostname
++	hostname D7000 >/dev/null 2>&1
++
++	# Renew auth login
++	eval `nvram get http_password` >/dev/null 2>&1
++	echo "root:${http_password}" | chpasswd >/dev/null 2>&1
 +}
 +
 +# Main dirs
@@ -50,7 +60,7 @@ diff -urN work/utelnetd-0.1.11/rc_debug_mode work/utelnetd-0.1.11/rc_debug_mode
 +
 +UTELNETD=${BINDIR}/utelnetd
 +
-+eval `nvram get telnet_enable` > /dev/null 2>&1
++eval `nvram get telnet_enable` >/dev/null 2>&1
 +
 +case $1 in
 +start|restart)
@@ -64,7 +74,10 @@ diff -urN work/utelnetd-0.1.11/rc_debug_mode work/utelnetd-0.1.11/rc_debug_mode
 +stop)
 +stop
 +;;
++authhostrenew)
++authhostrenew
++;;
 +*)
-+echo "Usage: $0 < start restart startforced restartforced stop >"
++echo "Usage: $0 < start restart startforced restartforced stop authhostrenew >"
 +;;
 +esac
