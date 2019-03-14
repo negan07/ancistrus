@@ -49,15 +49,16 @@ LANGSDIR=${WWW}/langs
 URL=https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/tools/ancistrus-arm-D7000
 [ ! -z "$1" ] && URL=$1
 
+[ "`system get dev_name 2>/dev/null`" != "D7000" ] || [ ! -x ${BINDIR}/xdslctl ] && echo "This script can be used with Netgear D7000 (V1) only" && exit 5
 [ -x ${BINDIR}/${BIN} ] || mount | grep ${MNTPART} >/dev/null 2>&1 && echo "${BIN} looks already installed." && exit 4
 
 cd ${ETCDIR}
 echo "Cleaning up some garbage/orphan dirs & files..."
-[ ! -z "`pidof telnetenabled`" ] && killall -9 telnetenabled
+killall -9 telnetenabled >/dev/null 2>&1
 for D in "/opt" "${WWW}/cgi-bin"; do find $D -type d -name .svn -exec rm -rf '{}' \; >/dev/null 2>&1; done
 for D in "CSY" "TUR"; do find ${LANGSDIR} -type d -name $D -exec rm -rf '{}' \; >/dev/null 2>&1; done
 find ${LANGSDIR} -type f -name *.gz -exec rm -f '{}' \; >/dev/null 2>&1
-rm -f ${OPKG} ${CONF} ${ARC} ${USRETCDIR}/rcS.MT ${BINDIR}/reaim ${BINDIR}/telnetenabled ${WWW}/language/Czech.js ${WWW}/*DGND*.jpg ${WWW}/vw_* ${WWW}/vpn_* ${WWW}/h_vpn* ${WWW}/h_vauto* ${WWW}/h_vman* ${WWW}/index1.htm ${WWW}/start1.htm ${WWW}/*_demo.htm ${WWW}/start_old_style.htm ${WWW}/ORG-RST_status.htm ${WWW}/DSL_PRO_config.html
+rm -f ${OPKG} ${CONF} ${ARC} ${USRETCDIR}/rcS.MT ${USRETCDIR}/prepare_3g ${BINDIR}/reaim ${BINDIR}/telnetenabled ${WWW}/language/Czech.js ${WWW}/*DGND*.jpg ${WWW}/vw_* ${WWW}/vpn_* ${WWW}/h_vpn* ${WWW}/h_vauto* ${WWW}/h_vman* ${WWW}/index1.htm ${WWW}/start1.htm ${WWW}/*_demo.htm ${WWW}/start_old_style.htm ${WWW}/ORG-RST_status.htm ${WWW}/DSL_PRO_config.html ${WWW}/*3g*.htm
 sync
 echo
 echo "Downloading & extracting: ${ARC} ..."
