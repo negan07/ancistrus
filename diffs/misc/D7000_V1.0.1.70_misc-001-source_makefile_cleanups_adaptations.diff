@@ -104,14 +104,14 @@ diff -urN D7000_V1.0.1.70_WW_src/Source/Makefile D7000_V1.0.1.70_WW_src/Source/M
 +	$(SSTRIP) $D/$$F; fi; done;)
 +	$(SSTRIP) target/opt/rcagent/downloader
 +	@echo -e "\\e[35mSOURCE: PRE_FS \\e[36mgarbage orphans cleanup\\e[0m"
-+	-find $(FS_DIR) -type d -name .svn -exec rm -rf '{}' \; > /dev/null 2>&1
-+	-@$(foreach F, "*.gz" "*DGND*.jpg" "rcS.MT" "telnetenabled" "vw_*" "vpn_*" "h_vpn*" "h_vauto*" "h_vman*" "index1.htm" "start1.htm" "*_demo.htm" "start_old_style.htm" "ORG-RST_status.htm" "DSL_PRO_config.html", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
++	-find $(FS_DIR) -type d -name .svn -exec rm -rf '{}' \; >/dev/null 2>&1
++	-@$(foreach F, "*.gz" "*DGND*.jpg" "rcS.MT" "prepare_3g" "telnetenabled" "vw_*" "vpn_*" "h_vpn*" "h_vauto*" "h_vman*" "index1.htm" "start1.htm" "*_demo.htm" "start_old_style.htm" "ORG-RST_status.htm" "DSL_PRO_config.html" "*3g*.htm", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
 +	mogrify -format jpg $(FS_DIR)/www.eng/image/apmodelink.jpg
 +ifeq ($(ANNEX),A)
-+	-@$(foreach D, "CSY" "TUR" , find $(FS_DIR) -type d -name $(D) -exec rm -rf '{}' \; > /dev/null 2>&1;)
++	-@$(foreach D, "CSY" "TUR" , find $(FS_DIR) -type d -name $(D) -exec rm -rf '{}' \; >/dev/null 2>&1;)
 +	-@$(foreach F, "Czech.js" , find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
 +else
-+	-@$(foreach D, "CHS" "ITA" "KOR" "ESP", find $(FS_DIR) -type d -name $(D) -exec rm -rf '{}' \; > /dev/null 2>&1;)
++	-@$(foreach D, "CHS" "ITA" "KOR" "ESP", find $(FS_DIR) -type d -name $(D) -exec rm -rf '{}' \; >/dev/null 2>&1;)
 +	-@$(foreach F, "Chinese.js" "Italian.js" "Korean.js" "Spanish.js", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
 +endif
  ifeq ($(ITUNES_SERVER),1)
