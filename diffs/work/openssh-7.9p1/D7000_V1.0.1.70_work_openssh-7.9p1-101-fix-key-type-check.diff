@@ -1,0 +1,61 @@
+diff -urN work/openssh-7.9p1/openssh-7.9p1/monitor.c work/openssh-7.9p1/openssh-7.9p1/monitor.c
+--- work/openssh-7.9p1/openssh-7.9p1/monitor.c	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-7.9p1/openssh-7.9p1/monitor.c	2018-01-05 12:00:11.000000000 +0100
+@@ -846,6 +846,35 @@ mm_answer_authrole(int sock, struct sshbuf *m)
+ 	return (0);
+ }
+ 
++/*
++ * Check that the key type appears in the supplied pattern list, ignoring
++ * mismatches in the signature algorithm. (Signature algorithm checks are
++ * performed in the unprivileged authentication code).
++ * Returns 1 on success, 0 otherwise.
++ */
++static int
++key_base_type_match(const char *method, const struct sshkey *key,
++    const char *list)
++{
++	char *s, *l, *ol = xstrdup(list);
++	int found = 0;
++
++	l = ol;
++	for ((s = strsep(&l, ",")); s && *s != '\0'; (s = strsep(&l, ","))) {
++		if (sshkey_type_from_name(s) == key->type) {
++			found = 1;
++			break;
++		}
++	}
++	if (!found) {
++		error("%s key type %s is not in permitted list %s", method,
++		    sshkey_ssh_name(key), list);
++	}
++
++	free(ol);
++	return found;
++}
++
+ int
+ mm_answer_authpassword(int sock, struct sshbuf *m)
+ {
+@@ -1151,8 +1180,8 @@ mm_answer_keyallowed(int sock, struct sshbuf *m)
+ 				break;
+ 			if (auth2_key_already_used(authctxt, key))
+ 				break;
+-			if (match_pattern_list(sshkey_ssh_name(key),
+-			    options.pubkey_key_types, 0) != 1)
++			if (!key_base_type_match(auth_method, key,
++			    options.pubkey_key_types))
+ 				break;
+ 			allowed = user_key_allowed(ssh, authctxt->pw, key,
+ 			    pubkey_auth_attempt, &opts);
+@@ -1163,8 +1192,8 @@ mm_answer_keyallowed(int sock, struct sshbuf *m)
+ 				break;
+ 			if (auth2_key_already_used(authctxt, key))
+ 				break;
+-			if (match_pattern_list(sshkey_ssh_name(key),
+-			    options.hostbased_key_types, 0) != 1)
++			if (!key_base_type_match(auth_method, key,
++			    options.hostbased_key_types))
+ 				break;
+ 			allowed = hostbased_key_allowed(authctxt->pw,
+ 			    cuser, chost, key);
