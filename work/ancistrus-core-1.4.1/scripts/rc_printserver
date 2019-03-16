@@ -1,0 +1,67 @@
+#!/bin/sh
+#
+# ancistrus
+#
+# Netgear's D7000 (V1) Nighthawk Router Experience Distributed Project
+#
+# https://github.com/negan07/ancistrus
+#
+# License: GPLv2
+#
+#
+# Rc script for printserver.
+#
+# Usage: $0 < boot start restart startforced restartforced stop enable disable >
+#
+
+stop() {
+# kill print server
+for K in "KC_PRINT" "KC_BONJOUR"
+do
+	for PID in `pidof ${K}`
+	do
+	[ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
+	done
+done
+}
+
+start() {
+# run print server
+KC_BONJOUR &
+KC_PRINT &
+/etc/turn_on_printer_led
+}
+
+eval `nvram get printserver_disable` >/dev/null 2>&1
+
+case $1 in
+boot)
+# start printserver only: to be invoked by /usr/etc/rcS
+[ "${printserver_disable}" != "1" ] || [ ! -e /usr/sbin/anc ] && start >/dev/null 2>&1
+;;
+start|restart)
+stop
+[ "${printserver_disable}" != "1" ] && start >/dev/null 2>&1
+;;
+startforced|restartforced)
+stop
+start >/dev/null 2>&1
+;;
+stop)
+stop
+;;
+enable)
+# stop, enable, then run printserver
+stop
+nvram set printserver_disable=0
+start >/dev/null 2>&1
+;;
+disable)
+# disable & stop printserver
+nvram set printserver_disable=1
+stop
+;;
+*)
+echo "Usage: $0 < boot start restart startforced restartforced stop enable disable >"
+;;
+esac

@@ -5,7 +5,8 @@ POSTTAG			:= _post
 OPTIONAL		:= opt
 CONF			:= profile
 RCSSCRIPTS		:= $(RCSSCR)
-BINSCRIPTS		:= printserverkill.sh led.sh guiinfo.sh pem_gen.sh wol.sh
+BINSCRIPTS		:= led.sh guiinfo.sh pem_gen.sh wol.sh
+APPSCRIPTS		:= rc_printserver
 KSCRIPTS		:= kernelprocskill.sh
 SSCRIPTS		:= 
 FSCRIPTS		:= 
@@ -19,7 +20,7 @@ all:
 install:
 	for D in $(TMPINSTDIR) $(SCRDIR) $(ETCDIR) $(INITDIR) $(RCSDIR) $(PREDIR) $(POSTDIR) $(FWDIR) $(SCHDIR); do install -m 0755 -d $$D; done
 	install -m 0755 $(BINSCRIPTS) $(SCRDIR)
-	install -m 0755 $(RCSSCRIPTS) $(TMPINSTDIR)
+	install -m 0755 $(RCSSCRIPTS) $(APPSCRIPTS) $(TMPINSTDIR)
 	install -m 0755 $(CONF) $(ETCDIR)
 	for V in $(KSCRIPTS) $(SSCRIPTS) $(FSCRIPTS) $(CSCRIPTS); do install -m 0755 $$V $(INITDIR); done
 	for W in K S F; do install -m 0755 $${W}$(OPTIONAL)* $(INITDIR); done

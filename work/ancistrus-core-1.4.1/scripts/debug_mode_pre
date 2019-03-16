@@ -1,8 +1,0 @@
-#!/bin/sh
-
-# rc_debug_mode is run every time password is changed from the web gui so renew /etc/passwd too
-eval `nvram get http_password`
-echo "root:${http_password}" | chpasswd > /dev/null 2>&1
-echo "nobody:${http_password}" | chpasswd > /dev/null 2>&1
-
-exit 0
