@@ -47,19 +47,6 @@ function runInhCmd(serv, servflag) {
 	return true;
 }
 
-function runPSCmd(psflag) {
-	var cf=document.forms[0], msg, flgset, cmd;
-
-	if(psflag.checked==true) flgset="enable";
-	else flgset="disable";
-	msg="Warning! Print Server killing service is about to be "+flgset+"d :proceed ?";
-	if(!confirm(msg)) return false;
-
-	cmd="/usr/sbin/scripts/printserverkill.sh "+flgset+"kill >/dev/null 2>&1";
-	AncstdAction(cf,'anc_inhibit.htm','','inhibit',cmd);
-	return true;
-}
-
 function runUpgCmd() {
 	var cf=document.forms[0], cmd, flg;
 
@@ -102,8 +89,7 @@ function showAll() {
 	if(i!=16) txt+="\");'><b>Inhibit "+inname[i];
 	else txt+="\");'><b>Turn Telnet Daemon On";
 	txt+="</b></a></td><td nowrap align='right'><input class='apply_bt' type='submit' value='Apply' onClick='return run";
-	if(i<14) txt+="InhCmd(\""+inval[i]+"\", "+inval[i]+"_disable);'>";
-	else if(i==14) txt+="PSCmd("+inval[i]+"_disable);'>";
+	if(i<15) txt+="InhCmd(\""+inval[i]+"\", "+inval[i]+"_disable);'>";
 	else if(i==15) txt+="UpgCmd();'>";
 	else txt+="TelCmd();'>";
 	txt+="</td></tr><tr><td colspan='2' background='liteblue.gif' height='12'></td></tr>";
