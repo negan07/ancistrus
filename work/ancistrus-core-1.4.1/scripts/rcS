@@ -42,7 +42,7 @@ for M in rdpa_gpl rdpa rdpa_mw chipinfo bcmxtmrtdrv bcmxtmcfg pktflow pktrunner 
 for M in led_pb_api led_hw; do insmod /lib/modules/${M}.ko; done
 
 # Disable Broadcom LED control
-echo 0300 > /proc/led
+echo 0300 >/proc/led
 
 # LED show we are booting...
 led_app on 71
@@ -82,21 +82,21 @@ ifconfig lo 127.0.0.1
 route add -net 127.0.0.0 netmask 255.0.0.0 lo
 
 # Force IGMP version 3
-echo "3" > /proc/sys/net/ipv4/conf/all/force_igmp_version
+echo "3" >/proc/sys/net/ipv4/conf/all/force_igmp_version
 
 # Various
 cp -f /usr/sbin/setupwizard.cgi /tmp/setupwizard.cgi
-klogd&
+klogd &
 cmd_agent_ap
 
 # IPV6
-echo 2 > /proc/sys/net/ipv6/conf/all/forwarding
-echo 1 > /proc/sys/net/ipv6/conf/all/autoconf
-echo 1 > /proc/sys/net/ipv6/conf/default/autoconf
+echo 2 >/proc/sys/net/ipv6/conf/all/forwarding
+echo 1 >/proc/sys/net/ipv6/conf/all/autoconf
+echo 1 >/proc/sys/net/ipv6/conf/default/autoconf
 # Set default, do not autoconf with RA pinfo (prefix info)
-echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
-echo 0 > /proc/sys/net/ipv6/conf/all/accept_ra_pinfo
-echo 0 > /proc/sys/net/ipv6/conf/default/accept_ra_pinfo
+echo 1 >/proc/sys/net/ipv6/conf/all/disable_ipv6
+echo 0 >/proc/sys/net/ipv6/conf/all/accept_ra_pinfo
+echo 0 >/proc/sys/net/ipv6/conf/default/accept_ra_pinfo
 
 # Mount from /etc/fstab if any
 mount -a
@@ -104,7 +104,7 @@ sleep 1
 
 # Check if nvram partition is mounted correctly otherwise erase it and revert to default settings
 if [ ! -e '/config/nvram/ready' ]; then
-echo "mount scnvram failed, calling eraseall " > /dev/console
+echo "mount scnvram failed, calling eraseall " >/dev/console
 umount /config/nvram
 flash_eraseall -j /dev/mtd3
 mount -n -t jffs2 "mtd:scnvram" /config/nvram
@@ -118,86 +118,78 @@ flash_eraseall -j /dev/mtd8
 mount -n -t jffs2 "mtd:xxx" /config/xxx
 touch /config/xxx/ready
 fi
-echo "=============mount finished " > /dev/console
+echo "=============mount finished " >/dev/console
 
 # Switch setup
 I=0; while [ $I -le 3 ]; do ethswctl -c pause -p $I -v 1; let I++; done
 
 # Init services
 /usr/sbin/rc_app/rc_init
-scfgmgr&
+scfgmgr &
 
 # Start services
-echo "=============rc start " > /dev/console
+echo "=============rc start " >/dev/console
 rc start
-echo "=============rc finish " > /dev/console
+echo "=============rc finish " >/dev/console
 
 # Various
 rc upnp start
 crond &
-multi_pb_app 90 91 92 10 40&
+multi_pb_app 90 91 92 10 40 &
 wlevt
 
-# Route add for upnpd
-route add -net 239.0.0.0 netmask 255.0.0.0 br0
-
 # Router
-echo 1 > /proc/sys/net/ipv4/ip_forward
+echo 1 >/proc/sys/net/ipv4/ip_forward
 
 # Pppox
-echo 1 > /proc/sys/net/ipv4/ip_dynaddr
+echo 1 >/proc/sys/net/ipv4/ip_dynaddr
 
 # Arp ignore
-echo 1 > /proc/sys/net/ipv4/conf/all/arp_ignore
+echo 1 >/proc/sys/net/ipv4/conf/all/arp_ignore
 
 # Add more conntrack
-echo 65536 > /proc/sys/net/nf_conntrack_max
-echo 16384 > /sys/module/nf_conntrack/parameters/hashsize
-echo 16384 > /proc/sys/net/netfilter/nf_conntrack_buckets
-echo 256 > /proc/sys/net/netfilter/nf_conntrack_expect_max
+echo 65536 >/proc/sys/net/nf_conntrack_max
+echo 16384 >/sys/module/nf_conntrack/parameters/hashsize
+echo 16384 >/proc/sys/net/netfilter/nf_conntrack_buckets
+echo 256 >/proc/sys/net/netfilter/nf_conntrack_expect_max
 
 # Extend port range
-echo 1025 65535 > /proc/sys/net/ipv4/ip_local_port_range
+echo 1025 65535 >/proc/sys/net/ipv4/ip_local_port_range
 
 # Ignore_all not yet used: this should be satisfactory
-echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+echo 1 >/proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
 
 # Set to 1 for lan static route, when wan is not up and ip_forward is 0.
-echo 1 > /proc/sys/net/ipv4/conf/br0/forwarding
-echo 1 > /proc/sys/net/ipv4/conf/wlan0/forwarding
-echo 1 > /proc/sys/net/ipv4/conf/wlan0-va0/forwarding
+echo 1 >/proc/sys/net/ipv4/conf/br0/forwarding
+echo 1 >/proc/sys/net/ipv4/conf/wlan0/forwarding
+echo 1 >/proc/sys/net/ipv4/conf/wlan0-va0/forwarding
 
 # Drop spoofed addr
-echo 1 > /proc/sys/net/ipv4/conf/eth1/rp_filter
+echo 1 >/proc/sys/net/ipv4/conf/eth1/rp_filter
 
 # Turn '0' for performance when fast_path is enabled
-echo 1 > /proc/sys/net/ipv4/conf/all/rp_filter
+echo 1 >/proc/sys/net/ipv4/conf/all/rp_filter
 
 # Do not honor source route flags
-echo 0 > /proc/sys/net/ipv4/conf/default/accept_source_route
-echo 0 > /proc/sys/net/ipv4/conf/all/accept_source_route
+echo 0 >/proc/sys/net/ipv4/conf/default/accept_source_route
+echo 0 >/proc/sys/net/ipv4/conf/all/accept_source_route
 
 # Netfilter timeouts
-echo 300 > /proc/sys/net/ipv4/netfilter/ip_conntrack_generic_timeout
-echo 300 > /proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout_stream
-echo 300 > /proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout
-echo 60 > /proc/sys/net/ipv4/netfilter/ip_conntrack_icmp_timeout
-echo 7440 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established
-echo 60 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_syn_sent
-echo 10 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_time_wait
+echo 300 >/proc/sys/net/ipv4/netfilter/ip_conntrack_generic_timeout
+echo 300 >/proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout_stream
+echo 300 >/proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout
+echo 60 >/proc/sys/net/ipv4/netfilter/ip_conntrack_icmp_timeout
+echo 7440 >/proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established
+echo 60 >/proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_syn_sent
+echo 10 >/proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_time_wait
 
 # Insert usb net modules
 for M in GPL_NetUSB NetUSB; do insmod /lib/modules/${M}.ko; done
-echo "insmod finish" > /dev/console
+echo "insmod finish" >/dev/console
 sleep 5
 
 # Print server
-eval `nvram get printserver_disable` >/dev/null 2>&1
-if [ "${printserver_disable}" != "1" ]; then
-KC_BONJOUR &
-KC_PRINT &
-/etc/turn_on_printer_led
-fi
+/usr/sbin/rc_app/rc_printserver boot
 
 # ancistrus
 # Vars
