@@ -23,7 +23,7 @@
 # Typing: 'rc $SERV enable' the service inhibition will be removed and service will be available again.
 #
 
-eval `nvram get anc_boot_disable` > /dev/null 2>&1
+eval `nvram get anc_boot_disable` >/dev/null 2>&1
 [ "${anc_boot_disable}" = "1" ] && exit 1							#skip flag
 
 TAG=_pre
@@ -34,16 +34,16 @@ SERV=${SERV%${TAG}}
 case "$1" in
 enable)												#enable service (remove inhibition)
 nvram set ${SERV}_disable=0
-${RCAPPDIR}/rc_${SERV} start > /dev/null 2>&1
+${RCAPPDIR}/rc_${SERV} start >/dev/null 2>&1
 exit 127
 ;;
 disable)											#disable service (add/enable inhibition)
-${RCAPPDIR}/rc_${SERV} stop > /dev/null 2>&1
+${RCAPPDIR}/rc_${SERV} stop >/dev/null 2>&1
 nvram set ${SERV}_disable=1
 exit 127
 ;;
 *)
-eval `nvram get ${SERV}_disable` > /dev/null 2>&1
+eval `nvram get ${SERV}_disable` >/dev/null 2>&1
 [ "`eval echo '$'${SERV}_disable`" = "1" ] && exit 127						#no exec cmd exit code
 exit 0												#no inhibition
 ;;
