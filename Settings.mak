@@ -41,6 +41,7 @@ RCDSLKO			?= adsldd.ko pktrunner.ko pktflow.ko bcmxtmcfg.ko bcmxtmrtdrv.ko
 RCDSLDRV		?= adsl_phy.bin
 RCDSLSO			?= libbcm_crc.so libseltctl.so libbcm_flashutil.so libxdslctl.so
 RCDSLBINS		?= $(RCDSLCMDBIN)
+RCMAINSERV		?= rc_printserver rc_debug_mode
 RCMAINWEB		?= top.js linux.js top.html adv_index.htm GPL_rev1.htm
 RCMAINCSS		?= top.css
 RCTMPDIR		?= /tmp
@@ -53,6 +54,7 @@ RCWWWCSSDIR		?= $(RCWWWDIR)/style
 RCLDLIBMOD		?= $(RCLDLIB)/modules
 RCBOOTDIR		?= $(RCUSRDIR)$(RCRAMBOOTDIR)
 RCBINDIR		?= $(RCUSRDIR)$(RCSBINDIR)
+RCAPPDIR		?= $(RCBINDIR)/rc_app
 RCADSLDIR		?= $(RCBOOTDIR)/adsl
 RCBOOT			?= $(RCBOOTDIR)/$(RCBOOT_NAME)
 

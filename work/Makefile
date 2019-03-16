@@ -131,6 +131,7 @@ post_inst:
 	@mv $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMDBIN) || exit 1
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) || exit 1
 	@mv $(BUILD_TARGET)$(RCTMPDIR)/openssl $(BUILD_TARGET)$(RCTMPDIR)/curl $(BUILD_TARGET)$(RCTMPDIR)/busybox $(BUILD_TARGET)$(RCTMPDIR)/ip $(BUILD_TARGET)$(RCTMPDIR)/tc $(BUILD_TARGET)$(RCTMPDIR)/mini_httpd $(BUILD_TARGET)$(RCBINDIR)/ || exit 1
+	@for F in $(RCMAINSERV); do mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCAPPDIR)/ || exit 1; done
 	@for F in `cat $(BUSYBOX)/busybox.links`; do mv $(BUILD_TARGET)$(RCTMPDIR)/`basename $$F` $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; done
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep xdsl-driver`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
