@@ -18,9 +18,7 @@ BINDIR=/usr/sbin
 WAKECMDNAME=ether-wake
 WAKECMD=${BINDIR}/${WAKECMDNAME}
 
-LANIF=`anc nvram rget lan_if`
-[ -z "${LANIF}" ] && LANIF=group1
-
+LANIF=`anc nvram drget lan_if group1`
 eval MAC=\${$#}
 
 [ ! -e ${WAKECMD} ] && echo "${WAKECMDNAME} applet not present: upgrade/install busybox package to obtain it" && echo "Type: 'opkg update && opkg install busybox'" && exit 2
