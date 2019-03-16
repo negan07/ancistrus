@@ -1,7 +1,7 @@
 diff -urN work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp
 --- work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp	1970-01-01 01:00:00.000000000 +0100
 +++ work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,129 @@
+@@ -0,0 +1,128 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -40,7 +40,7 @@ diff -urN work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp work/
 +	[ ! -z "`pidof ${DAEMON}`" ] && echo "${DAEMON} already running..." && exit 1
 +
 +	# Removing no more used vars
-+	[ ! -z `anc nvram rget minisnmpd_prot` >/dev/null 2>&1 ] && anc nvram unset minisnmpd_prot minisnmpd_port minisnmpd_remote_prot && nvram commit
++	[ ! -z "`anc nvram rget minisnmpd_prot`" ] && anc nvram unset minisnmpd_prot minisnmpd_port minisnmpd_remote_prot && nvram commit
 +
 +	# Nvram vars
 +	VARS="minisnmpd_community minisnmpd_description minisnmpd_vendor minisnmpd_location minisnmpd_contact minisnmpd_timeout minisnmpd_auth wan_ifname minisnmpd_ip6 ip6_mode"
@@ -52,8 +52,7 @@ diff -urN work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp work/
 +	set -- ${DEFS}
 +		for VAR in $VARS
 +		do
-+		VAL=`anc nvram rget ${VAR}` >/dev/null 2>&1
-+		[ -z "${VAL}" ] && VAL=${1}
++		VAL=`anc nvram drget ${VAR} $1`
 +		eval "${VAR}='${VAL}'"
 +		shift
 +		done
