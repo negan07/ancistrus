@@ -100,6 +100,7 @@ exit(3);													\
 #define NV_SDGET nvram_safedef_get
 #define NV_GETR nvram_get_r
 #define NV_SGETR nvram_safe_get_r
+#define NV_SDGETR nvram_safedef_get_r
 #define NV_BSGET nvram_bcm_safe_get
 #define NV_BSGETR nvram_bcm_safe_get_r
 #define NV_SET nvram_set

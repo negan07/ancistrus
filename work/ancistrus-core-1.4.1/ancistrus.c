@@ -6,8 +6,8 @@
 #include "ancistrus.h"
 
 int nvram(MAINARGS) {
-enum { HELP, SHOW, DEFSHOW, BCMSHOW, RGET, GET, BCMRGET, BCMGET, SET, BCMSET, UNSET, BCMUNSET, ADD, APPEND, DELETE, INSERT, CHANGE, RESET, INIT, COMMIT };
-OPTIONS = { {"show", 3, 0}, {"defshow", 3, 0}, {"bcmshow", 3, 0}, {"rget", 4, 1}, {"get", 4, 1}, {"bcmrget", 4, 1}, {"bcmget", 4, 1}, {"set", 5, 2}, {"bcmset", 5, 2}, {"unset", 4, 1}, {"bcmunset", 4, 1}, {"add", 5, 1}, {"append", 5, 1}, {"delete", 5, 1}, {"insert", 5, 1}, {"change", 6, 1}, {"reset", 3, 0}, {"init", 3, 0}, {"commit", 3, 0} };
+enum { HELP, SHOW, DEFSHOW, BCMSHOW, RGET, DRGET, GET, DGET, BCMRGET, BCMGET, SET, BCMSET, UNSET, BCMUNSET, ADD, APPEND, DELETE, INSERT, CHANGE, RESET, INIT, COMMIT };
+OPTIONS = { {"show", 3, 0}, {"defshow", 3, 0}, {"bcmshow", 3, 0}, {"rget", 4, 1}, {"drget", 5, 2}, {"get", 4, 1}, {"dget", 5, 2}, {"bcmrget", 4, 1}, {"bcmget", 4, 1}, {"set", 5, 2}, {"bcmset", 5, 2}, {"unset", 4, 1}, {"bcmunset", 4, 1}, {"add", 5, 1}, {"append", 5, 1}, {"delete", 5, 1}, {"insert", 5, 1}, {"change", 6, 1}, {"reset", 3, 0}, {"init", 3, 0}, {"commit", 3, 0} };
 unsigned int i=0, j=0;
 char *var;
 
@@ -22,13 +22,21 @@ SEARCHOPT
 	case BCMSHOW:						//nvram.bcm name=value list
 	nvram_bcm_show();
 	break;
-	case RGET:						//get a var (in reentrant safe mode): no loop for this, use GET instead
+	case RGET:						//get a reentrant var: no loop for this, use GET instead
 	var=NV_SGETR(argv[3]);
+	puts(var);
+	SFREE(var);
+	break;
+	case DRGET:						//get a reentrant var with default val: no loop for this, use DGET instead
+	var=NV_SDGETR(argv[3], argv[4]);
 	puts(var);
 	SFREE(var);
 	break;
 	case GET:						//get a var series (name=val)
 	PARLOOP printf("%s=%s\n", argv[j], NV_SGET(argv[j]));
+	break;
+	case DGET:						//get a var series (name=val) with default vals
+	PARLOOP printf("%s=%s\n", argv[j], NV_SDGET(argv[j], argv[j+1]));
 	break;
 	case BCMRGET:						//get a bcmvar (in reentrant safe mode): no loop for this, use BCMGET instead
 	var=NV_BSGETR(argv[3]);
