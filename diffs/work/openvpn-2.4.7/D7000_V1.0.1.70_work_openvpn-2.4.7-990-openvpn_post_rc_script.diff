@@ -1,11 +1,11 @@
 diff -urN work/openvpn-2.4.7/openvpn_post work/openvpn-2.4.7/openvpn_post
 --- work/openvpn-2.4.7/openvpn_post	2017-09-26 11:27:35.000000000 +0200
 +++ work/openvpn-2.4.7/openvpn_post	2017-11-28 17:45:53.442033301 +0100
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,26 @@
 +#!/bin/sh
 +
 +if [ "$1" = "start" -o "$1" = "restart" ]; then
-+ENABLE=`anc nvram rget openvpn_enable`
++ENABLE=`anc nvram drget openvpn_enable 0`
 +[ "${ENABLE}" != "1" ] && exit 0
 +	# Parsing client configs
 +	for F in server.conf server_phone.conf client.conf client.ovpn client_phone.ovpn
@@ -17,8 +17,7 @@ diff -urN work/openvpn-2.4.7/openvpn_post work/openvpn-2.4.7/openvpn_post
 +	set -- AES-256-CBC sha256
 +		for OPT in cipher auth
 +		do
-+		VAL=`anc nvram rget openvpn_${OPT}`
-+		[ -z "${VAL}" ] && VAL=$1
++		VAL=`anc nvram drget openvpn_${OPT} $1`
 +		shift
 +		sed -i "s|${OPT} .*|${OPT} ${VAL}|" ${CONFFILE}
 +		done
