@@ -31,9 +31,13 @@
 ETCDIR=/etc
 USRETCDIR=/usr${ETCDIR}
 BINDIR=/usr/sbin
-MNTDIR=/usr/lib/opkg
-MNTPART=mtd20
-MNTLANGPART=/config/language_TUR
+LIBDIR=/lib
+MODDIR=${LIBDIR}/modules
+DEVDIR=/dev
+USRDEVDIR=/usr${DEVDIR}
+OPKGMNTDIR=/usr/lib/opkg
+LANGMNTDIR=/config/language_TUR
+OPKGMNTPART=mtd20
 
 BIN=opkg
 OPKG=${ETCDIR}/${BIN}
@@ -50,15 +54,17 @@ URL=https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/tools/ancistrus
 [ ! -z "$1" ] && URL=$1
 
 [ "`system get dev_name 2>/dev/null`" != "D7000" ] || [ ! -x ${BINDIR}/xdslctl ] && echo "This script can be used with Netgear D7000 (V1) only" && exit 5
-[ -x ${BINDIR}/${BIN} ] || mount | grep ${MNTPART} >/dev/null 2>&1 && echo "${BIN} looks already installed." && exit 4
+[ -x ${BINDIR}/${BIN} ] || mount | grep ${OPKGMNTPART} >/dev/null 2>&1 && echo "${BIN} looks already installed." && exit 4
 
 cd ${ETCDIR}
 echo "Cleaning up some garbage/orphan dirs & files..."
 killall -9 telnetenabled >/dev/null 2>&1
+spuctl stop >/dev/null 2>&1
+rmmod ipt_vpntrigger.ko >/dev/null 2>&1
 for D in "/opt" "${WWW}/cgi-bin"; do find $D -type d -name .svn -exec rm -rf '{}' \; >/dev/null 2>&1; done
 for D in "CSY" "TUR"; do find ${LANGSDIR} -type d -name $D -exec rm -rf '{}' \; >/dev/null 2>&1; done
 find ${LANGSDIR} -type f -name *.gz -exec rm -f '{}' \; >/dev/null 2>&1
-rm -f ${OPKG} ${CONF} ${ARC} ${USRETCDIR}/rcS.MT ${USRETCDIR}/prepare_3g ${BINDIR}/reaim ${BINDIR}/telnetenabled ${WWW}/language/Czech.js ${WWW}/*DGND*.jpg ${WWW}/vw_* ${WWW}/vpn_* ${WWW}/h_vpn* ${WWW}/h_vauto* ${WWW}/h_vman* ${WWW}/index1.htm ${WWW}/start1.htm ${WWW}/*_demo.htm ${WWW}/start_old_style.htm ${WWW}/ORG-RST_status.htm ${WWW}/DSL_PRO_config.html ${WWW}/*3g*.htm
+rm -f ${OPKG} ${CONF} ${ARC} ${USRETCDIR}/rcS.MT ${USRETCDIR}/prepare_3g ${USRETCDIR}/ipsec_init_conn.sh ${BINDIR}/spuctl ${BINDIR}/reaim ${BINDIR}/telnetenabled ${LIBDIR}/libspuctl.so ${MODDIR}/ipt_vpntrigger.ko ${DEVDIR}/spu ${USRDEVDIR}/spu ${WWW}/language/Czech.js ${WWW}/*DGND*.jpg ${WWW}/vw_* ${WWW}/vpn_* ${WWW}/h_vpn* ${WWW}/h_vauto* ${WWW}/h_vman* ${WWW}/index1.htm ${WWW}/start1.htm ${WWW}/*_demo.htm ${WWW}/start_old_style.htm ${WWW}/ORG-RST_status.htm ${WWW}/DSL_PRO_config.html ${WWW}/*3g*.htm
 sync
 echo
 echo "Downloading & extracting: ${ARC} ..."
@@ -69,11 +75,13 @@ chmod 755 ${OPKG}
 chmod 644 ${CONF}
 echo
 echo "Mounting opkg info & status files partition..."
-[ ! -d ${MNTDIR} ] && mkdir -m 0777 ${MNTDIR}
-for U in ${MNTDIR} ${MNTLANGPART}; do umount $U >/dev/null 2>&1; done
-mount -n -t jffs2 ${MNTPART} ${MNTDIR}
+rm -rf ${OPKGMNTDIR}/
+[ ! -d ${OPKGMNTDIR} ] && mkdir -m 0777 ${OPKGMNTDIR}
+for U in ${OPKGMNTDIR} ${LANGMNTDIR}; do umount $U >/dev/null 2>&1; done
+mknod /dev/${OPKGMNTPART} c 90 40
+flash_eraseall -j /dev/${OPKGMNTPART}
+mount -n -t jffs2 ${OPKGMNTPART} ${OPKGMNTDIR}
 [ $? -ne 0 ] && echo "Problem has occurred: opkg partition not mounted." && exit 2
-rm -rf ${MNTDIR}/*
 sync
 echo
 echo "Installing essential packages: ${TOINST}"
