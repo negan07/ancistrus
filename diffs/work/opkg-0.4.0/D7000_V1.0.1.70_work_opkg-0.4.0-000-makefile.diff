@@ -1,7 +1,7 @@
 diff -urN work/opkg-0.4.0/Makefile work/opkg-0.4.0/Makefile
 --- work/opkg-0.4.0/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/opkg-0.4.0/Makefile	2017-03-23 20:35:42.745736890 +0100
-@@ -0,0 +1,156 @@
+@@ -0,0 +1,157 @@
 +include ../Rules.mak
 +
 +ifdef DEBUG
@@ -133,12 +133,13 @@ diff -urN work/opkg-0.4.0/Makefile work/opkg-0.4.0/Makefile
 +	@echo "echo \"Preparing $(OPKG) package installation...\"" >> $(PREINST)
 +	@echo "echo" >> $(PREINST)
 +	@echo "echo \"Mounting opkg info & status files partition...\"" >> $(PREINST)
-+	@echo "[ ! -d $(OPKG_INFO_STATUS_DIR) ] && mkdir -m 0777 $(OPKG_INFO_STATUS_DIR)" >> $(PREINST)
-+	@echo "umount $(OPKG_INFO_STATUS_DIR) > /dev/null 2>&1" >> $(PREINST)
-+	@echo "umount $(OPKGLANGPART) > /dev/null 2>&1" >> $(PREINST)
++	@echo "rm -rf $(OPKG_INFO_STATUS_DIR)/" >> $(PREINST)
++	@echo "mkdir -m 0777 $(OPKG_INFO_STATUS_DIR)" >> $(PREINST)
++	@echo "for U in $(OPKG_INFO_STATUS_DIR) $(OPKGLANGPART); do umount \$$U >/dev/null 2>&1; done" >> $(PREINST)
++	@echo "mknod /dev/$(OPKGPART) c 90 40" >> $(PREINST)
++	@echo "flash_eraseall -j /dev/$(OPKGPART)" >> $(PREINST)
 +	@echo "mount -n -t jffs2 $(OPKGPART) $(OPKG_INFO_STATUS_DIR)" >> $(PREINST)
 +	@echo "[ \$$? -ne 0 ] && echo \"Problem has occurred: opkg partition not mounted.\" && exit 1" >> $(PREINST)
-+	@echo "rm -rf $(OPKG_INFO_STATUS_DIR)/*" >> $(PREINST)
 +	@echo "sync" >> $(PREINST)
 +	@echo "exit 0" >> $(PREINST)
 +
