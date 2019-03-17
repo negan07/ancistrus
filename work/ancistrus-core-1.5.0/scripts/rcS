@@ -59,11 +59,6 @@ for M in ip6_tables ip6table_filter ip6table_raw ip6table_mangle nf_defrag_ipv6 
 # Insert SPI firewall modules
 /etc/do.sh
 
-# Add for vpn
-mknod /dev/spu c 233 0
-insmod /lib/modules/ipt_vpntrigger.ko
-spuctl start
-
 # Insert wifi modules
 for M in wfd wlcsm wlemf wl; do insmod /lib/modules/${M}.ko; done
 
@@ -82,7 +77,7 @@ ifconfig lo 127.0.0.1
 route add -net 127.0.0.0 netmask 255.0.0.0 lo
 
 # Force IGMP version 3
-echo "3" >/proc/sys/net/ipv4/conf/all/force_igmp_version
+echo 3 >/proc/sys/net/ipv4/conf/all/force_igmp_version
 
 # Various
 cp -f /usr/sbin/setupwizard.cgi /tmp/setupwizard.cgi
