@@ -223,14 +223,12 @@ reset() {
 # Stop qos-sqm
 stop_sqm >/dev/null 2>&1
 
-# Set original qos default vars
-set -- ${DEF}
-ORIGS="$1 $2 $3"
-set -- ${VAR}
-for V in $ORIGS
+# Set original qos default vars (enable, uplink, uplink rate unit)
+set -- $VARNAMEDEFS
+for V in 1 2 3
 do
-anc nvram set $1 $V
-shift
+anc nvram set $1 $2
+shift 2
 done
 
 # Unset other qos vars
@@ -238,6 +236,8 @@ for V in "$@"
 do
 [ "`echo $V | head -c 4`" = "qos_" ] && anc nvram unset $V
 done
+
+# Commit vars
 nvram commit
 }
 
