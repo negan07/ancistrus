@@ -110,7 +110,7 @@ diff -urN work/openssh-7.9p1/rc_ssh work/openssh-7.9p1/rc_ssh
 +	# Regenerate auth keys file from existents .pub
 +	[ ! -d ${KEYSDIR} ] && echo "Auth key dir: '${KEYSDIR}' missed..." && exit 3
 +	rm -f ${AUTHKEYS} && touch ${AUTHKEYS} && chmod 600 ${AUTHKEYS}
-+	find ${KEYSDIR} -type f -name *.pub -exec cat '{}' >> ${AUTHKEYS} \;
++	find ${KEYSDIR} -type f -name "*.pub" -exec cat '{}' >> ${AUTHKEYS} \;
 +	sync
 +	return 0
 +}
