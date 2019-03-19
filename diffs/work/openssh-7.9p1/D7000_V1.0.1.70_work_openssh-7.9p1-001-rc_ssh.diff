@@ -152,7 +152,7 @@ diff -urN work/openssh-7.9p1/rc_ssh work/openssh-7.9p1/rc_ssh
 +USR=root
 +LABEL=D7000
 +CONF=sshd_config
-+KEYTYPES="rsa ecdsa ed25519"
++KEYTYPES="rsa ed25519"
 +AUTHKEYSNAME=authorized_keys
 +AUTHKEYS=${KEYSDIR}/${AUTHKEYSNAME}
 +SSH_KEYGEN=${BINDIR}/ssh-keygen
