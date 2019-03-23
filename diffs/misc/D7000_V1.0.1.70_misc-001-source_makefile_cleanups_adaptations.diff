@@ -92,7 +92,7 @@ diff -urN D7000_V1.0.1.70_WW_src/Source/Makefile D7000_V1.0.1.70_WW_src/Source/M
  
  pre_fs:
  	rm -rf target
-@@ -94,263 +62,163 @@
+@@ -94,263 +62,165 @@
  	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
  	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
  	cd target/lib; ln -sf libscnvram.so libconfig.so
@@ -100,12 +100,14 @@ diff -urN D7000_V1.0.1.70_WW_src/Source/Makefile D7000_V1.0.1.70_WW_src/Source/M
 +	target/opt/leafp2p target/opt/rcagent target/opt/rcagent/cgi target/opt/rcagent/scripts target/opt/remote target/opt/xagent \
 +	target/usr/sbin target/usr/sbin/rc_app target/www.eng/cgi-bin, \
 +	for F in `ls -A $D`; do \
-+	if [ -x $D/$$F ] && [ ! -d $D/$$F ] && [ ! -L $D/$$F ] && [ -z `echo $$F | grep "\.so"` ] && [ -z `echo $$F | grep "\.sh"` ]; then \
++	if [ -x $D/$$F ] && [ ! -d $D/$$F ] && [ ! -L $D/$$F ] && [ -z "`echo $$F | grep "\.so"`" ] && [ -z "`echo $$F | grep "\.sh"`" ]; then \
 +	$(SSTRIP) $D/$$F; fi; done;)
 +	$(SSTRIP) target/opt/rcagent/downloader
 +	@echo -e "\\e[35mSOURCE: PRE_FS \\e[36mgarbage orphans cleanup\\e[0m"
 +	-find $(FS_DIR) -type d -name .svn -exec rm -rf '{}' \; >/dev/null 2>&1
-+	-@$(foreach F, "*.gz" "*DGND*.jpg" "rcS.MT" "prepare_3g" "ipsec_init_conn.sh" "spuctl" "telnetenabled" "libspuctl.so" "ipt_vpntrigger.ko" "spu" "vw_*" "vpn_*" "h_vpn*" "h_vauto*" "h_vman*" "index1.htm" "start1.htm" "*_demo.htm" "start_old_style.htm" "ORG-RST_status.htm" "DSL_PRO_config.html" "*3g*.htm", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
++	-find $(FS_DIR) -type c -name spu -exec rm -f '{}' \; >/dev/null 2>&1
++	-find $(FS_DIR) -type l -name import_ca.cgi upgrade_driver.cgi -exec rm -f '{}' \; >/dev/null 2>&1
++	-@$(foreach F, "*.gz" "*DGND*.jpg" "rcS.MT" "prepare_3g" "ipsec_init_conn.sh" "spuctl" "telnetenabled" "libspuctl.so" "ipt_vpntrigger.ko" "vw_*" "vpn_*" "h_vpn*" "h_vauto*" "h_vman*" "index1.htm" "start1.htm" "*_demo.htm" "start_old_style.htm" "ORG-RST_status.htm" "DSL_PRO_config.html" "*3g*.htm" "adsl_test.htm" "alert*" "at_cmd_log.htm" "choose_wan*" "debug*" "dongle_list.htm" "hidden.htm" "*lanip_mo*" "*odem*" "*mstatus*" "LGO_logout.htm" "menu*.htm" "m_status.htm" "ORG-index.htm" "TR069.htm" "*driver*" "wiz_failover.htm" "wiz_selwan.htm" "wiz_summary.htm", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
 +	mogrify -format jpg $(FS_DIR)/www.eng/image/apmodelink.jpg
 +ifeq ($(ANNEX),A)
 +	-@$(foreach D, "CSY" "TUR" , find $(FS_DIR) -type d -name $(D) -exec rm -rf '{}' \; >/dev/null 2>&1;)
