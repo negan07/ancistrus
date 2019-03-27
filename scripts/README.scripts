@@ -14,6 +14,7 @@ dl_sources.sh			Download & extract source codes.
 founddiff.sh			Found code differences between firmware versions.
 git_info.sh			For commit versioning & changelog usage.
 hostprepare.sh			Apt download & install necessary packets.
+pack_fw.sh			Prepare firmware .zip pack after compiling.
 opkg-utils-x.x.x		Dir containing packet building scripts & tools.
 receive				Prepare debug environment on running router.
 renamediff.sh			Rename diffs from old firmware version to new one.
