@@ -92,7 +92,7 @@ diff -urN D7000_V1.0.1.70_WW_src/Source/Makefile D7000_V1.0.1.70_WW_src/Source/M
  
  pre_fs:
  	rm -rf target
-@@ -94,263 +62,165 @@
+@@ -94,263 +62,167 @@
  	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
  	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
  	cd target/lib; ln -sf libscnvram.so libconfig.so
@@ -222,7 +222,9 @@ diff -urN D7000_V1.0.1.70_WW_src/Source/Makefile D7000_V1.0.1.70_WW_src/Source/M
  	echo "SOAPVersion=2.00" >> $(CUR_SETTING)
 -	echo "ReadyShareSupportedLevel=13" >> $(CUR_SETTING)
 -	
-+	echo "ReadyShareSupportedLevel=13" >> $(CUR_SETTING)	
++	echo "ReadyShareSupportedLevel=@readysharesupportlevel#" >> $(CUR_SETTING)
++	echo "XCloudSupported=1" >> $(CUR_SETTING)
++	echo "LoginMethod=2.0" >> $(CUR_SETTING)
  	# Generate fw info which will bind to trx file
  	echo $(VERSION) > $(FW_INFO)
  	echo $(REGION) >> $(FW_INFO)
