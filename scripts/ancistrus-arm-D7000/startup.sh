@@ -32,6 +32,7 @@ ETCDIR=/etc
 USRETCDIR=/usr${ETCDIR}
 BINDIR=/usr/sbin
 LIBDIR=/lib
+USRLIBDIR=/usr${LIBDIR}
 MODDIR=${LIBDIR}/modules
 DEVDIR=/dev
 USRDEVDIR=/usr${DEVDIR}
@@ -64,7 +65,8 @@ rmmod ipt_vpntrigger.ko >/dev/null 2>&1
 for D in "/opt" "${WWW}/cgi-bin"; do find $D -type d -name .svn -exec rm -rf '{}' \; >/dev/null 2>&1; done
 for D in "CSY" "TUR"; do find ${LANGSDIR} -type d -name $D -exec rm -rf '{}' \; >/dev/null 2>&1; done
 find "${LANGSDIR}" -type f -name *.gz -exec rm -f '{}' \; >/dev/null 2>&1
-rm -f ${OPKG} ${CONF} ${ARC} ${USRETCDIR}/rcS.MT ${USRETCDIR}/prepare_3g ${USRETCDIR}/ipsec_init_conn.sh ${USRETCDIR}/import_ca.cgi ${BINDIR}/spuctl ${BINDIR}/reaim ${BINDIR}/telnetenabled ${LIBDIR}/libspuctl.so ${MODDIR}/ipt_vpntrigger.ko ${DEVDIR}/spu ${USRDEVDIR}/spu ${WWW}/language/Czech.js ${WWW}/*DGND*.jpg ${WWW}/vw_* ${WWW}/vpn_* ${WWW}/h_vpn* ${WWW}/h_vauto* ${WWW}/h_vman* ${WWW}/index1.htm ${WWW}/start1.htm ${WWW}/*_demo.htm ${WWW}/start_old_style.htm ${WWW}/ORG-RST_status.htm ${WWW}/DSL_PRO_config.html ${WWW}/*3g*.htm ${WWW}/import_ca.cgi ${WWW}/adsl_test.htm ${WWW}/alert* ${WWW}/at_cmd_log.htm ${WWW}/choose_wan* ${WWW}/debug* ${WWW}/dongle_list.htm ${WWW}/hidden.htm ${WWW}/*lanip_mo* ${WWW}/*odem* ${WWW}/*mstatus* ${WWW}/LGO_logout.htm ${WWW}/menu*.htm ${WWW}/m_status.htm ${WWW}/ORG-index.htm ${WWW}/TR069.htm ${WWW}/*driver* ${WWW}/wiz_failover.htm ${WWW}/wiz_selwan.htm ${WWW}/wiz_summary.htm
+rm -f ${OPKG} ${CONF} ${ARC} ${USRETCDIR}/rcS.MT ${USRETCDIR}/prepare_3g ${USRETCDIR}/ipsec_init_conn.sh ${USRETCDIR}/import_ca.cgi ${USRETCDIR}/upgrade_stringTbl.cgi ${BINDIR}/spuctl ${BINDIR}/reaim ${BINDIR}/telnetenabled ${LIBDIR}/libspuctl.so ${LIBDIR}/lib*.la ${USRLIBDIR}/lib*.a ${MODDIR}/ipt_vpntrigger.ko ${DEVDIR}/spu ${USRDEVDIR}/spu ${WWW}/language/Czech.js ${WWW}/*DGND*.jpg ${WWW}/vw_* ${WWW}/vpn_* ${WWW}/h_vpn* ${WWW}/h_vauto* ${WWW}/h_vman* ${WWW}/index1.htm ${WWW}/start1.htm ${WWW}/*_demo.htm ${WWW}/start_old_style.htm ${WWW}/ORG-RST_status.htm ${WWW}/DSL_PRO_config.html ${WWW}/*3g*.htm ${WWW}/import_ca.cgi ${WWW}/upgrade_stringTbl.cgi ${WWW}/adsl_test.htm ${WWW}/StringTableUpload.html ${WWW}/alert* ${WWW}/at_cmd_log.htm ${WWW}/choose_wan* ${WWW}/debug* ${WWW}/dongle_list.htm ${WWW}/hidden.htm ${WWW}/*lanip_mo* ${WWW}/*odem* ${WWW}/*mstatus* ${WWW}/LGO_logout.htm ${WWW}/menu*.htm ${WWW}/m_status.htm ${WWW}/ORG-index.htm ${WWW}/TR069.htm ${WWW}/*driver* ${WWW}/wiz_failover.htm ${WWW}/wiz_selwan.htm ${WWW}/wiz_summary.htm ${WWW}/md5
+rm -rf ${LIBDIR}/naptd ${USRLIBDIR}/pkgconfig /usr/local /usr/upnp
 sync
 echo
 echo "Downloading & extracting: ${ARC} ..."
