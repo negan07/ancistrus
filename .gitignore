@@ -103,6 +103,7 @@ build/
 localbin/
 scripts/opkg-utils-*/
 diff-*
+commit_log*
 D70_00_*
 *target*
 vmlinux.*
