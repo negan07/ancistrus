@@ -19,7 +19,7 @@ DESC_$(NVRAM)			:= Enhanced shared libscnvram
 DIRLIST				+= $(NVRAM)
 # CORE
 CORE_WORK_NAME			:= $(PROJECT_NAME)-core
-VER_$(CORE_WORK_NAME)		:= 1.5.1
+VER_$(CORE_WORK_NAME)		:= 1.5.2
 CORE_WORK			:= $(CORE_WORK_NAME)-$(VER_$(CORE_WORK_NAME))
 NAME_$(CORE_WORK)		:= $(CORE_WORK_NAME)$(DBG)
 SUBVER_$(CORE_WORK)		:= 
