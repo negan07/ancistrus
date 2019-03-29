@@ -28,14 +28,6 @@ function focus_stat(obj, tf)
    if(obj.name == "search")
    { item_focus = tf; }
 }
-/*document.onkeypress = function (evt)
-{
-	if (item_focus == true)
-	{
-		var keyCode = evt ? (evt.which ? evt.which : evt.keyCode) : event.keyCode;
-		if (keyCode == 13) { document.getElementById('search_button').click(); }
-	}
-};*/
 
 // -->
 </script>
@@ -58,7 +50,6 @@ var file_version=0;
 var file_region="";
 var netgear_version=0;
 var netgear_region="@netgear_region#";
-
 var help_info="_index";
 var wps_charcount=0;
 var wps_endis_configured=1;     // 1 for unconfigured, 5 for configured
@@ -72,26 +63,17 @@ var plc_setting_flag="";
 var wps_process=0;
 var enable_ap_flag=@ap_mode#;//bug 24666 according to the page 128 of spec 2.0,add AP mode
 var ParentalControl = "0";
-
-//var gui_region="English";
 var gui_region="@h_language_sel#";
 var region_class;
-
-
 var logs_checkbox_flag = 1;
-var thank_login_flag = 0;
 var host_name="D7000";
 var usb_router_flag = 1; 
-var green_download=@greendown_enable#;
-var green_download_flag=@greendown_support#;
 var readyShareSupportedLevel = @readysharesupportlevel#; 
 var an_router_flag = 1;
 var wireless_schedule_flag = 1;
 var guest_router_flag = 1;
 var traffic_router_flag=1;
-
 var mode_router_flag=1;
-
 var qos_router_flag=1;
 var multi_lang_router_flag=1;
 var wds_router_flag=0;
@@ -107,9 +89,7 @@ var l2tp_flag=1;
 var igmp_flag=1;
 var pppoe_intranet_flag=1;
 var dns_third_flag=1;
-var tr069_router_flag=0;
 var block_sites_flag=1;
-//var firewall_rules_flag=1;
 var ipv6_flag=1;
 var mode_is_300=1;
 var is_vc_release=0;
@@ -125,21 +105,16 @@ var bridge_iptv_flag=1;
 var parental_ctrl_flag=1;
 var dfs_channel2_router_flag=1;
 var new_multiple_lang=1;
-var dongle_3g_flag=0;
 var iptv_flag="@h_language_flag#";
-var is_fuppes = 1;
 var vlan_iptv_flag=1;
 var led_ctrl_flag=@led_ctrl_support#;
-
 var from_nowan = "";
-
 var wps_mode = "@wps_mode#";
 var cf_load_menu = 0;
 var is_advindex_pg =1;
 
 function loadvalue()
 {
-	//setFooterClass();
 	change_size();
 
 	region_class = initClass(gui_region);
@@ -150,36 +125,17 @@ function loadvalue()
 		menu_color_change('home');
 
 	if(guest_router_flag == 1 )
-	{
 		document.getElementById("guest").style.display="";
-		//if( an_router_flag == 1 )
-			//document.getElementById("guest_a").style.display="";
-	}
 
 	if( usb_router_flag == 1)
-	{
 		document.getElementById("usb_bt").style.display="";
-//		if( is_fuppes == 1)
-//			document.getElementById("media").style.display="";
-		if(green_download_flag == 1)
-		    document.getElementById("greendown_bt").style.display="";
-	}
+
 	if(openvpn_flag == "1")
 		document.getElementById("openvpn").style.display="";
 
 	if(block_sites_flag == 1)
 		document.getElementById("block_site").style.display="";
 
-	//if(firewall_rules_flag == 1)
-	//	document.getElementById("firewall_rules").style.display="";
-	/*
-	if( plc_setting_flag == 1)
-		document.getElementById("plc").style.display="";
-	*/
-	/*
-	if( wds_router_flag == 1)
-		document.getElementById("wds").style.display="";
-    */
 	if( qos_router_flag == 1)
 		document.getElementById("qos").style.display="";
 
@@ -189,31 +145,20 @@ function loadvalue()
 	if(ipv6_flag == 1)
 		document.getElementById("ipv6").style.display="";
 
-	
-	if(tr069_router_flag == 1)
-		document.getElementById("tr069").style.display="";
-
 	if(traffic_router_flag == 1)
 		document.getElementById("traffic").style.display="";
-		
+
 	if(mode_router_flag == 1)
 		document.getElementById("mode").style.display="";
 
-	//if(iptv_flag == "Russian")
-	//	document.getElementById("iptv").style.display="";
-    if(dongle_3g_flag ==1) {
-        document.getElementById("dongle_3g").style.display="";
-        document.getElementById("dongle_upgrade").style.display="";
-	}
 	if(accesscntl_flag == "1")
-	{
-		document.getElementById("access_control").style.display = "";
-	}
+		document.getElementById("access_control").style.display="";
 
 	if(vlan_iptv_flag == 1)
 		document.getElementById("vlan").style.display="";
-    if(led_ctrl_flag==1)
-        document.getElementById("led_ctrl").style.display="";
+
+	if(led_ctrl_flag==1)
+		document.getElementById("led_ctrl").style.display="";
 }
 
 function load_menu(id)
@@ -241,7 +186,7 @@ function load_menu(id)
             enable_ap_flag=formframe.enable_ap_flag;
                         menu_class_default();
         }	
-	}
+    }
 	if(id=="modem")
     {
         if(enabled_modem!=formframe.enabled_modem)
@@ -249,17 +194,14 @@ function load_menu(id)
             enabled_modem=formframe.enabled_modem;
                         menu_class_default();
         }	
-	}
+    }
 	if(id=='gd')
     {
-        green_download = formframe.gd_enable;
-        open_or_close_sub('greendown');
-		open_or_close_sub('security');
-		menu_color_change('email');
+	open_or_close_sub('security');
+	menu_color_change('email');
     }
 	if(cf_load_menu == 1)
 		menu_color_change(id);
-		
 	cf_load_menu=0;
 }
 
@@ -267,7 +209,6 @@ function load_menu(id)
 <div id="top">
 	<iframe name="topframe" id="topframe" src="top.html" allowtransparency="true" scrolling="no" height="100%" width="100%" frameborder="0"></iframe>
 </div>
-
 <div id="container" class="container_center">
 <div id="middle">
 <div id="menu">
@@ -275,39 +216,39 @@ function load_menu(id)
 var setup_open=0;
 var usb_open=0;
 var security_open=0;
-var greendown_open=0;
 var admin_open=0;
 var advanced_open=0;
 </script>
 	<div id="home" class="advanced_purple_button" onclick="click_adv_action('home');"><b><span languageCode = "3001">ADVANCED Home</span></b></div>
 	<div id="setup_wizard" class="advanced_black_button" onclick="click_adv_action('setup_wizard');"><b><span languageCode = "319">Setup Wizard</span></b></div>
+
 @wps_hide_s#
 	<div id="wps" class="advanced_black_button" onclick="click_adv_action('wps');"><b><span languageCode = "3002">WPS Wizard</span></b></div>
 @wps_hide_e#
-    <div id="vpn_wiz" class="advanced_black_button" onclick="click_adv_action('vpn_wiz');" style="display: none"><b><span languageCode="10400">VPN Wizard</span></b></div>
+
+	<div id="vpn_wiz" class="advanced_black_button" onclick="click_adv_action('vpn_wiz');" style="display:none"><b><span languageCode="10400">VPN Wizard</span></b></div>
 	<div id="setup_bt" class="advanced_white_close_button" onclick="open_or_close_sub('setup'); setup_open++;"><b><span languageCode = "305">Setup</span></b></div>
-	<div id="setup_sub" class="sub_men"  style="display: none">
+	<div id="setup_sub" class="sub_men" style="display:none">
 	<dl>
-		<dt id="internet" class="sub_back"><a onclick="click_adv_action('internet');"><b><span languageCode = "3003">Internet Setup</span></b></a></dt><!--href="javascript:void(0)"-->
-		<!--dt id="adsl" class="sub_back"><a  target="formframe" onclick="click_adv_action('adsl');"><b><span languageCode = "341">ADSL Setup</span></b></a></dt-->
-		<dt id="dongle_3g" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('dongle_3g');"><b><span languageCode = "">3G Mobile Setup</span></b></a></dt>
+		<dt id="internet" class="sub_back"><a onclick="click_adv_action('internet');"><b><span languageCode = "3003">Internet Setup</span></b></a></dt>
 
 @wireless_hide_s#
-		<dt id="wireless" class="sub_back"><a  target="formframe" onclick="click_adv_action('wireless');"><b><span languageCode = "3004">Wireless Setup</span></b></a></dt>
-@wireless_hide_e# <!--href="javascript:void(1)"-->
-		<dt id="guest" class="sub_back" style="display:none"><a  target="formframe" onclick="click_adv_action('guest');"><b><span languageCode = "321">Guest Network</span></b></a></dt>
-		<!--<dt id="guest_a" class="sub_back" style="display:none"><a  target="formframe" onclick="click_adv_action('guest_a');"><b><u>Guest Network<script>document.write("a/n");</script></u></b></a></dt>-->	
-		<dt id="wan" class="sub_back"><a  target="formframe" onclick="click_adv_action('wan');"><b><span languageCode = "3005">WAN Setup</span></b></a></dt>
+		<dt id="wireless" class="sub_back"><a target="formframe" onclick="click_adv_action('wireless');"><b><span languageCode = "3004">Wireless Setup</span></b></a></dt>
+@wireless_hide_e#
+
+		<dt id="guest" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('guest');"><b><span languageCode = "321">Guest Network</span></b></a></dt>
+		<dt id="wan" class="sub_back"><a target="formframe" onclick="click_adv_action('wan');"><b><span languageCode = "3005">WAN Setup</span></b></a></dt>
 	       	<dt id="lan" class="sub_back"><a target="formframe" onclick="click_adv_action('lan');"><b><span languageCode = "3006">LAN Setup</span></b></a></dt>
-		<dt id="qos" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('qos');"><b><span languageCode = "3007">QoS Setup</span></b></a></dt>	
-        <dt id="vlan" class="sub_back" style="display: none"><a target="formframe" onclick="click_adv_action('vlan');"><b><span languageCode="10642">VLAN/IPTV Setup</span></b></a></dt>	
+		<dt id="qos" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('qos');"><b><span languageCode = "3007">QoS Setup</span></b></a></dt>	
+        <dt id="vlan" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('vlan');"><b><span languageCode="10642">VLAN/IPTV Setup</span></b></a></dt>	
 	</dl>
 	</div>
+
 @usb_hide_s#
-	<div id="usb_bt" class="advanced_white_close_button"  style="display: none" onclick="open_or_close_sub('usb'); usb_open++;"><b><span languageCode = "322">USB Storage</span></b></div>
-	<div id="usb_sub" class="sub_men"  style="display: none">	
+	<div id="usb_bt" class="advanced_white_close_button" style="display:none" onclick="open_or_close_sub('usb'); usb_open++;"><b><span languageCode = "322">USB Storage</span></b></div>
+	<div id="usb_sub" class="sub_men" style="display:none">	
 	<dl>	
-		<dt id="usb_adv" class="sub_back"><a  target="formframe" onclick="click_adv_action('usb_adv');">
+		<dt id="usb_adv" class="sub_back"><a target="formframe" onclick="click_adv_action('usb_adv');">
 <script>
 	if(readyShareSupportedLevel > 1)
 		document.write("<b><span languageCode = \"3019\">ReadySHARE Storage</span></b>");
@@ -315,82 +256,64 @@ var advanced_open=0;
 		document.write("<b><span languageCode = \"31\">Basic Settings</span></b>");
 </script>
 </a></dt>
-<!-- now advanced setting, media server,readycloud page are in tabs.
-		<dt id="usb_adv" class="sub_back"><a  target="formframe" onclick="click_adv_action('usb_adv');"><b><span languageCode = "7">Advanced Settings</span></b></a></dt>
-		<dt id="media" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('media');"><b><span languageCode = "841">Media Server</span></b></a></dt>
-	      <dt id="usb_readycloud" class="sub_back"><a  target="formframe" onclick="click_adv_action('usb_readycloud');"><b><span languageCode = "99999">ReadyCLOUD</span></b></a></dt>
--->
-	<dt id="usb_printer" class="sub_back"><a  target="formframe" onclick="click_adv_action('usb_printer');"><b><span languageCode = "3055">ReadySHARE Printer</span></b></a></dt>
-	<dt id="usb_vault" class="sub_back"><a  target="formframe" onclick="click_adv_action('usb_vault');"><b><span languageCode = "4020">Netgear ReadySHARE Vault</span></b></a></dt>
+	<dt id="usb_printer" class="sub_back"><a target="formframe" onclick="click_adv_action('usb_printer');"><b><span languageCode = "3055">ReadySHARE Printer</span></b></a></dt>
+	<dt id="usb_vault" class="sub_back"><a target="formframe" onclick="click_adv_action('usb_vault');"><b><span languageCode = "4020">Netgear ReadySHARE Vault</span></b></a></dt>
 	</dl>	
 	</div>
 @usb_hide_e#
 
 	<div id="security_bt" class="advanced_white_close_button" onclick="open_or_close_sub('security'); security_open++;"><b><span languageCode = "13">Security</span></b></div>
-	<div id="security_sub" class="sub_men"  style="display: none">
+	<div id="security_sub" class="sub_men" style="display:none">
 	<dl>
-		<dt id="parental" class="sub_back"><a  target="formframe" onclick="click_adv_action('parental');"><b><span languageCode = "3008">Parental Controls</span></b></a></dt>
+		<dt id="parental" class="sub_back"><a target="formframe" onclick="click_adv_action('parental');"><b><span languageCode = "3008">Parental Controls</span></b></a></dt>
 		<dt id="access_control" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('access_control');"><b><span languageCode="1100">Access Control</span></b></a></dt>
-		<dt id="block_site" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('block_site');"><b><span languageCode = "76">Block Sites</span></b></a></dt>
+		<dt id="block_site" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('block_site');"><b><span languageCode = "76">Block Sites</span></b></a></dt>
+		<dt id="block_services" class="sub_back"><a target="formframe" onclick="click_adv_action('block_services');"><b><span languageCode = "88">Block Services</span></b></a></dt>
 		
-		<!--dt id="firewall_rules" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('firewall_rules');"><b><span languageCode = "229">Firewall Rules</span></b></a></dt-->
-		<dt id="block_services" class="sub_back"><a  target="formframe" onclick="click_adv_action('block_services');"><b><span languageCode = "88">Block Services</span></b></a></dt>
-		
-		<dt id="schedule" class="sub_back"><a  target="formframe" onclick="click_adv_action('schedule');"><b><span languageCode = "244">Schedule</span></b></a></dt>
-		<dt id="email" class="sub_back"><a  target="formframe" onclick="click_adv_action('email');"><b><span languageCode = "162">E-mail</span></b></a></dt>
+		<dt id="schedule" class="sub_back"><a target="formframe" onclick="click_adv_action('schedule');"><b><span languageCode = "244">Schedule</span></b></a></dt>
+		<dt id="email" class="sub_back"><a target="formframe" onclick="click_adv_action('email');"><b><span languageCode = "162">E-mail</span></b></a></dt>
 	</dl>	
 	</div>
-    <div id="greendown_bt" class="advanced_white_close_button" style="display: none" onclick="open_or_close_sub('greendown'); greendown_open++;"><b><span languageCode = "2038" class="dwn">NETGEAR Downloader</span></b></div>
-	<div id="greendown_sub" class="sub_men"  style="display: none">
-	<dl>
-		<dt id="greendown_basic" class="sub_back"><a  target="formframe" onclick="click_adv_action('greendown_basic');">
-	    <b><span languageCode = "31">Basic Settings</span></b>
-	</a></dt>
-	       	<dt id="greendown_adv" class="sub_back"><a  target="formframe" onclick="click_adv_action('greendown_adv');"><b><span languageCode = "2027">Download Manager</span></b></a></dt>
-	</dl>
-	</div>
+	<div id="greendown_bt" class="advanced_white_close_button" style="display:none"><b><span class="dwn">NETGEAR Downloader</span></b></div>
+	<div id="greendown_sub" class="sub_men" style="display:none"></div>
 	<div id="admin_bt" class="advanced_white_close_button" onclick="open_or_close_sub('admin'); admin_open++;"><b><span languageCode = "3009">Administration</span></b></div>
-	<div id="admin_sub" class="sub_men"  style="display: none">
+	<div id="admin_sub" class="sub_men" style="display:none">
 	<dl>
-	       	<dt id="status" class="sub_back"><a  target="formframe" onclick="click_adv_action('status');"><b><span languageCode = "325">Router Status</span></b></a></dt>
-		<dt id="vpn_sta" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('vpn_sta');"><b><span languageCode="10485">VPN Status</span></b></a></dt>
-		<dt id="log" class="sub_back"><a  target="formframe" onclick="click_adv_action('log');"><b><span languageCode = "195">Logs</span></b></a></dt>
-		<dt id="attached" class="sub_back"><a  target="formframe" onclick="click_adv_action('attached');"><b><span languageCode = "125">Attached Devices</span></b></a></dt>
-		<dt id="bak_set" class="sub_back"><a  target="formframe" onclick="click_adv_action('bak_set');"><b><span languageCode = "20">Backup Settings</span></b></a></dt>
-		<dt id="passwd" class="sub_back"><a  target="formframe" onclick="click_adv_action('passwd');"><b><span languageCode = "326">Set Password</span></b></a></dt>
+	       	<dt id="status" class="sub_back"><a target="formframe" onclick="click_adv_action('status');"><b><span languageCode = "325">Router Status</span></b></a></dt>
+		<dt id="log" class="sub_back"><a target="formframe" onclick="click_adv_action('log');"><b><span languageCode = "195">Logs</span></b></a></dt>
+		<dt id="attached" class="sub_back"><a target="formframe" onclick="click_adv_action('attached');"><b><span languageCode = "125">Attached Devices</span></b></a></dt>
+		<dt id="bak_set" class="sub_back"><a target="formframe" onclick="click_adv_action('bak_set');"><b><span languageCode = "20">Backup Settings</span></b></a></dt>
+		<dt id="passwd" class="sub_back"><a target="formframe" onclick="click_adv_action('passwd');"><b><span languageCode = "326">Set Password</span></b></a></dt>
 		<dt id="ntp" class="sub_back"><a target="formframe" onclick="click_adv_action('ntp');"><b><span languageCode = "">NTP Setting</span></b></a></dt>
-		<dt id="diag" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('diag');"><b><span languageCode = "130">Diagnostics</span></b></a></dt>
-		<dt id="upgrade" class="sub_back"><a  target="formframe" onclick="click_adv_action('upgrade');"><b><span languageCode = "3010">Firmware Update</span></b></a></dt>
-		<dt id="dongle_upgrade" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('dongle_upgrade');"><b><span languageCode = "">Dongle Driver Update</span></b></a></dt>
-	</dl>	
-	</div>	
-
-	<div id="advanced_bt" class="advanced_white_close_button" onclick="open_or_close_sub('advanced'); advanced_open++;"><b><span languageCode = "3011">Advanced Setup</span></b></div>
-	<div id="advanced_sub" class="sub_men"  style="display: none">
-	<dl>
-		<dt id="wladv" class="sub_back"><a  target="formframe" onclick="click_adv_action('wladv');"><b><span languageCode = "320">Wireless Settings</span></b></a></dt>
-		<dt id="wlap" class="sub_back"><a  target="formframe" onclick="click_adv_action('wlap');"><b><span languageCode = "3912">Wireless Access Point</span></b></a></dt>
-		<dt id="wds" class="long_name" style="display: none"><a  target="formframe" onclick="click_adv_action('wds');"><b><span languageCode = "329">Wireless Repeating Function</span></b></a></dt>
-		<dt id="forwarding_triggering" class="long_name"><a  target="formframe" onclick="click_adv_action('forwarding_triggering');"><b><span languageCode = "186">Port Forwarding / Port Triggering</span></b></a></dt>
-		<dt id="dns" class="sub_back"><a  target="formframe" onclick="click_adv_action('dns');"><b><span languageCode = "149">Dynamic DNS</span></b></a></dt>
-		<dt id="openvpn" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('openvpn');"><b><span languageCode = "4000">VPN Service</span></b></a></dt>
-		<dt id="static" class="sub_back"><a  target="formframe" onclick="click_adv_action('static');"><b><span languageCode = "330">Static Routes</span></b></a></dt>
-		<dt id="remote" class="sub_back"><a target="formframe" onclick="click_adv_action('remote');"><b><span languageCode = "220">Remote Management</span></b></a></dt>
-@usb_hide_s#
-		<dt id="usb" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('usb');"><b><span languageCode = "332">USB Settings</span></b></a></dt>
-@usb_hide_e#
-		<dt id="upnp" class="sub_back"><a  target="formframe" onclick="click_adv_action('upnp');"><b><span>UPnP</span></b></a></dt>
-		<dt id="ipv6" class="sub_back" style="display: none"><a target="formframe" onclick="click_adv_action('ipv6');"><b><span>IPv6</span></b></a></dt>		
-		<dt id="tr069" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('tr069');"><b><span>TR069</span></b></a></dt>
-		<dt id="traffic" class="sub_back" style="display: none"><a target="formframe" onclick="click_adv_action('traffic');"><b><span languageCode = "331">Traffic Meter</span></b></a></dt>
-		<dt id="led_ctrl" class="sub_back" style="display: none"><a target="formframe" onclick="click_adv_action('led_ctrl');"><b><span languageCode = "4420">LED Control Settings</span></b></a></dt>
-		<dt id="mode" class="sub_back" style="display: none"><a target="formframe" onclick="click_adv_action('mode');"><b><span languageCode = "338">Device Mode</span></b></a></dt>
-        <dt id="vpn_ply" class="sub_back" style="display: none"><a  target="formframe" onclick="click_adv_action('vpn_ply');"><b><span languageCode="10430">VPN Policies</span></b></a></dt>
+		<dt id="diag" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('diag');"><b><span languageCode = "130">Diagnostics</span></b></a></dt>
+		<dt id="upgrade" class="sub_back"><a target="formframe" onclick="click_adv_action('upgrade');"><b><span languageCode = "3010">Firmware Update</span></b></a></dt>
 	</dl>	
 	</div>
+	<div id="advanced_bt" class="advanced_white_close_button" onclick="open_or_close_sub('advanced'); advanced_open++;"><b><span languageCode = "3011">Advanced Setup</span></b></div>
+	<div id="advanced_sub" class="sub_men" style="display:none">
+	<dl>
+		<dt id="wladv" class="sub_back"><a target="formframe" onclick="click_adv_action('wladv');"><b><span languageCode = "320">Wireless Settings</span></b></a></dt>
+		<dt id="wlap" class="sub_back"><a target="formframe" onclick="click_adv_action('wlap');"><b><span languageCode = "3912">Wireless Access Point</span></b></a></dt>
+		<dt id="wds" class="long_name" style="display:none"><a target="formframe" onclick="click_adv_action('wds');"><b><span languageCode = "329">Wireless Repeating Function</span></b></a></dt>
+		<dt id="forwarding_triggering" class="long_name"><a target="formframe" onclick="click_adv_action('forwarding_triggering');"><b><span languageCode = "186">Port Forwarding / Port Triggering</span></b></a></dt>
+		<dt id="dns" class="sub_back"><a target="formframe" onclick="click_adv_action('dns');"><b><span languageCode = "149">Dynamic DNS</span></b></a></dt>
+		<dt id="openvpn" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('openvpn');"><b><span languageCode = "4000">VPN Service</span></b></a></dt>
+		<dt id="static" class="sub_back"><a target="formframe" onclick="click_adv_action('static');"><b><span languageCode = "330">Static Routes</span></b></a></dt>
+		<dt id="remote" class="sub_back"><a target="formframe" onclick="click_adv_action('remote');"><b><span languageCode = "220">Remote Management</span></b></a></dt>
 
+@usb_hide_s#
+		<dt id="usb" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('usb');"><b><span languageCode = "332">USB Settings</span></b></a></dt>
+		<dt id="ethereal" class="sub_back"><a target="formframe" onclick="goto_formframe('get_packet.htm&todo=cfg_init');menu_color_change('ethereal');"><b><span>Ethereal</span></b></a></dt>
+@usb_hide_e#
+
+		<dt id="upnp" class="sub_back"><a target="formframe" onclick="click_adv_action('upnp');"><b><span>UPnP</span></b></a></dt>
+		<dt id="ipv6" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('ipv6');"><b><span>IPv6</span></b></a></dt>
+		<dt id="traffic" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('traffic');"><b><span languageCode = "331">Traffic Meter</span></b></a></dt>
+		<dt id="led_ctrl" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('led_ctrl');"><b><span languageCode = "4420">LED Control Settings</span></b></a></dt>
+		<dt id="mode" class="sub_back" style="display:none"><a target="formframe" onclick="click_adv_action('mode');"><b><span languageCode = "338">Device Mode</span></b></a></dt>
+	</dl>	
+	</div>
 </div>
-<!--div id="mini_height"> </div-->
 <div id="formframe_div">
 		<iframe name="formframe" id="formframe" src="RST_status.htm" allowtransparency="true" height="100%" width="100%" scrolling="auto" frameborder="0">
 		</iframe>
@@ -409,13 +332,8 @@ var advanced_open=0;
 	<b languageCode = "3014">SEARCH HELP</b>
 	<input type="text" name="search" value="Enter Search Item" onKeyPress="detectEnter('num',event);" onBlur="focus_stat(this, false);" onFocus="focus_stat(this, true);this.select();" languageCode = "3063" >
 	<input id="search_button" class="search_button" type="button" name="dosearch" value="GO" onClick="do_search();" languageCode = "3015">
-</div>
-</div>
-</div>
-</div>
+</div></div></div></div>
 </form>
-
 <script language="javascript" type="text/javascript" src="langs.js"></script>
-
 </body>
 </html>
