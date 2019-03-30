@@ -1,13 +1,15 @@
 diff -urN work/mini_httpd-1.17beta1/Makefile work/mini_httpd-1.17beta1/Makefile
 --- work/mini_httpd-1.17beta1/Makefile	2002-05-25 22:16:55.000000000 +0200
 +++ work/mini_httpd-1.17beta1/Makefile	2018-11-19 11:18:18.000000000 +0100
-@@ -1,53 +1,43 @@
+@@ -1,53 +1,45 @@
 -# Makefile for mini_httpd
 +include ../Rules.mak
 +
 +BINS	:= mini_httpd
 +CERTS	:= $(BINS).pem
 +STARTUP	:= httpd
++CUR_SET	:= currentsetting.htm
++HTMDIR	:= ../www
 +
 +HTTPS=1
 +IP_ASSIGN_CHK=1
@@ -79,7 +81,7 @@ diff -urN work/mini_httpd-1.17beta1/Makefile work/mini_httpd-1.17beta1/Makefile
  endif
  
  ifeq ($(PNPX),1)
-@@ -64,31 +54,30 @@
+@@ -64,31 +56,31 @@
  # support netgear new login method
  CFLAGS += -DSMART_LOGOUT
  
@@ -107,6 +109,7 @@ diff -urN work/mini_httpd-1.17beta1/Makefile work/mini_httpd-1.17beta1/Makefile
 -mini_httpd.o:	mini_httpd.c version.h port.h match.h tdate_parse.h mime_encodings.h mime_types.h
 -	${CC} ${CFLAGS} -c mini_httpd.c
 +	install -m 0755 $(BINS) $(TMPINSTDIR)
++	install -m 0755 $(HTMDIR)/$(CUR_SET) $(TMPINSTDIR)
  
 -match.o:	match.c match.h
 -	${CC} ${CFLAGS} -c match.c
@@ -127,7 +130,7 @@ diff -urN work/mini_httpd-1.17beta1/Makefile work/mini_httpd-1.17beta1/Makefile
  
  mime_encodings.h: mime_encodings.txt
  	rm -f mime_encodings.h
-@@ -102,27 +91,28 @@
+@@ -102,27 +94,28 @@
  	  -e 's/#.*//' -e 's/[ 	]*$$//' -e '/^$$/d' \
  	  -e 's/[ 	][ 	]*/", 0, "/' -e 's/^/{ "/' -e 's/$$/", 0 },/'
  
@@ -169,7 +172,7 @@ diff -urN work/mini_httpd-1.17beta1/Makefile work/mini_httpd-1.17beta1/Makefile
  	  rm -rf $$name ; \
  	  mkdir $$name ; \
  	  tar cf - `cat FILES` | ( cd $$name ; tar xfBp - ) ; \
-@@ -131,3 +119,31 @@
+@@ -131,3 +124,31 @@
  	  tar cf $$name.tar $$name ; \
  	  rm -rf $$name ; \
  	  gzip $$name.tar
@@ -184,8 +187,7 @@ diff -urN work/mini_httpd-1.17beta1/Makefile work/mini_httpd-1.17beta1/Makefile
 +
 +preinst:
 +	@echo "#!/bin/sh" > $(PREINST)
-+	@echo "[ -e $(TMPDIR)/$(BINS) ] && rm -f $(TMPDIR)/$(BINS)" >> $(PREINST)
-+	@echo "[ -e $(TMPDIR)/$(CERTS) ] && rm -f $(TMPDIR)/$(CERTS)" >> $(PREINST)
++	@echo "for F in $(BINS) $(CERTS) $(CUR_SET); do [ -e $(TMPDIR)/\$$F ] && rm -f $(TMPDIR)/\$$F; done" >> $(PREINST)
 +	@echo "exit 0" >> $(PREINST)
 +
 +postinst:
@@ -194,6 +196,7 @@ diff -urN work/mini_httpd-1.17beta1/Makefile work/mini_httpd-1.17beta1/Makefile
 +	@echo "echo \"Updating $(BINS) ...\"" >> $(POSTINST)
 +	@echo "[ -f $(TMPDIR)/$(CERTS) ] && cp -f $(TMPDIR)/$(CERTS) $(USRETC)/ && mv -f $(TMPDIR)/$(CERTS) $(TMPETC)/" >> $(POSTINST)
 +	@echo "mv -f $(TMPDIR)/$(BINS) $(USRSBIN)/" >> $(POSTINST)
++	@echo "[ -f $(TMPDIR)/$(CUR_SET) ] && mv -f $(TMPDIR)/$(CUR_SET) $(WWW)/" >> $(POSTINST)
 +	@echo "sync" >> $(POSTINST)
 +	@echo "echo \"Restarting web daemon service...\"" >> $(POSTINST)
 +	@echo "$(RC) $(STARTUP) restart" >> $(POSTINST)

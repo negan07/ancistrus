@@ -146,6 +146,7 @@ post_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mmain web pages \\e[0m"
 	@$(foreach F, $(RCMAINWEB), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWDIR)/$(F) || exit 1;)
 	@$(foreach F, $(RCMAINCSS), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWCSSDIR)/$(F) || exit 1;)
+	@mv $(BUILD_TARGET)$(RCTMPDIR)/currentsetting.htm $(BUILD_TARGET)$(RCWWWDIR)/ || exit 1
 	@echo -e "\\e[35m$(CUR_REL_PATH): moving $(RCINITD) & opkg dirs content from \\e[36m$(BUILD_TARGET) \\e[0m"
 	@mv $(BUILD_TARGET)$(RCINITDIR)/* $(IMAGEDIR)/$(RCINITD) || exit 1
 	@mv $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/* $(IMAGEDIR)/opkg || exit 1
