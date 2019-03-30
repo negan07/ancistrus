@@ -48,7 +48,7 @@ diff -urN D7000_V1.0.1.70_WW_src/Source/Makefile D7000_V1.0.1.70_WW_src/Source/M
  #need not add WW in version for WW release
  ifeq ($(REGION),WW)
  	VERSION=V$(VER)_$(SUB_VER)
-@@ -52,305 +32,198 @@
+@@ -52,305 +32,212 @@
  	ETCVERSION=$(ANNEX)$(VER)_$(SUB_VER)$(REGION)
  endif
  
@@ -114,7 +114,21 @@ diff -urN D7000_V1.0.1.70_WW_src/Source/Makefile D7000_V1.0.1.70_WW_src/Source/M
 +	@echo -e "\\e[35mSOURCE: PRE_FS \\e[36mgarbage orphans cleanup\\e[0m"
 +	-find $(FS_DIR) -type c -name "spu" -exec rm -f '{}' \; >/dev/null 2>&1
 +	-@$(foreach L, "import_ca.cgi" "upgrade_driver.cgi" "upgrade_stringTbl.cgi", find $(FS_DIR) -type l -name $(L) -exec rm -f '{}' \; >/dev/null 2>&1;)
-+	-@$(foreach F, "*.gz" "*DGND*.jpg" "rcS.MT" "prepare_3g" "ipsec_init_conn.sh" "spuctl" "telnetenabled" "libspuctl.so" "ipt_vpntrigger.ko" "vw_*" "vpn_*" "h_vpn*" "h_vauto*" "h_vman*" "index1.htm" "start1.htm" "*_demo.htm" "start_old_style.htm" "ORG-RST_status.htm" "DSL_PRO_config.html" "*3g*.htm" "adsl_test.htm" "StringTableUpload.html" "alert*" "at_cmd_log.htm" "choose_wan*" "debug*" "dongle_list.htm" "hidden.htm" "*lanip_mo*" "*odem*" "*mstatus*" "LGO_logout.htm" "menu*.htm" "m_status.htm" "ORG-index.htm" "TR069.htm" "*driver*" "wiz_failover.htm" "wiz_selwan.htm" "wiz_summary.htm" "md5", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
++	-@$(foreach F, "*.gz" "*DGND*.jpg" "rcS.MT" "prepare_3g" "ipsec_init_conn.sh" "spuctl" "telnetenabled" "libspuctl.so" "ipt_vpntrigger.ko" "vw_*" "vpn_*" "h_vpn*" "h_vauto*" "h_vman*" "index1.htm" "start1.htm" "*_demo.htm" "start_old_style.htm" "ORG-RST_status.htm" "DSL_PRO_config.html" "*3g*.htm" "adsl_test.htm" "StringTableUpload.html" "alert*" "at_cmd_log.htm" "choose_wan*" "debug*" "dongle_list.htm" "hidden.htm" "*lanip_mo*" "*odem*" "*mstatus*" "LGO_logout.htm" "menu*.htm" "m_status.htm" "ORG-index.htm" "TR069.htm" "*driver*" "wiz_failover.htm" "wiz_selwan.htm" "wiz_summary.htm" "md5" "utility_dlna.js", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
++	@echo -e "\\e[35mSOURCE: PRE_FS \\e[36mduplicate removal\\e[0m"
++	ln -sf nbtscan $(FS_DIR)/usr/sbin/nbtscan_refresh
++	ln -sf nvram $(FS_DIR)/usr/sbin/readycloud_nvram
++	ln -sf wizard_eth $(FS_DIR)/usr/sbin/wizard_vdsl
++	ln -sf DNS_ddns_st.htm $(FS_DIR)/www.eng/Netgear_ddns_st.htm
++	ln -sf WIZ_pppoa.htm $(FS_DIR)/www.eng/wizpppoa.htm
++	ln -sf BAS_pppoe_h.htm $(FS_DIR)/www.eng/BAS_pppoa_h.htm
++	ln -sf BRS_04_B_checkNet_ping.html $(FS_DIR)/www.eng/BRS_04_B_checkNet.html
++	ln -sf upgrade.htm $(FS_DIR)/www.eng/UPG_upgrade.htm
++	ln -sf dtreebase.gif $(FS_DIR)/www.eng/rout.gif
++	ln -sf image/spacer.gif $(FS_DIR)/www.eng/spacer.gif
++	ln -sf button/button.gif $(FS_DIR)/www.eng/image/ca_purple_long_button.gif
++	ln -sf button/test.gif $(FS_DIR)/www.eng/image/ca-little-purple-button.gif
++	@echo -e "\\e[35mSOURCE: PRE_FS \\e[36mimages conversion\\e[0m"
 +	mogrify -format jpg $(FS_DIR)/www.eng/image/apmodelink.jpg
 +ifeq ($(ANNEX),A)
 +	-@$(foreach D, "CSY" "TUR" , find $(FS_DIR) -type d -name $(D) -exec rm -rf '{}' \; >/dev/null 2>&1;)
