@@ -194,7 +194,7 @@ DIRLIST				+= $(OPENSSL)
 TARLIST				+= $(TAR_$(OPENSSL))
 # CURL
 CURL_NAME			:= curl
-VER_$(CURL_NAME)		:= 7.64.0
+VER_$(CURL_NAME)		:= 7.64.1
 CURL				:= $(CURL_NAME)-$(VER_$(CURL_NAME))
 NAME_$(CURL)			:= $(CURL_NAME)$(DBG)
 SUBVER_$(CURL)			:= 
