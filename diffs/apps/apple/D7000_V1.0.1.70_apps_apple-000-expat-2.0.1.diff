@@ -1,9 +1,0 @@
-diff -urN D7000_V1.0.1.70_WW_src/Source/apps/apple/expat-2.0.1/build.sh D7000_V1.0.1.70_WW_src/Source/apps/apple/expat-2.0.1/build.sh
---- D7000_V1.0.1.70_WW_src/Source/apps/apple/expat-2.0.1/build.sh	2016-10-11 17:54:11.000000000 +0200
-+++ D7000_V1.0.1.70_WW_src/Source/apps/apple/expat-2.0.1/build.sh	2017-05-04 20:53:03.771753087 +0200
-@@ -1,4 +1,4 @@
- #!/bin/bash
- build_dir=build_sc
- cd $build_dir
--CC=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-gcc ../configure --target=arm-linux --host=arm-linux --build=i686-pc-linux-gnu --enable-shared --enable-static
-+CFLAGS="${1}" CC=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-gcc ../configure --target=arm-linux --host=arm-linux --build=i686-pc-linux-gnu --enable-shared --enable-static

@@ -1,0 +1,33 @@
+diff -urN D7000_V1.0.1.74_WW_src/Source/apps/mini_httpd-1.17beta1/Makefile D7000_V1.0.1.74_WW_src/Source/apps/mini_httpd-1.17beta1/Makefile
+--- D7000_V1.0.1.74_WW_src/Source/apps/mini_httpd-1.17beta1/Makefile	2016-10-11 17:56:20.000000000 +0200
++++ D7000_V1.0.1.74_WW_src/Source/apps/mini_httpd-1.17beta1/Makefile	2017-04-30 21:34:15.886121143 +0200
+@@ -28,12 +28,9 @@
+ BINDIR =	/usr/local/sbin
+ MANDIR =	/usr/local/man
+ CC =		$(CROSS)gcc
+-#CC =		gcc
+ CDEFS =		${SSL_DEFS} ${SSL_INC} 
+-CFLAGS =	-Os  ${CDEFS}  -Wall -Werror -Wno-unused-but-set-variable
++CFLAGS +=	-Os  ${CDEFS}  -Wall -Werror -Wno-unused-but-set-variable
+ CFLAGS +=	-I$(SHARED_DIR) -I../nvram
+-#CFLAGS +=       -D_SC_DEBUG_ENABLE_
+-#CFLAGS =	-g ${CDEFS}
+ 
+ ifeq ($(IP_ASSIGN_CHK),1)
+ CFLAGS += -DIP_ASSIGN_CHK
+@@ -42,7 +39,6 @@
+ LDFLAGS =	-s
+ 
+ LDFLAGS +=      -L../nvram -lscnvram
+-#LDFLAGS =	-g
+ LDLIBS =	${SSL_LIBS} ${SYSV_LIBS} #${CRYPT_LIB}
+ 
+ ifeq ($(USB),1)
+@@ -77,6 +73,7 @@
+ 	${CC} ${CFLAGS} ${LDFLAGS} mini_httpd.o match.o tdate_parse.o sc_sessionid.o ${LDLIBS} -o mini_httpd
+ 
+ install:mini_httpd
++	$(SSTRIP) mini_httpd
+ 	cp -f mini_httpd ../../target/usr/sbin
+ ifeq ($(HTTPS),1)
+ 	cp -f mini_httpd.pem ../../target/usr/etc
