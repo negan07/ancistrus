@@ -1,7 +1,7 @@
-diff -urN work/openssl-1.0.2r/openssl-1.0.2r/Configure work/openssl-1.0.2r/openssl-1.0.2r/Configure
---- work/openssl-1.0.2r/openssl-1.0.2r/Configure
-+++ work/openssl-1.0.2r/openssl-1.0.2r/Configure
-@@ -2137,6 +2137,11 @@
+diff -urN work/openssl-1.0.2t/openssl-1.0.2t/Configure work/openssl-1.0.2t/openssl-1.0.2t/Configure
+--- work/openssl-1.0.2t/openssl-1.0.2t/Configure
++++ work/openssl-1.0.2t/openssl-1.0.2t/Configure
+@@ -2138,6 +2138,11 @@
  	close(OUT);
    }
    
@@ -13,9 +13,9 @@ diff -urN work/openssl-1.0.2r/openssl-1.0.2r/Configure work/openssl-1.0.2r/opens
  print <<EOF;
  
  Configured for $target.
-diff -urN work/openssl-1.0.2r/openssl-1.0.2r/util/libeay.num work/openssl-1.0.2r/openssl-1.0.2r/util/libeay.num
---- work/openssl-1.0.2r/openssl-1.0.2r/util/libeay.num
-+++ work/openssl-1.0.2r/openssl-1.0.2r/util/libeay.num
+diff -urN work/openssl-1.0.2t/openssl-1.0.2t/util/libeay.num work/openssl-1.0.2t/openssl-1.0.2t/util/libeay.num
+--- work/openssl-1.0.2t/openssl-1.0.2t/util/libeay.num
++++ work/openssl-1.0.2t/openssl-1.0.2t/util/libeay.num
 @@ -2075,7 +2075,6 @@
  UI_add_error_string                     2633	EXIST::FUNCTION:
  KRB5_CHECKSUM_free                      2634	EXIST::FUNCTION:

@@ -1,6 +1,6 @@
-diff -urN work/openssl-1.0.2r/openssl-1.0.2r/Makefile.shared work/openssl-1.0.2r/openssl-1.0.2r/Makefile.shared
---- work/openssl-1.0.2r/openssl-1.0.2r/Makefile.shared
-+++ work/openssl-1.0.2r/openssl-1.0.2r/Makefile.shared
+diff -urN work/openssl-1.0.2t/openssl-1.0.2t/Makefile.shared work/openssl-1.0.2t/openssl-1.0.2t/Makefile.shared
+--- work/openssl-1.0.2t/openssl-1.0.2t/Makefile.shared
++++ work/openssl-1.0.2t/openssl-1.0.2t/Makefile.shared
 @@ -95,7 +95,6 @@
      LDCMD="$${LDCMD:-$(CC)}"; LDFLAGS="$${LDFLAGS:-$(CFLAGS)}"; \
      LIBPATH=`for x in $$LIBDEPS; do echo $$x; done | sed -e 's/^ *-L//;t' -e d | uniq`; \

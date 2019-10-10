@@ -1,6 +1,6 @@
-diff -urN work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
---- work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
-+++ work/openssl-1.0.2r/openssl-1.0.2r/Makefile.org
+diff -urN work/openssl-1.0.2t/openssl-1.0.2t/Makefile.org work/openssl-1.0.2t/openssl-1.0.2t/Makefile.org
+--- work/openssl-1.0.2t/openssl-1.0.2t/Makefile.org
++++ work/openssl-1.0.2t/openssl-1.0.2t/Makefile.org
 @@ -185,7 +185,7 @@
  EXHEADER=       e_os2.h
  HEADER=         e_os.h
