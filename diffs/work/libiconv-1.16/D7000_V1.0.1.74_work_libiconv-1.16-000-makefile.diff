@@ -1,12 +1,12 @@
-diff -urN work/libiconv-1.15/Makefile work/libiconv-1.15/Makefile
---- work/libiconv-1.15/Makefile	2018-10-23 23:00:46.662292000 +0200
-+++ work/libiconv-1.15/Makefile	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/libiconv-1.16/Makefile work/libiconv-1.16/Makefile
+--- work/libiconv-1.16/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/libiconv-1.16/Makefile	2018-10-23 23:01:08.566300143 +0200
 @@ -0,0 +1,52 @@
 +include ../Rules.mak
 +
 +LIBSNAME		:= libiconv.so
 +LIBSMAINVER		:= 2
-+LIBSVER			:= 6.0
++LIBSVER			:= 6.1
 +LIBSDIRNAME		:= $(LIBICONV)/lib/.libs
 +LIBSORIGNAME		:= $(LIBSNAME).$(LIBSMAINVER).$(LIBSVER)
 +LIBS			:= $(LIBSNAME).0.0

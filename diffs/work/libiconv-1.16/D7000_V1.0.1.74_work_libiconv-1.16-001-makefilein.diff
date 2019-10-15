@@ -1,11 +1,10 @@
-diff -urN work/libiconv-1.15/libiconv-1.15/Makefile.in work/libiconv-1.15/libiconv-1.15/Makefile.in
---- work/libiconv-1.15/libiconv-1.15/Makefile.in	2018-10-23 23:00:46.662292000 +0200
-+++ work/libiconv-1.15/libiconv-1.15/Makefile.in	2018-10-23 23:01:08.566300143 +0200
-@@ -31,12 +31,6 @@
+diff -urN work/libiconv-1.16/libiconv-1.16/Makefile.in work/libiconv-1.16/libiconv-1.16/Makefile.in
+--- work/libiconv-1.16/libiconv-1.16/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/libiconv-1.16/libiconv-1.16/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -31,11 +31,6 @@
  
  all : lib/localcharset.h force
  	cd lib && $(MAKE) all
--	cd preload && $(MAKE) all
 -	cd srclib && $(MAKE) all
 -	cd src && $(MAKE) all
 -	cd po && $(MAKE) all
