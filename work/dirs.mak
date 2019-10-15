@@ -228,10 +228,10 @@ DIRLIST				+= $(LIBARCHIVE)
 TARLIST				+= $(TAR_$(LIBARCHIVE))
 # OPKGUTILS
 OPKG_UTILS_NAME			:= opkg-utils
-VER_$(OPKG_UTILS_NAME)		:= 0.4.0
+VER_$(OPKG_UTILS_NAME)		:= 0.4.1
 OPKG_UTILS			:= $(OPKG_UTILS_NAME)-$(VER_$(OPKG_UTILS_NAME))
 NAME_$(OPKG_UTILS)		:= $(OPKG_UTILS_NAME)$(DBG)
-SUBVER_$(OPKG_UTILS)		:= -010
+SUBVER_$(OPKG_UTILS)		:= 
 VER_$(OPKG_UTILS)		:= $(VER_$(OPKG_UTILS_NAME))$(SUBVER_$(OPKG_UTILS))
 DL_$(OPKG_UTILS)		:= http://git.yoctoproject.org/cgit/cgit.cgi/opkg-utils/snapshot
 TAR_$(OPKG_UTILS)		:= $(OPKG_UTILS).tar.gz

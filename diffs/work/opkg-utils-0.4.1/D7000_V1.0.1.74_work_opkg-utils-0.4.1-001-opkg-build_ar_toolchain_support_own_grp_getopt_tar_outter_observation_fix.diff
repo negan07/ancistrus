@@ -1,6 +1,6 @@
-diff -urN work/opkg-utils-0.4.0/opkg-build work/opkg-utils-0.4.0/opkg-build
---- work/opkg-utils-0.4.0/opkg-build	2017-04-04 23:21:46.566819127 +0200
-+++ work/opkg-utils-0.4.0/opkg-build	2017-04-05 21:21:17.549018779 +0200
+diff -urN work/opkg-utils-0.4.1/opkg-build work/opkg-utils-0.4.1/opkg-build
+--- work/opkg-utils-0.4.1/opkg-build	2017-04-04 23:21:46.566819127 +0200
++++ work/opkg-utils-0.4.1/opkg-build	2017-04-05 21:21:17.549018779 +0200
 @@ -193,20 +193,20 @@
  : <<=cut
  =head1 SYNOPSIS
