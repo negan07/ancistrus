@@ -1,12 +1,12 @@
-diff -urN work/curl-7.64.1/Makefile work/curl-7.64.1/Makefile
---- work/curl-7.64.1/Makefile	2018-10-23 23:00:46.662292000 +0200
-+++ work/curl-7.64.1/Makefile	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/curl-7.66.0/Makefile work/curl-7.66.0/Makefile
+--- work/curl-7.66.0/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/curl-7.66.0/Makefile	2018-10-23 23:01:08.566300143 +0200
 @@ -0,0 +1,61 @@
 +include ../Rules.mak
 +
 +LIBSNAME		:= libcurl.so
 +LIBSMAINVER		:= 4
-+LIBSVER			:= $(LIBSMAINVER).5.0
++LIBSVER			:= $(LIBSMAINVER).6.0
 +LIBS			:= $(LIBSNAME).$(LIBSVER)
 +BINS			:= curl
 +

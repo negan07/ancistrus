@@ -1,7 +1,7 @@
-diff -urN work/curl-7.64.1/curl-7.64.1/Makefile.am work/curl-7.64.1/curl-7.64.1/Makefile.am
---- work/curl-7.64.1/curl-7.64.1/Makefile.am	2018-10-23 23:00:46.662292000 +0200
-+++ work/curl-7.64.1/curl-7.64.1/Makefile.am	2018-10-23 23:01:08.566300143 +0200
-@@ -168,7 +168,7 @@
+diff -urN work/curl-7.66.0/curl-7.66.0/Makefile.am work/curl-7.66.0/curl-7.66.0/Makefile.am
+--- work/curl-7.66.0/curl-7.66.0/Makefile.am	2018-10-23 23:00:46.662292000 +0200
++++ work/curl-7.66.0/curl-7.66.0/Makefile.am	2018-10-23 23:01:08.566300143 +0200
+@@ -179,7 +179,7 @@
  bin_SCRIPTS = curl-config
  
  SUBDIRS = lib src
@@ -10,7 +10,7 @@ diff -urN work/curl-7.64.1/curl-7.64.1/Makefile.am work/curl-7.64.1/curl-7.64.1/
  
  pkgconfigdir = $(libdir)/pkgconfig
  pkgconfig_DATA = libcurl.pc
-@@ -279,8 +279,8 @@ cygwinbin:
+@@ -290,8 +290,8 @@
  # We extend the standard install with a custom hook:
  install-data-hook:
  	cd include && $(MAKE) install
