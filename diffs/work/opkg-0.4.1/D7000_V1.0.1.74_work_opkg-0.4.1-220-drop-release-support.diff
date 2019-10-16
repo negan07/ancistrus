@@ -1,6 +1,6 @@
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/Makefile.am work/opkg-0.4.0/opkg-0.4.0/libopkg/Makefile.am
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/Makefile.am	2016-12-22 18:38:14.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/Makefile.am	2017-03-24 23:46:06.404090221 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/Makefile.am work/opkg-0.4.1/opkg-0.4.1/libopkg/Makefile.am
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/Makefile.am	2016-12-22 18:38:14.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/Makefile.am	2017-03-24 23:46:06.404090221 +0100
 @@ -6,24 +6,24 @@
  
  libopkg_includedir=$(includedir)/libopkg
@@ -32,9 +32,9 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/Makefile.am work/opkg-0.4.0/opkg-0.
  	sprintf_alloc.c xregex.c xsystem.c xfuncs.c opkg_archive.c \
  	opkg_verify.c string_util.c
  
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/cksum_list.c work/opkg-0.4.0/opkg-0.4.0/libopkg/cksum_list.c
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/cksum_list.c	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/cksum_list.c	1970-01-01 01:00:00.000000000 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/cksum_list.c work/opkg-0.4.1/opkg-0.4.1/libopkg/cksum_list.c
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/cksum_list.c	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/cksum_list.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,88 +0,0 @@
 -/* vi: set expandtab sw=4 sts=4: */
 -/* cksum_lis.c - the opkg package management system
@@ -124,9 +124,9 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/cksum_list.c work/opkg-0.4.0/opkg-0
 -    }
 -    return NULL;
 -}
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/cksum_list.h work/opkg-0.4.0/opkg-0.4.0/libopkg/cksum_list.h
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/cksum_list.h	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/cksum_list.h	1970-01-01 01:00:00.000000000 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/cksum_list.h work/opkg-0.4.1/opkg-0.4.1/libopkg/cksum_list.h
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/cksum_list.h	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/cksum_list.h	1970-01-01 01:00:00.000000000 +0100
 @@ -1,51 +0,0 @@
 -/* vi: set expandtab sw=4 sts=4: */
 -/* cksum_list.h - the opkg package management system
@@ -179,9 +179,9 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/cksum_list.h work/opkg-0.4.0/opkg-0
 -#endif
 -
 -#endif                          /* CKSUM_LIST_H */
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c	2018-03-19 23:24:40.857986605 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_cmd.c work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_cmd.c
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_cmd.c	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_cmd.c	2018-03-19 23:24:40.857986605 +0100
 @@ -29,7 +29,6 @@
  #include "opkg_conf.h"
  #include "opkg_cmd.h"
@@ -232,9 +232,9 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c work/opkg-0.4.0/opkg-0.4
      for (iter = void_list_first(&opkg_config->pkg_src_list); iter;
              iter = void_list_next(&opkg_config->pkg_src_list, iter)) {
          src = (pkg_src_t *) iter->data;
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg_hash.c work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg_hash.c
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg_hash.c	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg_hash.c	2018-03-19 22:56:46.405529250 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/pkg_hash.c work/opkg-0.4.1/opkg-0.4.1/libopkg/pkg_hash.c
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/pkg_hash.c	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/pkg_hash.c	2018-03-19 22:56:46.405529250 +0100
 @@ -23,7 +23,6 @@
  #include <fnmatch.h>
  
@@ -243,7 +243,7 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg_hash.c work/opkg-0.4.0/opkg-0.4
  #include "pkg.h"
  #include "opkg_message.h"
  #include "opkg_archive.h"
-@@ -165,33 +164,6 @@
+@@ -165,37 +164,6 @@
      return ret;
  }
  
@@ -264,8 +264,12 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg_hash.c work/opkg-0.4.0/opkg-0.4
 -                free(list_file);
 -                return -1;
 -            }
+-            char *subpath, *distribution, *component;
+-            distribution = strtok(dist->name, "-");
+-            component = strtok(NULL, "-");
+-            sprintf_alloc(&subpath, "dists/%s/%s/binary-%s", distribution, component, nv->name);
 -            pkg_src_list_append(&opkg_config->pkg_src_list, subname,
--                                dist->value, NULL, "__dummy__", 0);
+-                                dist->value, NULL, subpath, 0);
 -        }
 -
 -        free(list_file);
@@ -277,7 +281,7 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg_hash.c work/opkg-0.4.0/opkg-0.4
  void pkg_hash_init(void)
  {
      hash_table_init("pkg-hash", &opkg_config->pkg_hash,
-@@ -210,50 +182,12 @@
+@@ -214,50 +186,12 @@
  int pkg_hash_load_feeds(void)
  {
      pkg_src_list_elt_t *iter;
@@ -329,9 +333,9 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/pkg_hash.c work/opkg-0.4.0/opkg-0.4
      for (iter = void_list_first(&opkg_config->pkg_src_list); iter;
              iter = void_list_next(&opkg_config->pkg_src_list, iter)) {
  
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/release.c work/opkg-0.4.0/opkg-0.4.0/libopkg/release.c
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/release.c	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/release.c	1970-01-01 01:00:00.000000000 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/release.c work/opkg-0.4.1/opkg-0.4.1/libopkg/release.c
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/release.c	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/release.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,373 +0,0 @@
 -/* vi: set expandtab sw=4 sts=4: */
 -/* release.c - the opkg package management system
@@ -706,9 +710,9 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/release.c work/opkg-0.4.0/opkg-0.4.
 -
 -    return ret;
 -}
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/release.h work/opkg-0.4.0/opkg-0.4.0/libopkg/release.h
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/release.h	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/release.h	1970-01-01 01:00:00.000000000 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/release.h work/opkg-0.4.1/opkg-0.4.1/libopkg/release.h
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/release.h	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/release.h	1970-01-01 01:00:00.000000000 +0100
 @@ -1,54 +0,0 @@
 -/* vi: set expandtab sw=4 sts=4: */
 -/* release.h - the opkg package management system
@@ -764,9 +768,9 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/release.h work/opkg-0.4.0/opkg-0.4.
 -}
 -#endif
 -#endif                          /* RELEASE_H */
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/release_parse.c work/opkg-0.4.0/opkg-0.4.0/libopkg/release_parse.c
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/release_parse.c	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/release_parse.c	1970-01-01 01:00:00.000000000 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/release_parse.c work/opkg-0.4.1/opkg-0.4.1/libopkg/release_parse.c
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/release_parse.c	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/release_parse.c	1970-01-01 01:00:00.000000000 +0100
 @@ -1,128 +0,0 @@
 -/* vi: set expandtab sw=4 sts=4: */
 -/* release_parse.c - the opkg package management system
@@ -831,7 +835,7 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/release_parse.c work/opkg-0.4.0/opk
 -        break;
 -
 -    case 'M':
--        if (is_field("MD5sum", line)) {
+-        if (is_field("MD5Sum", line)) {
 -            reading_md5sums = 1;
 -            if (release->md5sums == NULL) {
 -                release->md5sums = xcalloc(1, sizeof(cksum_list_t));
@@ -870,7 +874,7 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/release_parse.c work/opkg-0.4.0/opk
 -        break;
 -
 -    default:
--        ret = 1;
+-        ret = 0;
 -    }
 -
 -    reading_md5sums = 0;
@@ -896,9 +900,9 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/release_parse.c work/opkg-0.4.0/opk
 -
 -    return ret;
 -}
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/release_parse.h work/opkg-0.4.0/opkg-0.4.0/libopkg/release_parse.h
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/release_parse.h	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/release_parse.h	1970-01-01 01:00:00.000000000 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/release_parse.h work/opkg-0.4.1/opkg-0.4.1/libopkg/release_parse.h
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/release_parse.h	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/release_parse.h	1970-01-01 01:00:00.000000000 +0100
 @@ -1,29 +0,0 @@
 -/* vi: set expandtab sw=4 sts=4: */
 -/* release_parse.h - the opkg package management system

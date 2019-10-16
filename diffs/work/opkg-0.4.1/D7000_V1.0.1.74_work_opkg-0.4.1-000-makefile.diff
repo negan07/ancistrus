@@ -1,6 +1,6 @@
-diff -urN work/opkg-0.4.0/Makefile work/opkg-0.4.0/Makefile
---- work/opkg-0.4.0/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/opkg-0.4.0/Makefile	2017-03-23 20:35:42.745736890 +0100
+diff -urN work/opkg-0.4.1/Makefile work/opkg-0.4.1/Makefile
+--- work/opkg-0.4.1/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/opkg-0.4.1/Makefile	2017-03-23 20:35:42.745736890 +0100
 @@ -0,0 +1,157 @@
 +include ../Rules.mak
 +

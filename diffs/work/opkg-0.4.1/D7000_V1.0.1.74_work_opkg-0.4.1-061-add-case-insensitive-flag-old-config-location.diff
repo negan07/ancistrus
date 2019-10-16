@@ -1,6 +1,6 @@
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c	2016-12-22 18:38:14.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c	2017-03-24 22:57:03.946704785 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_cmd.c work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_cmd.c
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_cmd.c	2016-12-22 18:38:14.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_cmd.c	2017-03-24 22:57:03.946704785 +0100
 @@ -367,7 +331,7 @@
      for (i = 0; i < ordered->len; i++) {
          pkg = ordered->pkgs[i];
@@ -76,9 +76,9 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_cmd.c work/opkg-0.4.0/opkg-0.4
                  print_pkg(pkg);
          }
  
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.c work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.c
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.c	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.c	2018-03-19 23:02:24.135480676 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_conf.c work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_conf.c
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_conf.c	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_conf.c	2018-03-19 23:02:24.135480676 +0100
 @@ -75,6 +75,7 @@
      {"download_only", OPKG_OPT_TYPE_BOOL, &_conf.download_only},
      {"download_first", OPKG_OPT_TYPE_BOOL, &_conf.download_first}, /* Not available on internal solver */
@@ -87,9 +87,9 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.c work/opkg-0.4.0/opkg-0.
      {"no_install_recommends", OPKG_OPT_TYPE_BOOL, &_conf.no_install_recommends},
      {"offline_root", OPKG_OPT_TYPE_STRING, &_conf.offline_root},
      {"overlay_root", OPKG_OPT_TYPE_STRING, &_conf.overlay_root},
-diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.h work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.h
---- work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.h	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.h	2018-03-19 23:03:50.142966116 +0100
+diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_conf.h work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_conf.h
+--- work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_conf.h	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/libopkg/opkg_conf.h	2018-03-19 23:03:50.142966116 +0100
 @@ -20,6 +20,7 @@
  #define OPKG_CONF_H
  
@@ -98,7 +98,7 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.h work/opkg-0.4.0/opkg-0.
  
  #ifdef __cplusplus
  extern "C" {
-@@ -105,6 +106,7 @@
+@@ -106,6 +107,7 @@
      char *gpg_trust_level;
      char *signature_type;
      int nodeps;             /* do not follow dependencies */
@@ -106,10 +106,10 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/libopkg/opkg_conf.h work/opkg-0.4.0/opkg-0.
      int no_install_recommends;
      char *offline_root;
      char *overlay_root;
-diff -urN work/opkg-0.4.0/opkg-0.4.0/src/opkg.c work/opkg-0.4.0/opkg-0.4.0/src/opkg.c
---- work/opkg-0.4.0/opkg-0.4.0/src/opkg.c	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.4.0/opkg-0.4.0/src/opkg.c	2018-03-19 23:07:10.981458627 +0100
-@@ -54,6 +54,7 @@
+diff -urN work/opkg-0.4.1/opkg-0.4.1/src/opkg.c work/opkg-0.4.1/opkg-0.4.1/src/opkg.c
+--- work/opkg-0.4.1/opkg-0.4.1/src/opkg.c	2018-02-19 18:08:43.000000000 +0100
++++ work/opkg-0.4.1/opkg-0.4.1/src/opkg.c	2018-03-19 23:07:10.981458627 +0100
+@@ -55,6 +55,7 @@
      ARGS_OPT_NOACTION,
      ARGS_OPT_DOWNLOAD_ONLY,
      ARGS_OPT_NODEPS,
@@ -117,7 +117,7 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/src/opkg.c work/opkg-0.4.0/opkg-0.4.0/src/o
      ARGS_OPT_AUTOREMOVE,
      ARGS_OPT_VOLATILE_CACHE,
      ARGS_OPT_COMBINE,
-@@ -105,6 +106,7 @@
+@@ -106,6 +107,7 @@
      {"noaction", 0, 0, ARGS_OPT_NOACTION},
      {"download-only", 0, 0, ARGS_OPT_DOWNLOAD_ONLY},
      {"nodeps", 0, 0, ARGS_OPT_NODEPS},
@@ -125,7 +125,7 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/src/opkg.c work/opkg-0.4.0/opkg-0.4.0/src/o
      {"no-install-recommends", 0, 0, ARGS_OPT_NO_INSTALL_RECOMMENDS},
      {"offline", 1, 0, 'o'},
      {"offline-root", 1, 0, 'o'},
-@@ -136,7 +138,7 @@
+@@ -138,7 +140,7 @@
      char *solver_version = NULL;
  
      while (1) {
@@ -134,7 +134,7 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/src/opkg.c work/opkg-0.4.0/opkg-0.4.0/src/o
                               &option_index);
          if (c == -1)
              break;
-@@ -151,6 +153,9 @@
+@@ -153,6 +155,9 @@
          case 'f':
              opkg_config->conf_file = xstrdup(optarg);
              break;
@@ -144,7 +144,7 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/src/opkg.c work/opkg-0.4.0/opkg-0.4.0/src/o
          case 'o':
              opkg_config->offline_root = xstrdup(optarg);
              break;
-@@ -219,6 +224,9 @@
+@@ -221,6 +226,9 @@
          case ARGS_OPT_NODEPS:
              opkg_config->nodeps = 1;
              break;
@@ -154,7 +154,7 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/src/opkg.c work/opkg-0.4.0/opkg-0.4.0/src/o
          case ARGS_OPT_ADD_ARCH:
          case ARGS_OPT_ADD_DEST:
              tuple = xstrdup(optarg);
-@@ -275,6 +283,9 @@
+@@ -280,6 +288,9 @@
          }
      }
  
@@ -164,7 +164,7 @@ diff -urN work/opkg-0.4.0/opkg-0.4.0/src/opkg.c work/opkg-0.4.0/opkg-0.4.0/src/o
      if (parse_err)
          return parse_err;
      else
-@@ -367,6 +378,7 @@
+@@ -373,6 +384,7 @@
      printf("\t--noaction                      No action -- test only\n");
      printf("\t--download-only                 No action -- download only\n");
      printf("\t--nodeps                        Do not follow dependencies\n");
