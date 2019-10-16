@@ -1,16 +1,18 @@
-diff -urN work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/Makefile.in work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/Makefile.in
---- work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/Makefile.in	2018-10-23 23:00:46.662292000 +0200
-+++ work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/Makefile.in	2018-10-23 23:01:08.566300143 +0200
-@@ -18,20 +18,19 @@
+diff -urN work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/Makefile.in work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/Makefile.in
+--- work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -19,22 +19,20 @@
  @ALL_CMT@EXT2FS_LIB_SUBDIR= lib/ext2fs
  
  LIB_SUBDIRS=lib/et lib/ss $(E2P_LIB_SUBDIR) $(UUID_LIB_SUBDIR) \
 -	$(BLKID_LIB_SUBDIR) $(SUPPORT_LIB_SUBDIR) $(EXT2FS_LIB_SUBDIR) intl
 +	$(BLKID_LIB_SUBDIR) $(SUPPORT_LIB_SUBDIR) $(EXT2FS_LIB_SUBDIR)
  
--PROG_SUBDIRS=e2fsck $(DEBUGFS_DIR) misc $(RESIZE_DIR) tests/progs po
--SUBDIRS=util $(LIB_SUBDIRS) $(PROG_SUBDIRS) tests
+-PROG_SUBDIRS=e2fsck $(DEBUGFS_DIR) misc $(RESIZE_DIR) tests/progs po \
+-	$(E2SCRUB_DIR)
 +PROG_SUBDIRS=e2fsck misc
+ 
+-SUBDIRS=util $(LIB_SUBDIRS) $(PROG_SUBDIRS) tests
 +SUBDIRS=$(LIB_SUBDIRS) $(PROG_SUBDIRS)
  
  SUBS= util/subst.conf lib/config.h $(top_builddir)/lib/dirpaths.h \
@@ -19,16 +21,16 @@ diff -urN work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/Makefile.in work/e2fsprogs-1.44
  TAR=tar
  
 -all:: subs
-+all:: 
++all::
  	$(MAKE) libs
  @ALL_CMT@	$(MAKE) progs
 -@ALL_CMT@	$(MAKE) docs
  
  subs: $(DEP_SUBSTITUTE)
  	@for i in $(SUBS) ; do if test -d `dirname $$i` ; \
-diff -urN work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/misc/Makefile.in work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/misc/Makefile.in
---- work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/misc/Makefile.in	2018-10-23 23:00:46.662292000 +0200
-+++ work/e2fsprogs-1.44.5/e2fsprogs-1.44.5/misc/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/misc/Makefile.in work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/misc/Makefile.in
+--- work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/misc/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/misc/Makefile.in	2018-10-23 23:01:08.566300143 +0200
 @@ -131,8 +131,7 @@
  	$(Q) $(CPPCHECK_CMD) $(CPPFLAGS) $<
  @PROFILE_CMT@	$(Q) $(CC) $(ALL_CFLAGS) -g -pg -o profiled/$*.o -c $<
