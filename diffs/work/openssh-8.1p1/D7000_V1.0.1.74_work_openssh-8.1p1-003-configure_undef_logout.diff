@@ -1,0 +1,12 @@
+diff -urN work/openssh-8.1p1/openssh-8.1p1/configure work/openssh-8.1p1/openssh-8.1p1/configure
+--- work/openssh-8.1p1/openssh-8.1p1/configure	2018-01-26 14:13:08.324425774 +0100
++++ work/openssh-8.1p1/openssh-8.1p1/configure	2018-01-26 14:13:08.324425774 +0100
+@@ -9699,7 +9699,7 @@
+ 
+ fi
+ 
+-for ac_func in fmt_scaled scan_scaled login logout openpty updwtmp logwtmp
++for ac_func in fmt_scaled scan_scaled login openpty updwtmp logwtmp
+ do :
+   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

@@ -397,10 +397,10 @@ DESC_$(MINIHTTPD)		:= Small HTTP(S) server
 DIRLIST				+= $(MINIHTTPD)
 # OPENSSH
 OPEN_SSH_NAME			:= openssh
-VER_$(OPEN_SSH_NAME)		:= 7.9p1
+VER_$(OPEN_SSH_NAME)		:= 8.1p1
 OPEN_SSH			:= $(OPEN_SSH_NAME)-$(VER_$(OPEN_SSH_NAME))
 NAME_$(OPEN_SSH)		:= $(OPEN_SSH_NAME)$(DBG)
-SUBVER_$(OPEN_SSH)		:= -113
+SUBVER_$(OPEN_SSH)		:= 
 VER_$(OPEN_SSH)			:= $(VER_$(OPEN_SSH_NAME))$(SUBVER_$(OPEN_SSH))
 DL_$(OPEN_SSH)			:= https://cloudflare.cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable
 TAR_$(OPEN_SSH)			:= $(OPEN_SSH).tar.gz
