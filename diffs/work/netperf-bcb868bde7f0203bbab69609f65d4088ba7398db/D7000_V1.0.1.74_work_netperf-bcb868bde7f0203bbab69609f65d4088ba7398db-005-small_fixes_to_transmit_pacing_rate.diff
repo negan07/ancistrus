@@ -1,0 +1,51 @@
+diff -urN work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_omni.c work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_omni.c
+--- work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_omni.c	2015-07-20 19:30:24.000000000 +0200
++++ work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_omni.c	2017-03-23 21:20:45.828649220 +0100
+@@ -7108,6 +7108,7 @@
+                       Use filename of '?' to get the list of choices\n\
+     -p min[,max]      Set the min/max port numbers for TCP_CRR, TCP_TRR\n\
+     -P local[,remote] Set the local/remote port for the data socket\n\
++    -q rate           Transmit pacing rate\n\
+     -r req,[rsp]      Set request/response sizes (TCP_RR, UDP_RR)\n\
+     -R 0/1            Allow routing of traffic on data connection.\n\
+                       Default: 0 (off) for UDP_STREAM, 1 (on) otherwise\n\
+@@ -7478,7 +7479,7 @@
+       break;
+     case 'q':
+       /* set the local socket pacing rate */
+-      pacing_rate = atoi(optarg);
++      pacing_rate = convert(optarg);
+       break;
+     case 'r':
+       /* set the request/response sizes. setting request/response
+diff -urN work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_bsd.c work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_bsd.c
+--- work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_bsd.c	2015-07-20 19:30:24.000000000 +0200
++++ work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_bsd.c	2017-03-23 21:20:45.828649220 +0100
+@@ -405,6 +405,7 @@
+     -N                Use the connected socket for UDP remotely\n\
+     -p min[,max]      Set the min/max port numbers for TCP_CRR, TCP_TRR\n\
+     -P local[,remote] Set the local/remote port for the data socket\n\
++    -q rate           Transmit pacing rate\n\
+     -r req,[rsp]      Set request/response sizes (TCP_RR, UDP_RR)\n\
+     -s send[,recv]    Set local socket send/recv buffer sizes\n\
+     -S send[,recv]    Set remote socket send/recv buffer sizes\n\
+@@ -13153,7 +13154,7 @@
+ 
+ {
+ 
+-#define SOCKETS_ARGS "aAb:CDnNhH:L:m:M:p:P:r:R:s:S:T:Vw:W:z46"
++#define SOCKETS_ARGS "aAb:CDnNhH:L:m:M:p:P:q:r:R:s:S:T:Vw:W:z46"
+ 
+   extern char	*optarg;	  /* pointer to option string	*/
+ 
+@@ -13333,6 +13334,10 @@
+       if (arg2[0])
+ 	strncpy(remote_data_port,arg2,sizeof(remote_data_port));
+       break;
++    case 'q':
++      /* set the local socket pacing rate */
++      pacing_rate = convert(optarg);
++      break;
+     case 't':
+       /* set the test name */
+       strcpy(test_name,optarg);

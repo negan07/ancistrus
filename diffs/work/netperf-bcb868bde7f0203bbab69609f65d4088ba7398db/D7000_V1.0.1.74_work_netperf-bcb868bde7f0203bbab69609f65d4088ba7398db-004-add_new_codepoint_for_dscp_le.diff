@@ -1,0 +1,19 @@
+diff -urN work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/dscp.c work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/dscp.c
+--- work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/dscp.c	2015-07-20 19:30:24.000000000 +0200
++++ work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/dscp.c	2017-03-23 21:20:45.828649220 +0100
+@@ -92,6 +92,7 @@
+ 
+ #ifndef IPTOS_DSCP_CS0
+ # define	IPTOS_DSCP_CS0		0x00
++# define        IPTOS_DSCP_LE           0x01
+ # define	IPTOS_DSCP_CS1		0x20
+ # define	IPTOS_DSCP_CS2		0x40
+ # define	IPTOS_DSCP_CS3		0x60
+@@ -121,6 +122,7 @@
+ 	{ "af42", IPTOS_DSCP_AF42 },
+ 	{ "af43", IPTOS_DSCP_AF43 },
+ 	{ "cs0", IPTOS_DSCP_CS0 },
++	{  "LE", IPTOS_DSCP_LE  },
+ 	{ "cs1", IPTOS_DSCP_CS1 },
+ 	{ "cs2", IPTOS_DSCP_CS2 },
+ 	{ "cs3", IPTOS_DSCP_CS3 },
