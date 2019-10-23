@@ -5,11 +5,11 @@
 1552684349 smartmontools_7.0_armD7000.ipk
 1554037506 ancistrus-core_1.5.2_armD7000.ipk
 1541458797 hdparm_9.58_armD7000.ipk
-1552942731 qos-sqm_2.0.0-416_armD7000.ipk
 1571260559 opkg_0.4.1_armD7000.ipk
 1571260557 curl_7.66.0_armD7000.ipk
 1540419782 xdsl-driver-agtef_042u.d26o-001_armD7000.ipk
-1550962537 network-test_1.0.0_armD7000.ipk
+1571869069 network-test_1.0.0-002_armD7000.ipk
+1571869069 qos-sqm_2.1.4_armD7000.ipk
 1540419782 xdsl-driver-orig_042n.d26b-001_armD7000.ipk
 1552684346 busybox_1.30.1-111_armD7000.ipk
 1571260559 mini-snmpd_1.5-pre-129_armD7000.ipk
