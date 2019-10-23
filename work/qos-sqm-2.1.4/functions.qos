@@ -16,7 +16,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 #
-#   Copyright (C) 2012-2018
+#   Copyright (C) 2012-2019
 #       Michael D. Taht, Toke Høiland-Jørgensen, Sebastian Moeller
 #       Eric Luehrsen
 #
@@ -37,17 +37,25 @@
 #
 
 sqm_logger() {
+    local level_min
+    local level_max
+    local debug
+
     case $1 in
         ''|*[!0-9]*) LEVEL=$VERBOSITY_INFO ;; # empty or non-numbers
         *) LEVEL=$1; shift ;;
     esac
 
-    if [ "$SQM_VERBOSITY_MAX" -ge "$LEVEL" ] && [ "$SQM_VERBOSITY_MIN" -le "$LEVEL" ] ; then
+    level_min=${SQM_VERBOSITY_MIN:-$VERBOSITY_SILENT}
+    level_max=${SQM_VERBOSITY_MAX:-$VERBOSITY_INFO}
+    debug=${SQM_DEBUG:-0}
+
+    if [ "$level_max" -ge "$LEVEL" ] && [ "$level_min" -le "$LEVEL" ] ; then
         echo "$@" >&2
     fi
     # slightly dangerous as this will keep adding to the log file
-    if [ -n "${SQM_DEBUG}" -a "${SQM_DEBUG}" -eq "1" ]; then
-        if [ "$SQM_VERBOSITY_MAX" -ge "$LEVEL" -o "$LEVEL" -eq "$VERBOSITY_TRACE" ]; then
+    if [ "$debug" -eq "1" ]; then
+        if [ "$level_max" -ge "$LEVEL" -o "$LEVEL" -eq "$VERBOSITY_TRACE" ]; then
             echo "$@" >> ${SQM_DEBUG_LOG}
         fi
     fi
@@ -59,28 +67,53 @@ sqm_log() { sqm_logger $VERBOSITY_INFO "$@"; }
 sqm_debug() { sqm_logger $VERBOSITY_DEBUG "$@"; }
 sqm_trace() { sqm_logger $VERBOSITY_TRACE "$@"; }
 
-# ipt needs a toggle to show the outputs for debugging (as do all users of >
-# /dev/null 2>&1 and friends)
-ipt() {
-    # Try to wipe pre-existing rules and chains if any
-    for rep in "s/-A/-D/g" "s/-I/-D/g" "s/-N/-X/g"
+# Function to negate iptables commands. Turns addition and insertion into
+# deletion, and creation of new chains into deletion
+# Its output has quotes around all parameters so we can preserve arguments
+# containing whitespace across log file write & re-read
+ipt_negate() {
+    for var in "$@"
     do
-        local d=$(echo $* | sed $rep)
-        [ "$d" != "$*" ] && {
-            sqm_trace "iptables ${d}"
-            iptables $d >> ${OUTPUT_TARGET} 2>&1
-                [ "${IP6MODE}" != "disable" ] && {
-                sqm_trace "ip6tables ${d}"
-                ip6tables $d >> ${OUTPUT_TARGET} 2>&1
-                }
-        }
+        case $var in
+            -A|-I) echo -n '"-D" ' ;;
+            -N) echo -n '"-X" ' ;;
+            *) echo -n "\"$var\" "  ;;
+        esac
     done
-    sqm_trace "iptables $*"
-    iptables $* >> ${OUTPUT_TARGET} 2>&1
-        [ "${IP6MODE}" != "disable" ] && {
-        sqm_trace "ip6tables $*"
-        ip6tables $* >> ${OUTPUT_TARGET} 2>&1
-        }
+    echo ""
+}
+
+# Split a string containing an iptables command line parameter invocation, then run it through ipt().
+ipt_run_split() {
+    eval "set -- $1"
+    ipt "$@"
+}
+
+ipt() {
+    local neg
+
+    for var in "$@"
+    do
+        case $var in
+            -A|-I|-N)
+                # If the rule is an addition rule, we first run its negation
+                neg=$(ipt_negate "$@")
+                ipt_run_split "$neg"
+                ;;
+        esac
+    done
+    SILENT=1 ${IPTABLES} "$@"
+    [ "${IP6MODE}" != "disable" ] && SILENT=1 ${IP6TABLES} "$@"
+}
+
+# wrapper to call iptables to allow debug logging
+iptables_wrapper(){
+    cmd_wrapper iptables ${IPTABLES_BINARY} "$@"
+}
+
+# wrapper to call ip6tables to allow debug logging
+ip6tables_wrapper(){
+    cmd_wrapper ip6tables ${IP6TABLES_BINARY} "$@"
 }
 
 # wrapper to call tc to allow debug logging
@@ -100,21 +133,24 @@ cmd_wrapper(){
     # $3-$end: the actual arguments for $2
     local CALLERID
     local CMD_BINARY
+    local ERRLOG
     local LAST_ERROR
     local RET
-    local ERRLOG
 
     CALLERID=$1; shift   # extract and remove the id string
     CMD_BINARY=$1; shift # extract and remove the binary
 
     # Handle silencing of errors from callers
-    [ "${SILENT}" = "1" ] && ERRLOG="sqm_debug" || ERRLOG="sqm_error"
+    ERRLOG="sqm_error"
+    if [ "$SILENT" = "1" ]; then
+        ERRLOG="sqm_debug"
+        sqm_debug "cmd_wrapper: ${CALLERID}: invocation silenced by request, FAILURE either expected or acceptable."
+        # The busybox shell doesn't understand the concept of an inline variable only applying
+        # to a single command, so we need to reset SILENT afterwards. Ugly, but it works...
+        SILENT=0
+    fi
 
-    # Make silencing cmd_wrapper a single-shot approach
-    # The busybox shell doesn't understand the concept of an inline variable only applying
-    # to a single command, so we need to reset SILENT afterwards. Ugly, but it works...
-    [ "${SILENT}" = "1" ] && SILENT=0
-
+    sqm_trace "cmd_wrapper: COMMAND: ${CMD_BINARY} $@"
     LAST_ERROR=$( ${CMD_BINARY} "$@" 2>&1 )
     RET=$?
 
@@ -128,7 +164,6 @@ cmd_wrapper(){
 
     return ${RET}
 }
-
 
 do_modules() {
     for MOD in $ALL_MODULES; do
@@ -146,7 +181,9 @@ undo_modules() {
 # variable names previoulsy defined in qos-sqm.conf and since it should contain all
 # used variables in addition to $ALL_MODULES & $SQM_CHECK_QDISCS this should be the complete set.
 write_defaults_vars_to_state_file() {
-    local filename=$1
+    local filename
+
+    filename=$1
     shift
     #write var=val couples to $filename
     write_state_file ${filename} "$@"
@@ -161,7 +198,9 @@ write_defaults_vars_to_state_file() {
 # Write a state file to the filename given as $1. The remaining arguments are
 # variable names that should be written to the state file.
 write_state_file() {
-    local filename=$1
+    local filename
+
+    filename=$1
     shift
     for var in "$@"; do
         val=$(eval echo '$'$var)
@@ -169,19 +208,22 @@ write_state_file() {
     done > ${filename}
 }
 
-
 # find the ifb device associated with a specific interface, return nothing if no
 # ifb is associated with IF
 get_ifb_associated_with_if() {
-   local CUR_IF=$1
-  # extended grep not working so this workaround
-  #local CUR_IFB=$( $TC_BINARY -p filter show parent ffff: dev ${CUR_IF} | grep -o -E ifb'[^)\ ]+' )
-   local CUR_IFB=$( $TC_BINARY -p filter show parent ffff: dev ${CUR_IF} | grep -o $( ifb_name ${CUR_IF} ) )
-   sqm_debug "ifb associated with interface ${CUR_IF}: ${CUR_IFB}"
+    local CUR_IF
+    local CUR_IFB
+    local TMP
+
+    CUR_IF=$1
+    # workaround to skip extended grep
+    #CUR_IFB=$( $TC_BINARY -p filter show parent ffff: dev ${CUR_IF} | grep -o -E ifb'[^)\ ]+' )    
+    CUR_IFB=$( $TC_BINARY -p filter show parent ffff: dev ${CUR_IF} | grep -o $( ifb_name ${CUR_IF} ) )
+    sqm_debug "ifb associated with interface ${CUR_IF}: ${CUR_IFB}"
 
     # we could not detect an associated IFB for CUR_IF
     if [ -z "${CUR_IFB}" ]; then
-        local TMP=$( $TC_BINARY -p filter show parent ffff: dev ${CUR_IF} )
+        TMP=$( $TC_BINARY -p filter show parent ffff: dev ${CUR_IF} )
         if [ ! -z "${TMP}" ]; then
             # oops, there is output but we failed to properly parse it? Ask for a user report
             sqm_error "#---- CUT HERE ----#"
@@ -197,54 +239,59 @@ get_ifb_associated_with_if() {
 }
 
 ifb_name() {
-    local CUR_IF=$1
-    local MAX_IF_NAME_LENGTH=15
-    local IFB_PREFIX="ifb4"
-    local NEW_IFB="${IFB_PREFIX}${CUR_IF}"
-    local IFB_NAME_LENGTH=${#NEW_IFB}
-    # IFB names can only be 15 chararcters, so we chop of excessive characters
-    # at the start of the interface name
-    if [ ${IFB_NAME_LENGTH} -gt ${MAX_IF_NAME_LENGTH} ]; then
-        local OVERLIMIT=$(( ${#NEW_IFB} - ${MAX_IF_NAME_LENGTH} ))
-        NEW_IFB=${IFB_PREFIX}${CUR_IF:${OVERLIMIT}:$(( ${MAX_IF_NAME_LENGTH} - ${#IFB_PREFIX} ))}
-    fi
+    local CUR_IF
+    local MAX_IF_NAME_LENGTH
+    local IFB_PREFIX
+    local NEW_IFB
+
+    CUR_IF=$1
+    MAX_IF_NAME_LENGTH=15
+    IFB_PREFIX="ifb4"
+    NEW_IFB=$( echo -n "${IFB_PREFIX}${CUR_IF}" | head -c $MAX_IF_NAME_LENGTH )
     echo ${NEW_IFB}
 }
 
 # if required
 create_new_ifb_for_if() {
-    local NEW_IFB=$(ifb_name $1)
+    local NEW_IFB
+    local RET
+
+    NEW_IFB=$(ifb_name $1)
     create_ifb ${NEW_IFB}
-    local RET=$?
+    RET=$?
     echo $NEW_IFB
     return $RET
 }
 
-
 # TODO: report failures
 create_ifb() {
-    local CUR_IFB=${1}
+    local CUR_IFB
+
+    CUR_IFB=${1}
     $IP link add name ${CUR_IFB} type ifb
 }
 
 delete_ifb() {
-    local CUR_IFB=${1}
+    local CUR_IFB
+
+    CUR_IFB=${1}
     $IP link set dev ${CUR_IFB} down
     $IP link delete ${CUR_IFB} type ifb
 }
 
-
 # the best match is either the IFB already associated with the current interface
 # or a new named IFB
 get_ifb_for_if() {
-    local CUR_IF=$1
+    local CUR_IF
+    local CUR_IFB
+
+    CUR_IF=$1
     # if an ifb is already associated return that
-    local CUR_IFB=$( get_ifb_associated_with_if ${CUR_IF} )
+    CUR_IFB=$( get_ifb_associated_with_if ${CUR_IF} )
     [ -z "$CUR_IFB" ] && CUR_IFB=$( create_new_ifb_for_if ${CUR_IF} )
     [ -z "$CUR_IFB" ] && sqm_warn "Could not find existing IFB for ${CUR_IF}, nor create a new IFB instead..."
     echo ${CUR_IFB}
 }
-
 
 # Verify that a qdisc is available, using a series of checks that are
 # progressively "heavier" and less desirable. These begin with different
@@ -254,8 +301,13 @@ get_ifb_for_if() {
 # This last approach is to be avoided as much as possible. It should only be
 # necessary for builtin qdisc modules on minimal (or broken) Linux distros.
 verify_qdisc() {
-    local qdisc=$1
+    local qdisc
+    local ifb
+    local root_string
+    local args
+    local IFB_MTU
 
+    qdisc=$1
     [ -n "$qdisc" ] || return 1
 
     # if static module with version/parameters, on minimal Linux distro by now
@@ -265,10 +317,10 @@ verify_qdisc() {
     fi
 
     # try heavy-weight instantiation of qdisc on ifb
-    local ifb=TMP_IFB_4_SQM
-    local root_string="root" # this works for most qdiscs
-    local args=""
-    local IFB_MTU=1514
+    ifb=TMP_IFB_4_SQM
+    root_string="root" # this works for most qdiscs
+    args=""
+    IFB_MTU=1514
 
     create_ifb $ifb || return 1
 
@@ -306,9 +358,13 @@ get_effective_llam() {
 # ethernet interface, and ignore any VLAN just as the kernel seems to do.
 # This is only used with tc_stab or QDISCs relying on kernel-reported sizes.
 get_adjusted_overhead() {
-    local eth_offset=14
-    local iface=$1
-    local rel_overhead=$(( $OVERHEAD - $eth_offset ))
+    local eth_offset
+    local iface
+    local rel_overhead
+
+    eth_offset=14
+    iface=$1
+    rel_overhead=$(( $OVERHEAD - $eth_offset ))
 
     if [ $(expr "$(ip link show ${iface} 2>/dev/null)" : ".* link/ether ") -gt 0 ]; then
 	echo $rel_overhead
@@ -317,7 +373,6 @@ get_adjusted_overhead() {
         echo ${OVERHEAD}
     fi
 }
-
 
 get_htb_adsll_string() {
 
@@ -332,10 +387,13 @@ get_stab_string() {
 # the conjunction of get_htb_adsll_string() and get_stab_string()
 # acting opportunely with one or another behaviour
 get_shaper_string() {
-    local SHAPERSTRING=""
-    local func=$1
-    local iface=$2
+    local SHAPERSTRING
+    local func
+    local iface
 
+    SHAPERSTRING=""
+    func=$1
+    iface=$2
     [ -z "${func}" ] && func="htb_adsll"
 
     if [ "${LINKLAYER}" != "none" ]; then
@@ -363,19 +421,19 @@ get_shaper_string() {
     echo ${SHAPERSTRING}
 }
 
-
 # Determine rate adjustments needed for link layer adaptation e.g. PTM
 get_lla_adjusted_rate() {
-    local rate=$1
-    local adjrate=$1
+    local rate
+    local adjrate
 
+    rate=$1
+    adjrate=$1
     if [ "${LINKLAYER}" = "ptm" -a "${LLAM}" = "tc_stab" ]; then
         adjrate="$(( ${rate} * 64 / 65 ))"
         sqm_debug "LLA: derating bandwidth for PTM of 1.54% (from ${rate} to ${adjrate})"
     fi
     echo $adjrate
 }
-
 
 # The following three functions provide built-in support for configuring
 # arbitrary shaper, leaf qdisc and prioritisation schemes. They utilize the
@@ -393,7 +451,6 @@ egress() {
     ipt_squash_egress
 }
 
-
 ingress() {
     qdisc_tree_build ingress $DEV
 
@@ -408,12 +465,11 @@ ingress() {
     tc_ingress_redirect $IFACE $DEV
 }
 
-
 sqm_start() {
     [ -n "$IFACE" ] || return 1
     do_modules
     verify_configs || return 1
-    sqm_debug "Starting built-in sqm_start()"
+    sqm_debug "${0}: Starting built-in sqm_start()"
 
     [ -z "$DEV" ] && DEV=$( get_ifb_for_if ${IFACE} )
 
@@ -422,27 +478,26 @@ sqm_start() {
 
     if [ "$UPLINK" -ne 0 ]; then
         egress
-        sqm_debug "egress shaping activated"
+        sqm_debug "${0}: egress shaping activated"
     else
         ipt_squash_egress
-        sqm_debug "egress shaping deactivated"
+        sqm_debug "${0}: egress shaping deactivated"
         SILENT=1 $TC qdisc del dev $IFACE root
     fi
 
     if [ "$DOWNLINK" -ne 0 ]; then
         verify_qdisc ingress "ingress" || return 1
         ingress
-        sqm_debug "ingress shaping activated"
+        sqm_debug "${0}: ingress shaping activated"
     else
         ipt_squash_ingress
-        sqm_debug "ingress shaping deactivated"
+        sqm_debug "${0}: ingress shaping deactivated"
         SILENT=1 $TC qdisc del dev $DEV root
         SILENT=1 $TC qdisc del dev $IFACE ingress
     fi
 
     return 0
 }
-
 
 sqm_stop() {
     SILENT=1 $TC qdisc del dev $IFACE ingress
@@ -466,12 +521,15 @@ sqm_stop() {
 # be lumpy, but at a lower CPU cost. In first approximation quantum should not be
 # larger than burst.
 get_htb_quantum() {
-    local HTB_MTU=$( get_mtu $1 )
-    local BANDWIDTH=$2
-    local DURATION_US=$3
-    local MIN_QUANTUM
+    local HTB_MTU
+    local BANDWIDTH
+    local DURATION_US
     local QUANTUM
+    local MIN_QUANTUM
 
+    HTB_MTU=$( get_mtu $1 )
+    BANDWIDTH=$2
+    DURATION_US=$3
     sqm_debug "get_htb_quantum: 1: ${1}, 2: ${2}, 3: ${3}"
 
     if [ -z "${DURATION_US}" ] ; then
@@ -504,12 +562,15 @@ get_htb_quantum() {
 # the following command (for ifb4pppoe-wan):
 #	tc -d class show dev ifb4pppoe-wan
 get_burst() {
-    local MTU=$1
-    local BANDWIDTH=$2 # note bandwidth is always given in kbps
-    local SHAPER_BURST_US=$3
+    local MTU
+    local BANDWIDTH
+    local SHAPER_BURST_US
     local MIN_BURST
     local BURST
 
+    MTU=$1
+    BANDWIDTH=$2 # note bandwidth is always given in kbps
+    SHAPER_BURST_US=$3
     sqm_debug "get_burst: 1: ${1}, 2: ${2}, 3: ${3}"
 
     if [ -z "${SHAPER_BURST_US}" ] ; then
@@ -541,11 +602,14 @@ get_burst() {
 # Create optional burst parameters to leap over CPU interrupts when the CPU is
 # severly loaded. We need to be conservative though.
 get_htb_burst() {
-    local HTB_MTU=$( get_mtu $1 )
-    local BANDWIDTH=$2
-    local DURATION_US=$3
+    local HTB_MTU
+    local BANDWIDTH
+    local DURATION_US
     local BURST
 
+    HTB_MTU=$( get_mtu $1 )
+    BANDWIDTH=$2
+    DURATION_US=$3
     sqm_debug "get_htb_burst: 1: ${1}, 2: ${2}, 3: ${3}"
 
     if [ -z "${DURATION_US}" ] ; then
@@ -574,10 +638,9 @@ get_mtu() {
 
 # Set the autoflow variable to 1 if you want to limit the number of flows
 # otherwise the default of 1024 will be used for all Xfq_codel qdiscs.
-
 get_flows() {
     case $QDISC in
-        codel|ns2_codel|pie|*fifo|pfifo_fast) ;;
+        codel|ns2_codel|*fifo|pfifo_fast) ;;
         fq_codel|*fq_codel|sfq) echo flows $( get_flows_count ${1} ) ;;
     esac
 }
@@ -594,12 +657,12 @@ get_flows_count() {
         [ $1 -gt 69999 ] && FLOWS=512
         [ $1 -gt 99999 ] && FLOWS=1024
         case $QDISC in
-          codel|ns2_codel|pie|*fifo|pfifo_fast) ;;
+          codel|ns2_codel|*fifo|pfifo_fast) ;;
           fq_codel|*fq_codel|sfq) echo $FLOWS ;;
         esac
     else
         case $QDISC in
-          codel|ns2_codel|pie|*fifo|pfifo_fast) ;;
+          codel|ns2_codel|*fifo|pfifo_fast) ;;
           fq_codel|*fq_codel|sfq) echo 1024 ;;
         esac
     fi
@@ -609,8 +672,16 @@ get_flows_count() {
 # Note, the link bandwidth in the current direction (ingress or egress)
 # is required to adjust the target for slow links
 get_target() {
-    local CUR_TARGET=${1}
-    local CUR_LINK_KBPS=${2}
+    local CUR_TARGET
+    local CUR_LINK_KBPS
+    local CUR_TARGET_STRING
+    local CUR_TARGET_VALUE
+    local CUR_TARGET_UNIT
+    local AUTO_TARGET
+    local UNIT_VALID
+
+    CUR_TARGET=${1}
+    CUR_LINK_KBPS=${2}
     [ ! -z "$CUR_TARGET" ] && sqm_debug "cur_target: ${CUR_TARGET} cur_bandwidth: ${CUR_LINK_KBPS}"
     CUR_TARGET_STRING=
     # either e.g. 100ms or auto
@@ -621,7 +692,7 @@ get_target() {
     UNIT_VALID=
 
     case $QDISC in
-        *codel|*pie)
+        *codel)
             if [ ! -z "${CUR_TARGET_VALUE}" -a ! -z "${CUR_TARGET_UNIT}" ];
             then
                 case ${CUR_TARGET_UNIT} in
@@ -684,6 +755,9 @@ get_target() {
 # so increase target for slow links (note below roughly 2500kbps a single packet
 # will take more than 5 ms to be transferred over the wire)
 adapt_target_to_slow_link() {
+    local LINK_BW
+    local TARGET
+
     LINK_BW=$1
     # for ATM the worst case expansion including overhead seems to be 33 clls of
     # 53 bytes each
@@ -693,7 +767,7 @@ adapt_target_to_slow_link() {
     # do not change anything for fast links
     [ "$TARGET" -lt 5000 ] && TARGET=5000
     case ${QDISC} in
-        *codel|pie)
+        *codel)
             echo "${TARGET}"
             ;;
     esac
@@ -703,6 +777,9 @@ adapt_target_to_slow_link() {
 # below target if target >= interval that will not work well, so increase
 # interval by the same amonut that target got increased
 adapt_interval_to_slow_link() {
+    local TARGET
+    local INTERVAL
+
     TARGET=$1
     case ${QDISC} in
         *codel)
@@ -713,20 +790,13 @@ adapt_interval_to_slow_link() {
             INTERVAL=$(( 95000 + ${TARGET} ))
             echo "interval ${INTERVAL}us"
             ;;
-        pie)
-            ## not sure if pie needs this, probably not
-            ##TUPDATE=$(( (30 - 20) * 1000 + ${TARGET} ))
-            #TUPDATE=$(( 10000 + ${TARGET} ))
-            #echo "tupdate ${TUPDATE}us"
-            ;;
     esac
 }
-
 
 # set quantum parameter if available for this qdisc
 get_quantum() {
     case $QDISC in
-        *fq_codel|fq_pie|drr) echo quantum $1 ;;
+        *fq_codel|drr) echo quantum $1 ;;
         *) ;;
     esac
 }
@@ -734,9 +804,11 @@ get_quantum() {
 # only show limits to qdiscs that can handle them...
 # Note that $LIMIT contains the default limit
 get_limit() {
+    local CURLIMIT
+
     CURLIMIT=$1
     case $QDISC in
-    *codel|*pie|pfifo_fast|sfq|pfifo) [ -z ${CURLIMIT} ] && CURLIMIT=${LIMIT}  # global default limit
+    *codel|pfifo_fast|sfq|pfifo) [ -z ${CURLIMIT} ] && CURLIMIT=${LIMIT}  # global default limit
     ;;
     bfifo) [ -z "$CURLIMIT" ] && [ ! -z "$LIMIT" ] && CURLIMIT=$(( ${LIMIT} * $( get_mtu ${IFACE} ) )) # bfifo default to txquelength * MTU,
     ;;
@@ -751,11 +823,13 @@ get_limit() {
 }
 
 get_ecn() {
+    local CURECN
+
     CURECN=$1
     case ${CURECN} in
         ECN)
             case $QDISC in
-                *codel|*pie|*red)
+                *codel|*red)
                     CURECN=ecn
                     ;;
                 *)
@@ -765,7 +839,7 @@ get_ecn() {
             ;;
         NOECN)
             case $QDISC in
-                *codel|*pie|*red)
+                *codel|*red)
                     CURECN=noecn
                     ;;
                 *)

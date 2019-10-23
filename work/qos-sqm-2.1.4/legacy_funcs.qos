@@ -36,10 +36,12 @@
 # backwards compatibility.
 
 is_legacy_script() {
-    local script=$1
+    local script
+    local regex
 
+    script=$1
     # Legacy scripts removed from the distribution
-    local regex="\(simpl\(e\|est\|est_tbf\)\).qos"
+    regex="\(simpl\(e\|est\|est_tbf\)\).qos"
     expr match "$script" "$regex" >/dev/null && return 0
     return 1
 }
@@ -49,8 +51,9 @@ is_legacy_script() {
 # emulate its function within the new framework.
 
 legacy_script_settings() {
-    local script=$1
+    local script
 
+    script=$1
     case $script in
         simple.qos) echo 'IGNORE_DSCP_EGRESS="0"';;
         simplest.qos) echo 'IGNORE_DSCP_INGRESS="1"; IGNORE_DSCP_EGRESS="1"';;
@@ -62,9 +65,11 @@ legacy_script_settings() {
 # Given a legacy script, warn about its usage and emulate its function.
 
 legacy_script_emulate() {
-    local script=$1
-    local vars=$(legacy_script_settings $script)
+    local script
+    local vars
 
+    script=$1
+    vars=$(legacy_script_settings $script)
     sqm_warn "Legacy script $script is deprecated and should not be used."
     sqm_warn "You can achieve the same effect by setting the following"
     sqm_warn "equivalent configuration variables:"

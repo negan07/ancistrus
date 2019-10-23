@@ -4,7 +4,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 #
-#   Copyright (C) 2012-2018
+#   Copyright (C) 2012-2019
 #       Michael D. Taht, Toke Høiland-Jørgensen, Sebastian Moeller
 #       Eric Luehrsen
 #
@@ -45,6 +45,10 @@ path_binaries() {
 [ -z "$IP" ] && IP=ip_wrapper
 [ -z "$TC_BINARY" ] && TC_BINARY=${BINDIR}/tc
 [ -z "$IP_BINARY" ] && IP_BINARY=${BINDIR}/ip
+[ -z "$IPTABLES" ] && IPTABLES=iptables_wrapper
+[ -z "$IP6TABLES" ] && IP6TABLES=ip6tables_wrapper
+[ -z "$IPTABLES_BINARY" ] && IPTABLES_BINARY=${BINDIR}/iptables
+[ -z "$IP6TABLES_BINARY" ] && IP6TABLES_BINARY=${BINDIR}/ip6tables
 [ -z "$RUNLOCK" ] && RUNLOCK=/tmp/var/lock/qos-sqm.lock
 [ -z "$STATE_FILE" ] && STATE_FILE=/tmp/qos.state
 [ "$SQM_DEBUG" = "1" ] && QOS_LOG=/tmp/qosdebug.log
@@ -98,32 +102,50 @@ else
 fi
 }
 
-run_lock() {
-# take lock to protect against concurrent runs
-local MAX_TRIES=15
-local TRIES=0
+release_lock() {
+PID=$(cat "${RUNLOCK}/pid")
+	if [ "${PID}" -ne "$$" ]; then
+	sqm_error "Trying to release lock with wrong PID ${PID} != $$"
+	return 1
+	fi
+rm -rf "${RUNLOCK}"
+return 0
+}
 
-	while [ ${TRIES} -lt ${MAX_TRIES} ]
+take_lock() {
+	if mkdir "${RUNLOCK}" 2>/dev/null; then
+	sqm_trace "Acquired run lock ( pid: $$ )"
+	echo $$ >"${RUNLOCK}/pid"
+	trap release_lock 0
+	return 0
+	fi
+sqm_warn "Unable to get run lock - already held by `cat "${RUNLOCK}/pid"`"
+return 1
+}
+
+# take lock to protect against concurrent runs
+run_lock() {
+local MAX_TRIES
+local TRIES
+
+MAX_TRIES=15
+TRIES=0
+	while ! take_lock
 	do
-	mkdir -m 0755 ${RUNLOCK} 2>/dev/null
-		if [ $? -eq 0 ]; then
-		sqm_trace "Acquired run lock"
-		trap 'rm -rf ${RUNLOCK}' EXIT
-		return 0
-		fi
-	sqm_debug "Unable to get run lock"
 	sleep 1
 	let TRIES++
+		if [ "${TRIES}" -eq "${MAX_TRIES}" ]; then
+		sqm_error "Giving up on getting lock after ${MAX_TRIES} attempts"
+		sqm_error "This is a bug: please issue report it"
+		sqm_error "To re-enable qos-sqm, type: rm -r ${RUNLOCK}"
+		exit 1
+		fi
 	done
-sqm_error "Giving up on getting lock after ${MAX_TRIES} attempts"
-sqm_error "This is a bug: please issue report it"
-exit 1
 }
 
 stop_sqm() {
 
 # allow passing in the IFACE as first command line argument
-
 [ -n "$IFACE" ] || exit 1
 
 sqm_trace; sqm_trace "$(date): Stopping." # Add some space and a date stamp to verbose log output and log files to separate runs
@@ -189,8 +211,11 @@ return 0
 }
 
 show_sqm() {
-local INGR=$( ifb_name ${IFACE} )
-local INGRLNK=`$IP_BINARY link | grep ${INGR}`
+local INGR
+local INGRLNK
+
+INGR=$( ifb_name ${IFACE} )
+INGRLNK=$( $IP_BINARY link | grep ${INGR} )
 [ -z "$1" ] && {
 S="-d"
 } || {
@@ -213,8 +238,8 @@ V="-v"
     done
 echo
 echo "--- MANGLE ---"
-iptables -t mangle -nL $V
-[ "$IP6MODE" != "disable" ] && ip6tables -t mangle -nL $V
+$IPTABLES_BINARY -t mangle -nL $V
+[ "$IP6MODE" != "disable" ] && $IP6TABLES_BINARY -t mangle -nL $V
 
 return 0
 }
@@ -245,7 +270,7 @@ splash() {
 cat << _EOF_
 ################################################################################
 # (Cero3 Shaper)
-#   Copyright (C) 2012-2018
+#   Copyright (C) 2012-2019
 #       Michael D. Taht, Toke Høiland-Jørgensen, Sebastian Moeller
 #       Eric Luehrsen
 #

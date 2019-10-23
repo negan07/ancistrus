@@ -42,10 +42,12 @@
 # is critical to guard against manual config errors.
 
 verify_configs() {
+    local found
+
     # Ensure shaper/leaf are listed in $SQM_CHECK_QDISCS. 
     # This also implies capability files exist.
     for q in $QDISC $SHAPER; do
-        local found="0"
+        found="0"
         for allow in $SQM_CHECK_QDISCS; do
             [ "$q" = "$allow" ] && found="1" && break
         done
@@ -89,8 +91,9 @@ verify_configs() {
 # classification.
 
 is_multitier_classful() {
-    local dir=$1
+    local dir
 
+    dir=$1
     case $dir in
     ingress)
     [ "$IGNORE_DSCP_INGRESS" = "0" ] && qdisc_has_cap $SHAPER classful && return 0
@@ -135,9 +138,11 @@ is_multitier_classful() {
 # Look up the capabilities for a specific qdisc.
 
 get_qdisc_caps() {
-    local qdisc=$1
-    local caps="$(get_caps_$qdisc 2>/dev/null)"
+    local qdisc
+    local caps
 
+    qdisc=$1
+    caps="$(get_caps_$qdisc 2>/dev/null)"
     [ -z "$caps" ] && sqm_warn "QDISC $qdisc has unknown capabilities."
     echo "$caps"
 }
@@ -146,11 +151,15 @@ get_qdisc_caps() {
 # Verify that a qdisc has the specified capability.
 
 qdisc_has_cap() {
-    local qdisc=$1
-    local cap=$2
+    local qdisc
+    local cap
+    local caps
+
+    qdisc=$1
+    cap=$2
     [ -z "$qdisc" -o -z "$cap" ] && return 1
 
-    local caps="$(get_qdisc_caps $qdisc)"
+    caps="$(get_qdisc_caps $qdisc)"
     [ -z "$caps" ] && return 1
 
     for c in $caps; do
@@ -207,15 +216,18 @@ get_caps_tbf() {
 #    n     The nth priority tier, for either a class or leaf qdisc
 
 qdisc_tree_build() {
-    local dir=$1
-    local iface=$2
-
+    local dir
+    local iface
     local rate
     local ignore_dscp
     local diffserv
     local qdisc_opts
     local burst_dur_us
     local quantum_dur_us
+    local num_tiers
+
+    dir=$1
+    iface=$2
 
     case $dir in
     ingress)
@@ -254,7 +266,6 @@ qdisc_tree_build() {
     else
         # Classful shaper, different leaf qdisc, 1 or n-tier classification
 
-        local num_tiers
         if [ "${ignore_dscp}" = "1" ]; then
             num_tiers="1"
             sqm_debug "Do not perform DSCP based filtering on ${dir}. (1-tier classification)"
@@ -303,13 +314,24 @@ qdisc_tree_build() {
 # This defines the simple, classless TBF shaper qdisc.
 
 tier_shaper_tbf() {
-    local func=$1
-    local dir=$2
-    local iface=$3
-    local num_tiers=$4
-    local tier=$5
-    local rate=$6
-    local burst_dur_us=$7
+    local func
+    local dir
+    local iface
+    local num_tiers
+    local tier
+    local rate
+    local burst_dur_us
+    local mtu
+    local burst
+    local args
+
+    func=$1
+    dir=$2
+    iface=$3
+    num_tiers=$4
+    tier=$5
+    rate=$6
+    burst_dur_us=$7
 
     case $func in
     flow_rate)
@@ -328,10 +350,10 @@ tier_shaper_tbf() {
     ;;
     esac
 
-    local mtu=$(get_mtu $IFACE)
-    local burst="$(get_burst ${mtu:-1514} ${rate} ${burst_dur_us})"
+    mtu=$(get_mtu $IFACE)
+    burst="$(get_burst ${mtu:-1514} ${rate} ${burst_dur_us})"
     burst=${burst:-1514}
-    local args="$(get_stab_string ${iface}) $SHAPER rate ${rate}kbit burst $burst latency 300ms $(get_htb_adsll_string)"
+    args="$(get_stab_string ${iface}) $SHAPER rate ${rate}kbit burst $burst latency 300ms $(get_htb_adsll_string)"
 
     case "$dir $num_tiers $tier" in
     "ingress 1 root"|"egress 1 root")
@@ -349,19 +371,37 @@ tier_shaper_tbf() {
 # This defines the commonly used, classful HTB shaper qdisc.
 
 tier_shaper_htb() {
-    local func=$1
-    local dir=$2
-    local iface=$3
-    local num_tiers=$4
-    local tier=$5
-    local rate=$6
-    local burst_dur_us=$7
-    local quantum_dur_us=$8
+    local func
+    local dir
+    local iface
+    local num_tiers
+    local tier
+    local rate
+    local burst_dur_us
+    local quantum_dur_us
+    local prio_rate
+    local be_rate
+    local bk_rate
+    local be_ceil
+    local lq
+    local burst
+    local args
+    local args31
+    local ret
 
-    local prio_rate=`expr $rate / 3` # Ceiling for priority
-    local be_rate=`expr $rate / 6`   # Min for best effort
-    local bk_rate=`expr $rate / 6`   # Min for background
-    local be_ceil=`expr $rate - 16`  # A little slop at the top
+    func=$1
+    dir=$2
+    iface=$3
+    num_tiers=$4
+    tier=$5
+    rate=$6
+    burst_dur_us=$7
+    quantum_dur_us=$8
+
+    prio_rate=`expr $rate / 3` # Ceiling for priority
+    be_rate=`expr $rate / 6`   # Min for best effort
+    bk_rate=`expr $rate / 6`   # Min for background
+    be_ceil=`expr $rate - 16`  # A little slop at the top
 
     case $func in
     flow_rate)
@@ -408,11 +448,11 @@ tier_shaper_htb() {
     ;;
     esac
 
-    local lq="quantum `get_htb_quantum $IFACE $rate $quantum_dur_us`"
-    local burst="`get_htb_burst $IFACE $rate $burst_dur_us`"
-    local args="$SHAPER $lq $burst $(get_htb_adsll_string ${iface})"
-    local args31="$SHAPER $lq $(get_htb_adsll_string ${iface})"
-    local ret=""
+    lq="quantum `get_htb_quantum $IFACE $rate $quantum_dur_us`"
+    burst="`get_htb_burst $IFACE $rate $burst_dur_us`"
+    args="$SHAPER $lq $burst $(get_htb_adsll_string ${iface})"
+    args31="$SHAPER $lq $(get_htb_adsll_string ${iface})"
+    ret=""
 
     case "$num_tiers $tier" in
     "1 root")
@@ -464,12 +504,25 @@ tier_shaper_htb() {
 # hfsc_lite.qos scripts by Eric Luehrsen, with additional feedback from him.
 
 tier_shaper_hfsc() {
-    local func=$1
-    local dir=$2
-    local iface=$3
-    local num_tiers=$4
-    local tier=$5
-    local rate=$6
+    local func
+    local dir
+    local iface
+    local num_tiers
+    local tier
+    local rate
+    local rate_c
+    local rate_r
+    local rate_1
+    local rate_2
+    local rate_3
+    local ret
+
+    func=$1
+    dir=$2
+    iface=$3
+    num_tiers=$4
+    tier=$5
+    rate=$6
 
 # Parameter comments below from Eric Luehrsen:
 
@@ -477,15 +530,15 @@ tier_shaper_hfsc() {
 # However in saturation, each class is guaranteed (real time) minimum of 10%.
 # This allows HFSC to do its work but avoids some of its virtual time quirks.
 
-    local rate_c=$(( ${rate} * 105 / 100 ))
-#    local rate_r=$(( ${rate} *  10 / 100 ))
-#    local rate_1=$(( ${rate} *  20 / 100 ))
-#    local rate_2=$(( ${rate} *  50 / 100 ))
-#    local rate_3=$(( ${rate} *  30 / 100 ))
-    local rate_r=$(( ${rate} / 10 ))
-    local rate_1=$(( ${rate} / 5 ))
-    local rate_2=$(( ${rate} / 2 ))
-    local rate_3=$(( ${rate} * 3 / 10 ))
+    rate_c=$(( ${rate} * 105 / 100 ))
+#   rate_r=$(( ${rate} *  10 / 100 ))
+#   rate_1=$(( ${rate} *  20 / 100 ))
+#   rate_2=$(( ${rate} *  50 / 100 ))
+#   rate_3=$(( ${rate} *  30 / 100 ))
+    rate_r=$(( ${rate} / 10 ))
+    rate_1=$(( ${rate} / 5 ))
+    rate_2=$(( ${rate} / 2 ))
+    rate_3=$(( ${rate} * 3 / 10 ))
 
     case $func in
     flow_rate)
@@ -536,7 +589,7 @@ tier_shaper_hfsc() {
 # The SC curve (LS+RT) includes feedback in virtual time, but the UL
 # ceiling is pure real time. If UL=SC, then you cant actually get SC.
 
-    local ret=""
+    ret=""
 
     case "$num_tiers $tier" in
     "1 root")
@@ -578,15 +631,22 @@ tier_shaper_hfsc() {
 # This general function handles all currently supported leaf qdiscs.
 
 tier_leaf_generic() {
-    local func=$1
-    local dir=$2
-    local num_tiers=$3
-    local tier=$4
-    local qdisc_opts=$5
-    local rate=$6
-    local flow_rate=$7
-
+    local func
+    local dir
+    local num_tiers
+    local tier
+    local qdisc_opts
+    local rate
+    local flow_rate
     local args
+
+    func=$1
+    dir=$2
+    num_tiers=$3
+    tier=$4
+    qdisc_opts=$5
+    rate=$6
+    flow_rate=$7
 
     if [ "$func" != "tier_args" ]; then
         sqm_error "Unknown function \"$func\" in tier_leaf_$QDISC()."

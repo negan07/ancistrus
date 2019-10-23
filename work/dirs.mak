@@ -145,10 +145,10 @@ DEP_$(QOS_NG)			:=
 DESC_$(QOS_NG)			:= Quality Of Service tool from Netgear firmware 36_42n
 # QOS SQM
 QOS_SQM_NAME			:= qos-sqm
-VER_$(QOS_SQM_NAME)		:= 2.0.0
+VER_$(QOS_SQM_NAME)		:= 2.1.4
 QOS_SQM				:= $(QOS_SQM_NAME)-$(VER_$(QOS_SQM_NAME))
 NAME_$(QOS_SQM)			:= $(QOS_SQM_NAME)$(DBG)
-SUBVER_$(QOS_SQM)		:= -416
+SUBVER_$(QOS_SQM)		:= 
 VER_$(QOS_SQM)			:= $(VER_$(QOS_SQM_NAME))$(SUBVER_$(QOS_SQM))
 DL_$(QOS_SQM)			:= void
 TAR_$(QOS_SQM)			:= void

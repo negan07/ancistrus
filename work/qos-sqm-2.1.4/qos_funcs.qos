@@ -52,7 +52,10 @@ qos_setup_common() {
 # been built. Provide DSCP-based prioritization for usable qdiscs.
 
 qos_setup_egress() {
-    local prio=1  # dynamically scoped priority var for local tc_ func calls
+    local prio
+
+    # dynamically scoped priority var for local tc_ func calls
+    prio=1
 
     # setup diffserv if prioritization enabled with a classful shaper qdisc
     if is_multitier_classful egress; then
@@ -73,7 +76,10 @@ qos_setup_egress() {
 # must be used for classification.
 
 qos_setup_ingress() {
-    local prio=1  # dynamically scoped priority var for local tc_ func calls
+    local prio
+
+    # dynamically scoped priority var for local tc_ func calls
+    prio=1
 
     # setup diffserv if prioritization enabled with a classful shaper qdisc
     if is_multitier_classful ingress; then
@@ -88,8 +94,9 @@ qos_setup_ingress() {
 # egress path setup.
 
 ipt_setup_map_dscp_fwmark() {
-    local iface=$1
+    local iface
 
+    iface=$1
     sqm_debug "Prepare DSCP based marking on egress. (multi-tier classification)"
     ipt -t mangle -N QOS_MARK_${iface}
 
@@ -109,8 +116,9 @@ ipt_setup_map_dscp_fwmark() {
 # Note that this is intended for use during egress path setup.
 
 ipt_enable_map_dscp_fwmark() {
-    local iface=$1
+    local iface
 
+    iface=$1
     sqm_debug "Activate DSCP based marking on egress. (multi-tier classification)"
     ipt -t mangle -A POSTROUTING -o $iface -m mark --mark 0x00/${IPT_MASK} -j QOS_MARK_${iface}
 }
@@ -164,9 +172,11 @@ ipt_vtun_dns_ntp_dscp() {
 # selected shaper and leaf qdiscs.
 
 tc_ingress_redirect() {
-    local iface=$1
-    local dev=$2
+    local iface
+    local dev
 
+    iface=$1
+    dev=$2
     SILENT=1 $TC qdisc del dev $iface handle ffff: ingress
     $TC qdisc add dev $iface handle ffff: ingress
 
@@ -184,7 +194,9 @@ tc_ingress_redirect() {
 # This approach must be used on ingress since netfilter is not available.
 
 tc_classify_dscp() {
-    local iface=$1
+    local iface
+
+    iface=$1
 
     # Catchall
 
@@ -208,10 +220,10 @@ tc_classify_dscp() {
         *) ID=1 ;;
         esac
     $TC filter add dev $iface protocol ip parent 1:0 prio $prio u32 match ip tos 0x${HEX} 0xfc classid 1:1${ID}
-    prio=$(($prio + 1))
+    let prio++
         [ "$IP6MODE" != "disable" ] && {
         $TC filter add dev $iface protocol ipv6 parent 1:0 prio $prio u32 match ip6 priority 0x${HEX} 0xfc classid 1:1${ID}
-        prio=$(($prio + 1))
+        let prio++
         }
     done
 }
@@ -221,7 +233,9 @@ tc_classify_dscp() {
 # This approach cannot be used on ingress since netfilter is not available.
 
 tc_classify_fwmark() {
-    local iface=$1
+    local iface
+
+    iface=$1
 
     # Need a catchall rule
 
@@ -232,7 +246,7 @@ tc_classify_fwmark() {
     for ID in 1 2 3
     do
     $TC filter add dev $iface parent 1:0 protocol ip prio $prio handle ${ID}/${IPT_MASK} fw classid 1:1${ID}
-    prio=$(($prio + 1))
+    let prio++
     done
 
     # IPv6 support. Note the handle indicates the fw mark that is looked for
@@ -241,30 +255,34 @@ tc_classify_fwmark() {
     for ID in 1 2 3
     do
     $TC filter add dev $iface parent 1:0 protocol ipv6 prio $prio handle ${ID}/${IPT_MASK} fw classid 1:1${ID}
-    prio=$(($prio + 1))
+    let prio++
     done
     }
 }
 
 tc_classify_arp() {
-    local iface=$1
+    local iface
+
+    iface=$1
 
     # Arp traffic prioritization
 
     $TC filter add dev $iface parent 1:0 protocol arp prio $prio u32 match u32 0 0 classid 1:11
-    prio=$(($prio + 1))
+    let prio++
 }
 
 tc_classify_icmp() {
-    local iface=$1
+    local iface
+
+    iface=$1
 
     # ICMP traffic - Don't impress your friends. Deoptimize to manage ping floods better instead
 
     $TC filter add dev $iface parent 1:0 protocol ip prio $prio u32 match ip protocol 1 0xff flowid 1:13
-    prio=$(($prio + 1))
+    let prio++
 
     [ "$IP6MODE" != "disable" ] && {
     $TC filter add dev $iface parent 1:0 protocol ipv6 prio $prio u32 match ip protocol 1 0xff flowid 1:13
-    prio=$(($prio + 1))
+    let prio++
     }
 }
