@@ -296,13 +296,13 @@ DIRLIST				+= $(HDIDLE)
 TARLIST				+= $(TAR_$(HDIDLE))
 # SMARTMONTOOLS
 SMONTOOLS_NAME			:= smartmontools
-VER_$(SMONTOOLS_NAME)		:= 7.0
+VER_$(SMONTOOLS_NAME)		:= 7.1
 SMONTOOLS			:= $(SMONTOOLS_NAME)-$(VER_$(SMONTOOLS_NAME))
 NAME_$(SMONTOOLS)		:= $(SMONTOOLS_NAME)$(DBG)
-SUBVER_$(SMONTOOLS)		:= 
+SUBVER_$(SMONTOOLS)		:= -r4975
 VER_$(SMONTOOLS)		:= $(VER_$(SMONTOOLS_NAME))$(SUBVER_$(SMONTOOLS))
-DL_$(SMONTOOLS)			:= https://sourceforge.net/projects/smartmontools/files/smartmontools/$(VER_$(SMONTOOLS_NAME))
-TAR_$(SMONTOOLS)		:= $(SMONTOOLS).tar.gz
+DL_$(SMONTOOLS)			:= https://828-105252244-gh.circle-artifacts.com/0/builds
+TAR_$(SMONTOOLS)		:= smartmontools-$(VER_$(SMONTOOLS)).src.tar.gz
 HOME_$(SMONTOOLS)		:= https://www.smartmontools.org/
 LIC_$(SMONTOOLS)		:= GPLv2
 SEC_$(SMONTOOLS)		:= storage
