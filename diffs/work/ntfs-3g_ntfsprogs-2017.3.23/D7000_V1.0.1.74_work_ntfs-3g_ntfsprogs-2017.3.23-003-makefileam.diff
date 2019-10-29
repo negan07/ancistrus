@@ -1,0 +1,59 @@
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/Makefile.am work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/Makefile.am
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/Makefile.am	2018-10-23 23:00:46.662292000 +0200
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/Makefile.am	2018-10-23 23:01:08.566300143 +0200
+@@ -24,7 +24,7 @@
+ 	$(srcdir)/m4/lt~obsolete.m4 \
+ 	$(srcdir)/m4/ltoptions.m4
+ 
+-SUBDIRS = include libfuse-lite libntfs-3g ntfsprogs src
++SUBDIRS = include libfuse-lite libntfs-3g ntfsprogs
+ 
+ doc_DATA = README
+ 
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.am work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.am
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.am	2018-10-23 23:00:46.662292000 +0200
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.am	2018-10-23 23:01:08.566300143 +0200
+@@ -14,40 +14,21 @@
+ 
+ if ENABLE_NTFSPROGS
+ 
+-bin_PROGRAMS		= ntfsfix ntfsinfo ntfscluster ntfsls ntfscat ntfscmp
+-sbin_PROGRAMS		= mkntfs ntfslabel ntfsundelete ntfsresize ntfsclone \
+-			  ntfscp
++bin_PROGRAMS		= ntfsfix
++sbin_PROGRAMS		= 
+ EXTRA_PROGRAM_NAMES	= ntfswipe ntfstruncate ntfsrecover \
+ 			  ntfsusermap ntfssecaudit
+ 
+ QUARANTINED_PROGRAM_NAMES = ntfsdump_logfile ntfsmftalloc ntfsmove ntfsck \
+ 			   ntfsfallocate
+ 
+-man_MANS		= mkntfs.8 ntfsfix.8 ntfslabel.8 ntfsinfo.8 \
+-			  ntfsundelete.8 ntfsresize.8 ntfsprogs.8 ntfsls.8 \
+-			  ntfsclone.8 ntfscluster.8 ntfscat.8 ntfscp.8 \
+-			  ntfscmp.8 ntfswipe.8 ntfstruncate.8 \
+-			  ntfsdecrypt.8 ntfsfallocate.8 ntfsrecover.8 \
+-			  ntfsusermap.8 ntfssecaudit.8
++man_MANS		= 
+ EXTRA_MANS		=
+ 
+ CLEANFILES		= $(EXTRA_PROGRAMS)
+ 
+ MAINTAINERCLEANFILES = Makefile.in
+ 
+-if ENABLE_CRYPTO
+-EXTRA_PROGRAM_NAMES	+= ntfsdecrypt
+-endif
+-
+-if ENABLE_EXTRAS
+-bin_PROGRAMS		+= $(EXTRA_PROGRAM_NAMES)
+-if ENABLE_QUARANTINED
+-bin_PROGRAMS		+= $(QUARANTINED_PROGRAM_NAMES)
+-endif
+-else
+-EXTRA_PROGRAMS		= $(EXTRA_PROGRAM_NAMES)
+-endif
+-
+ # Set the include path.
+ AM_CPPFLAGS		= -I$(top_srcdir)/include/ntfs-3g $(all_includes)
+ 

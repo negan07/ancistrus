@@ -1,0 +1,26 @@
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.in work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.in
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -79,21 +79,7 @@
+ build_triplet = @build@
+ host_triplet = @host@
+ target_triplet = @target@
+-@ENABLE_NTFSPROGS_TRUE@bin_PROGRAMS = ntfsfix$(EXEEXT) \
+-@ENABLE_NTFSPROGS_TRUE@	ntfsinfo$(EXEEXT) ntfscluster$(EXEEXT) \
+-@ENABLE_NTFSPROGS_TRUE@	ntfsls$(EXEEXT) ntfscat$(EXEEXT) \
+-@ENABLE_NTFSPROGS_TRUE@	ntfscmp$(EXEEXT) $(am__EXEEXT_3) \
+-@ENABLE_NTFSPROGS_TRUE@	$(am__EXEEXT_5)
+-@ENABLE_NTFSPROGS_TRUE@sbin_PROGRAMS = mkntfs$(EXEEXT) \
+-@ENABLE_NTFSPROGS_TRUE@	ntfslabel$(EXEEXT) \
+-@ENABLE_NTFSPROGS_TRUE@	ntfsundelete$(EXEEXT) \
+-@ENABLE_NTFSPROGS_TRUE@	ntfsresize$(EXEEXT) ntfsclone$(EXEEXT) \
+-@ENABLE_NTFSPROGS_TRUE@	ntfscp$(EXEEXT)
+-@ENABLE_CRYPTO_TRUE@@ENABLE_NTFSPROGS_TRUE@am__append_1 = ntfsdecrypt
+-@ENABLE_EXTRAS_TRUE@@ENABLE_NTFSPROGS_TRUE@am__append_2 = $(EXTRA_PROGRAM_NAMES)
+-@ENABLE_EXTRAS_TRUE@@ENABLE_NTFSPROGS_TRUE@@ENABLE_QUARANTINED_TRUE@am__append_3 = $(QUARANTINED_PROGRAM_NAMES)
+-@ENABLE_EXTRAS_FALSE@@ENABLE_NTFSPROGS_TRUE@EXTRA_PROGRAMS =  \
+-@ENABLE_EXTRAS_FALSE@@ENABLE_NTFSPROGS_TRUE@	$(am__EXEEXT_2)
++@ENABLE_NTFSPROGS_TRUE@bin_PROGRAMS = ntfsfix$(EXEEXT)
+ subdir = ntfsprogs
+ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
+ 	$(srcdir)/mkntfs.8.in $(srcdir)/ntfscat.8.in \

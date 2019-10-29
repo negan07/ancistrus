@@ -136,6 +136,7 @@ work/openssl-*/
 work/dnrd-*/
 work/dnsmasq-*/
 work/e2fsprogs-*/
+work/ntfs-3g_ntfsprogs-*/
 work/libiconv-*/
 work/easy-rsa-*/
 work/hd-idle*/
