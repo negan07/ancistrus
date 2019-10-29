@@ -129,7 +129,7 @@ function readInfo() {
 		}
 	}
 	xmlhttp=readFileTags("ancdslinfo");
-	if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+	if(xmlhttp.readyState==4 && xmlhttp.status==200 && "@h_wifi_ap_mode#"!="1") {
 	str=xmlhttp.responseText;
 	line=str.split('\n');
 	len=line.length;
@@ -196,12 +196,14 @@ function readInfo() {
 	var varval=[dslver, vendorid, vendorver, profile, vectoring, carrymax[0], carrymax[1], carryb0[0], carryb0[1], attn, snr, pwr, ancver, opkgver, numpack, "@part_/#", "@part_/usr/etc/init.d#", "@part_/usr/lib/opkg#", "@part_/config/nvram#"];
 	var uom=[" dB", " dB", " dBm"];
 	txt+="<tr></tr>";
-	for(i=0;i<3;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
-	if("@h_wan_traffic_type#"=="ptm") for(i=3;i<5;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
-	txt+="<tr><td colspan='2' background='liteblue.gif' height='12'></td></tr>";
-	for(i=5;i<9;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
-	for(i=9;i<12;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+uom[i-9]+"</td></tr><tr></tr>";
-	txt+="<tr><td colspan='2' background='liteblue.gif' height='12'></td></tr>";
+		if("@h_wifi_ap_mode#"!="1") {
+		for(i=0;i<3;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
+		if("@h_wan_traffic_type#"=="ptm") for(i=3;i<5;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
+		txt+="<tr><td colspan='2' background='liteblue.gif' height='12'></td></tr>";
+		for(i=5;i<9;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
+		for(i=9;i<12;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+uom[i-9]+"</td></tr><tr></tr>";
+		txt+="<tr><td colspan='2' background='liteblue.gif' height='12'></td></tr>";
+		}
 		if(opkgfound) {
 		for(i=12;i<15;i++) txt+="<tr><td nowrap align='left'><b>"+varname[i]+"</b></td><td nowrap align='right'>"+varval[i]+"</td></tr><tr></tr>";
 			for(i=15;i<varval.length;i++) {
@@ -239,6 +241,7 @@ function readInfo() {
 <input type="hidden" name="opkg_act_name" value="">
 <input type="hidden" name="opkg_act" value="">
 <input type="hidden" name="h_wan_traffic_type" value="@h_wan_traffic_type#">
+<input type="hidden" name="h_wifi_ap_mode" value="@h_wifi_ap_mode#">
 <input type="hidden" name="h_anc_upgr_disable" value="@h_anc_upgr_disable#">
 </div>
 </form>
