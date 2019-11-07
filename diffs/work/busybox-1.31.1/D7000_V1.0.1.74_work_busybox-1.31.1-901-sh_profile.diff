@@ -1,6 +1,6 @@
-diff -urN work/busybox-1.30.1/profile work/busybox-1.30.1/profile
---- work/busybox-1.30.1/profile	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.30.1/profile	2018-10-31 22:04:11.047427933 +0100
+diff -urN work/busybox-1.31.1/profile work/busybox-1.31.1/profile
+--- work/busybox-1.31.1/profile	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.31.1/profile	2018-10-31 22:04:11.047427933 +0100
 @@ -0,0 +1,6 @@
 +export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts:/usr/sbin/rc_app
 +if [ "`busybox | head -n 1 | awk '{print $2}'`" != "v1.17.2" ]; then

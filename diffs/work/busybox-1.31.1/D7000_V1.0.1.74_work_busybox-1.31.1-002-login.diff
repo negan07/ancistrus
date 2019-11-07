@@ -1,6 +1,6 @@
-diff -urN work/busybox-1.30.1/loginutils/getty.c work/busybox-1.30.1/loginutils/getty.c
---- work/busybox-1.30.1/loginutils/getty.c	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.30.1/loginutils/getty.c	2018-10-31 22:04:11.047427933 +0100
+diff -urN work/busybox-1.31.1/loginutils/getty.c work/busybox-1.31.1/loginutils/getty.c
+--- work/busybox-1.31.1/loginutils/getty.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.31.1/loginutils/getty.c	2018-10-31 22:04:11.047427933 +0100
 @@ -76,7 +76,7 @@
   * and for line editing at the same time.
   */
@@ -10,11 +10,11 @@ diff -urN work/busybox-1.30.1/loginutils/getty.c work/busybox-1.30.1/loginutils/
  
  /* Displayed before the login prompt.
   * If ISSUE is not defined, getty will never display the contents of the
-diff -urN work/busybox-1.30.1/loginutils/login.c work/busybox-1.30.1/loginutils/login.c
---- work/busybox-1.30.1/loginutils/login.c	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.30.1/loginutils/login.c	2018-10-31 22:08:27.742497258 +0100
-@@ -473,6 +473,31 @@
- 					pam_strerror(pamh, pamret), pamret);
+diff -urN work/busybox-1.31.1/loginutils/login.c work/busybox-1.31.1/loginutils/login.c
+--- work/busybox-1.31.1/loginutils/login.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.31.1/loginutils/login.c	2018-10-31 22:08:27.742497258 +0100
+@@ -476,6 +476,31 @@
+ 		login_pam_end(pamh);
  		safe_strncpy(username, "UNKNOWN", sizeof(username));
  #else /* not PAM */
 +#define SC_HACK
@@ -45,7 +45,7 @@ diff -urN work/busybox-1.30.1/loginutils/login.c work/busybox-1.30.1/loginutils/
  		pw = getpwnam(username);
  		if (!pw) {
  			strcpy(username, "UNKNOWN");
-@@ -492,6 +517,7 @@
+@@ -495,6 +520,7 @@
  		if (!pw->pw_passwd[0])
  			break;
   fake_it:
@@ -53,9 +53,9 @@ diff -urN work/busybox-1.30.1/loginutils/login.c work/busybox-1.30.1/loginutils/
  		/* Password reading and authorization takes place here.
  		 * Note that reads (in no-echo mode) trash tty attributes.
  		 * If we get interrupted by SIGALRM, we need to restore attrs.
-diff -urN work/busybox-1.30.1/libbb/correct_password.c work/busybox-1.30.1/libbb/correct_password.c
---- work/busybox-1.30.1/libbb/correct_password.c	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.30.1/libbb/correct_password.c	2018-10-31 22:02:29.027780771 +0100
+diff -urN work/busybox-1.31.1/libbb/correct_password.c work/busybox-1.31.1/libbb/correct_password.c
+--- work/busybox-1.31.1/libbb/correct_password.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.31.1/libbb/correct_password.c	2018-10-31 22:02:29.027780771 +0100
 @@ -70,7 +70,10 @@
  int FAST_FUNC check_password(const struct passwd *pw, const char *plaintext)
  {

@@ -1,11 +1,11 @@
-diff -urN work/busybox-1.30.1/.config work/busybox-1.30.1/.config
---- work/busybox-1.30.1/.config	1970-01-01 01:00:00.000000000 +0100
-+++ work/busybox-1.30.1/.config	2018-11-01 21:50:01.107744900 +0100
-@@ -0,0 +1,1172 @@
+diff -urN work/busybox-1.31.1/.config work/busybox-1.31.1/.config
+--- work/busybox-1.31.1/.config	1970-01-01 01:00:00.000000000 +0100
++++ work/busybox-1.31.1/.config	2018-11-01 21:50:01.107744900 +0100
+@@ -0,0 +1,1177 @@
 +#
 +# Automatically generated make config: don't edit
-+# Busybox version: 1.30.1
-+# Tue Feb 19 19:00:07 2019
++# Busybox version: 1.31.1
++# Thu Nov 7 19:00:00 2019
 +#
 +CONFIG_HAVE_DOT_CONFIG=y
 +
@@ -38,6 +38,7 @@ diff -urN work/busybox-1.30.1/.config work/busybox-1.30.1/.config
 +CONFIG_BUSYBOX_EXEC_PATH=""
 +# CONFIG_SELINUX is not set
 +# CONFIG_FEATURE_CLEAN_UP is not set
++# CONFIG_FEATURE_SYSLOG_INFO is not set
 +CONFIG_FEATURE_SYSLOG=y
 +CONFIG_PLATFORM_LINUX=y
 +
@@ -782,6 +783,7 @@ diff -urN work/busybox-1.30.1/.config work/busybox-1.30.1/.config
 +# CONFIG_I2CSET is not set
 +# CONFIG_I2CDUMP is not set
 +# CONFIG_I2CDETECT is not set
++# CONFIG_I2CTRANSFER is not set
 +# CONFIG_INOTIFYD is not set
 +# CONFIG_LESS is not set
 +CONFIG_FEATURE_LESS_MAXLINES=0
@@ -817,6 +819,7 @@ diff -urN work/busybox-1.30.1/.config work/busybox-1.30.1/.config
 +# CONFIG_STRINGS is not set
 +CONFIG_SYSINFO=y
 +# CONFIG_TIME is not set
++# CONFIG_TS is not set
 +# CONFIG_TTYSIZE is not set
 +# CONFIG_UBIRENAME is not set
 +# CONFIG_UBIATTACH is not set
@@ -945,6 +948,7 @@ diff -urN work/busybox-1.30.1/.config work/busybox-1.30.1/.config
 +CONFIG_FEATURE_TELNETD_INETD_WAIT=y
 +CONFIG_TFTP=y
 +CONFIG_FEATURE_TFTP_PROGRESS_BAR=y
++CONFIG_FEATURE_TFTP_HPA_COMPAT=y
 +CONFIG_TFTPD=y
 +CONFIG_FEATURE_TFTP_GET=y
 +CONFIG_FEATURE_TFTP_PUT=y
@@ -1150,6 +1154,7 @@ diff -urN work/busybox-1.30.1/.config work/busybox-1.30.1/.config
 +#
 +CONFIG_FEATURE_SH_MATH=y
 +# CONFIG_FEATURE_SH_MATH_64 is not set
++# CONFIG_FEATURE_SH_MATH_BASE is not set
 +CONFIG_FEATURE_SH_EXTRA_QUIET=y
 +# CONFIG_FEATURE_SH_STANDALONE is not set
 +# CONFIG_FEATURE_SH_NOFORK is not set
@@ -1174,9 +1179,9 @@ diff -urN work/busybox-1.30.1/.config work/busybox-1.30.1/.config
 +# CONFIG_FEATURE_IPC_SYSLOG is not set
 +CONFIG_FEATURE_IPC_SYSLOG_BUFFER_SIZE=0
 +# CONFIG_FEATURE_KMSG_SYSLOG is not set
-diff -urN work/busybox-1.30.1/configs/TEST_nommu_defconfig work/busybox-1.30.1/configs/TEST_nommu_defconfig
---- work/busybox-1.30.1/configs/TEST_nommu_defconfig	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.30.1/configs/TEST_nommu_defconfig	2018-10-31 22:38:20.156001102 +0100
+diff -urN work/busybox-1.31.1/configs/TEST_nommu_defconfig work/busybox-1.31.1/configs/TEST_nommu_defconfig
+--- work/busybox-1.31.1/configs/TEST_nommu_defconfig	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.31.1/configs/TEST_nommu_defconfig	2018-10-31 22:38:20.156001102 +0100
 @@ -651,6 +651,7 @@
  CONFIG_VERBOSE_RESOLUTION_ERRORS=y
  CONFIG_ARP=y
@@ -1185,9 +1190,9 @@ diff -urN work/busybox-1.30.1/configs/TEST_nommu_defconfig work/busybox-1.30.1/c
  CONFIG_BRCTL=y
  CONFIG_FEATURE_BRCTL_FANCY=y
  CONFIG_FEATURE_BRCTL_SHOW=y
-diff -urN work/busybox-1.30.1/configs/TEST_noprintf_defconfig work/busybox-1.30.1/configs/TEST_noprintf_defconfig
---- work/busybox-1.30.1/configs/TEST_noprintf_defconfig	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.30.1/configs/TEST_noprintf_defconfig	2018-10-31 22:38:18.740005913 +0100
+diff -urN work/busybox-1.31.1/configs/TEST_noprintf_defconfig work/busybox-1.31.1/configs/TEST_noprintf_defconfig
+--- work/busybox-1.31.1/configs/TEST_noprintf_defconfig	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.31.1/configs/TEST_noprintf_defconfig	2018-10-31 22:38:18.740005913 +0100
 @@ -659,6 +659,7 @@
  # CONFIG_VERBOSE_RESOLUTION_ERRORS is not set
  # CONFIG_ARP is not set
@@ -1196,9 +1201,9 @@ diff -urN work/busybox-1.30.1/configs/TEST_noprintf_defconfig work/busybox-1.30.
  # CONFIG_BRCTL is not set
  # CONFIG_FEATURE_BRCTL_FANCY is not set
  # CONFIG_FEATURE_BRCTL_SHOW is not set
-diff -urN work/busybox-1.30.1/configs/TEST_rh9_defconfig work/busybox-1.30.1/configs/TEST_rh9_defconfig
---- work/busybox-1.30.1/configs/TEST_rh9_defconfig	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.30.1/configs/TEST_rh9_defconfig	2018-10-31 22:38:17.612009746 +0100
+diff -urN work/busybox-1.31.1/configs/TEST_rh9_defconfig work/busybox-1.31.1/configs/TEST_rh9_defconfig
+--- work/busybox-1.31.1/configs/TEST_rh9_defconfig	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.31.1/configs/TEST_rh9_defconfig	2018-10-31 22:38:17.612009746 +0100
 @@ -668,6 +668,7 @@
  # CONFIG_VERBOSE_RESOLUTION_ERRORS is not set
  CONFIG_ARP=y
