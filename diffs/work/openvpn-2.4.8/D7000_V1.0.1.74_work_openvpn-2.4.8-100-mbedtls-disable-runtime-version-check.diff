@@ -1,6 +1,6 @@
-diff -urN work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/ssl_mbedtls.c work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/ssl_mbedtls.c
---- work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/ssl_mbedtls.c
-+++ work/openvpn-2.4.7/openvpn-2.4.7/src/openvpn/ssl_mbedtls.c
+diff -urN work/openvpn-2.4.8/openvpn-2.4.8/src/openvpn/ssl_mbedtls.c work/openvpn-2.4.8/openvpn-2.4.8/src/openvpn/ssl_mbedtls.c
+--- work/openvpn-2.4.8/openvpn-2.4.8/src/openvpn/ssl_mbedtls.c
++++ work/openvpn-2.4.8/openvpn-2.4.8/src/openvpn/ssl_mbedtls.c
 @@ -1406,7 +1406,7 @@ const char *
  get_ssl_library_version(void)
  {

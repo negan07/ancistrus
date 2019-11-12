@@ -1,6 +1,6 @@
-diff -urN work/openvpn-2.4.7/Makefile work/openvpn-2.4.7/Makefile
---- work/openvpn-2.4.7/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/openvpn-2.4.7/Makefile	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/openvpn-2.4.8/Makefile work/openvpn-2.4.8/Makefile
+--- work/openvpn-2.4.8/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/openvpn-2.4.8/Makefile	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,73 @@
 +include ../Rules.mak
 +
@@ -22,7 +22,7 @@ diff -urN work/openvpn-2.4.7/Makefile work/openvpn-2.4.7/Makefile
 +	fi
 +
 +configure:
-+	cd $(OPEN_VPN) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -lssl -lcrypto" LZO_LIBS="-L$(WORK_DIR)/$(LZO)/$(LZO)/src/.libs -llzo2" LDFLAGS="-L$(WORK_DIR)/$(NVRAM)" LIBS="-lscnvram" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include -I$(WORK_DIR)/$(LZO)/$(LZO)/include -I$(WORK_DIR)/$(NVRAM) -I$(GIT_ROOT_DIR)/$(SRC_ROOT_DIR)" --disable-lz4 --enable-lzo --enable-crypto --enable-server --disable-plugins --enable-management --enable-fragment --enable-multihome --enable-port-share --enable-pf --disable-debug --enable-iproute2
++	cd $(OPEN_VPN) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) OPENSSL_LIBS="-L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -lssl -lcrypto" LZO_LIBS="-L$(WORK_DIR)/$(LZO)/$(LZO)/src/.libs -llzo2" LDFLAGS="-L$(WORK_DIR)/$(NVRAM)" LIBS="-lscnvram" CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include -I$(WORK_DIR)/$(LZO)/$(LZO)/include -I$(WORK_DIR)/$(NVRAM) -I$(GIT_ROOT_DIR)/$(SRC_ROOT_DIR)" --disable-lz4 --enable-lzo --enable-crypto --enable-server --disable-plugins --enable-management --enable-fragment --enable-multihome --enable-port-share --enable-pf --disable-debug --enable-iproute2 --with-crypto-library=openssl --disable-selinux --disable-systemd --disable-pkcs11
 +
 +install: control
 +	$(SSTRIP) $(BINS)

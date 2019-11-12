@@ -347,10 +347,10 @@ DIRLIST				+= $(EASYRSA)
 TARLIST				+= $(TAR_$(EASYRSA))
 # OPENVPN
 OPEN_VPN_NAME			:= openvpn
-VER_$(OPEN_VPN_NAME)		:= 2.4.7
+VER_$(OPEN_VPN_NAME)		:= 2.4.8
 OPEN_VPN			:= $(OPEN_VPN_NAME)-$(VER_$(OPEN_VPN_NAME))
 NAME_$(OPEN_VPN)		:= $(OPEN_VPN_NAME)$(DBG)
-SUBVER_$(OPEN_VPN)		:= -011
+SUBVER_$(OPEN_VPN)		:= 
 VER_$(OPEN_VPN)			:= $(VER_$(OPEN_VPN_NAME))$(SUBVER_$(OPEN_VPN))
 DL_$(OPEN_VPN)			:= https://build.openvpn.net/downloads/releases
 TAR_$(OPEN_VPN)			:= $(OPEN_VPN).tar.gz
