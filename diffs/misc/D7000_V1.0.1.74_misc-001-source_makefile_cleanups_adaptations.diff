@@ -248,11 +248,15 @@ diff -urN D7000_V1.0.1.74_WW_src/Source/Makefile D7000_V1.0.1.74_WW_src/Source/M
 +endif
  	# Generate currentsetting.htm
 -	# For test, smartwizard CD request Model name is "WNR2000v2"
- 	echo "Firmware="V$(VER)_$(SUB_VER)"@netgear_region#" > $(CUR_SETTING)
- 	echo "RegionTag="$(BOARD_ID)_"@netgear_region#" >>  $(CUR_SETTING)
- 	echo "Region=@netgear_region#"  >> $(CUR_SETTING)
+-	echo "Firmware="V$(VER)_$(SUB_VER)"@netgear_region#" > $(CUR_SETTING)
+-	echo "RegionTag="$(BOARD_ID)_"@netgear_region#" >>  $(CUR_SETTING)
+-	echo "Region=@netgear_region#"  >> $(CUR_SETTING)
 -	#echo "Model="$(BOARD_ID)  >> $(CUR_SETTING)
- 	echo "Model="$(BOARD_ID)  >> $(CUR_SETTING)
+-	echo "Model="$(BOARD_ID)  >> $(CUR_SETTING)
++	echo "Firmware=@fw_version#&#8203;@netgear_region#" > $(CUR_SETTING)
++	echo "RegionTag=@model_name#_@netgear_region#" >>  $(CUR_SETTING)
++	echo "Region=@netgear_region#" >> $(CUR_SETTING)
++	echo "Model=@model_name#" >> $(CUR_SETTING)
  	echo "InternetConnectionStatus=@if_wan_up#" >> $(CUR_SETTING)
  	if [ "$(OPENDNS)" == "1" ]; then echo "ParentalControlSupported=1" >> $(CUR_SETTING); fi
 -	echo "SOAPVersion=2.00" >> $(CUR_SETTING)
