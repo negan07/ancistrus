@@ -1,5 +1,5 @@
 1573581509 openssl_1.0.2t_armD7000.ipk
-1552086385 hd-idle_1.05-006_armD7000.ipk
+1573760439 mini_httpd_1.17beta1-075_armD7000.ipk
 1571260560 zlib_1.2.11-001_armD7000.ipk
 1547419984 dnrd_2.20.4_armD7000.ipk
 1573162953 busybox_1.31.1_armD7000.ipk
@@ -12,7 +12,7 @@
 1540419782 xdsl-driver-orig_042n.d26b-001_armD7000.ipk
 1571260559 mini-snmpd_1.5-pre-129_armD7000.ipk
 1571260557 e2fsprogs_1.45.4_armD7000.ipk
-1571260557 mini_httpd_1.17beta1-074_armD7000.ipk
+1552086385 hd-idle_1.05-006_armD7000.ipk
 1571260557 libiconv_1.16_armD7000.ipk
 1573581507 curl_7.67.0_armD7000.ipk
 1571260559 openssh_8.1p1_armD7000.ipk
