@@ -89,8 +89,7 @@ do
 		done
 	;;
 	Source/target)
-	sudo tar xjf $1/$D.tar.bz2 -C $1/Source
-	sudo tar xjf $2/$D.tar.bz2 -C $2/Source
+	for T in $*; do sudo tar xjf $T/$D.tar.bz2 -C $T/Source; done
 	diff -urN $1/$D $2/$D > $DESTDIR/$D.diff
 	;;
 	Source)

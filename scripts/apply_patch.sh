@@ -57,7 +57,7 @@ DIFFDIR=$3
 [ -z "$DIFFDIR" ] && DIFFDIR=diffs
 cd ..
 [ $# -lt 4 ] && echo "Usage: $0 <prj_name> <fw_ver> <diff_dir> all" `ls -A ${DIFFDIR}` && exit 1
-shift;shift;shift;							#throw first 3 params
+shift 3									#throw first 3 params
 
 case $1 in
 crosstools)								#toolchain patch

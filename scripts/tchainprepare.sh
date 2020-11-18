@@ -30,6 +30,7 @@ TCDIR="$5"
 TARTC="$6"
 INSTDIR="$7"
 BRDLDIR="$8"
+PKGS="autoconf-2.65 automake-1.11.1 gcc-4.6.2 gdb-7.3.1 m4-1.4.15 uClibc-0.9.32"
 # create compiled toolchain's root dir: the path cannot be modified
 sudo mkdir -p -m 0755 $INSTDIR
 # searching for source dir...
@@ -46,28 +47,18 @@ chmod -f 644 src/*.config
 # extract archives on dl dir
 cd $BRDLDIR
 echo "Extracting crosstools before patching..."
-tar xjf autoconf-2.65.tar.bz2 || exit 3
-tar xjf automake-1.11.1.tar.bz2 || exit 3
-tar xjf gcc-4.6.2.tar.bz2 || exit 3
-tar xjf gdb-7.3.1.tar.bz2 || exit 3
-tar xjf m4-1.4.15.tar.bz2 || exit 3
-tar xjf uClibc-0.9.32.tar.bz2 || exit 3
+for P in ${PKGS}; do tar xjf ${P}.tar.bz2 || exit 3; done
 # remove old archives
-rm -f autoconf-2.65.tar.bz2 automake-1.11.1.tar.bz2 gcc-4.6.2.tar.bz2 gdb-7.3.1.tar.bz2 m4-1.4.15.tar.bz2 uClibc-0.9.32.tar.bz2
+for P in ${PKGS}; do rm -f ${P}.tar.bz2; done
 cd ../../../../scripts
 # apply patches
 ./apply_patch.sh $PROJECT $FWVER $DIFFDIR crosstools
 # repack them all
 cd ../${TCDIR}/${BRDLDIR}
 echo "Repacking crosstools after patching..."
-tar cjf autoconf-2.65.tar.bz2 autoconf-2.65 || exit 3
-tar cjf automake-1.11.1.tar.bz2 automake-1.11.1 || exit 3
-tar cjf gcc-4.6.2.tar.bz2 gcc-4.6.2 || exit 3
-tar cjf gdb-7.3.1.tar.bz2 gdb-7.3.1 || exit 3
-tar cjf m4-1.4.15.tar.bz2 m4-1.4.15 || exit 3
-tar cjf uClibc-0.9.32.tar.bz2 uClibc-0.9.32 || exit 3
+for P in ${PKGS}; do tar cjf ${P}.tar.bz2 ${P} || exit 3; done
 # dir cleanup
-rm -Rf autoconf-2.65 automake-1.11.1 gcc-4.6.2 gdb-7.3.1 m4-1.4.15 uClibc-0.9.32
+rm -Rf ${PKGS}
 cd ../../../..
 echo
 echo "Ready to start:"
