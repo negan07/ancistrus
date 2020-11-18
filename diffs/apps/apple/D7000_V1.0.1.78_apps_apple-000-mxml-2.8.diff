@@ -1,0 +1,55 @@
+diff -urN D7000_V1.0.1.78_WW_src/Source/apps/apple/mxml-2.8/build.sh D7000_V1.0.1.78_WW_src/Source/apps/apple/mxml-2.8/build.sh
+--- D7000_V1.0.1.78_WW_src/Source/apps/apple/mxml-2.8/build.sh	2016-10-11 17:53:52.000000000 +0200
++++ D7000_V1.0.1.78_WW_src/Source/apps/apple/mxml-2.8/build.sh	2017-05-04 20:53:03.771753087 +0200
+@@ -2,4 +2,4 @@
+ build_dir=build_sc
+ cd $build_dir
+ 
+-CPPFLAGS="" CFLAGS="-I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --prefix=
++CPPFLAGS="" CFLAGS="${1} -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --prefix=
+diff -urN D7000_V1.0.1.78_WW_src/Source/apps/apple/mxml-2.8/Makefile D7000_V1.0.1.78_WW_src/Source/apps/apple/mxml-2.8/Makefile
+--- D7000_V1.0.1.78_WW_src/Source/apps/apple/mxml-2.8/Makefile	2016-10-11 17:53:52.000000000 +0200
++++ D7000_V1.0.1.78_WW_src/Source/apps/apple/mxml-2.8/Makefile	2017-05-04 14:46:29.105544499 +0200
+@@ -20,7 +20,7 @@
+ TARGET_DIR = ../../../target
+ ARFLAGS		=	crvs
+ ARCHFLAGS	=	
+-CFLAGS		=	$(OPTIM) $(ARCHFLAGS) -Wall -D_THREAD_SAFE -D_REENTRANT
++CFLAGS += $(OPTIM) $(ARCHFLAGS) -Wall -D_THREAD_SAFE -D_REENTRANT
+ CP		=	/bin/cp
+ DSO		=	$(CC)
+ DSOFLAGS	=	 -Wl,-soname,libmxml.so.1,-rpath,$(libdir) -shared $(OPTIM)
+@@ -30,7 +30,7 @@
+ LIBS		=	 -lpthread
+ LN		=	/bin/ln -s
+ MKDIR		=	/bin/mkdir
+-OPTIM		=	-fPIC -Os -g
++OPTIM		=	-fPIC -Os
+ RM		=	/bin/rm -f
+ SHELL		=	/bin/sh
+ 
+@@ -66,7 +66,7 @@
+ # Rules...
+ #
+ 
+-.SILENT:
++#.SILENT:
+ .SUFFIXES:	.c .man .o
+ .c.o:
+ 	echo Compiling $<
+@@ -243,6 +243,7 @@
+ 	echo Creating $@...
+ 	$(RM) $@
+ 	$(AR) $(ARFLAGS) $@ $(LIBOBJS)
++	$(STRIP) $(STRIPFLAGS) $@
+ 	$(RANLIB) $@
+ 
+ $(LIBOBJS):	mxml.h
+@@ -256,6 +257,7 @@
+ libmxml.so.1.5:	$(LIBOBJS)
+ 	echo Creating $@...
+ 	$(DSO) $(DSOFLAGS) -o libmxml.so.1.5 $(LIBOBJS)
++	$(STRIP) $@
+ 	$(RM) libmxml.so libmxml.so.1
+ 	$(LN) libmxml.so.1.5 libmxml.so
+ 	$(LN) libmxml.so.1.5 libmxml.so.1

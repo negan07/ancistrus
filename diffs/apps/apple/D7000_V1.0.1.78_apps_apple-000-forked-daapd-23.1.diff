@@ -1,0 +1,22 @@
+diff -urN D7000_V1.0.1.78_WW_src/Source/apps/apple/forked-daapd-23.1/build.sh D7000_V1.0.1.78_WW_src/Source/apps/apple/forked-daapd-23.1/build.sh
+--- D7000_V1.0.1.78_WW_src/Source/apps/apple/forked-daapd-23.1/build.sh	2016-10-11 17:54:03.000000000 +0200
++++ D7000_V1.0.1.78_WW_src/Source/apps/apple/forked-daapd-23.1/build.sh	2017-05-04 22:16:13.238645316 +0200
+@@ -4,8 +4,7 @@
+ 
+ FFMPEG_DIR="`pwd`/../../../mediaserver/library/ffmpeg-0.11.2"
+ 
+-#CC_VAR=/opt/buildroot-gcc463/usr/bin/arm-linux-gcc
+-CFLAGS_VARS= "-D_GNU_SOURCE ";
++CFLAGS_VARS="-D_GNU_SOURCE "
+ CFLAGS_VARS+="-I`pwd`/../../avl-0.3.5/ -I`pwd`/../../mxml-2.8/ ";
+ CFLAGS_VARS+="-I`pwd`/../../avahi-0.6.25/ -I`pwd`/../../libxml2-2.9.1/include/ ";
+ CFLAGS_VARS+="-I$FFMPEG_DIR/ -I$FFMPEG_DIR/libavutil/ -I$FFMPEG_DIR/libavformat/ -I$FFMPEG_DIR/libavcodec/ ";
+@@ -45,7 +44,7 @@
+ 	mv tmp1 $file
+ done
+ 
+-ANTLR="`pwd`/../../antlr3/antlr3" GPG_ERROR_CONFIG="`pwd`/../../target/usr/bin/gpg-error-config" GPG_ERROR_LIBS=" -L`pwd`/../target/usr/lib -l lgpg-error" LIBGCRYPT_CONFIG="`pwd`/../../target/usr/bin/libgcrypt-config" LIBGCRYPT_LIBS=" -L`pwd`/../target/usr/lib -l lgcrypt" CFLAGS="$CFLAGS_VARS" CPPFLAGS="$CFLAGS_VARS" LDFLAGS="$LDFLAGS_VARS" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --prefix= --sbindir=/usr/sbin --sysconfdir=/etc --exec-prefix=/usr --sbindir=/usr/sbin --sysconfdir=/etc --datadir=/usr/share --mandir=/usr/man --exec-prefix=/usr\
++ANTLR="`pwd`/../../antlr3/antlr3" GPG_ERROR_CONFIG="`pwd`/../../target/usr/bin/gpg-error-config" GPG_ERROR_LIBS=" -L`pwd`/../target/usr/lib -l lgpg-error" LIBGCRYPT_CONFIG="`pwd`/../../target/usr/bin/libgcrypt-config" LIBGCRYPT_LIBS=" -L`pwd`/../target/usr/lib -l lgcrypt" CFLAGS="${1} $CFLAGS_VARS" CPPFLAGS="$CFLAGS_VARS" LDFLAGS="$LDFLAGS_VARS" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --prefix= --sbindir=/usr/sbin --sysconfdir=/etc --exec-prefix=/usr --sbindir=/usr/sbin --sysconfdir=/etc --datadir=/usr/share --mandir=/usr/man --exec-prefix=/usr\
+ 	--enable-shared \
+ 	--enable-static \
+ 	--enable-itunes 
