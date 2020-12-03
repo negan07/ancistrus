@@ -1,7 +1,7 @@
-diff -urN work/hdparm-9.58/Makefile work/hdparm-9.58/Makefile
---- work/hdparm-9.58/Makefile	2017-05-23 23:09:40.513449762 +0200
-+++ work/hdparm-9.58/Makefile	2017-05-01 21:08:42.000000000 +0200
-@@ -1,35 +1,18 @@
+diff -urN work/hdparm-9.60/Makefile work/hdparm-9.60/Makefile
+--- work/hdparm-9.60/Makefile	2017-05-23 23:09:40.513449762 +0200
++++ work/hdparm-9.60/Makefile	2017-05-01 21:08:42.000000000 +0200
+@@ -1,36 +1,21 @@
  # Makefile for hdparm
  
 -# DESTDIR is for non root installs (eg packages, NFS) only!
@@ -19,14 +19,14 @@ diff -urN work/hdparm-9.58/Makefile work/hdparm-9.58/Makefile
 -STRIP ?= strip
 -
 -CFLAGS := -O2 -W -Wall -Wbad-function-cast -Wcast-align -Wpointer-arith -Wcast-qual -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -fkeep-inline-functions -Wwrite-strings -Waggregate-return -Wnested-externs -Wtrigraphs $(CFLAGS)
-+CFLAGS := -Os -W -Wall -Wbad-function-cast -Wcast-align -Wpointer-arith -Wcast-qual -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -fkeep-inline-functions -Wwrite-strings -Waggregate-return -Wnested-externs -Wtrigraphs $(CFLAGS)
- 
- LDFLAGS = -s
--#LDFLAGS = -s -static
+-
 -INSTALL = install
 -INSTALL_DATA = $(INSTALL) -m 644
 -INSTALL_DIR = $(INSTALL) -m 755 -d
 -INSTALL_PROGRAM = $(INSTALL)
++CFLAGS := -Os -W -Wall -Wbad-function-cast -Wcast-align -Wpointer-arith -Wcast-qual -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -fkeep-inline-functions -Wwrite-strings -Waggregate-return -Wnested-externs -Wtrigraphs $(CFLAGS)
++
++LDFLAGS = -s
  
  OBJS = hdparm.o identify.o sgio.o sysfs.o geom.o fallocate.o fibmap.o fwdownload.o dvdspeed.o wdidle3.o apt.o
  
@@ -34,14 +34,17 @@ diff -urN work/hdparm-9.58/Makefile work/hdparm-9.58/Makefile
 -	$(MAKE) -j4 hdparm
 +all: hdparm
  
- hdparm: hdparm.h sgio.h $(OBJS)
+ static:
+ 	LDFLAGS=-static $(MAKE)
+ 
+ hdparm: Makefile hdparm.h sgio.h $(OBJS)
  	$(CC) $(LDFLAGS) -o hdparm $(OBJS)
 -	$(STRIP) hdparm
 +	$(SSTRIP) hdparm
  
  hdparm.o:	hdparm.h sgio.h
  
-@@ -43,17 +26,9 @@
+@@ -44,17 +29,9 @@
  
  apt.o:		apt.c
  
