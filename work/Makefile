@@ -124,6 +124,8 @@ post_inst:
 	@ln -sf libz.so.$(RCZLIBVER) $(BUILD_TARGET)$(RCLDLIB)/libz.so.$(RCZLIBMAINVER) || exit 1
 	@ln -sf libcrypto.so.$(RCSSLVER) $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so || exit 1
 	@ln -sf libssl.so.$(RCSSLVER) $(BUILD_TARGET)$(RCLDLIB)/libssl.so || exit 1
+	@ln -sf libcrypto.so.$(RCSSLVER) $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so.$(RCOLDSSLVER) || exit 1
+	@ln -sf libssl.so.$(RCSSLVER) $(BUILD_TARGET)$(RCLDLIB)/libssl.so.$(RCOLDSSLVER) || exit 1
 	@ln -sf libcurl.so.$(RCCURLVER) $(BUILD_TARGET)$(RCLDLIB)/libcurl.so || exit 1
 	@ln -sf libcurl.so.$(RCCURLVER) $(BUILD_TARGET)$(RCLDLIB)/libcurl.so.$(RCCURLMAINVER) || exit 1
 	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBOOTDIR)/$(RCAPPSNAME) || exit 1
