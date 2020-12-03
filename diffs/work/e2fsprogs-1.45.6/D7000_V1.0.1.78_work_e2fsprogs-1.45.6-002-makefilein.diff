@@ -1,6 +1,6 @@
-diff -urN work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/Makefile.in work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/Makefile.in
---- work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/Makefile.in	2018-10-23 23:00:46.662292000 +0200
-+++ work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/Makefile.in work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/Makefile.in
+--- work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/Makefile.in	2018-10-23 23:01:08.566300143 +0200
 @@ -19,22 +19,20 @@
  @ALL_CMT@EXT2FS_LIB_SUBDIR= lib/ext2fs
  
@@ -28,10 +28,19 @@ diff -urN work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/Makefile.in work/e2fsprogs-1.45
  
  subs: $(DEP_SUBSTITUTE)
  	@for i in $(SUBS) ; do if test -d `dirname $$i` ; \
-diff -urN work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/misc/Makefile.in work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/misc/Makefile.in
---- work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/misc/Makefile.in	2018-10-23 23:00:46.662292000 +0200
-+++ work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/misc/Makefile.in	2018-10-23 23:01:08.566300143 +0200
-@@ -131,8 +131,7 @@
+diff -urN work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/misc/Makefile.in work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/misc/Makefile.in
+--- work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/misc/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/misc/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -11,7 +11,7 @@
+ 
+ @MCONFIG@
+ 
+-@DEFRAG_CMT@@LINUX_CMT@E4DEFRAG_PROG= e4defrag
++@DEFRAG_CMT@@LINUX_CMT@E4DEFRAG_PROG=
+ @DEFRAG_CMT@@LINUX_CMT@E4DEFRAG_MAN= e4defrag.8
+ 
+ @LINUX_CMT@E4CRYPT_PROG = e4crypt
+@@ -132,8 +132,7 @@
  	$(Q) $(CPPCHECK_CMD) $(CPPFLAGS) $<
  @PROFILE_CMT@	$(Q) $(CC) $(ALL_CFLAGS) -g -pg -o profiled/$*.o -c $<
  

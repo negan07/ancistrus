@@ -1,6 +1,6 @@
-diff -urN work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/e2fsck/e2fsck.h work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/e2fsck/e2fsck.h
---- work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/e2fsck/e2fsck.h	2018-10-23 23:00:46.662292000 +0200
-+++ work/e2fsprogs-1.45.4/e2fsprogs-1.45.4/e2fsck/e2fsck.h	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/e2fsck/e2fsck.h work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/e2fsck/e2fsck.h
+--- work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/e2fsck/e2fsck.h	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.45.6/e2fsprogs-1.45.6/e2fsck/e2fsck.h	2018-10-23 23:01:08.566300143 +0200
 @@ -73,7 +73,7 @@
   * Exit codes used by fsck-type programs
   */
