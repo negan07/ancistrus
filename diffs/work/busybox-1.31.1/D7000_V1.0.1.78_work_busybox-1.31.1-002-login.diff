@@ -13,13 +13,13 @@ diff -urN work/busybox-1.31.1/loginutils/getty.c work/busybox-1.31.1/loginutils/
 diff -urN work/busybox-1.31.1/loginutils/login.c work/busybox-1.31.1/loginutils/login.c
 --- work/busybox-1.31.1/loginutils/login.c	2018-07-02 13:23:06.000000000 +0200
 +++ work/busybox-1.31.1/loginutils/login.c	2018-10-31 22:08:27.742497258 +0100
-@@ -476,6 +476,31 @@
+@@ -476,6 +476,44 @@
  		login_pam_end(pamh);
  		safe_strncpy(username, "UNKNOWN", sizeof(username));
  #else /* not PAM */
 +#define SC_HACK
 +#ifdef SC_HACK
-+    {
++        {
 +            FILE *fp;
 +            char name[32], pass[32], buffer[128]="";
 +            struct passwd pw_copy;
@@ -29,23 +29,36 @@ diff -urN work/busybox-1.31.1/loginutils/login.c work/busybox-1.31.1/loginutils/
 +            pw->pw_uid              =0;
 +            pw->pw_gid              =0;
 +            pw->pw_dir              =(char*)"/";
-+                // password is not set
-+                if(access("/etc/htpasswd",F_OK)!=0) break;
-+                fp=fopen("/etc/htpasswd","r");
-+                fread(buffer,1,128,fp);
-+                sscanf(buffer,"%[^:]:%s",name, pass);
-+                fclose(fp);
-+                pw->pw_name         =name;
-+                pw->pw_passwd       =pass;
-+
-+                /*  check username      */
-+                if(strcmp(username,name)!=0) goto auth_failed;
++                    // password is not set
++                    if(access("/etc/htpasswd",F_OK)!=0) {
++					system("/usr/sbin/nvram get http_username > /tmp/tmp_htpasswd"); 
++					system("/usr/sbin/nvram get http_password >> /tmp/tmp_htpasswd");
++    	    				if((fp=fopen("/tmp/tmp_htpasswd","r")) == NULL) return 0;
++						while(fgets(buffer,sizeof(buffer), fp)!=NULL && feof(fp)!=EOF) {
++						if(strstr(buffer, "http_username=")) sscanf(buffer,"http_username= %s", name);
++						if(strstr(buffer, "http_password=")) sscanf(buffer,"http_password= %s", pass);
++						}
++					fclose(fp);
++					unlink("/tmp/tmp_htpasswd");	
++					pw->pw_name     = name;
++					pw->pw_passwd   = pass;
++                    }
++		     else {
++                    			fp=fopen("/etc/htpasswd","r");
++                    			fread(buffer,1,128,fp);
++                    			sscanf(buffer,"%[^:]:%s",name, pass);
++                    			fclose(fp);
++		     }
++            pw->pw_name         =name;
++            pw->pw_passwd       =pass;
++            /*  check username      */
++            if(strcmp(username,name)!=0) goto auth_failed;
 +        }
 +#else
  		pw = getpwnam(username);
  		if (!pw) {
  			strcpy(username, "UNKNOWN");
-@@ -495,6 +520,7 @@
+@@ -495,6 +533,7 @@
  		if (!pw->pw_passwd[0])
  			break;
   fake_it:

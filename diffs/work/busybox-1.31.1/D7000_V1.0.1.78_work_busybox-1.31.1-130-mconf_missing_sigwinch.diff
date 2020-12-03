@@ -1,4 +1,4 @@
-diff -urN work/busybox-1.31.1/scripts/kconfig/mconf.c
+diff -urN work/busybox-1.31.1/scripts/kconfig/mconf.c work/busybox-1.31.1/scripts/kconfig/mconf.c
 --- work/busybox-1.31.1/scripts/kconfig/mconf.c
 +++ work/busybox-1.31.1/scripts/kconfig/mconf.c
 @@ -31,6 +31,10 @@

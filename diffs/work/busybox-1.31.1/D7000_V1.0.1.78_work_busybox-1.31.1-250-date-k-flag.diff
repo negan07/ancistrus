@@ -1,4 +1,4 @@
-diff -urN work/busybox-1.31.1/coreutils/date.c
+diff -urN work/busybox-1.31.1/coreutils/date.c work/busybox-1.31.1/coreutils/date.c
 --- work/busybox-1.31.1/coreutils/date.c
 +++ work/busybox-1.31.1/coreutils/date.c
 @@ -123,6 +123,7 @@
