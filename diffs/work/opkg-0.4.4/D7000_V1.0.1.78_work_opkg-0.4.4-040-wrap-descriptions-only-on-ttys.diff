@@ -1,7 +1,7 @@
-diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/pkg_parse.c work/opkg-0.4.1/opkg-0.4.1/libopkg/pkg_parse.c
---- work/opkg-0.4.1/opkg-0.4.1/libopkg/pkg_parse.c	2016-12-22 18:38:14.000000000 +0100
-+++ work/opkg-0.4.1/opkg-0.4.1/libopkg/pkg_parse.c	2017-03-24 22:30:50.254489817 +0100
-@@ -21,6 +21,7 @@
+diff -urN work/opkg-0.4.4/opkg-0.4.4/libopkg/pkg_parse.c work/opkg-0.4.4/opkg-0.4.4/libopkg/pkg_parse.c
+--- work/opkg-0.4.4/opkg-0.4.4/libopkg/pkg_parse.c	2016-12-22 18:38:14.000000000 +0100
++++ work/opkg-0.4.4/opkg-0.4.4/libopkg/pkg_parse.c	2017-03-24 22:30:50.254489817 +0100
+@@ -23,6 +23,7 @@
  
  #include <stdio.h>
  #include <ctype.h>
@@ -9,9 +9,9 @@ diff -urN work/opkg-0.4.1/opkg-0.4.1/libopkg/pkg_parse.c work/opkg-0.4.1/opkg-0.
  #include <string.h>
  #include <stdlib.h>
  #include <errno.h>
-@@ -285,11 +285,17 @@
-             if (!pkg->description) {
-                 pkg->description = xmalloc(strlen(line) + 1);
+@@ -288,11 +289,17 @@
+                 pkg->description = xmalloc(1 + strlen(line) + 1);
+                 *pkg->description = '\0';
              } else {
 -                pkg->description =
 -                    xrealloc(pkg->description, strlen(pkg->description)
