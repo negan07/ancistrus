@@ -1,7 +1,7 @@
-diff -urN work/openvpn-2.4.8/openvpn-2.4.8/src/openvpn/options.c work/openvpn-2.4.8/openvpn-2.4.8/src/openvpn/options.c
---- work/openvpn-2.4.8/openvpn-2.4.8/src/openvpn/options.c
-+++ work/openvpn-2.4.8/openvpn-2.4.8/src/openvpn/options.c
-@@ -58,7 +58,7 @@
+diff -urN work/openvpn-2.5.0/openvpn-2.5.0/src/openvpn/options.c work/openvpn-2.5.0/openvpn-2.5.0/src/openvpn/options.c
+--- work/openvpn-2.5.0/openvpn-2.5.0/src/openvpn/options.c
++++ work/openvpn-2.5.0/openvpn-2.5.0/src/openvpn/options.c
+@@ -61,7 +61,7 @@
  #include "ssl_verify.h"
  #include "platform.h"
  #include <ctype.h>
@@ -10,7 +10,7 @@ diff -urN work/openvpn-2.4.8/openvpn-2.4.8/src/openvpn/options.c work/openvpn-2.
  #include "memdbg.h"
  
  const char title_string[] =
-@@ -4557,6 +4557,16 @@
+@@ -4785,6 +4785,16 @@
          }
          else
          {
@@ -27,13 +27,15 @@ diff -urN work/openvpn-2.4.8/openvpn-2.4.8/src/openvpn/options.c work/openvpn-2.
              fp = platform_fopen(file, "r");
          }
          if (fp)
-@@ -4567,6 +4567,9 @@
+@@ -4795,6 +4805,11 @@
                  int offset = 0;
                  CLEAR(p);
                  ++line_num;
 +                /* override some line options created by rc_openvpn on /etc/server*.conf */
-+                if(!strncmp(line,"cipher ",7)) snprintf(line, sizeof(line), "cipher %s\n", nvram_safedef_get("openvpn_cipher", "AES-256-CBC"));
++                if(!strncmp(line,"cipher ",7)) snprintf(line, sizeof(line), "cipher %s\n", nvram_safedef_get("openvpn_cipher", "AES-128-GCM"));
 +                else if(!strncmp(line,"auth ",5)) snprintf(line, sizeof(line), "auth %s\n", nvram_safedef_get("openvpn_auth", "sha256"));
++		/* remove deprecated compression option */
++                else if(!strncmp(line,"comp-lzo",8)) continue;
                  if (strlen(line) == OPTION_LINE_SIZE)
                  {
                      msg(msglevel, "In %s:%d: Maximum option line length (%d) exceeded, line starts with %s",

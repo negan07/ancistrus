@@ -1,7 +1,7 @@
-diff -urN work/openvpn-2.4.8/openvpn_post work/openvpn-2.4.8/openvpn_post
---- work/openvpn-2.4.8/openvpn_post	2017-09-26 11:27:35.000000000 +0200
-+++ work/openvpn-2.4.8/openvpn_post	2017-11-28 17:45:53.442033301 +0100
-@@ -0,0 +1,26 @@
+diff -urN work/openvpn-2.5.0/openvpn_post work/openvpn-2.5.0/openvpn_post
+--- work/openvpn-2.5.0/openvpn_post	2017-09-26 11:27:35.000000000 +0200
++++ work/openvpn-2.5.0/openvpn_post	2017-11-28 17:45:53.442033301 +0100
+@@ -0,0 +1,24 @@
 +#!/bin/sh
 +
 +if [ "$1" = "start" -o "$1" = "restart" ]; then
@@ -14,13 +14,11 @@ diff -urN work/openvpn-2.4.8/openvpn_post work/openvpn-2.4.8/openvpn_post
 +	[ ! -r ${CONFFILE} -o ! -w ${CONFFILE} ] && continue
 +
 +	# Change some original options
-+	set -- AES-256-CBC sha256
-+		for OPT in cipher auth
-+		do
-+		VAL=`anc nvram drget openvpn_${OPT} $1`
-+		shift
-+		sed -i "s|${OPT} .*|${OPT} ${VAL}|" ${CONFFILE}
-+		done
++	sed -i "s|cipher .*|cipher `anc nvram drget openvpn_cipher AES-128-GCM`|" ${CONFFILE}
++	sed -i "s|auth .*|auth `anc nvram drget openvpn_auth sha256`|" ${CONFFILE}
++
++	# Remove some deprecated original options
++	sed -i "/^comp-lzo/d" ${CONFFILE}
 +
 +	# Append personal settings on client .conf files only
 +	[ `echo ${CONFFILE} | grep client` >/dev/null 2>&1 ] && anc nvtotxt openvpn_client_opt >> ${CONFFILE}

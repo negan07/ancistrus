@@ -25,7 +25,7 @@ function setDefs() {
 	var nval=["12974", "12973"];
 	var h_nvar=[cf.h_openvpn_protocol, cf.h_openvpn_tun_protocol, cf.h_openvpn_type, cf.h_openvpn_cipher, cf.h_openvpn_auth];
 	var hnvar=[cf.openvpn_protocol, cf.openvpn_tun_protocol, cf.openvpn_type, cf.openvpn_cipher, cf.openvpn_auth];
-	var hnval=["udp", "udp", "0", "AES-256-CBC", "sha256"];
+	var hnval=["udp", "udp", "0", "AES-128-GCM", "sha256"];
 
 	if(cf.openvpn_enable.value=="") cf.openvpn_enable.checked=false;
 	for(i=0;i<nvar.length;i++) if(nvar[i].value=="") nvar[i].value=nval[i];
@@ -148,22 +148,17 @@ function checkData() {
 </td></tr>
 <tr><td align="left"><a href="javascript:gotoWiki('openvpn-package#cipher-algorithm');"><b>Cipher Encryption Algorithm</b></a></td>
 	<td align="right"><select name="openvpn_cipher" size=1>
-		<option value="AES-128-CBC">AES-128-CBC (128 bit key, 128 bit block)</option>
-		<option value="AES-192-CBC">AES-192-CBC (192 bit key, 128 bit block)</option>
-		<option value="AES-256-CBC">AES-256-CBC (256 bit key, 128 bit block)</option>
-		<option value="CAMELLIA-128-CBC">CAMELLIA-128-CBC (128 bit key, 128 bit block)</option>
-		<option value="CAMELLIA-192-CBC">CAMELLIA-192-CBC (192 bit key, 128 bit block)</option>
-		<option value="CAMELLIA-256-CBC">CAMELLIA-256-CBC (256 bit key, 128 bit block)</option>
-		<option value="SEED-CBC">SEED-CBC (128 bit key, 128 bit block)</option>
+		<option value="AES-128-GCM">AES-128-GCM (128 bit key, 128 bit block)</option>
+		<option value="AES-256-GCM">AES-256-GCM (256 bit key, 128 bit block)</option>
 	</select>
 </td></tr>
 <tr><td align="left"><a href="javascript:gotoWiki('openvpn-package#digest-algorithm');"><b>Digest Message Algorithm</b></a></td>
 	<td align="right"><select name="openvpn_auth" size=1>
+		<option value="sha256">SHA256 (256 bit size)</option>
+		<option value="sha512">SHA512 (512 bit size)</option>
 		<option value="rsa-sha256">RSA-SHA256 (256 bit size)</option>
 		<option value="rsa-sha384">RSA-SHA384 (384 bit size)</option>
 		<option value="rsa-sha512">RSA-SHA512 (512 bit size)</option>
-		<option value="sha256">SHA256 (256 bit size)</option>
-		<option value="sha512">SHA512 (512 bit size)</option>
 	</select>
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
