@@ -1,6 +1,6 @@
-diff -urN work/easy-rsa-3.0.6/Makefile work/easy-rsa-3.0.6/Makefile
---- work/easy-rsa-3.0.6/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/easy-rsa-3.0.6/Makefile	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/easy-rsa-3.0.8/Makefile work/easy-rsa-3.0.8/Makefile
+--- work/easy-rsa-3.0.8/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/easy-rsa-3.0.8/Makefile	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,26 @@
 +include ../Rules.mak
 +
