@@ -1,0 +1,19 @@
+diff -urN work/libarchive-3.5.0/libarchive-3.5.0/libarchive/archive_read_support_format_zip.c work/libarchive-3.5.0/libarchive-3.5.0/libarchive/archive_read_support_format_zip.c
+--- work/libarchive-3.5.0/libarchive-3.5.0/libarchive/archive_read_support_format_zip.c	1970-01-01 01:00:00.000000000 +0100
++++ work/libarchive-3.5.0/libarchive-3.5.0/libarchive/archive_read_support_format_zip.c	2017-03-23 20:35:44.381701657 +0100
+@@ -899,6 +899,7 @@
+ 	return ARCHIVE_OK;
+ }
+ 
++#if HAVE_LZMA_H && HAVE_LIBLZMA
+ /*
+  * Auxiliary function to uncompress data chunk from zipx archive
+  * (zip with lzma compression).
+@@ -971,6 +972,7 @@
+ 	free(lzma_alone_compressed_buffer);
+ 	return status;
+ }
++#endif
+ 
+ /*
+  * Assumes file pointer is at beginning of local file header.
