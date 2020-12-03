@@ -1,6 +1,6 @@
-diff -urN work/zlib-1.2.11/Makefile work/zlib-1.2.11/Makefile
---- work/zlib-1.2.11/Makefile	2017-04-06 18:00:46.662292000 +0200
-+++ work/zlib-1.2.11/Makefile	2017-04-06 18:01:08.566300143 +0200
+diff -urN work/zlib-develop/Makefile work/zlib-develop/Makefile
+--- work/zlib-develop/Makefile	2017-04-06 18:00:46.662292000 +0200
++++ work/zlib-develop/Makefile	2017-04-06 18:01:08.566300143 +0200
 @@ -0,0 +1,65 @@
 +include ../Rules.mak
 +

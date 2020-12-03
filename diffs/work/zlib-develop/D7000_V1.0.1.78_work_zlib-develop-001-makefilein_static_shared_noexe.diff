@@ -1,6 +1,6 @@
-diff -urN work/zlib-1.2.11/zlib-1.2.11/Makefile.in work/zlib-1.2.11/zlib-1.2.11/Makefile.in
---- work/zlib-1.2.11/zlib-1.2.11/Makefile.in	2017-04-06 18:00:46.662292000 +0200
-+++ work/zlib-1.2.11/zlib-1.2.11/Makefile.in	2017-04-06 18:01:08.566300143 +0200
+diff -urN work/zlib-develop/zlib-develop/Makefile.in work/zlib-develop/zlib-develop/Makefile.in
+--- work/zlib-develop/zlib-develop/Makefile.in	2017-04-06 18:00:46.662292000 +0200
++++ work/zlib-develop/zlib-develop/Makefile.in	2017-04-06 18:01:08.566300143 +0200
 @@ -75,11 +75,11 @@
  
  all: static shared
