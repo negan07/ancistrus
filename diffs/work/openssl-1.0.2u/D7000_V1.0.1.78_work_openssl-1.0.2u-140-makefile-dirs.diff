@@ -1,0 +1,31 @@
+diff -urN work/openssl-1.0.2u/openssl-1.0.2u/Makefile.org work/openssl-1.0.2u/openssl-1.0.2u/Makefile.org
+--- work/openssl-1.0.2u/openssl-1.0.2u/Makefile.org
++++ work/openssl-1.0.2u/openssl-1.0.2u/Makefile.org
+@@ -137,7 +137,7 @@
+ 
+ BASEADDR=
+ 
+-DIRS=   crypto ssl engines apps test tools
++DIRS=   crypto ssl apps
+ ENGDIRS= ccgost
+ SHLIBDIRS= crypto ssl
+ 
+@@ -608,12 +608,12 @@
+ 			sed -e '1,/^$$/d' doc/openssl-shared.txt; \
+ 		fi; \
+ 	fi
+-	cp libcrypto.pc $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig
+-	chmod 644 $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig/libcrypto.pc
+-	cp libssl.pc $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig
+-	chmod 644 $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig/libssl.pc
+-	cp openssl.pc $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig
+-	chmod 644 $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig/openssl.pc
++#	cp libcrypto.pc $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig
++#	chmod 644 $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig/libcrypto.pc
++#	cp libssl.pc $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig
++#	chmod 644 $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig/libssl.pc
++#	cp openssl.pc $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig
++#	chmod 644 $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig/openssl.pc
+ 
+ install_html_docs:
+ 	here="`pwd`"; \
