@@ -1,16 +1,13 @@
 diff -urN work/openssl-1.0.2t/Makefile work/openssl-1.0.2t/Makefile
 --- work/openssl-1.0.2t/Makefile	2017-04-06 18:00:46.662292000 +0200
 +++ work/openssl-1.0.2t/Makefile	2017-04-06 18:01:08.566300143 +0200
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,65 @@
 +include ../Rules.mak
 +
 +LIBCRYPTONAME		:= libcrypto.so
 +LIBSSLNAME		:= libssl.so
-+SHLIB_MAJOR		:= 1
-+SHLIB_MINOR		:= 0.0
-+SHLIB_EXT		:= $(SHLIB_MAJOR).$(SHLIB_MINOR)
-+LIBCRYPTO		:= $(LIBCRYPTONAME).$(SHLIB_EXT)
-+LIBSSL			:= $(LIBSSLNAME).$(SHLIB_EXT)
++LIBCRYPTO		:= $(LIBCRYPTONAME).$(RCSSLVER)
++LIBSSL			:= $(LIBSSLNAME).$(RCSSLVER)
 +BINS			:= openssl
 +SSLCNF			:= $(BINS).cnf
 +
@@ -25,7 +22,7 @@ diff -urN work/openssl-1.0.2t/Makefile work/openssl-1.0.2t/Makefile
 +	fi
 +
 +configure:
-+	cd $(OPENSSL) && CROSS_COMPILE="" && ./Configure linux-elf --openssldir=$(USRETC) --with-zlib-include=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-zlib-lib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) zlib-dynamic enable-shared enable-threads no-static-engine no-asm no-gmp no-jpake no-krb5 no-md2 no-rc5 no-rfc3779 no-ssl3 no-store
++	cd $(OPENSSL) && CROSS_COMPILE="" && ./Configure linux-elf --openssldir=$(USRETC) enable-threads enable-shared no-asm no-gmp no-jpake no-krb5 no-md2 no-rc5 no-rfc3779 no-ssl3 no-store no-zlib no-zlib-dynamic no-static-engine
 +
 +install: control
 +	$(STRIP) $(OPENSSL)/$(LIBCRYPTO) $(OPENSSL)/$(LIBSSL)
@@ -64,6 +61,8 @@ diff -urN work/openssl-1.0.2t/Makefile work/openssl-1.0.2t/Makefile
 +	@echo "mv -f $(TMPDIR)/$(SSLCNF) $(USRETC)/" >> $(POSTINST)
 +	@echo "ln -sf $(LIBCRYPTO) $(LDLIB)/$(LIBCRYPTONAME)" >> $(POSTINST)
 +	@echo "ln -sf $(LIBSSL) $(LDLIB)/$(LIBSSLNAME)" >> $(POSTINST)
++	@echo "ln -sf $(LIBCRYPTO) $(LDLIB)/$(LIBCRYPTONAME).$(RCOLDSSLVER)" >> $(POSTINST)
++	@echo "ln -sf $(LIBSSL) $(LDLIB)/$(LIBSSLNAME).$(RCOLDSSLVER)" >> $(POSTINST)
 +	@echo "sync" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +endif
