@@ -1,7 +1,7 @@
-diff -urN work/smartmontools-7.1/smartmontools-7.1/smartd.cpp work/smartmontools-7.1/smartmontools-7.1/smartd.cpp
---- work/smartmontools-7.1/smartmontools-7.1/smartd.cpp	2017-10-15 19:31:30.000000000 +0200
-+++ work/smartmontools-7.1/smartmontools-7.1/smartd.cpp	2018-04-19 22:45:26.645467722 +0200
-@@ -142,6 +142,7 @@
+diff -urN work/smartmontools-7.2/smartmontools-7.2/smartd.cpp work/smartmontools-7.2/smartmontools-7.2/smartd.cpp
+--- work/smartmontools-7.2/smartmontools-7.2/smartd.cpp	2017-10-15 19:31:30.000000000 +0200
++++ work/smartmontools-7.2/smartmontools-7.2/smartd.cpp	2018-04-19 22:45:26.645467722 +0200
+@@ -143,6 +143,7 @@
  
  #define EXIT_SIGNAL    254 // abort on signal
  
@@ -9,7 +9,7 @@ diff -urN work/smartmontools-7.1/smartmontools-7.1/smartd.cpp work/smartmontools
  
  // command-line: 1=debug mode, 2=print presets
  static unsigned char debugmode = 0;
-@@ -1312,7 +1313,7 @@
+@@ -1322,7 +1323,7 @@
  
  // Output multiple lines via separate syslog(3) calls.
  __attribute_format_printf(2, 0)
@@ -18,7 +18,7 @@ diff -urN work/smartmontools-7.1/smartmontools-7.1/smartd.cpp work/smartmontools
  {
    char buf[512+EBUFLEN]; // enough space for exec cmd output in MailWarning()
    vsnprintf(buf, sizeof(buf), fmt, ap);
-@@ -1321,7 +1322,7 @@
+@@ -1331,7 +1332,7 @@
      if ((q = strchr(p, '\n')))
        *q++ = 0;
      if (*p)
