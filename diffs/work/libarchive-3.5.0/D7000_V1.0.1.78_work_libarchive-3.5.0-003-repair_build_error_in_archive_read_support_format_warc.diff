@@ -1,0 +1,12 @@
+diff -urN work/libarchive-3.5.0/libarchive-3.5.0/libarchive/archive_read_support_format_warc.c work/libarchive-3.5.0/libarchive-3.5.0/libarchive/archive_read_support_format_warc.c
+--- work/libarchive-3.5.0/libarchive-3.5.0/libarchive/archive_read_support_format_warc.c	1970-01-01 01:00:00.000000000 +0100
++++ work/libarchive-3.5.0/libarchive-3.5.0/libarchive/archive_read_support_format_warc.c	2017-03-23 20:35:44.381701657 +0100
+@@ -127,7 +127,7 @@
+ static int _warc_rdhdr(struct archive_read *a, struct archive_entry *e);
+
+ /* private routines */
+-static unsigned int _warc_rdver(const char buf[10], size_t bsz);
++static unsigned int _warc_rdver(const char *buf, size_t bsz);
+ static unsigned int _warc_rdtyp(const char *buf, size_t bsz);
+ static warc_string_t _warc_rduri(const char *buf, size_t bsz);
+ static ssize_t _warc_rdlen(const char *buf, size_t bsz);
