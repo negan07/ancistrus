@@ -48,7 +48,7 @@ diff -urN work/dnrd-2.20.4/Makefile work/dnrd-2.20.4/Makefile
 +
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
-+	@echo "$(USRSBINRCAPP)/$(STARTUP) start >/dev/null 2>&1" >> $(POSTINST)
++	@echo "$(RC) dnrd restart" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +
 +prerm:
