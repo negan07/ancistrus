@@ -1,6 +1,6 @@
-diff -urN work/openssh-8.1p1/rc_ssh work/openssh-8.1p1/rc_ssh
---- work/openssh-8.1p1/rc_ssh	1970-01-01 01:00:00.000000000 +0100
-+++ work/openssh-8.1p1/rc_ssh	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/openssh-8.4p1/rc_ssh work/openssh-8.4p1/rc_ssh
+--- work/openssh-8.4p1/rc_ssh	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-8.4p1/rc_ssh	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,214 @@
 +#!/bin/sh
 +#

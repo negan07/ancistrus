@@ -1,6 +1,6 @@
-diff -urN work/openssh-8.1p1/Makefile work/openssh-8.1p1/Makefile
---- work/openssh-8.1p1/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/openssh-8.1p1/Makefile	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/openssh-8.4p1/Makefile work/openssh-8.4p1/Makefile
+--- work/openssh-8.4p1/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-8.4p1/Makefile	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,198 @@
 +include ../Rules.mak
 +
@@ -23,7 +23,7 @@ diff -urN work/openssh-8.1p1/Makefile work/openssh-8.1p1/Makefile
 +	fi
 +
 +configure:
-+	cd $(OPEN_SSH) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --prefix=$(USRDIR) --sysconfdir=$(TMPETC) --libdir=$(LDLIB) --sharedstatedir=$(LDLIB) --bindir=$(USRSBIN) --sbindir=$(USRSBIN) --libexecdir=$(USRSBIN) --localstatedir=$(VARLIB) --disable-pkcs11 --disable-etc-default-login --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-pututline --disable-pututxline --without-hardening --without-maildir --without-bsd-auth --without-xauth --without-kerberos5 --without-shadow --with-privsep-user=root --with-privsep-path=$(VARLIB)/ssh --with-cflags --with-cflags-after --with-cppflags --with-ldflags --with-ldflags-after --with-libs --with-zlib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-ssl-dir=$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) --with-ssl-engine --with-default-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-superuser-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-pid-dir=$(TMPDIR) CFLAGS="$(CFLAGS) -Os -s -fcommon" LD=$(CC)
++	cd $(OPEN_SSH) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --prefix=$(USRDIR) --sysconfdir=$(TMPETC) --libdir=$(LDLIB) --sharedstatedir=$(LDLIB) --bindir=$(USRSBIN) --sbindir=$(USRSBIN) --libexecdir=$(USRSBIN) --localstatedir=$(VARLIB) --disable-pkcs11 --disable-security-key --disable-etc-default-login --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-pututline --disable-pututxline --without-hardening --without-maildir --without-bsd-auth --without-xauth --without-kerberos5 --without-shadow --with-privsep-user=root --with-privsep-path=$(VARLIB)/ssh --with-cflags --with-cflags-after --with-cppflags --with-ldflags --with-ldflags-after --with-libs --with-zlib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-ssl-dir=$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) --with-ssl-engine --with-default-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-superuser-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-pid-dir=$(TMPDIR) CFLAGS="$(CFLAGS) -Os -s -fcommon" LD=$(CC)
 +
 +sshd_conf:
 +	@echo "#	\$$OpenBSD: sshd_config,v 1.103 2018/02/16 02:32:40 djm Exp \$$" > $(SSHD_CONF)
@@ -147,7 +147,7 @@ diff -urN work/openssh-8.1p1/Makefile work/openssh-8.1p1/Makefile
 +	@echo "Ciphers chacha20-poly1305@openssh.com,aes128-gcm@openssh.com,aes256-gcm@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr" >> $(SSHD_CONF)
 +	@echo "HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> $(SSHD_CONF)
 +	@echo "CASignatureAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256,ssh-rsa" >> $(SSHD_CONF)
-+	@echo "KexAlgorithms ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,curve25519-sha256,curve25519-sha256@libssh.org" >> $(SSHD_CONF)
++	@echo "KexAlgorithms diffie-hellman-group16-sha512,curve25519-sha256,curve25519-sha256@libssh.org" >> $(SSHD_CONF)
 +	@echo "MACs hmac-sha2-256,hmac-sha2-512,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com" >> $(SSHD_CONF)
 +
 +install: control sshd_conf
