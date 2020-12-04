@@ -19,8 +19,8 @@
 <!--
 
 function varInit() {
-	AncdataToVisible(document.forms[0]);
 	var cf=document.forms[0];
+	AncdataToVisible(cf);
 
 	cf.testname.value="-s";
 	cf.testhost.value="netperf.bufferbloat.net";
@@ -81,6 +81,7 @@ function checkData() {
 	<td align="right"><select name="testname" size=1>
 		<option value="-s">Speed Test</option>
 		<option value="-c">Stress Test</option>
+		<option value="-i">Latency Test</option>
 	</select></td>
 </tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
