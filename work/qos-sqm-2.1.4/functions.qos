@@ -180,32 +180,23 @@ undo_modules() {
 # Write a state file to the filename given as $1. This version will extract all
 # variable names previoulsy defined in qos-sqm.conf and since it should contain all
 # used variables in addition to $ALL_MODULES & $SQM_CHECK_QDISCS this should be the complete set.
-write_defaults_vars_to_state_file() {
+write_state_file() {
     local filename
 
     filename=$1
     shift
     #write var=val couples to $filename
-    write_state_file ${filename} "$@"
+    for var in "$@"; do
+        val=$(eval echo '$'$var)
+        echo "$var=\"$val\""
+    done > ${filename}
+
     #add undo modules
     echo "ALL_UNDO_MODULES=\"${ALL_UNDO_MODULES}\"" >> ${filename}
     #add included modules
     echo "ALL_MODULES=\"${ALL_MODULES}\"" >> ${filename}
     #add check modules
     echo "SQM_CHECK_QDISCS=\"${SQM_CHECK_QDISCS}\"" >> ${filename}
-}
-
-# Write a state file to the filename given as $1. The remaining arguments are
-# variable names that should be written to the state file.
-write_state_file() {
-    local filename
-
-    filename=$1
-    shift
-    for var in "$@"; do
-        val=$(eval echo '$'$var)
-        echo "$var=\"$val\""
-    done > ${filename}
 }
 
 # find the ifb device associated with a specific interface, return nothing if no
@@ -306,6 +297,7 @@ verify_qdisc() {
     local root_string
     local args
     local IFB_MTU
+    local randnum
 
     qdisc=$1
     [ -n "$qdisc" ] || return 1
@@ -317,7 +309,8 @@ verify_qdisc() {
     fi
 
     # try heavy-weight instantiation of qdisc on ifb
-    ifb=TMP_IFB_4_SQM
+    randnum=$(tr -cd 0-9a-f < /dev/urandom 2>/dev/null | head -c 4) # use random ifb name to avoid overlaps on multiple interfaces
+    ifb=SQM_IFB_$randnum
     root_string="root" # this works for most qdiscs
     args=""
     IFB_MTU=1514
