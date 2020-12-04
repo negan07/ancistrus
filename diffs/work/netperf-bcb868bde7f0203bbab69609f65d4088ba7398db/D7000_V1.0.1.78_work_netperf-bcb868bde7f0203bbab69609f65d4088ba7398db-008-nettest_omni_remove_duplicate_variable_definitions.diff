@@ -1,0 +1,18 @@
+diff -urN work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_omni.c work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_omni.c
+--- work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_omni.c	2018-06-13 23:32:44.000000000 +0200
++++ work/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/netperf-bcb868bde7f0203bbab69609f65d4088ba7398db/src/nettest_omni.c	2020-11-27 22:23:28.443573000 +0100
+@@ -458,14 +458,6 @@
+ 
+  /* different options for the sockets				*/
+ 
+-int
+-  loc_nodelay,		/* don't/do use NODELAY	locally		*/
+-  rem_nodelay,		/* don't/do use NODELAY remotely	*/
+-  loc_sndavoid,		/* avoid send copies locally		*/
+-  loc_rcvavoid,		/* avoid recv copies locally		*/
+-  rem_sndavoid,		/* avoid send copies remotely		*/
+-  rem_rcvavoid; 	/* avoid recv_copies remotely		*/
+-
+ extern int
+   loc_tcpcork,
+   rem_tcpcork,
