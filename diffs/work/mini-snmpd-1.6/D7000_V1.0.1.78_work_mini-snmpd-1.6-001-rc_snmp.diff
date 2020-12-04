@@ -1,6 +1,6 @@
-diff -urN work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp
---- work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp	1970-01-01 01:00:00.000000000 +0100
-+++ work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/mini-snmpd-1.6/rc_snmp work/mini-snmpd-1.6/rc_snmp
+--- work/mini-snmpd-1.6/rc_snmp	1970-01-01 01:00:00.000000000 +0100
++++ work/mini-snmpd-1.6/rc_snmp	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,128 @@
 +#!/bin/sh
 +#
@@ -71,7 +71,7 @@ diff -urN work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp work/
 +	[ "${minisnmpd_auth}" != "0" ] && minisnmpd_auth="-a" || minisnmpd_auth=""
 +
 +	# Starting daemon
-+	$BIN -c "${minisnmpd_community}" -D "${minisnmpd_description}" -V "${minisnmpd_vendor}" -L "${minisnmpd_location}" -C "${minisnmpd_contact}" -t "${minisnmpd_timeout}" -i "${minisnmpd_interfaces}" -d "${minisnmpd_disks}" "${minisnmpd_ipprot}" "${minisnmpd_auth}"
++	$BIN -s -l info -c "${minisnmpd_community}" -D "${minisnmpd_description}" -V "${minisnmpd_vendor}" -L "${minisnmpd_location}" -C "${minisnmpd_contact}" -t "${minisnmpd_timeout}" -i "${minisnmpd_interfaces}" -d "${minisnmpd_disks}" "${minisnmpd_ipprot}" "${minisnmpd_auth}"
 +
 +	# Sanity check
 +	BIN_RC=$?
@@ -100,12 +100,12 @@ diff -urN work/mini-snmpd-3f0f4d93560a86358548c4f48459e9e9a8a4a6ca/rc_snmp work/
 +#BINDIR=/tmp/etc/ancdbg
 +
 +# Names
-+DAEMON=mini_snmpd
++DAEMON=mini-snmpd
 +BIN=${BINDIR}/${DAEMON}
 +ANC=${BINDIR}/anc
 +
 +# Debug running
-+[ "${2}" = "debug" ] && BIN="${BINDIR}/${DAEMON} -v -n"
++[ "${2}" = "debug" ] && BIN="${BINDIR}/${DAEMON} -l ${2} -n"
 +
 +case $1 in
 +start|restart)

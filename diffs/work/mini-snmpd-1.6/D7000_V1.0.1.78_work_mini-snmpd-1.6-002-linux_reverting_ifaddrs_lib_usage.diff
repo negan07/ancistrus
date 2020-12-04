@@ -1,0 +1,158 @@
+diff -urN work/mini-snmpd-1.6/mini-snmpd-1.6/linux.c work/mini-snmpd-1.6/mini-snmpd-1.6/linux.c
+--- work/mini-snmpd-1.6/mini-snmpd-1.6/linux.c	1970-01-01 01:00:00.000000000 +0100
++++ work/mini-snmpd-1.6/mini-snmpd-1.6/linux.c	2018-01-05 12:00:11.000000000 +0100
+@@ -31,7 +31,6 @@
+ #include <string.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+-#include <ifaddrs.h>
+ #include <errno.h>
+ #include <ctype.h>
+ #include <time.h>
+@@ -199,100 +198,65 @@
+ 
+ void get_netinfo(netinfo_t *netinfo)
+ {
+-	struct ifaddrs *ifap, *ifa;
++	int fd = socket(AF_INET, SOCK_DGRAM, 0);
++	size_t i;
++	struct ifreq ifreq;
+ 	field_t fields[MAX_NR_INTERFACES + 1];
+ 
+-	if (getifaddrs(&ifap) < 0)
+-		return;
++	memset(fields, 0, (MAX_NR_INTERFACES + 1) * sizeof(field_t));
++	for (i = 0; i < g_interface_list_length; i++) {
++		fields[i].prefix    = g_interface_list[i];
++		fields[i].len       = 12;
++		fields[i].value[0]  = &netinfo->rx_bytes[i];
++		fields[i].value[1]  = &netinfo->rx_packets[i];
++		fields[i].value[2]  = &netinfo->rx_errors[i];
++		fields[i].value[3]  = &netinfo->rx_drops[i];
++		fields[i].value[8]  = &netinfo->tx_bytes[i];
++		fields[i].value[9]  = &netinfo->tx_packets[i];
++		fields[i].value[10] = &netinfo->tx_errors[i];
++		fields[i].value[11] = &netinfo->tx_drops[i];
++
++		snprintf(ifreq.ifr_name, sizeof(ifreq.ifr_name), "%s", g_interface_list[i]);
++		if (fd == -1 || ioctl(fd, SIOCGIFFLAGS, &ifreq) == -1) {
++			netinfo->status[i] = 4;
++			continue;
++		}
+ 
+-	memset(fields, 0, sizeof(fields));
+-	memset(netinfo, 0, sizeof(*netinfo));
++		if (ifreq.ifr_flags & IFF_POINTOPOINT)
++			netinfo->if_type[i] = 23; /* ppp(23) */
++		else if (ifreq.ifr_flags & IFF_LOOPBACK)
++			netinfo->if_type[i] = 24; /* softwareLoopback(24) */
++		else
++			netinfo->if_type[i] = 6; /* ethernetCsmacd(6) */
+ 
+-	for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+-		struct sockaddr_in *addr, *mask, *bcaddr;
+-		struct sockaddr_ll *sll;
+-		int i;
++		if (ifreq.ifr_flags & IFF_UP)
++			netinfo->status[i] = (ifreq.ifr_flags & IFF_RUNNING) ? 1 : 7;
++		else
++			netinfo->status[i] = 2;
+ 
+-		if (!ifa->ifa_addr)
++		if (ioctl(fd, SIOCGIFHWADDR, &ifreq) == -1)
+ 			continue;
+ 
+-		i = find_ifname(ifa->ifa_name);
+-		if (i == -1)
+-			continue;
++		memcpy(&netinfo->mac_addr[i][0], &ifreq.ifr_hwaddr.sa_data[0], 6);
+ 
+-		switch (ifa->ifa_addr->sa_family) {
+-		case AF_INET:
+-			if (!ifa->ifa_addr || !ifa->ifa_netmask)
+-				continue;
+-
+-			addr = (struct sockaddr_in *)ifa->ifa_addr;
+-			mask = (struct sockaddr_in *)ifa->ifa_netmask;
+-			if (addr) {
+-				netinfo->in_addr[i] = ntohl(addr->sin_addr.s_addr);
+-				netinfo->in_mask[i] = ntohl(mask->sin_addr.s_addr);
+-			}
+-
+-			bcaddr = (struct sockaddr_in *)ifa->ifa_broadaddr;
+-			if (bcaddr && (ifa->ifa_flags & IFF_BROADCAST)) {
+-				netinfo->in_bcaddr[i] = ntohl(bcaddr->sin_addr.s_addr);
+-				netinfo->in_bcent[i]  = netinfo->in_bcaddr[i] ? 1 : 0;
+-			}
+-			break;
+-
+-		case AF_INET6:
+-			/* XXX: Not supported yet */
+-			break;
++		if (-1 == read_file_value(&netinfo->if_mtu[i], "/sys/class/net/%s/mtu", g_interface_list[i]))
++			netinfo->if_mtu[i] = 1500; /* Fallback */
+ 
+-		default:
+-			break;
+-		}
++		if (-1 == read_file_value(&netinfo->if_speed[i], "/sys/class/net/%s/speed", g_interface_list[i]))
++			netinfo->if_speed[i] = 1000; /* Fallback */
++		netinfo->if_speed[i] *= 1000000;     /* to bps */
+ 
+-		if (!netinfo->stats[i]) {
+-			if (ifa->ifa_flags & IFF_POINTOPOINT)
+-				netinfo->if_type[i] = 23; /* ppp(23) */
+-			else if (ifa->ifa_flags & IFF_LOOPBACK)
+-				netinfo->if_type[i] = 24; /* softwareLoopback(24) */
+-			else
+-				netinfo->if_type[i] = 6; /* ethernetCsmacd(6) */
+-
+-			if (ifa->ifa_flags & IFF_UP)
+-				netinfo->status[i] = (ifa->ifa_flags & IFF_RUNNING) ? 1 : 7;
+-			else
+-				netinfo->status[i] = 2;
+-
+-			sll = (struct sockaddr_ll *)ifa->ifa_addr;
+-			memcpy(netinfo->mac_addr[i], sll->sll_addr, sizeof(netinfo->mac_addr[i]));
+-
+-			/* XXX: Tx multicast and Rx/Tx broadcast not available atm. */
+-			fields[i].prefix    = g_interface_list[i];
+-			fields[i].len       = 12;
+-			fields[i].value[0]  = &netinfo->rx_bytes[i];
+-			fields[i].value[1]  = &netinfo->rx_packets[i];
+-			fields[i].value[2]  = &netinfo->rx_errors[i];
+-			fields[i].value[3]  = &netinfo->rx_drops[i];
+-			fields[i].value[7]  = &netinfo->rx_mc_packets[i];
+-			fields[i].value[8]  = &netinfo->tx_bytes[i];
+-			fields[i].value[9]  = &netinfo->tx_packets[i];
+-			fields[i].value[10] = &netinfo->tx_errors[i];
+-			fields[i].value[11] = &netinfo->tx_drops[i];
+-
+-			if (-1 == read_file_value(&netinfo->if_mtu[i], "/sys/class/net/%s/mtu", g_interface_list[i]))
+-				netinfo->if_mtu[i] = 1500; /* Fallback */
+-
+-			if (-1 == read_file_value(&netinfo->if_speed[i], "/sys/class/net/%s/speed", g_interface_list[i]))
+-				netinfo->if_speed[i] = 1000; /* Fallback */
+-			netinfo->if_speed[i] *= 1000000;     /* to bps */
+-
+-			netinfo->ifindex[i] = if_nametoindex(ifa->ifa_name);
+-
+-			/* XXX: Need better tracking on Linux, c.f. FreeBSD ... */
+-			netinfo->lastchange[1] = get_process_uptime();
+-			netinfo->stats[i] = 1;
+-		}
++		netinfo->ifindex[i] = if_nametoindex(ifreq.ifr_name);
++
++		/* XXX: Need better tracking on Linux, c.f. FreeBSD ... */
++		netinfo->lastchange[1] = get_process_uptime();
++		netinfo->stats[i] = 1;
+ 	}
+ 
++	if (fd != -1)
++		close(fd);
++
+ 	parse_file("/proc/net/dev", fields, NELEMS(fields), 0);
+-	freeifaddrs(ifap);
+ }
+ 
+ #endif /* __linux__ */

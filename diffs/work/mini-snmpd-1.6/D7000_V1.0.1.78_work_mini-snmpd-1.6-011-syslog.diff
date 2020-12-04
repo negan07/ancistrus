@@ -1,0 +1,12 @@
+diff -urN work/mini-snmpd-1.6/mini-snmpd-1.6/utils.c work/mini-snmpd-1.6/mini-snmpd-1.6/utils.c
+--- work/mini-snmpd-1.6/mini-snmpd-1.6/utils.c	1970-01-01 01:00:00.000000000 +0100
++++ work/mini-snmpd-1.6/mini-snmpd-1.6/utils.c	2018-01-05 12:00:11.000000000 +0100
+@@ -459,7 +459,7 @@
+ 		i += snprintf(&buf[i], len - i, ": %s", strerror(syserr));
+ 
+ 	if (g_syslog)
+-		syslog(priority, "%s", buf);
++		syslog(LOG_INFO, "10 00[MINI-SNMPD] %s", buf);
+ 	else
+ 		i = fprintf(stderr, "%s\n", buf);
+ 
