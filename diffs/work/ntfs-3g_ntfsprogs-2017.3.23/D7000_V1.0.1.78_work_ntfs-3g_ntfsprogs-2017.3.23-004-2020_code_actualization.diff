@@ -1,0 +1,4441 @@
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/fuse-lite/fuse.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/fuse-lite/fuse.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/fuse-lite/fuse.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/fuse-lite/fuse.h	2020-12-06 12:06:07.642798502 +0100
+@@ -432,6 +432,9 @@
+ 	 * non-NULL cases, the area is of _IOC_SIZE(cmd) bytes.
+ 	 *
+ 	 * Introduced in version 2.8
++	 *
++	 * Note : the unsigned long request submitted by the application        
++	 * is truncated to 32 bits, and forwarded as a signed int.
+ 	 */
+ 	int (*ioctl) (const char *, int cmd, void *arg,
+ 		      struct fuse_file_info *, unsigned int flags, void *data); 
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/fuse-lite/fuse_lowlevel.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/fuse-lite/fuse_lowlevel.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/fuse-lite/fuse_lowlevel.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/fuse-lite/fuse_lowlevel.h	2020-12-06 12:06:07.642798502 +0100
+@@ -814,6 +814,9 @@
+ 	 *
+ 	 * Introduced in version 2.8
+ 	 *
++	 * Note : the unsigned long request submitted by the application        
++	 * is truncated to 32 bits, and forwarded as a signed int.
++	 *
+ 	 * Valid replies:
+ 	 *   fuse_reply_ioctl_retry
+ 	 *   fuse_reply_ioctl
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/compat.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/compat.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/compat.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/compat.h	2020-12-06 12:06:07.646798491 +0100
+@@ -1,9 +1,10 @@
+ /*
+- * compat.h - Tweaks for Windows compatibility.
++ * compat.h - Tweaks for compatibility with non-Linux systems.
+  *
+  * Copyright (c) 2002 Richard Russon
+  * Copyright (c) 2002-2004 Anton Altaparmakov
+  * Copyright (c) 2008-2009 Szabolcs Szakacsits
++ * Copyright (c) 2019      Jean-Pierre Andre
+  *
+  * This program/include file is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU General Public License as published
+@@ -41,6 +42,20 @@
+ #define ELIBBAD ENOEXEC
+ #endif
+ 
++#ifndef ELIBACC
++#define ELIBACC ENOENT
++#endif
++
++/* xattr APIs in macOS differs from Linux ones in that they expect the special
++ * error code ENOATTR to be returned when an attribute cannot be found. So
++ * define NTFS_NOXATTR_ERRNO to the appropriate "no xattr found" errno value for
++ * the platform. */
++#if defined(__APPLE__) || defined(__DARWIN__)
++#define NTFS_NOXATTR_ERRNO ENOATTR
++#else
++#define NTFS_NOXATTR_ERRNO ENODATA
++#endif
++
+ #ifndef PATH_MAX
+ #define PATH_MAX 4096
+ #endif
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/device.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/device.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/device.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/device.h	2020-12-06 12:06:07.646798491 +0100
+@@ -111,7 +111,8 @@
+ 			s64 offset);
+ 	int (*sync)(struct ntfs_device *dev);
+ 	int (*stat)(struct ntfs_device *dev, struct stat *buf);
+-	int (*ioctl)(struct ntfs_device *dev, int request, void *argp);
++	int (*ioctl)(struct ntfs_device *dev, unsigned long request,
++			void *argp);
+ };
+ 
+ extern struct ntfs_device *ntfs_device_alloc(const char *name, const long state,
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/dir.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/dir.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/dir.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/dir.h	2020-12-06 12:06:07.646798491 +0100
+@@ -94,6 +94,7 @@
+ #define NTFS_DT_LNK		10
+ #define NTFS_DT_SOCK		12
+ #define NTFS_DT_WHT		14
++#define NTFS_DT_REPARSE		32
+ 
+ /*
+  * This is the "ntfs_filldir" function type, used by ntfs_readdir() to let
+@@ -116,6 +117,7 @@
+ int ntfs_set_ntfs_dos_name(ntfs_inode *ni, ntfs_inode *dir_ni,
+ 			const char *value, size_t size,	int flags);
+ int ntfs_remove_ntfs_dos_name(ntfs_inode *ni, ntfs_inode *dir_ni);
++int ntfs_dir_link_cnt(ntfs_inode *ni);
+ 
+ #if CACHE_INODE_SIZE
+ 
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/ioctl.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/ioctl.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/ioctl.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/ioctl.h	2020-12-06 12:06:07.646798491 +0100
+@@ -24,7 +24,12 @@
+ #ifndef IOCTL_H
+ #define IOCTL_H
+ 
+-int ntfs_ioctl(ntfs_inode *ni, int cmd, void *arg,
++/*
++ * Using an "unsigned long cmd" internally, like in <sys/ioctl.h> for Linux
++ * Note however that fuse truncates the arg to 32 bits, and that
++ * some commands (e.g. FITRIM) do not fit in a signed 32 bit field.
++ */
++int ntfs_ioctl(ntfs_inode *ni, unsigned long cmd, void *arg,
+                         unsigned int flags, void *data);
+ 
+ #endif /* IOCTL_H */
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/layout.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/layout.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/layout.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/layout.h	2020-12-06 12:06:07.646798491 +0100
+@@ -1433,6 +1433,26 @@
+ 
+ 	/* This one is for WinNT&2k. */
+ 	ACCESS_MAX_MS_ACE_TYPE		= 8,
++
++	/* Windows XP and later */
++	ACCESS_ALLOWED_CALLBACK_ACE_TYPE	= 9,
++	ACCESS_DENIED_CALLBACK_ACE_TYPE		= 10,
++	ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE	= 11,
++	ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE	= 12,
++	SYSTEM_AUDIT_CALLBACK_ACE_TYPE		= 13,
++	SYSTEM_ALARM_CALLBACK_ACE_TYPE		= 14, /* reserved */
++	SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE   = 15,
++	SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE   = 16, /* reserved */
++
++	/* Windows Vista and later */
++	SYSTEM_MANDATORY_LABEL_ACE_TYPE		= 17,
++
++	/* Windows 8 and later */
++	SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE	= 18,
++	SYSTEM_SCOPED_POLICY_ID_ACE_TYPE	= 19,
++
++	/* Windows 10 and later */
++	SYSTEM_PROCESS_TRUST_LABEL_ACE_TYPE	= 20,
+ } __attribute__((__packed__)) ACE_TYPES;
+ 
+ /**
+@@ -2383,17 +2403,23 @@
+  *
+  * 1. The least significant 16 bits (i.e. bits 0 to 15) specify the type of
+  *    the reparse point.
+- * 2. The 13 bits after this (i.e. bits 16 to 28) are reserved for future use.
+- * 3. The most significant three bits are flags describing the reparse point.
++ * 2. The 12 bits after this (i.e. bits 16 to 27) are reserved for future use.
++ * 3. The most significant four bits are flags describing the reparse point.
+  *    They are defined as follows:
++ *	bit 28: Directory bit. If set, the directory is not a surrogate
++ *		and can be used the usual way.
+  *	bit 29: Name surrogate bit. If set, the filename is an alias for
+  *		another object in the system.
+  *	bit 30: High-latency bit. If set, accessing the first byte of data will
+  *		be slow. (E.g. the data is stored on a tape drive.)
+  *	bit 31: Microsoft bit. If set, the tag is owned by Microsoft. User
+  *		defined tags have to use zero here.
++ * 4. Moreover, on Windows 10 :
++ *	Some flags may be used in bits 12 to 15 to further describe the
++ *	reparse point.
+  */
+ typedef enum {
++	IO_REPARSE_TAG_DIRECTORY	= const_cpu_to_le32(0x10000000),
+ 	IO_REPARSE_TAG_IS_ALIAS		= const_cpu_to_le32(0x20000000),
+ 	IO_REPARSE_TAG_IS_HIGH_LATENCY	= const_cpu_to_le32(0x40000000),
+ 	IO_REPARSE_TAG_IS_MICROSOFT	= const_cpu_to_le32(0x80000000),
+@@ -2413,9 +2439,16 @@
+ 	IO_REPARSE_TAG_SIS		= const_cpu_to_le32(0x80000007),
+ 	IO_REPARSE_TAG_SYMLINK		= const_cpu_to_le32(0xA000000C),
+ 	IO_REPARSE_TAG_WIM		= const_cpu_to_le32(0x80000008),
++	IO_REPARSE_TAG_DFM		= const_cpu_to_le32(0x80000016),
+ 	IO_REPARSE_TAG_WOF		= const_cpu_to_le32(0x80000017),
++	IO_REPARSE_TAG_WCI		= const_cpu_to_le32(0x80000018),
++	IO_REPARSE_TAG_CLOUD		= const_cpu_to_le32(0x9000001A),
++	IO_REPARSE_TAG_APPEXECLINK	= const_cpu_to_le32(0x8000001B),
++	IO_REPARSE_TAG_GVFS             = const_cpu_to_le32(0x9000001C),
++	IO_REPARSE_TAG_LX_SYMLINK       = const_cpu_to_le32(0xA000001D),
+ 
+ 	IO_REPARSE_TAG_VALID_VALUES	= const_cpu_to_le32(0xf000ffff),
++	IO_REPARSE_PLUGIN_SELECT	= const_cpu_to_le32(0xffff0fff),
+ } PREDEFINED_REPARSE_TAGS;
+ 
+ /**
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/param.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/param.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/param.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/param.h	2020-12-06 12:06:07.646798491 +0100
+@@ -40,6 +40,13 @@
+ };
+ 
+ /*
++ *		Parameters for formatting
++ */
++
++		/* Up to Windows 10, the cluster size was limited to 64K */
++#define NTFS_MAX_CLUSTER_SIZE 2097152 /* Windows 10 Creators allows 2MB */
++
++/*
+  *		Parameters for compression
+  */
+ 
+@@ -112,6 +119,9 @@
+  *	having access control in the file system leads to fewer requests
+  *	to the file system and fewer context switches.
+  *
++ *	Irrespective of the selected mode, cacheing is always used
++ *	in read-only mounts
++ *
+  *	Possible values for high level :
+  *		1 : no cache, kernel control (recommended)
+  *		4 : no cache, file system control
+@@ -120,7 +130,7 @@
+  *
+  *	Possible values for low level :
+  *		2 : no cache, kernel control
+- *		3 : use kernel/fuse cache, kernel control  (recommended)
++ *		3 : use kernel/fuse cache, kernel control (recommended)
+  *		5 : no cache, file system control
+  *		6 : kernel/fuse cache, file system control (OpenIndiana only)
+  *		8 : no cache, kernel control for ACLs
+@@ -131,6 +141,7 @@
+  *	of 6 is added in the mount report.
+  */
+ 
++#define TIMEOUT_RO 600 /* Attribute time out for read-only mounts */
+ #if defined(__sun) && defined(__SVR4)
+ /*
+  *	Access control by kernel is not implemented on OpenIndiana,
+@@ -143,9 +154,10 @@
+  *	Cacheing by kernel is buggy on Linux when access control is done
+  *	by the file system, and also when using hard-linked files on
+  *	the fuse high level interface.
++ *	Also ACL checks by recent kernels do not prove satisfactory.
+  */
+ #define HPERMSCONFIG 1
+-#define LPERMSCONFIG 3 /* Use 9 when ACLs are supported by fuse kernel */
++#define LPERMSCONFIG 3
+ #endif /* defined(__sun) && defined(__SVR4) */
+ 
+ #endif /* defined _NTFS_PARAM_H */
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/plugin.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/plugin.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/plugin.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/plugin.h	2020-12-06 12:06:07.646798491 +0100
+@@ -30,8 +30,9 @@
+ #ifndef _NTFS_PLUGIN_H
+ #define _NTFS_PLUGIN_H
+ 
+-#include "inode.h"
+ #include "layout.h"
++#include "inode.h"
++#include "dir.h"
+ 
+ struct fuse_file_info;
+ struct stat;
+@@ -71,10 +72,10 @@
+ 			struct fuse_file_info *fi);
+ 
+ 	/*
+-	 *	Release an open file
++	 *	Release an open file or directory
+ 	 * This is only called if fi->fh has been set to a non-null
+ 	 * value while opening. It may be used to free some context
+-	 * specific to the open file.
++	 * specific to the open file or directory
+ 	 * The returned value is zero for success or a negative errno
+ 	 * value for failure.
+ 	 */
+@@ -110,7 +111,7 @@
+ 	 *	Get a symbolic link
+ 	 * The symbolic link must be returned in an allocated buffer,
+ 	 * encoded in a zero terminated multibyte string compatible
+-	 * which the locale mount option.
++	 * with the locale mount option.
+ 	 * The returned value is zero for success or a negative errno
+ 	 * value for failure.
+ 	 */
+@@ -126,6 +127,30 @@
+ 	 */
+ 	int (*truncate)(ntfs_inode *ni, const REPARSE_POINT *reparse,
+ 			off_t size);
++	/*
++	 *	Open a directory
++	 * The field fi->flags indicates the kind of opening.
++	 * The field fi->fh may be used to store some information which
++	 * will be available to subsequent readdir(). When used
++	 * this field must be non-null and freed in release().
++	 * The returned value is zero for success and a negative errno
++	 * value for failure.
++	 */
++	int (*opendir)(ntfs_inode *ni, const REPARSE_POINT *reparse,
++			struct fuse_file_info *fi);
++
++	/*
++	 *	Get entries from a directory
++	 *
++	 * Use the filldir() function with fillctx argument to return
++	 * the directory entries.
++	 * Names "." and ".." are expected to be returned.
++	 * The returned value is zero for success and a negative errno
++	 * value for failure.
++	 */
++	int (*readdir)(ntfs_inode *ni, const REPARSE_POINT *reparse,
++			s64 *pos, void *fillctx, ntfs_filldir_t filldir,
++			struct fuse_file_info *fi);
+ } plugin_operations_t;
+ 
+ 
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/reparse.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/reparse.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/reparse.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/reparse.h	2020-12-06 12:06:07.650798482 +0100
+@@ -30,6 +30,9 @@
+ 
+ int ntfs_get_ntfs_reparse_data(ntfs_inode *ni, char *value, size_t size);
+ 
++char *ntfs_get_abslink(ntfs_volume *vol, ntfschar *junction, 
++			int count, const char *mnt_point, BOOL isdir);
++
+ REPARSE_POINT *ntfs_get_reparse_point(ntfs_inode *ni);
+ 
+ int ntfs_set_ntfs_reparse_data(ntfs_inode *ni, const char *value,
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/volume.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/volume.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/volume.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/include/ntfs-3g/volume.h	2020-12-06 12:06:07.650798482 +0100
+@@ -274,7 +274,7 @@
+ #if CACHE_LEGACY_SIZE
+ 	struct CACHE_HEADER *legacy_cache;
+ #endif
+-
++	const char *abs_mnt_point; /* Mount point */
+ };
+ 
+ extern const char *ntfs_home;
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/fuse.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/fuse.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/fuse.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/fuse.c	2020-12-06 12:06:07.650798482 +0100
+@@ -134,7 +134,6 @@
+     struct fuse *fuse;
+     fuse_req_t req;
+     char *contents;
+-    int allocated;
+     unsigned len;
+     unsigned size;
+     unsigned needlen;
+@@ -464,7 +463,7 @@
+         return NULL;
+     }
+ #endif /* __SOLARIS__ */
+-    strncpy(s, name, len);
++    memcpy(s, name, len);
+     s--;
+     *s = '/';
+ 
+@@ -2782,8 +2781,10 @@
+     fuse_finish_interrupt(f, req, &d);
+     free(path);
+ 
+-    fuse_reply_ioctl(req, err, out_buf, out_bufsz);
++    if (err >= 0) { /* not an error */
++        fuse_reply_ioctl(req, err, out_buf, out_bufsz);
+ 	goto out;
++    }
+ err:
+     reply_err(req, err);
+ out:
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/fuse_lowlevel.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/fuse_lowlevel.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/fuse_lowlevel.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/fuse_lowlevel.c	2020-12-06 12:06:07.650798482 +0100
+@@ -247,7 +247,7 @@
+     dirent->off = off;
+     dirent->namelen = namelen;
+     dirent->type = (stbuf->st_mode & 0170000) >> 12;
+-    strncpy(dirent->name, name, namelen);
++    memcpy(dirent->name, name, namelen);
+     if (padlen)
+         memset(buf + entlen, 0, padlen);
+ 
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/Makefile.am work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/Makefile.am
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/Makefile.am	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libfuse-lite/Makefile.am	2020-12-06 12:06:07.650798482 +0100
+@@ -7,7 +7,10 @@
+ 
+ libfuse_lite_la_CFLAGS=			  \
+ 	$(AM_CFLAGS) 			  \
+-	$(LIBFUSE_LITE_CFLAGS)		  \
++	$(LIBFUSE_LITE_CFLAGS)
++
++libfuse_lite_la_CPPFLAGS=		  \
++	$(AM_CPPFLAGS) 			  \
+ 	-I$(top_srcdir)/include/fuse-lite
+ 
+ libfuse_lite_la_LIBADD  = $(LIBFUSE_LITE_LIBS)
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/acls.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/acls.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/acls.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/acls.c	2020-12-06 12:06:07.650798482 +0100
+@@ -4,7 +4,7 @@
+  *	This module is part of ntfs-3g library, but may also be
+  *	integrated in tools running over Linux or Windows
+  *
+- * Copyright (c) 2007-2016 Jean-Pierre Andre
++ * Copyright (c) 2007-2017 Jean-Pierre Andre
+  *
+  * This program/include file is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU General Public License as published
+@@ -560,16 +560,34 @@
+ 			pace = (const ACCESS_ALLOWED_ACE*)
+ 				&((const char*)pacl)[offace];
+ 			acesz = le16_to_cpu(pace->size);
+-			if (((offace + acesz) > end)
+-			   || !ntfs_valid_sid(&pace->sid))
+-				 ok = FALSE;
+-			else {
+-				/* Win10 may insert garbage in the last ACE */
++			switch (pace->type) {
++			case ACCESS_ALLOWED_ACE_TYPE :
++			case ACCESS_DENIED_ACE_TYPE :
++				wantsz = ntfs_sid_size(&pace->sid) + 8;
++				if (((offace + acesz) > end)
++				    || !ntfs_valid_sid(&pace->sid)
++				    || (wantsz != acesz))
++					ok = FALSE;
++				break;
++			case SYSTEM_AUDIT_ACE_TYPE :
++			case ACCESS_ALLOWED_CALLBACK_ACE_TYPE :
++			case ACCESS_DENIED_CALLBACK_ACE_TYPE :
++			case SYSTEM_AUDIT_CALLBACK_ACE_TYPE :
++			case SYSTEM_MANDATORY_LABEL_ACE_TYPE :
++			case SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE :
++			case SYSTEM_SCOPED_POLICY_ID_ACE_TYPE :
++				/* Extra data after the SID */
+ 				wantsz = ntfs_sid_size(&pace->sid) + 8;
+-				if (((nace < (acecnt - 1))
+-					&& (wantsz != acesz))
++				if (((offace + acesz) > end)
++				    || !ntfs_valid_sid(&pace->sid)
+ 				    || (wantsz > acesz))
+ 					ok = FALSE;
++				break;
++			default :
++				/* SID at a different location */
++				if ((offace + acesz) > end)
++					ok = FALSE;
++				break;
+ 			}
+ 			offace += acesz;
+ 		}
+@@ -683,6 +701,7 @@
+ 	int acesz;
+ 	int usidsz;
+ 	int gsidsz;
++	BOOL acceptable;
+ 	const ACCESS_ALLOWED_ACE *poldace;
+ 	ACCESS_ALLOWED_ACE *pnewace;
+ 	ACCESS_ALLOWED_ACE *pauthace;
+@@ -708,6 +727,20 @@
+ 		acesz = le16_to_cpu(poldace->size);
+ 		src += acesz;
+ 		/*
++		 * Currently only ACE for file or directory access are
++		 * processed. More information needed about what to do
++		 * for other types (whose SID may be at a different location)
++		 */
++		switch (poldace->type) {
++		case ACCESS_ALLOWED_ACE_TYPE :
++		case ACCESS_DENIED_ACE_TYPE :
++			acceptable = TRUE;
++			break;
++		default :
++			acceptable = FALSE;
++			break;
++		}
++		/*
+ 		 * Extract inheritance for access, including inheritance for
+ 		 * access from an ACE with is both applied and inheritable.
+ 		 *
+@@ -721,6 +754,7 @@
+ 		 * "information."
+ 		 */
+ 		if ((poldace->flags & selection)
++		    && acceptable
+ 		    && (!fordir
+ 			|| (poldace->flags & NO_PROPAGATE_INHERIT_ACE)
+ 			|| (poldace->mask & (GENERIC_ALL | GENERIC_READ
+@@ -810,9 +844,10 @@
+ 			 * Inheritance for access, specific to
+ 			 * creator-owner (and creator-group)
+ 			 */
+-		if (fordir || !inherited
+-		   || (poldace->flags
+-			   & (CONTAINER_INHERIT_ACE | OBJECT_INHERIT_ACE))) {
++		if ((fordir || !inherited
++			|| (poldace->flags
++			   & (CONTAINER_INHERIT_ACE | OBJECT_INHERIT_ACE)))
++		    && acceptable) {
+ 			pnewace = (ACCESS_ALLOWED_ACE*)
+ 					((char*)newacl + dst);
+ 			memcpy(pnewace,poldace,acesz);
+@@ -869,7 +904,8 @@
+ 			   && !(poldace->flags & (CONTAINER_INHERIT_ACE
+ 					| NO_PROPAGATE_INHERIT_ACE)))
+ 				pnewace->flags |= INHERIT_ONLY_ACE;
+-			if ((poldace->flags & CONTAINER_INHERIT_ACE)
++			if (acceptable
++			    && (poldace->flags & CONTAINER_INHERIT_ACE)
+ 			    && !(poldace->flags & NO_PROPAGATE_INHERIT_ACE)
+ 			    && !ntfs_same_sid(&poldace->sid, ownersid)
+ 			    && !ntfs_same_sid(&poldace->sid, groupsid)) {
+@@ -3867,7 +3903,9 @@
+ 				}
+ 			}
+ 		}
+-		if (!ignore) {
++		if (((pace->type == ACCESS_ALLOWED_ACE_TYPE)
++			|| (pace->type == ACCESS_DENIED_ACE_TYPE))
++		    && !ignore) {
+ 			pxace->perms = 0;
+ 				/* specific decoding for vtx/uid/gid */
+ 			if (pxace->tag == POSIX_ACL_SPECIAL) {
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/attrib.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/attrib.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/attrib.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/attrib.c	2020-12-06 12:06:07.654798471 +0100
+@@ -5,7 +5,7 @@
+  * Copyright (c) 2002-2005 Richard Russon
+  * Copyright (c) 2002-2008 Szabolcs Szakacsits
+  * Copyright (c) 2004-2007 Yura Pakhuchiy
+- * Copyright (c) 2007-2015 Jean-Pierre Andre
++ * Copyright (c) 2007-2020 Jean-Pierre Andre
+  * Copyright (c) 2010      Erik Larsson
+  *
+  * This program/include file is free software; you can redistribute it and/or
+@@ -5850,6 +5850,9 @@
+ 				& (ATTR_IS_COMPRESSED | ATTR_IS_SPARSE);
+ 			if (spcomp)
+ 				a->compressed_size = cpu_to_sle64(na->compressed_size);
++			/* Updating sizes taints the extent holding the attr */
++			if (ctx->ntfs_ino)
++				NInoSetDirty(ctx->ntfs_ino);
+ 			if ((na->type == AT_DATA) && (na->name == AT_UNNAMED)) {
+ 				na->ni->allocated_size
+ 					= (spcomp
+@@ -6902,7 +6905,9 @@
+ 		}
+ 		switch (br % 4) {
+ 			case 3:  nr_free += lut[*(buf + br - 3)];
++			/* FALLTHRU */
+ 			case 2:  nr_free += lut[*(buf + br - 2)];
++			/* FALLTHRU */
+ 			case 1:  nr_free += lut[*(buf + br - 1)];
+ 		}
+ 	}
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/bootsect.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/bootsect.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/bootsect.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/bootsect.c	2020-12-06 12:06:07.654798471 +0100
+@@ -38,6 +38,7 @@
+ #include <errno.h>
+ #endif
+ 
++#include "param.h"
+ #include "compat.h"
+ #include "bootsect.h"
+ #include "debug.h"
+@@ -61,6 +62,7 @@
+ {
+ 	u32 i;
+ 	BOOL ret = FALSE;
++	u16 sectors_per_cluster;
+ 
+ 	ntfs_log_debug("Beginning bootsector check.\n");
+ 
+@@ -83,15 +85,27 @@
+ 	case 1: case 2: case 4: case 8: case 16: case 32: case 64: case 128:
+ 		break;
+ 	default:
+-		ntfs_log_error("Unexpected sectors per cluster value (%d).\n",
+-			       b->bpb.sectors_per_cluster);
+-		goto not_ntfs;
++		if ((b->bpb.sectors_per_cluster < 240)
++		    || (b->bpb.sectors_per_cluster > 253)) {
++			if (b->bpb.sectors_per_cluster > 128)
++				ntfs_log_error("Unexpected sectors"
++					" per cluster value (code 0x%x)\n",
++					b->bpb.sectors_per_cluster);
++			else
++				ntfs_log_error("Unexpected sectors"
++					" per cluster value (%d).\n",
++					b->bpb.sectors_per_cluster);
++			goto not_ntfs;
++		}
+ 	}
+ 
+ 	ntfs_log_debug("Checking cluster size.\n");
+-	i = (u32)le16_to_cpu(b->bpb.bytes_per_sector) * 
+-		b->bpb.sectors_per_cluster;
+-	if (i > 65536) {
++	if (b->bpb.sectors_per_cluster > 128)
++		sectors_per_cluster = 1 << (256 - b->bpb.sectors_per_cluster);
++	else
++		sectors_per_cluster = b->bpb.sectors_per_cluster;
++	i = (u32)le16_to_cpu(b->bpb.bytes_per_sector) * sectors_per_cluster;
++	if (i > NTFS_MAX_CLUSTER_SIZE) {
+ 		ntfs_log_error("Unexpected cluster size (%d).\n", i);
+ 		goto not_ntfs;
+ 	}
+@@ -171,7 +185,7 @@
+ int ntfs_boot_sector_parse(ntfs_volume *vol, const NTFS_BOOT_SECTOR *bs)
+ {
+ 	s64 sectors;
+-	u8  sectors_per_cluster;
++	u16  sectors_per_cluster;
+ 	s8  c;
+ 
+ 	/* We return -1 with errno = EINVAL on error. */
+@@ -186,7 +200,10 @@
+ 	 * below or equal the number_of_clusters) really belong in the
+ 	 * ntfs_boot_sector_is_ntfs but in this way we can just do this once.
+ 	 */
+-	sectors_per_cluster = bs->bpb.sectors_per_cluster;
++	if (bs->bpb.sectors_per_cluster > 128)
++		sectors_per_cluster = 1 << (256 - bs->bpb.sectors_per_cluster);
++	else
++		sectors_per_cluster = bs->bpb.sectors_per_cluster;
+ 	ntfs_log_debug("SectorsPerCluster = 0x%x\n", sectors_per_cluster);
+ 	if (sectors_per_cluster & (sectors_per_cluster - 1)) {
+ 		ntfs_log_error("sectors_per_cluster (%d) is not a power of 2."
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/compress.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/compress.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/compress.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/compress.c	2020-12-06 12:06:07.654798471 +0100
+@@ -491,6 +491,8 @@
+ 	 * first two checks do not detect it.
+ 	 */
+ 	if (cb == cb_end || !le16_to_cpup((le16*)cb) || dest == dest_end) {
++		if (dest_end > dest)
++			memset(dest, 0, dest_end - dest);
+ 		ntfs_log_debug("Completed. Returning success (0).\n");
+ 		return 0;
+ 	}
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/dir.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/dir.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/dir.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/dir.c	2020-12-06 12:06:07.654798471 +0100
+@@ -5,7 +5,7 @@
+  * Copyright (c) 2004-2005 Richard Russon
+  * Copyright (c) 2004-2008 Szabolcs Szakacsits
+  * Copyright (c) 2005-2007 Yura Pakhuchiy
+- * Copyright (c) 2008-2014 Jean-Pierre Andre
++ * Copyright (c) 2008-2020 Jean-Pierre Andre
+  *
+  * This program/include file is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU General Public License as published
+@@ -934,9 +934,9 @@
+ 	dt_type = NTFS_DT_UNKNOWN;
+ 	ni = ntfs_inode_open(dir_ni->vol, mref);
+ 	if (ni) {
+-		if ((attributes & FILE_ATTR_REPARSE_POINT)
+-		    && ntfs_possible_symlink(ni))
+-			dt_type = NTFS_DT_LNK;
++		if (attributes & FILE_ATTR_REPARSE_POINT)
++			dt_type = (ntfs_possible_symlink(ni)
++				? NTFS_DT_LNK : NTFS_DT_REPARSE);
+ 		else
+ 			if ((attributes & FILE_ATTR_SYSTEM)
+ 			   && !(attributes & FILE_ATTR_I30_INDEX_PRESENT))
+@@ -2792,3 +2792,82 @@
+ 	}
+ 	return (res);
+ }
++
++/*
++ *		Increment the count of subdirectories
++ *		(excluding entries with a short name)
++ */
++
++static int nlink_increment(void *nlink_ptr,
++			const ntfschar *name __attribute__((unused)),
++			const int len __attribute__((unused)),
++			const int type,
++			const s64 pos __attribute__((unused)),
++			const MFT_REF mref __attribute__((unused)),
++			const unsigned int dt_type)
++{
++	if ((dt_type == NTFS_DT_DIR) && (type != FILE_NAME_DOS))
++		(*((int*)nlink_ptr))++;
++	return (0);
++}
++
++/*
++ *		Compute the number of hard links according to Posix
++ *	For a directory count the subdirectories whose name is not
++ *		a short one, but count "." and ".."
++ *	Otherwise count the names, excluding the short ones.
++ *
++ *	if there is an error, a null count is returned.
++ */
++
++int ntfs_dir_link_cnt(ntfs_inode *ni)
++{
++	ntfs_attr_search_ctx *actx;
++	FILE_NAME_ATTR *fn;
++	s64 pos;
++	int err = 0;
++	int nlink = 0;
++
++	if (!ni) {
++		ntfs_log_error("Invalid argument.\n");
++		errno = EINVAL;
++		goto err_out;
++	}
++	if (ni->nr_extents == -1)
++		ni = ni->base_ni;
++	if (ni->mrec->flags & MFT_RECORD_IS_DIRECTORY) {
++		/*
++		 * Directory : scan the directory and count
++		 * subdirectories whose name is not DOS-only.
++		 * The directory names are ignored, but "." and ".."
++		 * are taken into account.
++		 */
++		pos = 0;
++		err = ntfs_readdir(ni, &pos, &nlink, nlink_increment);
++		if (err)
++			nlink = 0;
++	} else {
++		/*
++		 * Non-directory : search for FILE_NAME attributes,
++		 * and count those which are not DOS-only ones.
++		 */
++		actx = ntfs_attr_get_search_ctx(ni, NULL);
++		if (!actx)
++			goto err_out;
++		while (!(err = ntfs_attr_lookup(AT_FILE_NAME, AT_UNNAMED, 0,
++					CASE_SENSITIVE, 0, NULL, 0, actx))) {
++			fn = (FILE_NAME_ATTR*)((u8*)actx->attr +
++					le16_to_cpu(actx->attr->value_offset));
++			if (fn->file_name_type != FILE_NAME_DOS)
++				nlink++;
++		}
++		if (err && (errno != ENOENT))
++			nlink = 0;
++		ntfs_attr_put_search_ctx(actx);
++	}
++	if (!nlink)
++		ntfs_log_perror("Failed to compute nlink of inode %lld",
++			(long long)ni->mft_no);
++err_out :
++	return (nlink);
++}
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/index.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/index.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/index.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/index.c	2020-12-06 12:06:07.654798471 +0100
+@@ -5,7 +5,7 @@
+  * Copyright (c) 2004-2005 Richard Russon
+  * Copyright (c) 2005-2006 Yura Pakhuchiy
+  * Copyright (c) 2005-2008 Szabolcs Szakacsits
+- * Copyright (c) 2007 Jean-Pierre Andre
++ * Copyright (c) 2007-2020 Jean-Pierre Andre
+  *
+  * This program/include file is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU General Public License as published
+@@ -1563,19 +1563,32 @@
+ 			   INDEX_ENTRY *ie, INDEX_BLOCK *ib)
+ {
+ 	INDEX_ENTRY *ie_roam;
++	int freed_space;
++	BOOL full;
+ 	int ret = STATUS_ERROR;
+ 	
+ 	ntfs_log_trace("Entering\n");
+ 	
++	full = ih->index_length == ih->allocated_size;
+ 	ie_roam = ntfs_ie_dup_novcn(ie);
+ 	if (!ie_roam)
+ 		return STATUS_ERROR;
+ 
+ 	ntfs_ie_delete(ih, ie);
+ 
+-	if (ntfs_icx_parent_vcn(icx) == VCN_INDEX_ROOT_PARENT)
++	if (ntfs_icx_parent_vcn(icx) == VCN_INDEX_ROOT_PARENT) {
++		/*
++		 * Recover the space which may have been freed
++		 * while deleting an entry from root index
++		 */
++		freed_space = le32_to_cpu(ih->allocated_size)
++				- le32_to_cpu(ih->index_length);
++		if (full && (freed_space > 0) && !(freed_space & 7)) {
++			ntfs_ir_truncate(icx, cpu_to_le32(ih->index_length));
++			/* do nothing if truncation fails */
++		}
+ 		ntfs_inode_mark_dirty(icx->actx->ntfs_ino);
+-	else
++	} else
+ 		if (ntfs_ib_write(icx, ib))
+ 			goto out;
+ 	
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/inode.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/inode.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/inode.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/inode.c	2020-12-06 12:06:07.654798471 +0100
+@@ -837,7 +837,7 @@
+ 			if (!err)
+ 				err = errno;
+ 			ntfs_log_perror("Failed to open inode %lld with index",
+-				(long long)le64_to_cpu(fn->parent_directory));
++				(long long)MREF_LE(fn->parent_directory));
+ 			continue;
+ 		}
+ 		ictx = ntfs_index_ctx_get(index_ni, NTFS_INDEX_I30, 4);
+@@ -1518,14 +1518,16 @@
+ 	ntfs_attr_search_ctx *ctx;
+ 	STANDARD_INFORMATION *std_info;
+ 	FILE_NAME_ATTR *fn;
+-	const u64 *times;
++	u64 times[4];
+ 	ntfs_time now;
+ 	int cnt;
+ 	int ret;
+ 
+ 	ret = -1;
+ 	if ((size >= 8) && !(flags & XATTR_CREATE)) {
+-		times = (const u64*)value;
++		/* Copy, to avoid alignment issue encountered on ARM */
++		memcpy(times, value,
++			(size < sizeof(times) ? size : sizeof(times)));
+ 		now = ntfs_current_time();
+ 			/* update the standard information attribute */
+ 		ctx = ntfs_attr_get_search_ctx(ni, NULL);
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/ioctl.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/ioctl.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/ioctl.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/ioctl.c	2020-12-06 12:06:07.654798471 +0100
+@@ -3,7 +3,7 @@
+  *
+  *      This module is part of ntfs-3g library
+  *
+- * Copyright (c) 2014-2015 Jean-Pierre Andre
++ * Copyright (c) 2014-2019 Jean-Pierre Andre
+  * Copyright (c) 2014      Red Hat, Inc.
+  *
+  * This program/include file is free software; you can redistribute it and/or
+@@ -141,7 +141,8 @@
+ 			u64 *discard_max_bytes)
+ {
+ 	struct stat statbuf;
+-	char path1[80], path2[80];
++	char path1[40]; /* holds "/sys/dev/block/%d:%d" */
++	char path2[40 + sizeof(path1)]; /* less than 40 bytes more than path1 */
+ 	int ret;
+ 
+ 	/* Stat the backing device.  Caller has ensured it is a block device. */
+@@ -225,6 +226,24 @@
+ 	return 0;
+ }
+ 
++static inline LCN align_up(ntfs_volume *vol, LCN lcn, u64 granularity)
++{
++	u64 aligned;
++
++	aligned = (lcn << vol->cluster_size_bits) + granularity - 1;
++	aligned -= aligned % granularity;
++	return (aligned >> vol->cluster_size_bits);
++}
++
++static inline u64 align_down(ntfs_volume *vol, u64 count, u64 granularity)
++{
++	u64 aligned;
++
++	aligned = count << vol->cluster_size_bits;
++	aligned -= aligned % granularity;
++	return (aligned >> vol->cluster_size_bits);
++}
++
+ #define FSTRIM_BUFSIZ 4096
+ 
+ /* Trim the filesystem.
+@@ -255,11 +274,11 @@
+ 	 * XXX We could fix these limitations in future.
+ 	 */
+ 	if (start != 0 || len != (uint64_t)-1) {
+-		ntfs_log_debug("fstrim: setting start or length is not supported\n");
++		ntfs_log_error("fstrim: setting start or length is not supported\n");
+ 		return -EINVAL;
+ 	}
+ 	if (minlen > vol->cluster_size) {
+-		ntfs_log_debug("fstrim: minlen > cluster size is not supported\n");
++		ntfs_log_error("fstrim: minlen > cluster size is not supported\n");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -269,7 +288,7 @@
+ 	 * different.
+ 	 */
+ 	if (!NDevBlock(vol->dev)) {
+-		ntfs_log_debug("fstrim: not supported for non-block-device\n");
++		ntfs_log_error("fstrim: not supported for non-block-device\n");
+ 		return -EOPNOTSUPP;
+ 	}
+ 
+@@ -278,15 +297,12 @@
+ 	if (ret)
+ 		return ret;
+ 	if (discard_alignment != 0) {
+-		ntfs_log_debug("fstrim: backing device is not aligned for discards\n");
+-		return -EOPNOTSUPP;
+-	}
+-	if (discard_granularity > vol->cluster_size) {
+-		ntfs_log_debug("fstrim: discard granularity of backing device is larger than cluster size\n");
++		ntfs_log_error("fstrim: backing device is not aligned for discards\n");
+ 		return -EOPNOTSUPP;
+ 	}
++
+ 	if (discard_max_bytes == 0) {
+-		ntfs_log_debug("fstrim: backing device does not support discard (discard_max_bytes == 0)\n");
++		ntfs_log_error("fstrim: backing device does not support discard (discard_max_bytes == 0)\n");
+ 		return -EOPNOTSUPP;
+ 	}
+ 
+@@ -323,11 +339,14 @@
+ 		}
+ 
+ 		/* Trim the clusters in large as possible blocks, but
+-		 * not larger than discard_max_bytes.
++		 * not larger than discard_max_bytes, and compatible
++		 * with the supported trim granularity.
+ 		 */
+ 		for (start_lcn = start_buf; start_lcn < end_buf; ++start_lcn) {
+ 			if (!ntfs_bit_get(buf, start_lcn-start_buf)) {
+ 				LCN end_lcn;
++				LCN aligned_lcn;
++				u64 aligned_count;
+ 
+ 				/* Cluster 'start_lcn' is not in use,
+ 				 * find end of this run.
+@@ -338,14 +357,25 @@
+ 					  < discard_max_bytes &&
+ 					!ntfs_bit_get(buf, end_lcn-start_buf))
+ 					end_lcn++;
++				aligned_lcn = align_up(vol, start_lcn,
++						discard_granularity);
++				if (aligned_lcn >= end_lcn)
++					aligned_count = 0;
++				else {
++					aligned_count = 
++						align_down(vol,
++							end_lcn - aligned_lcn,
++							discard_granularity);
++				}
++				if (aligned_count) {
++					ret = fstrim_clusters(vol,
++						aligned_lcn, aligned_count);
++					if (ret)
++						goto free_out;
+ 
+-				ret = fstrim_clusters(vol,
+-						start_lcn, end_lcn-start_lcn);
+-				if (ret)
+-					goto free_out;
+-
+-				*trimmed += (end_lcn - start_lcn)
++					*trimmed += aligned_count
+ 						<< vol->cluster_size_bits;
++				}
+ 				start_lcn = end_lcn-1;
+ 			}
+ 		}
+@@ -359,7 +389,8 @@
+ 
+ #endif /* FITRIM && BLKDISCARD */
+ 
+-int ntfs_ioctl(ntfs_inode *ni, int cmd, void *arg __attribute__((unused)),
++int ntfs_ioctl(ntfs_inode *ni, unsigned long cmd,
++			void *arg __attribute__((unused)),
+ 			unsigned int flags __attribute__((unused)), void *data)
+ {
+ 	int ret = 0;
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/Makefile.am work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/Makefile.am
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/Makefile.am	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/Makefile.am	2020-12-06 12:06:07.650798482 +0100
+@@ -9,8 +9,8 @@
+ noinst_LTLIBRARIES = libntfs-3g.la
+ endif
+ 
+-libntfs_3g_la_CFLAGS  = $(AM_CFLAGS) -I$(top_srcdir)/include/ntfs-3g
+-libntfs_3g_la_CPPFLAGS= $(AM_CPPFLAGS) $(LIBNTFS_CPPFLAGS)
++libntfs_3g_la_CFLAGS  = $(AM_CFLAGS)
++libntfs_3g_la_CPPFLAGS= $(AM_CPPFLAGS) $(LIBNTFS_CPPFLAGS) -I$(top_srcdir)/include/ntfs-3g
+ libntfs_3g_la_LIBADD  = $(LIBNTFS_LIBS)
+ libntfs_3g_la_LDFLAGS = -version-info $(LIBNTFS_3G_VERSION) -no-undefined
+ 
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/mft.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/mft.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/mft.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/mft.c	2020-12-06 12:06:07.658798461 +0100
+@@ -5,7 +5,7 @@
+  * Copyright (c) 2004-2005 Richard Russon
+  * Copyright (c) 2004-2008 Szabolcs Szakacsits
+  * Copyright (c)      2005 Yura Pakhuchiy
+- * Copyright (c) 2014-2015 Jean-Pierre Andre
++ * Copyright (c) 2014-2018 Jean-Pierre Andre
+  *
+  * This program/include file is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU General Public License as published
+@@ -1389,16 +1389,27 @@
+ 			 */
+ 		if (ext_ni) {
+ 			/*
+-			 * Make sure record 15 is a base extent and has
+-			 * no extents.
+-			 * Also make sure it has no name : a base inode with
+-			 * no extents and no name cannot be in use.
+-			 * Otherwise apply standard procedure.
++			 * Make sure record 15 is a base extent and it has
++			 * no name. A base inode with no name cannot be in use.
++			 * The test based on base_mft_record fails for
++			 * extents of MFT, so we need a special check.
++			 * If already used, apply standard procedure.
+ 			 */
+    			if (!ext_ni->mrec->base_mft_record
+-			    && !ext_ni->nr_extents)
++			    && !ext_ni->mrec->link_count)
+ 				forced_mft_data = TRUE;
+ 			ntfs_inode_close(ext_ni);
++			/* Double-check, in case it is used for MFT */
++			if (forced_mft_data && base_ni->nr_extents) {
++				int i;
++
++				for (i=0; i<base_ni->nr_extents; i++) {
++					if (base_ni->extent_nis[i]
++					    && (base_ni->extent_nis[i]->mft_no
++							== FILE_mft_data))
++						forced_mft_data = FALSE;
++   				}
++			}
+ 		}
+ 	}
+ 	if (forced_mft_data)
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/object_id.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/object_id.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/object_id.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/object_id.c	2020-12-06 12:06:07.658798461 +0100
+@@ -3,7 +3,7 @@
+  *
+  *	This module is part of ntfs-3g library
+  *
+- * Copyright (c) 2009 Jean-Pierre Andre
++ * Copyright (c) 2009-2019 Jean-Pierre Andre
+  *
+  * This program/include file is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU General Public License as published
+@@ -63,9 +63,13 @@
+  *	significant byte first, and the six fields be compared individually
+  *	for ordering. RFC 4122 does not define the internal representation.
+  *
++ *	Windows apparently stores the first three fields in little endian
++ *	order, and the last two fields in big endian order.
++ *
+  *	Here we always copy disk images with no endianness change,
+  *	and, for indexing, GUIDs are compared as if they were a sequence
+- *	of four unsigned 32 bit integers.
++ *	of four little-endian unsigned 32 bit integers (as Windows
++ *	does it that way.)
+  *
+  * --------------------- begin from RFC 4122 ----------------------
+  * Consider each field of the UUID to be an unsigned integer as shown
+@@ -329,7 +333,7 @@
+ 
+ 	na = ntfs_attr_open(ni, AT_OBJECT_ID, AT_UNNAMED, 0);
+ 	if (na) {
+-
++		memset(&old_attr, 0, sizeof(OBJECT_ID_ATTR));
+ 			/* remove the existing index entry */
+ 		oldsize = remove_object_id_index(na,xo,&old_attr);
+ 		if (oldsize < 0)
+@@ -349,10 +353,12 @@
+ 					res = -1;
+ 				}
+ 			}
+-				/* write index part if provided */
++				/* overwrite index data with new value */
++			memcpy(&old_attr, value,
++				(size < sizeof(OBJECT_ID_ATTR)
++					? size : sizeof(OBJECT_ID_ATTR)));
+ 			if (!res
+-			    && ((size < sizeof(OBJECT_ID_ATTR))
+-				 || set_object_id_index(ni,xo,value))) {
++			    && set_object_id_index(ni,xo,&old_attr)) {
+ 				/*
+ 				 * If cannot index, try to remove the object
+ 				 * id and log the error. There will be an
+@@ -500,9 +506,11 @@
+ /*
+  *		Set the object id from an extended attribute
+  *
+- *	If the size is 64, the attribute and index are set.
+- *	else if the size is not less than 16 only the attribute is set.
+- *	The object id index is set accordingly.
++ *	The first 16 bytes are the new object id, they can be followed
++ *	by the birth volume id, the birth object id and the domain id.
++ *	If they are not present, their previous value is kept.
++ *	Only the object id is stored into the attribute, all the fields
++ *	are stored into the index.
+  *
+  *	Returns 0, or -1 if there is a problem
+  */
+@@ -519,10 +527,12 @@
+ 	if (ni && value && (size >= sizeof(GUID))) {
+ 		xo = open_object_id_index(ni->vol);
+ 		if (xo) {
+-			/* make sure the GUID was not used somewhere */
++			/* make sure the GUID was not used elsewhere */
+ 			memcpy(&key.object_id, value, sizeof(GUID));
+-			if (ntfs_index_lookup(&key,
+-					sizeof(OBJECT_ID_INDEX_KEY), xo)) {
++			if ((ntfs_index_lookup(&key,
++					sizeof(OBJECT_ID_INDEX_KEY), xo))
++			    || (MREF_LE(((struct OBJECT_ID_INDEX*)xo->entry)
++					->data.file_id) == ni->mft_no)) {
+ 				ntfs_index_ctx_reinit(xo);
+ 				res = add_object_id(ni, flags);
+ 				if (!res) {
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/realpath.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/realpath.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/realpath.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/realpath.c	2020-12-06 12:06:07.658798461 +0100
+@@ -45,8 +45,8 @@
+ {
+ 	FILE	*f;
+ 	size_t	sz;
+-	char	path[MAPPERNAMELTH + 24];
+ 	char	name[MAPPERNAMELTH + 16];
++	char	path[sizeof(name) + 16];
+ 	char	*res = NULL;
+ 
+ 	snprintf(path, sizeof(path), "/sys/block/%s/dm/name", ptname);
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/reparse.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/reparse.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/reparse.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/reparse.c	2020-12-06 12:06:07.658798461 +0100
+@@ -604,7 +604,7 @@
+  *		or NULL if there were some problem, as described by errno
+  */
+ 
+-static char *ntfs_get_abslink(ntfs_volume *vol, ntfschar *junction,
++char *ntfs_get_abslink(ntfs_volume *vol, ntfschar *junction,
+ 			int count, const char *mnt_point, BOOL isdir)
+ {
+ 	char *target;
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/security.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/security.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/security.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/security.c	2020-12-06 12:06:07.662798451 +0100
+@@ -3048,13 +3048,13 @@
+ 				free(oldattr);
+ 			}
+ 		}
+-		allowed = FALSE;
+-		if (gotowner) {
+ /* TODO : use CAP_FOWNER process capability */
+-			if (!processuid || (processuid == uid))
+-				allowed = TRUE;
+-			else
+-				errno = EPERM;
++		if (gotowner
++		    && (!processuid || (processuid == uid)))
++			allowed = TRUE;
++		else {
++			allowed = FALSE;
++			errno = EPERM;
+ 		}
+ 	}
+ 	return (allowed);
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/unix_io.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/unix_io.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/unix_io.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/unix_io.c	2020-12-06 12:06:07.662798451 +0100
+@@ -53,6 +53,9 @@
+ #ifdef HAVE_LINUX_FD_H
+ #include <linux/fd.h>
+ #endif
++#ifdef HAVE_LINUX_FS_H
++#include <linux/fs.h>
++#endif
+ 
+ #include "types.h"
+ #include "mst.h"
+@@ -140,8 +143,26 @@
+ 	*(int*)dev->d_private = open(dev->d_name, flags);
+ 	if (*(int*)dev->d_private == -1) {
+ 		err = errno;
++			/* if permission error and rw, retry read-only */
++		if ((err == EACCES) && ((flags & O_RDWR) == O_RDWR))
++			err = EROFS;
+ 		goto err_out;
+ 	}
++#ifdef HAVE_LINUX_FS_H
++		/* Check whether the device was forced read-only */
++	if (NDevBlock(dev) && ((flags & O_RDWR) == O_RDWR)) {
++		int r;
++		int state;
++
++		r = ioctl(DEV_FD(dev), BLKROGET, &state);
++		if (!r && state) {
++			err = EROFS;
++			if (close(DEV_FD(dev)))
++				err = errno;
++			goto err_out;
++   		}
++	}
++#endif
+ 	
+ 	if ((flags & O_RDWR) != O_RDWR)
+ 		NDevSetReadOnly(dev);
+@@ -348,8 +369,8 @@
+  *
+  * Returns:
+  */
+-static int ntfs_device_unix_io_ioctl(struct ntfs_device *dev, int request,
+-		void *argp)
++static int ntfs_device_unix_io_ioctl(struct ntfs_device *dev,
++		unsigned long request, void *argp)
+ {
+ 	return ioctl(DEV_FD(dev), request, argp);
+ }
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/volume.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/volume.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/volume.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/volume.c	2020-12-06 12:06:07.662798451 +0100
+@@ -529,7 +529,7 @@
+ 						dev->d_name);
+ 				goto error_exit;
+ 			} else {
+-				ntfs_log_info("Can only open '%s' as read-only\n",
++				ntfs_log_info("Error opening '%s' read-write\n",
+ 						dev->d_name);
+ 				NVolSetReadOnly(vol);
+ 			}
+@@ -959,7 +959,8 @@
+ 		vol->mftmirr_size = l;
+ 	}
+ 	ntfs_log_debug("Comparing $MFTMirr to $MFT...\n");
+-	for (i = 0; i < vol->mftmirr_size; ++i) {
++		/* Windows 10 does not update the full $MFTMirr any more */
++	for (i = 0; (i < vol->mftmirr_size) && (i < FILE_first_user); ++i) {
+ 		MFT_RECORD *mrec, *mrec2;
+ 		const char *ESTR[12] = { "$MFT", "$MFTMirr", "$LogFile",
+ 			"$Volume", "$AttrDef", "root directory", "$Bitmap",
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/win32_io.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/win32_io.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/win32_io.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/win32_io.c	2020-12-06 12:06:07.662798451 +0100
+@@ -1847,14 +1847,14 @@
+ 	return -1;
+ }
+ 
+-static int ntfs_device_win32_ioctl(struct ntfs_device *dev, int request,
+-		void *argp)
++static int ntfs_device_win32_ioctl(struct ntfs_device *dev,
++		unsigned long request, void *argp)
+ {
+ #if defined(BLKGETSIZE) | defined(BLKGETSIZE64)
+ 	win32_fd *fd = (win32_fd *)dev->d_private;
+ #endif
+ 
+-	ntfs_log_trace("win32_ioctl(%d) called.\n", request);
++	ntfs_log_trace("win32_ioctl(0x%lx) called.\n", request);
+ 	switch (request) {
+ #if defined(BLKGETSIZE)
+ 	case BLKGETSIZE:
+@@ -1897,7 +1897,7 @@
+ 		return 0;
+ #endif
+ 	default:
+-		ntfs_log_debug("unimplemented ioctl %d.\n", request);
++		ntfs_log_debug("unimplemented ioctl 0x%lx.\n", request);
+ 		errno = EOPNOTSUPP;
+ 		return -1;
+ 	}
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/xattrs.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/xattrs.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/xattrs.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/libntfs-3g/xattrs.c	2020-12-06 12:06:07.662798451 +0100
+@@ -470,6 +470,15 @@
+ 
+ #endif /* XATTR_MAPPINGS */
+ 
++/*
++ *		Get an NTFS attribute into an extended attribute
++ *
++ *	Returns the non-negative size of attribute if successful,
++ *	        or negative, with errno set, when fails
++ *	Note : the size is returned even if no buffer is provided
++ *	for returning the attribute, or if it is zero-sized.
++ */
++
+ int ntfs_xattr_system_getxattr(struct SECURITY_CONTEXT *scx,
+ 			enum SYSTEMXATTRS attr,
+ 			ntfs_inode *ni, ntfs_inode *dir_ni,
+@@ -483,12 +492,6 @@
+ #endif
+ #endif
+ 
+-				/*
+-				 * the returned value is the needed
+-				 * size. If it is too small, no copy
+-				 * is done, and the caller has to
+-				 * issue a new call with correct size.
+-				 */
+ 	switch (attr) {
+ 	case XATTR_NTFS_ACL :
+ 		res = ntfs_get_ntfs_acl(scx, ni, value, size);
+@@ -596,6 +599,13 @@
+ 	return (res);
+ }
+ 
++/*
++ *		Set an NTFS attribute from an extended attribute
++ *
++ *	Returns 0 if successful,
++ *	        non-zero, with errno set, when fails
++ */
++
+ int ntfs_xattr_system_setxattr(struct SECURITY_CONTEXT *scx,
+ 			enum SYSTEMXATTRS attr,
+ 			ntfs_inode *ni, ntfs_inode *dir_ni,
+@@ -669,8 +679,10 @@
+ 	case XATTR_NTFS_EFSINFO :
+ 		if (ni->vol->efs_raw)
+ 			res = ntfs_set_efs_info(ni, value, size, flags);
+-		else
++		else {
++			errno = EPERM;
+ 			res = -EPERM;
++		}
+ 		break;
+ 	case XATTR_NTFS_REPARSE_DATA :
+ 		res = ntfs_set_ntfs_reparse_data(ni, value, size, flags);
+@@ -683,8 +695,10 @@
+ 		/* warning : this closes both inodes */
+ 			res = ntfs_set_ntfs_dos_name(ni, dir_ni, value,
+ 						size, flags);
+-		else
++		else {
++			errno = EINVAL;
+ 			res = -errno;
++		}
+ 		break;
+ 	case XATTR_NTFS_TIMES:
+ 		res = ntfs_inode_set_times(ni, value, size, flags);
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.am work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.am
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.am	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/Makefile.am	2020-12-06 12:06:07.662798451 +0100
+@@ -146,8 +146,8 @@
+ 
+ if ENABLE_MOUNT_HELPER
+ install-exec-hook:
+-	$(INSTALL) -d $(DESTDIR)/sbin
+-	$(LN_S) -f $(sbindir)/mkntfs $(DESTDIR)/sbin/mkfs.ntfs
++	$(INSTALL) -d $(DESTDIR)/$(sbindir)
++	$(LN_S) -f $(sbindir)/mkntfs $(DESTDIR)$(sbindir)/mkfs.ntfs
+ 
+ install-data-hook:
+ 	$(INSTALL) -d $(DESTDIR)$(man8dir)
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/mkntfs.8.in work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/mkntfs.8.in
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/mkntfs.8.in	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/mkntfs.8.in	2020-12-06 12:06:07.662798451 +0100
+@@ -132,7 +132,7 @@
+ .TP
+ \fB\-c\fR, \fB\-\-cluster\-size\fR BYTES
+ Specify the size of clusters in bytes. Valid cluster size values are powers of
+-two, with at least 256, and at most 65536 bytes per cluster. If omitted,
++two, with at least 256, and at most 2097152 bytes (2MB) per cluster. If omitted,
+ .B mkntfs
+ uses 4096 bytes as the default cluster size.
+ .sp
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/mkntfs.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/mkntfs.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/mkntfs.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/mkntfs.c	2020-12-06 12:06:07.662798451 +0100
+@@ -6,7 +6,7 @@
+  * Copyright (c) 2002-2006 Szabolcs Szakacsits
+  * Copyright (c) 2005      Erik Sornes
+  * Copyright (c) 2007      Yura Pakhuchiy
+- * Copyright (c) 2010-2014 Jean-Pierre Andre
++ * Copyright (c) 2010-2018 Jean-Pierre Andre
+  *
+  * This utility will create an NTFS 1.2 or 3.1 volume on a user
+  * specified (block) device.
+@@ -119,6 +119,7 @@
+ #	endif
+ #endif
+ 
++#include "param.h"
+ #include "security.h"
+ #include "types.h"
+ #include "attrib.h"
+@@ -287,7 +288,7 @@
+ 	ntfs_log_info("Copyright (c) 2002-2006 Szabolcs Szakacsits\n");
+ 	ntfs_log_info("Copyright (c) 2005      Erik Sornes\n");
+ 	ntfs_log_info("Copyright (c) 2007      Yura Pakhuchiy\n");
+-	ntfs_log_info("Copyright (c) 2010-2014 Jean-Pierre Andre\n");
++	ntfs_log_info("Copyright (c) 2010-2018 Jean-Pierre Andre\n");
+ 	ntfs_log_info("\n%s\n%s%s\n", ntfs_gpl, ntfs_bugs, ntfs_home);
+ }
+ 
+@@ -669,7 +670,7 @@
+ 			break;
+ 		case 'L':
+ 			if (!opts2->label) {
+-				opts2->label = argv[optind-1];
++				opts2->label = optarg;
+ 			} else {
+ 				ntfs_log_error("You may only specify the label "
+ 						"once.\n");
+@@ -3719,11 +3720,11 @@
+ 		/*
+ 		 * For huge volumes, grow the cluster size until the number of
+ 		 * clusters fits into 32 bits or the cluster size exceeds the
+-		 * maximum limit of 64kiB.
++		 * maximum limit of NTFS_MAX_CLUSTER_SIZE.
+ 		 */
+ 		while (volume_size >> (ffs(vol->cluster_size) - 1 + 32)) {
+ 			vol->cluster_size <<= 1;
+-			if (vol->cluster_size > 65535) {
++			if (vol->cluster_size >= NTFS_MAX_CLUSTER_SIZE) {
+ 				ntfs_log_error("Device is too large to hold an "
+ 						"NTFS volume (maximum size is "
+ 						"256TiB).\n");
+@@ -3744,15 +3745,18 @@
+ 				"to, or larger than, the sector size.\n");
+ 		return FALSE;
+ 	}
+-	if (vol->cluster_size > 128 * (u32)opts.sector_size) {
++		/* Before Windows 10 Creators, the limit was 128 */
++	if (vol->cluster_size > 4096 * (u32)opts.sector_size) {
+ 		ntfs_log_error("The cluster size is invalid.  It cannot be "
+-				"more that 128 times the size of the sector "
++				"more that 4096 times the size of the sector "
+ 				"size.\n");
+ 		return FALSE;
+ 	}
+-	if (vol->cluster_size > 65536) {
++	if (vol->cluster_size > NTFS_MAX_CLUSTER_SIZE) {
+ 		ntfs_log_error("The cluster size is invalid.  The maximum "
+-			"cluster size is 65536 bytes (64kiB).\n");
++			"cluster size is %lu bytes (%lukiB).\n",
++			(unsigned long)NTFS_MAX_CLUSTER_SIZE,
++			(unsigned long)(NTFS_MAX_CLUSTER_SIZE >> 10));
+ 		return FALSE;
+ 	}
+ 	vol->cluster_size_bits = ffs(vol->cluster_size) - 1;
+@@ -4387,6 +4391,7 @@
+ 	u8 *sd;
+ 	FILE_ATTR_FLAGS extend_flags;
+ 	VOLUME_FLAGS volume_flags = const_cpu_to_le16(0);
++	int sectors_per_cluster;
+ 	int nr_sysfiles;
+ 	int buf_sds_first_size;
+ 	char *buf_sds;
+@@ -4639,8 +4644,11 @@
+ 	 * already inserted, so no need to worry about these things.
+ 	 */
+ 	bs->bpb.bytes_per_sector = cpu_to_le16(opts.sector_size);
+-	bs->bpb.sectors_per_cluster = (u8)(g_vol->cluster_size /
+-			opts.sector_size);
++	sectors_per_cluster = g_vol->cluster_size / opts.sector_size;
++	if (sectors_per_cluster > 128)
++		bs->bpb.sectors_per_cluster = 257 - ffs(sectors_per_cluster);
++	else
++		bs->bpb.sectors_per_cluster = sectors_per_cluster;
+ 	bs->bpb.media_type = 0xf8; /* hard disk */
+ 	bs->bpb.sectors_per_track = cpu_to_le16(opts.sectors_per_track);
+ 	ntfs_log_debug("sectors per track = %ld (0x%lx)\n",
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscat.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscat.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscat.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscat.c	2020-12-06 12:06:07.662798451 +0100
+@@ -236,6 +236,7 @@
+ 						optarg);
+ 				usage();
+ 			}
++			break;
+ 
+ 		case 'q':
+ 			opts.quiet++;
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsclone.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsclone.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsclone.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsclone.c	2020-12-06 12:06:07.662798451 +0100
+@@ -3,7 +3,7 @@
+  *
+  * Copyright (c) 2003-2006 Szabolcs Szakacsits
+  * Copyright (c) 2004-2006 Anton Altaparmakov
+- * Copyright (c) 2010-2016 Jean-Pierre Andre
++ * Copyright (c) 2010-2018 Jean-Pierre Andre
+  * Special image format support copyright (c) 2004 Per Olofsson
+  *
+  * Clone NTFS data and/or metadata to a sparse file, image, device or stdout.
+@@ -71,6 +71,7 @@
+  */
+ #define NTFS_DO_NOT_CHECK_ENDIANS
+ 
++#include "param.h"
+ #include "debug.h"
+ #include "types.h"
+ #include "support.h"
+@@ -270,7 +271,6 @@
+ 
+ #define LAST_METADATA_INODE	11
+ 
+-#define NTFS_MAX_CLUSTER_SIZE	65536
+ #define NTFS_SECTOR_SIZE	  512
+ 
+ #define rounded_up_division(a, b) (((a) + (b - 1)) / (b))
+@@ -393,7 +393,7 @@
+ 		   "Efficiently clone, image, restore or rescue an NTFS Volume.\n\n"
+ 		   "Copyright (c) 2003-2006 Szabolcs Szakacsits\n"
+ 		   "Copyright (c) 2004-2006 Anton Altaparmakov\n"
+-		   "Copyright (c) 2010-2016 Jean-Pierre Andre\n\n");
++		   "Copyright (c) 2010-2018 Jean-Pierre Andre\n\n");
+ 	fprintf(stderr, "%s\n%s%s", ntfs_gpl, ntfs_bugs, ntfs_home);
+ 	exit(0);
+ }
+@@ -465,6 +465,7 @@
+ 			break;
+ 		case 'O':
+ 			opt.overwrite++;
++			/* FALLTHRU */
+ 		case 'o':
+ 			if (opt.output)
+ 				usage(1);
+@@ -756,7 +757,7 @@
+ 
+ static void copy_cluster(int rescue, u64 rescue_lcn, u64 lcn)
+ {
+-	char buff[NTFS_MAX_CLUSTER_SIZE]; /* overflow checked at mount time */
++	char *buff;
+ 	/* vol is NULL if opt.restore_image is set */
+ 	s32 csize = le32_to_cpu(image_hdr.cluster_size);
+ 	BOOL backup_bootsector;
+@@ -773,6 +774,9 @@
+ 	}
+ 
+ 	rescue_pos = (off_t)(rescue_lcn * csize);
++	buff = (char*)ntfs_malloc(csize);
++	if (!buff)
++		err_exit("Not enough memory");
+ 
+ 		/* possible partial cluster holding the backup boot sector */
+ 	backup_bootsector = (lcn + 1)*csize >= full_device_size;
+@@ -858,6 +862,7 @@
+ 		perr_printf("Write failed");
+ #endif
+ 	}
++	free(buff);
+ }
+ 
+ static s64 lseek_out(int fd, s64 pos, int mode)
+@@ -995,7 +1000,11 @@
+ 				 struct progress_bar *progress, u64 *p_counter)
+ {
+ 	s64 i;
+-	char buff[NTFS_MAX_CLUSTER_SIZE];
++	char *buff;
++
++	buff = (char*)ntfs_malloc(csize);
++	if (!buff)
++		err_exit("Not enough memory");
+ 
+ 	memset(buff, 0, csize);
+ 
+@@ -1004,6 +1013,7 @@
+ 			perr_exit("write_all");
+ 		progress_update(progress, ++(*p_counter));
+ 	}
++	free(buff);
+ }
+ 
+ static void restore_image(void)
+@@ -1492,11 +1502,12 @@
+ 
+ static void copy_wipe_mft(ntfs_walk_clusters_ctx *image, runlist *rl)
+ {
+-	char buff[NTFS_MAX_CLUSTER_SIZE]; /* overflow checked at mount time */
++	char *buff;
+ 	void *fd;
+ 	s64 mft_no;
+ 	u32 mft_record_size;
+ 	u32 csize;
++	u32 buff_size;
+ 	u32 bytes_per_sector;
+ 	u32 records_per_set;
+ 	u32 clusters_per_set;
+@@ -1514,14 +1525,21 @@
+ 		/*
+ 		 * Depending on the sizes, there may be several records
+ 		 * per cluster, or several clusters per record.
++		 * Anyway, records are read and rescued by full clusters.
+ 		 */
+ 	if (csize >= mft_record_size) {
+ 		records_per_set = csize/mft_record_size;
+ 		clusters_per_set = 1;
++		buff_size = csize;
+ 	} else {
+ 		clusters_per_set = mft_record_size/csize;
+ 		records_per_set = 1;
++		buff_size = mft_record_size;
+ 	}
++	buff = (char*)ntfs_malloc(buff_size);
++	if (!buff)
++		err_exit("Not enough memory");
++
+ 	mft_no = 0;
+ 	ri = rj = 0;
+ 	wi = wj = 0;
+@@ -1554,6 +1572,7 @@
+ 		}
+ 	}
+ 	image->current_lcn = current_lcn;
++	free(buff);
+ }
+ 
+ /*
+@@ -1566,10 +1585,11 @@
+ 
+ static void copy_wipe_i30(ntfs_walk_clusters_ctx *image, runlist *rl)
+ {
+-	char buff[NTFS_MAX_CLUSTER_SIZE]; /* overflow checked at mount time */
++	char *buff;
+ 	void *fd;
+ 	u32 indx_record_size;
+ 	u32 csize;
++	u32 buff_size;
+ 	u32 bytes_per_sector;
+ 	u32 records_per_set;
+ 	u32 clusters_per_set;
+@@ -1586,15 +1606,22 @@
+ 		/*
+ 		 * Depending on the sizes, there may be several records
+ 		 * per cluster, or several clusters per record.
++		 * Anyway, records are read and rescued by full clusters.
+ 		 */
+ 	indx_record_size = image->ni->vol->indx_record_size;
+ 	if (csize >= indx_record_size) {
+ 		records_per_set = csize/indx_record_size;
+ 		clusters_per_set = 1;
++		buff_size = csize;
+ 	} else {
+ 		clusters_per_set = indx_record_size/csize;
+ 		records_per_set = 1;
++		buff_size = indx_record_size;
+ 	}
++	buff = (char*)ntfs_malloc(buff_size);
++	if (!buff)
++		err_exit("Not enough memory");
++
+ 	ri = rj = 0;
+ 	wi = wj = 0;
+ 	if (rl[ri].length)
+@@ -1627,6 +1654,7 @@
+ 		}
+ 	}
+ 	image->current_lcn = current_lcn;
++	free(buff);
+ }
+ 
+ static void dump_clusters(ntfs_walk_clusters_ctx *image, runlist *rl)
+@@ -1711,10 +1739,17 @@
+ 
+ 		for (j = 0; j < lcn_length; j++) {
+ 			u64 k = (u64)lcn + j;
+-			if (ntfs_bit_get_and_set(lcn_bitmap.bm, k, 1))
+-				err_exit("Cluster %llu referenced twice!\n"
+-					 "You didn't shutdown your Windows "
+-					 "properly?\n", (unsigned long long)k);
++			if (ntfs_bit_get_and_set(lcn_bitmap.bm, k, 1)) {
++				if (opt.ignore_fs_check)
++					Printf("Cluster %llu is referenced"
++						" twice!\n",
++						(unsigned long long)k);
++				else
++					err_exit("Cluster %llu referenced"
++						" twice!\nYou didn't shutdown"
++						" your Windows properly?\n",
++						(unsigned long long)k);
++			}
+ 		}
+ 
+ 		if (!opt.metadata_image)
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscluster.8.in work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscluster.8.in
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscluster.8.in	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscluster.8.in	2020-12-06 12:06:07.666798441 +0100
+@@ -69,7 +69,7 @@
+ .TP
+ \fB\-q\fR, \fB\-\-quiet\fR
+ Reduce the amount of output to a minimum.  Naturally, it doesn't make sense to
+-combine this option with
++combine this option with \fB\-\-verbose\fR
+ .TP
+ \fB\-s\fR, \fB\-\-sector\fR RANGE
+ Any files whose data is in this range of sectors will be displayed.
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscp.8.in work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscp.8.in
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscp.8.in	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscp.8.in	2020-12-06 12:06:07.666798441 +0100
+@@ -59,6 +59,10 @@
+ \fB\-q\fR, \fB\-\-quiet\fR
+ Suppress some debug/warning/error messages.
+ .TP
++\fB\-t\fR, \fB\-\-timestamp\fR
++Copy the modification time of source_file to destination. This is
++not compatible with \fB\-\-attr\-name\fR and \fB\-\-attribute\fR.
++.TP
+ \fB\-V\fR, \fB\-\-version\fR
+ Show the version number, copyright and license
+ .BR ntfscp .
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscp.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscp.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscp.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfscp.c	2020-12-06 12:06:07.666798441 +0100
+@@ -4,7 +4,7 @@
+  * Copyright (c) 2004-2007 Yura Pakhuchiy
+  * Copyright (c) 2005 Anton Altaparmakov
+  * Copyright (c) 2006 Hil Liao
+- * Copyright (c) 2014 Jean-Pierre Andre
++ * Copyright (c) 2014-2019 Jean-Pierre Andre
+  *
+  * This utility will copy file to an NTFS volume.
+  *
+@@ -58,6 +58,7 @@
+ #include "debug.h"
+ /* #include "version.h" */
+ #include "logging.h"
++#include "ntfstime.h"
+ #include "misc.h"
+ 
+ struct options {
+@@ -69,6 +70,7 @@
+ 	int		 quiet;		/* Less output */
+ 	int		 verbose;	/* Extra output */
+ 	int		 minfragments;	/* Do minimal fragmentation */
++	int		 timestamp;	/* Copy the modification time */
+ 	int		 noaction;	/* Do not write to disk */
+ 	ATTR_TYPES	 attribute;	/* Write to this attribute. */
+ 	int		 inode;		/* Treat dest_file as inode number. */
+@@ -129,6 +131,7 @@
+ 		"    -N, --attr-name NAME  Write to attribute with this name\n"
+ 		"    -n, --no-action       Do not write to disk\n"
+ 		"    -q, --quiet           Less output\n"
++		"    -t, --timestamp       Copy the modification time\n"
+ 		"    -V, --version         Version information\n"
+ 		"    -v, --verbose         More output\n\n",
+ 		EXEC_NAME);
+@@ -146,7 +149,7 @@
+  */
+ static int parse_options(int argc, char **argv)
+ {
+-	static const char *sopt = "-a:ifh?mN:no:qVv";
++	static const char *sopt = "-a:ifh?mN:no:qtVv";
+ 	static const struct option lopt[] = {
+ 		{ "attribute",	required_argument,	NULL, 'a' },
+ 		{ "inode",	no_argument,		NULL, 'i' },
+@@ -156,6 +159,7 @@
+ 		{ "attr-name",	required_argument,	NULL, 'N' },
+ 		{ "no-action",	no_argument,		NULL, 'n' },
+ 		{ "quiet",	no_argument,		NULL, 'q' },
++		{ "timestamp",	no_argument,		NULL, 't' },
+ 		{ "version",	no_argument,		NULL, 'V' },
+ 		{ "verbose",	no_argument,		NULL, 'v' },
+ 		{ NULL,		0,			NULL, 0   }
+@@ -175,6 +179,7 @@
+ 	opts.attr_name = NULL;
+ 	opts.inode = 0;
+ 	opts.attribute = AT_DATA;
++	opts.timestamp = 0;
+ 
+ 	opterr = 0; /* We'll handle the errors, thank you. */
+ 
+@@ -235,6 +240,9 @@
+ 			opts.quiet++;
+ 			ntfs_log_clear_levels(NTFS_LOG_LEVEL_QUIET);
+ 			break;
++		case 't':
++			opts.timestamp++;
++			break;
+ 		case 'V':
+ 			ver++;
+ 			break;
+@@ -284,6 +292,12 @@
+ 					"at the same time.\n");
+ 			err++;
+ 		}
++		if (opts.timestamp
++		    && (opts.attr_name || (opts.attribute != AT_DATA))) {
++			ntfs_log_error("Setting --timestamp is only possible"
++					" with unname data attribute.\n");
++			err++;
++		}
+ 	}
+ 
+ 	if (ver)
+@@ -822,6 +836,7 @@
+ int main(int argc, char *argv[])
+ {
+ 	FILE *in;
++	struct stat st;
+ 	ntfs_volume *vol;
+ 	ntfs_inode *out;
+ 	ntfs_attr *na;
+@@ -1136,6 +1151,16 @@
+ 	free(buf);
+ close_attr:
+ 	ntfs_attr_close(na);
++	if (opts.timestamp) {
++		if (!fstat(fileno(in),&st)) {
++			s64 change_time = st.st_mtime*10000000LL
++					+ NTFS_TIME_OFFSET;
++			out->last_data_change_time = cpu_to_le64(change_time);
++			ntfs_inode_update_times(out, 0);
++		} else {
++			ntfs_log_error("Failed to get the time stamp.\n");
++		}
++	}
+ close_dst:
+ 	while (ntfs_inode_close(out) && !opts.noaction) {
+ 		if (errno != EBUSY) {
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsdecrypt.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsdecrypt.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsdecrypt.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsdecrypt.c	2020-12-06 12:06:07.666798441 +0100
+@@ -557,6 +557,7 @@
+ 		switch (err) {
+ 		case GNUTLS_BAG_PKCS8_KEY:
+ 			flags = GNUTLS_PKCS_PLAIN;
++			/* FALLTHRU */
+ 		case GNUTLS_BAG_PKCS8_ENCRYPTED_KEY:
+ 			err = gnutls_pkcs12_bag_get_data(bag, 0, &dkey);
+ 			if (err < 0) {
+@@ -1481,12 +1482,15 @@
+ 						default :
+ 							*b++ = val;
+ 							val >>= 8;
++							/* FALLTHRU */
+ 						case 3 :
+ 							*b++ = val;
+ 							val >>= 8;
++							/* FALLTHRU */
+ 						case 2 :
+ 							*b++ = val;
+ 							val >>= 8;
++							/* FALLTHRU */
+ 						case 1 :
+ 							*b++ = val;
+ 							val >>= 8;
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsfallocate.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsfallocate.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsfallocate.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsfallocate.c	2020-12-06 12:06:07.666798441 +0100
+@@ -1,7 +1,7 @@
+ /**
+  * ntfsfallocate
+  *
+- * Copyright (c) 2013-2014 Jean-Pierre Andre
++ * Copyright (c) 2013-2020 Jean-Pierre Andre
+  *
+  * This utility will allocate clusters to a specified attribute belonging
+  * to a specified file or directory, to a specified length.
+@@ -214,10 +214,15 @@
+ 		count = 0;
+ 		switch (*s++) {
+ 		case 'E' : count++;
++			/* FALLTHRU */
+ 		case 'P' : count++;
++			/* FALLTHRU */
+ 		case 'T' : count++;
++			/* FALLTHRU */
+ 		case 'G' : count++;
++			/* FALLTHRU */
+ 		case 'M' : count++;
++			/* FALLTHRU */
+ 		case 'K' : count++;
+ 			switch (*s++) {
+ 			case 'i' :
+@@ -770,10 +775,14 @@
+ 			/* Get and save the initial allocations */
+ 			allocated_size = na->allocated_size;
+ 			data_size = ni->data_size;
+-			err = ntfs_attr_map_whole_runlist(na);
++			if (na->rl)
++				err = ntfs_attr_map_whole_runlist(na);
+ 			if (!err) {
+-				oldrl = ntfs_save_rl(na->rl);
+-				if (oldrl) {
++				if (na->rl)
++					oldrl = ntfs_save_rl(na->rl);
++				else
++					oldrl = (runlist_element*)NULL;
++				if (!na->rl || oldrl) {
+ 					err = ntfs_full_allocation(na, ctx,
+ 							alloc_offs, alloc_len);
+ 					if (err) {
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsfix.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsfix.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsfix.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsfix.c	2020-12-06 12:06:07.666798441 +0100
+@@ -506,6 +506,11 @@
+ 
+ 	ntfs_log_info("Comparing $MFTMirr to $MFT... ");
+ 	done = FALSE;
++	/*
++	 * Since 2017, Windows 10 does not mirror to full $MFTMirr when
++	 * using big clusters, and some records may be found different.
++	 * Nevertheless chkdsk.exe mirrors it fully, so we do similarly.
++	 */
+ 	for (i = 0; i < vol->mftmirr_size; ++i) {
+ 		MFT_RECORD *mrec, *mrec2;
+ 		const char *ESTR[12] = { "$MFT", "$MFTMirr", "$LogFile",
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsinfo.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsinfo.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsinfo.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsinfo.c	2020-12-06 12:06:07.666798441 +0100
+@@ -8,7 +8,7 @@
+  * Copyright (c) 2004-2005 Yuval Fledel
+  * Copyright (c) 2004-2007 Yura Pakhuchiy
+  * Copyright (c)      2005 Cristian Klein
+- * Copyright (c) 2011-2015 Jean-Pierre Andre
++ * Copyright (c) 2011-2020 Jean-Pierre Andre
+  *
+  * This utility will dump a file's attributes.
+  *
+@@ -119,7 +119,7 @@
+ 	printf("    2003      Leonard Norrgård\n");
+ 	printf("    2004-2005 Yuval Fledel\n");
+ 	printf("    2004-2007 Yura Pakhuchiy\n");
+-	printf("    2011-2014 Jean-Pierre Andre\n");
++	printf("    2011-2018 Jean-Pierre Andre\n");
+ 	printf("\n%s\n%s%s\n", ntfs_gpl, ntfs_bugs, ntfs_home);
+ }
+ 
+@@ -331,7 +331,7 @@
+ 		    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" } ;
+ 	static const char *wdays[]
+ 		= { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" } ;
+-	static char str[30];
++	static char str[50];
+ 	long long stamp;
+ 	u32 days;
+ 	u32 seconds;
+@@ -371,7 +371,7 @@
+ 		mon = days/31 + 1;
+ 		days -= 31*(mon - 1) - 1;
+ 	}
+-	sprintf(str,"%3s %3s %2u %02u:%02u:%02u %4u UTC\n",
++	snprintf(str, sizeof(str), "%3s %3s %2u %02u:%02u:%02u %4u UTC\n",
+ 		wdays[wday],
+ 		months[mon-1],(unsigned int)days,
+ 		(unsigned int)(seconds/3600),
+@@ -411,8 +411,10 @@
+ static const char *reparse_type_name(le32 tag)
+ {
+ 	const char *name;
++	le32 seltag;
+ 
+-	switch (tag) {
++	seltag = tag & IO_REPARSE_PLUGIN_SELECT;
++	switch (seltag) {
+ 	case IO_REPARSE_TAG_MOUNT_POINT :
+ 		name = " (mount point)";
+ 		break;
+@@ -425,6 +427,21 @@
+ 	case IO_REPARSE_TAG_DEDUP :
+ 		name = " (deduplicated)";
+ 		break;
++	case IO_REPARSE_TAG_WCI :
++		name = " (Windows container)";
++		break;
++	case IO_REPARSE_TAG_CLOUD :
++		name = " (Cloud)";
++		break;
++	case IO_REPARSE_TAG_NFS :
++		name = " (NFS symlink)";
++		break;
++	case IO_REPARSE_TAG_LX_SYMLINK :
++		name = " (Linux symlink)";
++		break;
++	case IO_REPARSE_TAG_APPEXECLINK :
++		name = " (Exec link)";
++		break;
+ 	default :
+ 		name = "";
+ 		break;
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsprogs.8.in work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsprogs.8.in
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsprogs.8.in	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsprogs.8.in	2020-12-06 12:06:07.666798441 +0100
+@@ -31,6 +31,9 @@
+ .BR ntfscp (8)
+ \- Copy a file to an NTFS volume.
+ .PP
++.BR ntfsfallocate (8)
++\- Preallocate space to a file on an NTFS volume
++.PP
+ .BR ntfsfix (8)
+ \- Check and fix some common errors, clear the LogFile and make Windows
+ perform a thorough check next time it boots.
+@@ -47,6 +50,9 @@
+ .BR ntfsresize (8)
+ \- Resize NTFS without losing data.
+ .PP
++.BR ntfsrecover (8)
++\- Recover updates committed by Windows on an NTFS volume.
++.PP
+ .BR ntfstruncate (8)
+ \- Truncate a file on an NTFS volume.
+ .PP
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsrecover.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsrecover.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsrecover.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsrecover.c	2020-12-06 12:06:07.666798441 +0100
+@@ -1,7 +1,7 @@
+ /*
+  *		Process log data from an NTFS partition
+  *
+- * Copyright (c) 2012-2016 Jean-Pierre Andre
++ * Copyright (c) 2012-2017 Jean-Pierre Andre
+  *
+  *	This program examines the Windows log file of an ntfs partition
+  *	and plays the committed transactions in order to restore the
+@@ -43,6 +43,7 @@
+  */
+ 
+ #define BASEBLKS 4 /* number of special blocks (always shown) */
++#define BASEBLKS2 34 /* number of special blocks when version >= 2.0 */
+ #define RSTBLKS 2 /* number of restart blocks */
+ #define BUFFERCNT 64 /* number of block buffers - a power of 2 */
+ #define NTFSBLKLTH 512 /* usa block size */
+@@ -122,6 +123,7 @@
+ int clusterbits;
+ u32 blocksz;
+ int blockbits;
++int log_major;
+ u16 bytespersect;
+ u64 mftlcn;
+ u32 mftrecsz;
+@@ -136,6 +138,7 @@
+ u64 synced_lsn;
+ u64 latest_lsn;
+ u64 restart_lsn;
++u64 offset_mask; /* block number in an lsn */
+ unsigned long firstblk; /* first block to dump (option -r) */
+ unsigned long lastblk;  /* last block to dump (option -r) */
+ u64 firstlcn; /* first block to dump (option -c) */
+@@ -164,6 +167,7 @@
+ unsigned int redocount;
+ unsigned int undocount;
+ struct BUFFER *buffer_table[BASEBLKS + BUFFERCNT];
++unsigned int redirect[BASEBLKS2];
+ 
+ static const le16 SDS[4] = {
+ 	const_cpu_to_le16('$'), const_cpu_to_le16('S'),
+@@ -319,18 +323,22 @@
+ {
+ 	struct BUFFER *buffer;
+ 	BOOL got;
++	int k;
++	unsigned int rnum;
+ 
+ 		/*
+ 		 * The first four blocks are stored apart, to make
+ 		 * sure pages 2 and 3 and the page which is logically
+ 		 * before them can be accessed at the same time.
++		 * (Only two blocks are stored apart if version >= 2.0)
+ 		 * Also, block 0 is smaller because it has to be read
+ 		 * before the block size is known.
+ 		 * Note : the last block is supposed to have an odd
+-		 * number, and cannot be overwritten by block 4 which
+-		 * follows logically.
++		 * number, and cannot be overwritten by block 4 (or 34
++		 * if version >= 2.0) which follows logically.
+ 		 */
+-	if (num < BASEBLKS)
++	if ((num < RSTBLKS)
++	    || ((log_major < 2) && (num < BASEBLKS)))
+ 		buffer = buffer_table[num + BUFFERCNT];
+ 	else
+ 		buffer = buffer_table[num & (BUFFERCNT - 1)];
+@@ -342,20 +350,27 @@
+ 		buffer = (struct BUFFER*)
+ 			malloc(sizeof(struct BUFFER) + blocksz);
+ 		buffer->size = blocksz;
+-		buffer->num = num + 1; /* forced to being read */
++		buffer->rnum = num + 1; /* forced to being read */
+ 		buffer->safe = FALSE;
+ 		if (num < BASEBLKS)
+ 			buffer_table[num + BUFFERCNT] = buffer;
+ 		else
+ 			buffer_table[num & (BUFFERCNT - 1)] = buffer;
+ 	}
+-	if (buffer && (buffer->num != num)) {
++	rnum = num;
++	if (log_major >= 2) {
++		for (k=RSTBLKS; k<BASEBLKS2; k++)
++			if (redirect[k] == num)
++				rnum = k;
++	}
++	if (buffer && (buffer->rnum != rnum)) {
+ 		buffer->num = num;
++		buffer->rnum = rnum;
+ 		if (ctx->vol)
+-			got = (ntfs_attr_pread(log_na,(u64)num << blockbits,
++			got = (ntfs_attr_pread(log_na,(u64)rnum << blockbits,
+                 		blocksz, buffer->block.data) == blocksz);
+ 		else
+-			got = !fseek(ctx->file, loclogblk(ctx, num), 0)
++			got = !fseek(ctx->file, loclogblk(ctx, rnum), 0)
+ 			    && (fread(buffer->block.data, blocksz,
+ 						1, ctx->file) == 1);
+ 		if (got) {
+@@ -365,7 +380,7 @@
+ 			buffer->safe = !replaceusa(buffer, blocksz);
+ 		} else {
+ 			buffer->safe = FALSE;
+-			fprintf(stderr,"** Could not read block %d\n", num);
++			fprintf(stderr,"** Could not read block %d\n", rnum);
+ 		}
+ 	}
+ 	return (buffer && buffer->safe ? buffer : (const struct BUFFER*)NULL);
+@@ -1096,22 +1111,30 @@
+ 	skipped = 0;
+ 	do {
+ 		prevmiddle = FALSE;
+-		if (prevblk > BASEBLKS)
++		if (prevblk > (log_major < 2 ? BASEBLKS : BASEBLKS2))
+ 			prevblk--;
+ 		else
+-			if (prevblk == BASEBLKS)
++			if (prevblk == (log_major < 2 ? BASEBLKS : BASEBLKS2))
+ 				prevblk = (logfilesz >> blockbits) - 1;
+ 			else {
+ 				rph = &buf->block.record;
+-				prevblk = (sle64_to_cpu(rph->copy.file_offset)
++				if (log_major < 2)
++					prevblk = (sle64_to_cpu(
++						rph->copy.file_offset)
+ 							>> blockbits) - 1;
++				else
++					prevblk = (sle64_to_cpu(
++						rph->copy.last_lsn)
++						    & offset_mask)
++							>> (blockbits - 3);
+ 				/*
+ 				 * If an initial block leads to block 4, it
+ 				 * can mean the last block or no previous
+ 				 * block at all. Using the last block is safer,
+ 				 * its lsn will indicate whether it is stale.
+ 				 */
+-				if (prevblk < BASEBLKS)
++				if (prevblk
++				    < (log_major < 2 ? BASEBLKS : BASEBLKS2))
+ 					prevblk = (logfilesz >> blockbits) - 1;
+ 			}
+ 		/* No previous block if the log only consists of block 2 or 3 */
+@@ -2706,7 +2729,7 @@
+ 				(long)le32_to_cpu(rest->system_page_size));
+ 			printf("log_page_size          %08lx\n",
+ 				(long)le32_to_cpu(rest->log_page_size));
+-			printf("restart_area_offset         %04x\n",
++			printf("restart_area_offset    %04x\n",
+ 				(int)le16_to_cpu(rest->restart_area_offset));
+ 			printf("minor_vers             %d\n",
+ 				(int)sle16_to_cpu(rest->minor_ver));
+@@ -2876,6 +2899,8 @@
+ 		}
+ 	}
+ 	restart_lsn = synced_lsn;
++	offset_mask = ((u64)1 << (64 - le32_to_cpu(restart.seq_number_bits)))
++				- (1 << (blockbits - 3));
+ 	return (dirty);
+ }
+ 
+@@ -2895,9 +2920,13 @@
+ {
+ 	const struct BUFFER *buf;
+ 	BOOL bad;
++	int blk;
+ 	int major, minor;
+ 
+ 	bad = FALSE;
++	for (blk=0; blk<BASEBLKS2; blk++)
++		redirect[blk] = 0;
++	log_major = 0; /* needed for reading into a buffer */
+ 	if (ctx->vol) {
+ 		RESTART_PAGE_HEADER *rph;
+ 
+@@ -2961,6 +2990,7 @@
+ 					major, minor);
+ 				bad = TRUE;
+ 			}
++		log_major = major;
+ 		if (bad) {
+ 			buf = (const struct BUFFER*)NULL;
+ 		}
+@@ -3343,7 +3373,8 @@
+ 			mblk = blk + 1;
+ 			while (total < size) {
+ 				if (mblk >= (logfilesz >> blockbits))
+-					mblk = BASEBLKS;
++					mblk = (log_major < 2 ? BASEBLKS
++							: BASEBLKS2);
+ 				more = size - total;
+ 				if (more > nextspace)
+ 					more = nextspace;
+@@ -3427,9 +3458,15 @@
+ 		if (optv) {
+ 			if (optv >= 2)
+ 				hexdump(data,blocksz);
+-			printf("* RCRD in block %ld 0x%lx (addr 0x%llx)\n",
+-			     (long)blk,(long)blk,
+-			     (long long)loclogblk(ctx, blk));
++			if (buf->rnum != blk)
++				printf("* RCRD for block %ld 0x%lx"
++				     " in block %ld (addr 0x%llx)\n",
++				     (long)blk,(long)blk,(long)buf->rnum,
++				     (long long)loclogblk(ctx, blk));
++			else
++				printf("* RCRD in block %ld 0x%lx (addr 0x%llx)\n",
++				     (long)blk,(long)blk,
++				     (long long)loclogblk(ctx, blk));
+ 		} else {
+ 			if (optt)
+ 				printf("block %ld\n",(long)blk);
+@@ -3551,9 +3588,15 @@
+ 	u32 stopblk;
+ 	TRISTATE state;
+ 
+-	if (optv)
+-		printf("\n* block %d at 0x%llx\n",(int)blk,
++	if (optv) {
++		if ((log_major >= 2) && (buf->rnum != blk))
++			printf("\n* block %d for block %d at 0x%llx\n",
++					(int)buf->rnum,(int)blk,
++					(long long)loclogblk(ctx, buf->rnum));
++		else
++			printf("\n* block %d at 0x%llx\n",(int)blk,
+ 					(long long)loclogblk(ctx, blk));
++	}
+ 	ctx->firstaction = (struct ACTION_RECORD*)NULL;
+ 	ctx->lastaction = (struct ACTION_RECORD*)NULL;
+ 	nextbuf = (const struct BUFFER*)NULL;
+@@ -3576,7 +3619,9 @@
+ 				skipped = blk - prevblk - 1;
+ 			else
+ 				skipped = blk - prevblk - 1
+-					+ (logfilesz >> blockbits) - BASEBLKS;
++					+ (logfilesz >> blockbits)
++					- (log_major < 2 ? BASEBLKS
++							: BASEBLKS2);
+ 			magic = prevbuf->block.record.magic;
+ 			switch (magic) {
+ 			case magic_RCRD :
+@@ -3599,9 +3644,18 @@
+ 						(long long)loclogblk(ctx, blk),
+ 						(long)prevblk);
+ 				else
+-					printf("\n* block %ld at 0x%llx\n",
+-						(long)blk,
+-						(long long)loclogblk(ctx, blk));
++					if ((log_major >= 2)
++					    && (buf->rnum != blk))
++						printf("\n* block %ld for block %ld at 0x%llx\n",
++							(long)buf->rnum,
++							(long)blk,
++							(long long)loclogblk(
++							    ctx,buf->rnum));
++					else
++						printf("\n* block %ld at 0x%llx\n",
++							(long)blk,
++							(long long)loclogblk(
++								ctx, blk));
+ 			}
+ 			state = backward_rcrd(ctx, blk, skipped,
+ 						buf, prevbuf, nextbuf);
+@@ -3632,6 +3686,155 @@
+ 	return (state == T_ERR ? 1 : 0);
+ }
+ 
++/*
++ *		Find the latest log block
++ *
++ *	Usually, the latest block is either block 2 or 3 which act as
++ *	temporary block before being copied to target location.
++ *	However under some unknown condition the block are written
++ *	immediately to target location, and we have to scan for the
++ *	latest one.
++ *	Currently this is not checked for logfile version 2.x which
++ *	use a different layout of temporary blocks.
++ */
++
++static const struct BUFFER *find_latest_block(CONTEXT *ctx, u32 baseblk,
++			const struct BUFFER *basebuf)
++{
++	le64 offset;
++	leLSN prevlsn;
++	leLSN curlsn;
++	u32 curblk;
++	u32 prevblk;
++	const struct BUFFER *prevbuf;
++	const struct BUFFER *curbuf;
++
++	offset = basebuf->block.record.copy.file_offset;
++	curbuf = (const struct BUFFER*)NULL;
++	curlsn = const_cpu_to_le64(0);
++	prevblk = 0;
++	curblk = baseblk;
++	do {
++		if (curblk < BASEBLKS) {
++			prevbuf = basebuf;
++			prevlsn = basebuf->block.record.last_end_lsn;
++			prevblk = baseblk;
++			curblk = le64_to_cpu(offset) >> blockbits;
++		} else {
++			if (optv)
++				printf("block %d is more recent than block %d\n",
++					(int)curblk, (int)prevblk);
++			prevbuf = curbuf;
++			prevlsn = curlsn;
++			prevblk = curblk;
++			curblk++;
++			if (curblk >= (logfilesz >> blockbits))
++				curblk = (log_major < 2 ? BASEBLKS : BASEBLKS2);
++		}
++		curbuf = read_buffer(ctx, curblk);
++		if (curbuf && (curbuf->block.record.magic == magic_RCRD)) {
++			curlsn = curbuf->block.record.copy.last_lsn;
++		}
++	} while (curbuf
++		&& (curbuf->block.record.magic == magic_RCRD)
++		&& (le64_to_cpu(curlsn) > le64_to_cpu(prevlsn)));
++	if (optv)
++		printf("Block %d is the latest one\n",(int)prevblk);
++	return (prevbuf);
++}
++
++/*
++ *		Determine the sequencing of blocks (when version >= 2.0)
++ *
++ *	Blocks 2..17 and 18..33 are temporary blocks being filled until
++ *	they are copied to their target locations, so there are three
++ *	possible location for recent blocks.
++ *
++ *	Returns the latest target block number
++ */
++
++static int block_sequence(CONTEXT *ctx)
++{
++	const struct BUFFER *buf;
++	int blk;
++	int k;
++	int target_blk;
++	int latest_blk;
++	s64 final_lsn;
++	s64 last_lsn;
++	s64 last_lsn12;
++	s64 last_lsn1, last_lsn2;
++
++	final_lsn = 0;
++	for (blk=RSTBLKS; 2*blk<(RSTBLKS+BASEBLKS2); blk++) {
++			/* First temporary block */
++		last_lsn1 = 0;
++		buf = read_buffer(ctx, blk);
++		if (buf && (buf->block.record.magic == magic_RCRD)) {
++			last_lsn1 = le64_to_cpu(
++					buf->block.record.copy.last_lsn);
++			if (!final_lsn
++			    || ((s64)(last_lsn1 - final_lsn) > 0))
++				final_lsn = last_lsn1;
++		}
++			/* Second temporary block */
++		buf = read_buffer(ctx, blk + (BASEBLKS2 - RSTBLKS)/2);
++		last_lsn2 = 0;
++		if (buf && (buf->block.record.magic == magic_RCRD)) {
++			last_lsn2 = le64_to_cpu(
++					buf->block.record.copy.last_lsn);
++			if (!final_lsn
++			    || ((s64)(last_lsn2 - final_lsn) > 0))
++				final_lsn = last_lsn2;
++		}
++			/* the latest last_lsn defines the target block */
++		last_lsn12 = 0;
++		latest_blk = 0;
++		if (last_lsn1 || last_lsn2) {
++			if (!last_lsn2
++			    || ((s64)(last_lsn1 - last_lsn2) > 0)) {
++				last_lsn12 = last_lsn1;
++				latest_blk = blk;
++			}
++			if (!last_lsn1
++			    || ((s64)(last_lsn1 - last_lsn2) <= 0)) {
++				last_lsn12 = last_lsn2;
++				latest_blk = blk + (BASEBLKS2 - RSTBLKS)/2;
++			}
++		}
++		last_lsn = 0;
++		target_blk = 0;
++		if (last_lsn12) {
++			target_blk = (last_lsn12 & offset_mask)
++							>> (blockbits - 3);
++			buf = read_buffer(ctx, target_blk);
++			if (buf && (buf->block.record.magic == magic_RCRD)) {
++				last_lsn = le64_to_cpu(
++					buf->block.record.copy.last_lsn);
++				if (!final_lsn
++				    || ((s64)(last_lsn - final_lsn) > 0))
++					final_lsn = last_lsn;
++			}
++		}
++			/* redirect to the latest block */
++		if (latest_blk
++		    && (!last_lsn || ((s64)(last_lsn - last_lsn12) < 0)))
++			redirect[latest_blk] = target_blk;
++	}
++	if (optv) {
++		printf("\n Blocks redirected :\n");
++		for (k=RSTBLKS; k<BASEBLKS2; k++)
++			if (redirect[k])
++				printf("* block %d to block %d\n",
++					(int)redirect[k],(int)k);
++	}
++	latest_lsn = final_lsn;
++	blk = (final_lsn & offset_mask) >> (blockbits - 3);
++	if (optv > 1)
++		printf("final lsn %llx in blk %d\n",(long long)final_lsn,blk);
++	return (blk);
++}
++
+ static int walk(CONTEXT *ctx)
+ {
+ 	const struct BUFFER *buf;
+@@ -3644,6 +3847,7 @@
+ 	u32 blk;
+ 	u32 nextblk;
+ 	u32 prevblk;
++	u32 finalblk;
+ 	int err;
+ 	u16 blkheadsz;
+ 	u16 pos;
+@@ -3657,6 +3861,7 @@
+ 	}
+ 	done = FALSE;
+ 	dirty = TRUE;
++	finalblk = 0;
+ 	err = 0;
+ 	blk = 0;
+ 	pos = 0;
+@@ -3675,7 +3880,8 @@
+ 	while (!done) {
+ 		 /* next block is needed to process the current one */
+ 		if ((nextblk >= (logfilesz >> blockbits)) && (optr || optf))
+-			nextbuf = read_buffer(ctx, BASEBLKS);
++			nextbuf = read_buffer(ctx,
++					(log_major < 2 ? BASEBLKS : BASEBLKS2));
+ 		else
+ 			nextbuf = read_buffer(ctx,nextblk);
+ 		if (nextbuf) {
+@@ -3741,17 +3947,30 @@
+ 		}
+ 		blk = nextblk;
+ 		nextblk++;
++
++		if (!optr && (log_major >= 2) && (nextblk == RSTBLKS)) {
++			finalblk = block_sequence(ctx);
++			if (!finalblk) {
++				done = TRUE;
++				err = 1;
++			}
++		}
++
+ 		if (optr) { /* Only selected range */
+-			if ((nextblk == BASEBLKS) && (nextblk < firstblk))
++			u32 endblk;
++
++			endblk = (log_major < 2 ? BASEBLKS : RSTBLKS);
++			if ((nextblk == endblk) && (nextblk < firstblk))
+ 				 nextblk = firstblk;
+-			if ((blk >= BASEBLKS) && (blk > lastblk))
++			if ((blk >= endblk) && (blk > lastblk))
+ 				done = TRUE;
+ 		} else
+ 			if (optf) { /* Full log, forward */
+ 				if (blk*blocksz >= logfilesz)
+ 					done = TRUE;
+ 			} else
+-				if (optb || optp || optu || opts) {
++				if (optb || optp || optu || opts
++				    || (log_major >= 2)) {
+ 					/* Restart blocks only (2 blocks) */
+ 					if (blk >= RSTBLKS)
+ 						done = TRUE;
+@@ -3782,16 +4001,18 @@
+ 	}
+ 	if (optv && opts && !dirty)
+ 		printf("* Volume is clean, nothing to do\n");
+-	if (optb || optp || optu
+-	    || (opts && dirty)) {
++	if (log_major >= 2)
++		blk = finalblk;
++	if (!err
++	    && (optb || optp || optu || (opts && dirty))) {
+ 		playedactions = 0;
+ 		ctx->firstaction = (struct ACTION_RECORD*)NULL;
+ 		ctx->lastaction = (struct ACTION_RECORD*)NULL;
+-		buf = nextbuf;
+-		nextbuf = read_buffer(ctx, blk+1);
+-		startbuf = best_start(buf,nextbuf);
+-		if (startbuf) {
+-			if (startbuf == nextbuf) {
++		if (log_major < 2) {
++			buf = nextbuf;
++			nextbuf = read_buffer(ctx, blk+1);
++			startbuf = best_start(buf,nextbuf);
++			if (startbuf && (startbuf == nextbuf)) {
+ 				/* nextbuf is better, show blk */
+ 				if (optv && buf) {
+ 					printf("* Ignored block %d at 0x%llx\n",
+@@ -3818,6 +4039,17 @@
+ 							&nextbuf->block.record);
+ 				}
+ 			}
++			if (startbuf && opts) {
++				buf = startbuf = find_latest_block(ctx,
++						blk, startbuf);
++				latest_lsn = le64_to_cpu(
++					buf->block.record.last_end_lsn);
++			}
++		} else {
++			buf = startbuf = read_buffer(ctx, blk);
++			nextbuf = (const struct BUFFER*)NULL;
++		}
++		if (startbuf) {
+ 			/* The latest buf may be more recent than restart */
+ 			rph = &buf->block.record;
+ 			if ((s64)(sle64_to_cpu(rph->last_end_lsn)
+@@ -3874,7 +4106,7 @@
+ {
+ 	printf("\n%s v%s (libntfs-3g) - Recover updates committed by Windows"
+ 			" on an NTFS Volume.\n\n", "ntfsrecover", VERSION);
+-	printf("Copyright (c) 2012-2016 Jean-Pierre Andre\n");
++	printf("Copyright (c) 2012-2017 Jean-Pierre Andre\n");
+ 	printf("\n%s\n%s%s\n", ntfs_gpl, ntfs_bugs, ntfs_home);
+ }
+ 
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsrecover.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsrecover.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsrecover.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsrecover.h	2020-12-06 12:06:07.666798441 +0100
+@@ -74,10 +74,12 @@
+ 
+ struct BUFFER {
+ 	unsigned int num;
++	unsigned int rnum;
+ 	unsigned int size;
+ 	unsigned int headsz;
+ 	BOOL safe;
+ 	union {
++		u64 alignment;
+ 		RESTART_PAGE_HEADER restart;
+ 		RECORD_PAGE_HEADER record;
+ 		char data[1];
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsresize.8.in work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsresize.8.in
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsresize.8.in	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsresize.8.in	2020-12-06 12:06:07.666798441 +0100
+@@ -243,10 +243,9 @@
+ .SH EXIT CODES
+ The exit code is 0 on success, non\-zero otherwise.
+ .SH KNOWN ISSUES
+-No reliability problem is known. If you need
+-help please try the Ntfsresize FAQ first (see below) and if you
+-don't find your answer then send your question, comment or bug report to
+-the development team:
++No reliability problem is known.
++If you find a bug please send an email describing the problem to the
++development team at:
+ .br
+ .nh
+ ntfs\-3g\-devel@lists.sf.net
+@@ -308,14 +307,6 @@
+ .nh
+ http://www.tuxera.com/community/
+ .hy
+-.sp
+-.B Ntfsresize
+-related news, example of usage, troubleshooting, statically linked binary and
+-FAQ (frequently asked questions) are maintained at:
+-.br
+-.nh
+-http://mlf.linux.rulez.org/mlf/ezaz/ntfsresize.html
+-.hy
+ .SH SEE ALSO
+ .BR fdisk (8),
+ .BR cfdisk (8),
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsresize.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsresize.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsresize.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsresize.c	2020-12-06 12:06:07.670798431 +0100
+@@ -5,7 +5,7 @@
+  * Copyright (c) 2002-2005 Anton Altaparmakov
+  * Copyright (c) 2002-2003 Richard Russon
+  * Copyright (c) 2007      Yura Pakhuchiy
+- * Copyright (c) 2011-2016 Jean-Pierre Andre
++ * Copyright (c) 2011-2018 Jean-Pierre Andre
+  *
+  * This utility will resize an NTFS volume without data loss.
+  *
+@@ -59,6 +59,7 @@
+ #include <fcntl.h>
+ #endif
+ 
++#include "param.h"
+ #include "debug.h"
+ #include "types.h"
+ #include "support.h"
+@@ -137,6 +138,8 @@
+ "* other reason. We suggest to get a replacement disk as soon as possible. *\n"
+ "***************************************************************************\n";
+ 
++enum mirror_source { MIRR_OLD, MIRR_NEWMFT, MIRR_MFT };
++
+ static struct {
+ 	int verbose;
+ 	int debug;
+@@ -226,6 +229,7 @@
+ 	struct llcn_t last_compressed;
+ 	struct llcn_t last_lcn;
+ 	s64 last_unsupp;	     /* last unsupported cluster */
++	enum mirror_source mirr_from;
+ } ntfs_resize_t;
+ 
+ /* FIXME: This, lcn_bitmap and pos from find_free_cluster() will make a cluster
+@@ -243,8 +247,6 @@
+ #define DIRTY_INODE		(1)
+ #define DIRTY_ATTRIB		(2)
+ 
+-#define NTFS_MAX_CLUSTER_SIZE	(65536)
+-
+ static s64 rounded_up_division(s64 numer, s64 denom)
+ {
+ 	return (numer + (denom - 1)) / denom;
+@@ -404,7 +406,7 @@
+ 	printf("Copyright (c) 2002-2005  Anton Altaparmakov\n");
+ 	printf("Copyright (c) 2002-2003  Richard Russon\n");
+ 	printf("Copyright (c) 2007       Yura Pakhuchiy\n");
+-	printf("Copyright (c) 2011-2016  Jean-Pierre Andre\n");
++	printf("Copyright (c) 2011-2018  Jean-Pierre Andre\n");
+ 	printf("\n%s\n%s%s", ntfs_gpl, ntfs_bugs, ntfs_home);
+ }
+ 
+@@ -451,8 +453,10 @@
+ 	switch (*suffix) {
+ 	case 'G':
+ 		size *= prefix_kind;
++		/* FALLTHRU */
+ 	case 'M':
+ 		size *= prefix_kind;
++		/* FALLTHRU */
+ 	case 'k':
+ 		size *= prefix_kind;
+ 		break;
+@@ -1459,10 +1463,13 @@
+ static void delayed_updates(ntfs_resize_t *resize)
+ {
+ 	struct DELAYED *delayed;
++	struct DELAYED *delayed_mft_data;
++	int nr_extents;
+ 
+ 	if (ntfs_volume_get_free_space(resize->vol))
+ 		err_exit("Failed to determine free space\n");
+ 
++	delayed_mft_data = (struct DELAYED*)NULL;
+ 	if (resize->delayed_runlists && reload_mft(resize))
+ 		err_exit("Failed to reload the MFT for delayed updates\n");
+ 
+@@ -1476,19 +1483,55 @@
+ 		 * So we update MFT data first, and we record the MFT
+ 		 * extents again in the MFT bitmap if they were recorded
+ 		 * in the old location.
++		 *
++		 * However, if we are operating in "no action" mode, the
++		 * MFT records to update are not written to their new location
++		 * and the MFT data runlist has to be updated last in order
++		 * to have the entries read from their old location.
++		 * In this situation the MFT bitmap is never written to
++		 * disk, so the same extents are reallocated repeatedly,
++		 * which is not what would be done in a real resizing.
+ 		 */
+ 
++	if (opt.ro_flag
++	    && resize->delayed_runlists
++	    && (resize->delayed_runlists->mref == FILE_MFT)
++	    && (resize->delayed_runlists->type == AT_DATA)) {
++			/* Update the MFT data runlist later */
++		delayed_mft_data = resize->delayed_runlists;
++		resize->delayed_runlists = resize->delayed_runlists->next;
++	}
++
+ 	while (resize->delayed_runlists) {
+ 		delayed = resize->delayed_runlists;
+ 		expand_attribute_runlist(resize->vol, delayed);
+-		if ((delayed->mref == FILE_MFT) && (delayed->type == AT_BITMAP))
+-			record_mft_in_bitmap(resize);
++		if (delayed->mref == FILE_MFT) {
++			if (delayed->type == AT_BITMAP)
++				record_mft_in_bitmap(resize);
++			if (delayed->type == AT_DATA)
++				resize->mirr_from = MIRR_MFT;
++		}
+ 		resize->delayed_runlists = resize->delayed_runlists->next;
+ 		if (delayed->attr_name)
+ 			free(delayed->attr_name);
+ 		free(delayed->head_rl);
+ 		free(delayed);
+ 	}
++	if (opt.ro_flag && delayed_mft_data) {
++		/* in "no action" mode, check updating the MFT runlist now */
++		expand_attribute_runlist(resize->vol, delayed_mft_data);
++		resize->mirr_from = MIRR_MFT;
++		if (delayed_mft_data->attr_name)
++			free(delayed_mft_data->attr_name);
++		free(delayed_mft_data->head_rl);
++		free(delayed_mft_data);
++	}
++	/* Beware of MFT fragmentation when the target size is too small */
++	nr_extents = resize->vol->mft_ni->nr_extents;
++	if (nr_extents > 2) {
++		printf("WARNING: The MFT is now severely fragmented"
++			" (%d extents)\n", nr_extents);
++	}
+ }
+ 
+ /*
+@@ -1849,9 +1892,13 @@
+ static void copy_clusters(ntfs_resize_t *resize, s64 dest, s64 src, s64 len)
+ {
+ 	s64 i;
+-	char buff[NTFS_MAX_CLUSTER_SIZE]; /* overflow checked at mount time */
++	char *buff;
+ 	ntfs_volume *vol = resize->vol;
+ 
++	buff = (char*)ntfs_malloc(vol->cluster_size);
++	if (!buff)
++		perr_exit("ntfs_malloc");
++
+ 	for (i = 0; i < len; i++) {
+ 
+ 		lseek_to_cluster(vol, src + i);
+@@ -1875,6 +1922,7 @@
+ 		resize->relocations++;
+ 		progress_update(&resize->progress, resize->relocations);
+ 	}
++	free(buff);
+ }
+ 
+ static void relocate_clusters(ntfs_resize_t *r, runlist *dest_rl, s64 src_lcn)
+@@ -2262,6 +2310,7 @@
+ 			err_exit("Could not allocate 16 records in"
+ 					" the first MFT chunk\n");
+ 		}
++		resize->mirr_from = MIRR_NEWMFT;
+ 	}
+ 
+ 	for (mref = 0; mref < (MFT_REF)nr_mft_records; mref++)
+@@ -2715,19 +2764,34 @@
+ 	if (vol->dev->d_ops->read(vol->dev, bs, bs_size) == -1)
+ 		perr_exit("read() error");
+ 
+-	bs->number_of_sectors = cpu_to_sle64(r->new_volume_size *
+-			bs->bpb.sectors_per_cluster);
++	if (bs->bpb.sectors_per_cluster > 128)
++		bs->number_of_sectors = cpu_to_sle64(r->new_volume_size
++				<< (256 - bs->bpb.sectors_per_cluster));
++	else
++		bs->number_of_sectors = cpu_to_sle64(r->new_volume_size *
++				bs->bpb.sectors_per_cluster);
+ 
+-	if (r->mftmir_old) {
++	if (r->mftmir_old || (r->mirr_from == MIRR_MFT)) {
+ 		r->progress.flags |= NTFS_PROGBAR_SUPPRESS;
+ 		/* Be sure the MFTMirr holds the updated MFT runlist */
+-		if (r->new_mft_start)
++		switch (r->mirr_from) {
++		case MIRR_MFT :
++			/* The late updates of MFT have not been synced */
++			ntfs_inode_sync(vol->mft_ni);
++			copy_clusters(r, r->mftmir_rl.lcn,
++				vol->mft_na->rl->lcn, r->mftmir_rl.length);
++			break;
++		case MIRR_NEWMFT :
+ 			copy_clusters(r, r->mftmir_rl.lcn,
+ 				 r->new_mft_start->lcn, r->mftmir_rl.length);
+-		else
++			break;
++		default :
+ 			copy_clusters(r, r->mftmir_rl.lcn, r->mftmir_old,
+ 				      r->mftmir_rl.length);
+-		bs->mftmirr_lcn = cpu_to_sle64(r->mftmir_rl.lcn);
++			break;
++		}
++		if (r->mftmir_old)
++			bs->mftmirr_lcn = cpu_to_sle64(r->mftmir_rl.lcn);
+ 		r->progress.flags &= ~NTFS_PROGBAR_SUPPRESS;
+ 	}
+ 		/* Set the start of the relocated MFT */
+@@ -3904,6 +3968,7 @@
+ 			ctx.mrec = mrec;
+ 			resize.mref = inum;
+ 			resize.delayed_runlists = expand->delayed_runlists;
++			resize.mirr_from = MIRR_OLD;
+ 			must_delay = 1;
+ 			replace_later(&resize,rl,head_rl);
+ 			expand->delayed_runlists = resize.delayed_runlists;
+@@ -4577,6 +4642,7 @@
+ 
+ 	resize.inuse = fsck.inuse;
+ 	resize.lcn_bitmap = fsck.lcn_bitmap;
++	resize.mirr_from = MIRR_OLD;
+ 
+ 	set_resize_constraints(&resize);
+ 	set_disk_usage_constraint(&resize);
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsundelete.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsundelete.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsundelete.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfsundelete.c	2020-12-06 12:06:07.670798431 +0100
+@@ -5,7 +5,7 @@
+  * Copyright (c) 2004-2005 Holger Ohmacht
+  * Copyright (c) 2005      Anton Altaparmakov
+  * Copyright (c) 2007      Yura Pakhuchiy
+- * Copyright (c) 2013-2014 Jean-Pierre Andre
++ * Copyright (c) 2013-2018 Jean-Pierre Andre
+  *
+  * This utility will recover deleted files from an NTFS volume.
+  *
+@@ -392,7 +392,7 @@
+ 			"Copyright (c) 2004-2005 Holger Ohmacht\n"
+ 			"Copyright (c) 2005      Anton Altaparmakov\n"
+ 			"Copyright (c) 2007      Yura Pakhuchiy\n"
+-			"Copyright (c) 2013-2014 Jean-Pierre Andre\n");
++			"Copyright (c) 2013-2018 Jean-Pierre Andre\n");
+ 	ntfs_log_info("\n%s\n%s%s\n", ntfs_gpl, ntfs_bugs, ntfs_home);
+ }
+ 
+@@ -567,10 +567,15 @@
+ 
+ 	switch (suffix[0]) {
+ 		case 'y': case 'Y': result *=   12;
++			/* FALLTHRU */
+ 		case 'm': case 'M': result *=    4;
++			/* FALLTHRU */
+ 		case 'w': case 'W': result *=    7;
++			/* FALLTHRU */
+ 		case 'd': case 'D': result *=   24;
++			/* FALLTHRU */
+ 		case 'h': case 'H': result *= 3600;
++			/* FALLTHRU */
+ 		case 0:
+ 		    break;
+ 
+@@ -1835,19 +1840,49 @@
+ static int create_pathname(const char *dir, const char *name,
+ 	const char *stream, char *buffer, int bufsize)
+ {
++	struct stat st;
++	int s;
++	int len;
++	int suffix;
++
+ 	if (!name)
+ 		name = UNKNOWN;
+ 
+-	if (dir)
++	if (dir) {
++#ifdef HAVE_WINDOWS_H
+ 		if (stream)
+-			snprintf(buffer, bufsize, "%s/%s:%s", dir, name, stream);
++			snprintf(buffer, bufsize, "%s\\%s:%s", dir, name,
++					 stream);
++		else
++			snprintf(buffer, bufsize, "%s\\%s", dir, name);
++#else
++		if (stream)
++			snprintf(buffer, bufsize, "%s/%s:%s", dir, name,
++					 stream);
+ 		else
+ 			snprintf(buffer, bufsize, "%s/%s", dir, name);
+-	else
++#endif
++	} else
+ 		if (stream)
+ 			snprintf(buffer, bufsize, "%s:%s", name, stream);
+ 		else
+ 			snprintf(buffer, bufsize, "%s", name);
++	len = strlen(buffer);
++	suffix = 0;
++#ifdef HAVE_WINDOWS_H
++	s = stat(buffer, &st);
++#else
++	s = lstat(buffer, &st);
++#endif
++	while (!s && (suffix < 999)) {
++		suffix++;
++		snprintf(&buffer[len], bufsize - len, ".%d", suffix);
++#ifdef HAVE_WINDOWS_H
++		s = stat(buffer, &st);
++#else
++		s = lstat(buffer, &st);
++#endif
++	}
+ 
+ 	return strlen(buffer);
+ }
+@@ -2012,7 +2047,8 @@
+ 		if (d->resident) {
+ 			fd = open_file(pathname);
+ 			if (fd < 0) {
+-				ntfs_log_perror("Couldn't create file");
++				ntfs_log_perror("Couldn't create file %s",
++						pathname);
+ 				goto free;
+ 			}
+ 
+@@ -2041,7 +2077,8 @@
+ 
+ 			fd = open_file(pathname);
+ 			if (fd < 0) {
+-				ntfs_log_perror("Couldn't create output file");
++				ntfs_log_perror("Couldn't create file %s",
++						pathname);
+ 				goto free;
+ 			}
+ 
+@@ -2151,9 +2188,11 @@
+ 		}
+ 		set_date(pathname, file->date);
+ 		if (d->name)
+-			ntfs_log_quiet("Undeleted '%s:%s' successfully.\n", file->pref_name, d->name);
++			ntfs_log_quiet("Undeleted '%s:%s' successfully to %s.\n",
++					file->pref_name, d->name, pathname);
+ 		else
+-			ntfs_log_quiet("Undeleted '%s' successfully.\n", file->pref_name);
++			ntfs_log_quiet("Undeleted '%s' successfully to %s.\n",
++					file->pref_name, pathname);
+ 	}
+ 	result = 1;
+ free:
+@@ -2348,7 +2387,7 @@
+ 	create_pathname(opts.dest, name, NULL, pathname, sizeof(pathname));
+ 	fd = open_file(pathname);
+ 	if (fd < 0) {
+-		ntfs_log_perror("Couldn't open output file '%s'", name);
++		ntfs_log_perror("Couldn't create output file '%s'", name);
+ 		goto attr;
+ 	}
+ 
+@@ -2376,6 +2415,7 @@
+ 	}
+ 
+ 	ntfs_log_verbose("Read %lld MFT Records\n", mft_end - mft_begin + 1);
++	ntfs_log_quiet("MFT extracted to file %s\n", pathname);
+ 	result = 0;
+ close:
+ 	close(fd);
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfswipe.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfswipe.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfswipe.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/ntfswipe.c	2020-12-06 12:06:07.670798431 +0100
+@@ -314,6 +314,7 @@
+ 
+ 		case 'i':
+ 			opts.info++;		/* and fall through */
++			/* FALLTHRU */
+ 		case 'a':
+ 			opts.directory++;
+ 			opts.logfile++;
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/playlog.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/playlog.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/playlog.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/playlog.c	2020-12-06 12:06:07.674798421 +0100
+@@ -1,7 +1,7 @@
+ /*
+  *		Redo or undo a list of logged actions
+  *
+- * Copyright (c) 2014-2016 Jean-Pierre Andre
++ * Copyright (c) 2014-2017 Jean-Pierre Andre
+  *
+  */
+ 
+@@ -229,7 +229,7 @@
+ 
+ 	err = 0;
+ 	done = FALSE;
+-	while ((k <= end) && !done) {
++	while ((k <= end) && !done && !err) {
+ 		lth = getle16(buffer,k+8);
+ 		if (optv > 1)
+ 			/* Usual indexes can be determined from size */
+@@ -270,9 +270,20 @@
+ 					(long long)getle64(buffer,k),
+ 					(int)lth,
+ 					(int)getle16(buffer,k+12),(int)k);
++				if ((lth < 80) || (lth & 7)) {
++					printf("** Invalid index record"
++						" length %d\n",lth);
++					err = 1;
++				}
+ 			}
+ 		done = (feedle16(buffer,k+12) & INDEX_ENTRY_END) || !lth;
+-	   	k += lth;
++		if (lth & 7) {
++			if (optv <= 1) /* Do not repeat the warning */
++				printf("** Invalid index record length %d\n",
++								lth);
++			err = 1;
++		} else
++	   		k += lth;
+    	}
+ 	if (k != end) {
+ 		printf("** Bad index record length %ld (computed %ld)\n",
+@@ -795,7 +806,9 @@
+ 	rl = ntfs_mapping_pairs_decompress(vol, attr, (runlist_element*)NULL);
+ 	if (rl) {
+ 		xrl = rl;
+-		while (xrl->length)
++		if (xrl->length)
++			xrl++;
++		while ((xrl->length) && (xrl->lcn != LCN_RL_NOT_MAPPED))
+ 			xrl++;
+ 		high_vcn = xrl->vcn - 1;
+ 		attr->highest_vcn = cpu_to_sle64(high_vcn);
+@@ -2117,7 +2130,7 @@
+ 	record = (MFT_RECORD*)buffer;
+ 	if ((target + length) <= mftrecsz) {
+ 		/* write a void mft entry (needed ?) */
+-		changed = memcmp(buffer + target, data, length)
++		changed = (length && memcmp(buffer + target, data, length))
+ 			|| (record->flags & MFT_RECORD_IN_USE);
+ 		err = 0;
+ 		if (changed) {
+@@ -2157,7 +2170,6 @@
+ 	data = ((const char*)&action->record)
+ 			+ get_undo_offset(&action->record);
+ 	length = le16_to_cpu(action->record.undo_length);
+-// TODO merge with undo_add_index ?
+ 	target = le16_to_cpu(action->record.record_offset)
+ 		+ le16_to_cpu(action->record.attribute_offset);
+ 	if (optv > 1) {
+@@ -2176,7 +2188,9 @@
+ 	    && !(length & 7)
+ 	    && ((target + length) <= xsize)) {
+ 		/* This has to be an idempotent action */
+-		found = !memcmp(buffer + target, data, length);
++		found = (action->record.undo_operation
++				== const_cpu_to_le16(CompensationlogRecord))
++		    || !memcmp(buffer + target, data, length);
+ 		err = 0;
+ 		if (found) {
+ 			/* Remove the entry */
+@@ -2191,7 +2205,7 @@
+ 		}
+ 		if (optv > 1) {
+ 			printf("-> INDX record %s\n",
+-				(found ? "unchanged" : "removed"));
++				(found ? "removed" : "unchanged"));
+ 		}
+ 	}
+ 	return (err);
+@@ -2238,7 +2252,9 @@
+ 	    && !(length & 7)
+ 	    && ((target + length) <= mftrecsz)) {
+ 		/* This has to be an idempotent action */
+-		found = !memcmp(buffer + target, data, length);
++		found = (action->record.undo_operation
++				== const_cpu_to_le16(CompensationlogRecord))
++			|| !memcmp(buffer + target, data, length);
+ 		err = 0;
+ 		/* Only delete if present */
+ 		if (found) {
+@@ -2578,7 +2594,9 @@
+ 			dump(&buffer[target], length);
+ 		}
+ 		if ((target + length) <= mftrecsz) {
+-			changed = memcmp(buffer + target, data, length);
++			changed = (action->record.undo_operation
++				    == const_cpu_to_le16(CompensationlogRecord))
++				|| memcmp(buffer + target, data, length);
+ 			err = 0;
+ 			if (changed) {
+ 				memcpy(buffer + target, data, length);
+@@ -2627,8 +2645,13 @@
+ 		+ le16_to_cpu(action->record.attribute_offset)
+ 		+ offsetof(INDEX_ENTRY, key.file_name.file_name_length)
+ 		- length;
+-	err = change_resident_expect(vol, action, buffer, data, expected,
+-			target, length, AT_INDEX_ROOT);
++	if (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord))
++		err = change_resident(vol, action, buffer, data,
++			target, length);
++	else
++		err = change_resident_expect(vol, action, buffer, data,
++			expected, target, length, AT_INDEX_ROOT);
+ 	return (err);
+ }
+ 
+@@ -2649,12 +2672,14 @@
+ 	expected = ((const char*)&action->record)
+ 			+ get_undo_offset(&action->record);
+ 	length = le16_to_cpu(action->record.redo_length);
+-// length must be 8
+-	target = le16_to_cpu(action->record.record_offset)
+-		+ le16_to_cpu(action->record.attribute_offset)
+-+ 16; // explanation needed (right justified ?)
+-	err = change_resident_expect(vol, action, buffer, data, expected,
+-			target, length, AT_INDEX_ROOT);
++	if (length == 8) {
++		target = le16_to_cpu(action->record.record_offset)
++			+ le16_to_cpu(action->record.attribute_offset);
++		/* target is right-justified to end of attribute */
++		target += getle16(buffer, target + 8) - length;
++		err = change_resident_expect(vol, action, buffer, data,
++				expected, target, length, AT_INDEX_ROOT);
++	}
+ 	return (err);
+ }
+ 
+@@ -2738,11 +2763,13 @@
+ 	data = ((const char*)&action->record)
+ 			+ get_redo_offset(&action->record);
+ 	length = le16_to_cpu(action->record.redo_length);
+-			/* target is left-justified to creation time */
+-	target = le16_to_cpu(action->record.record_offset)
+-		+ le16_to_cpu(action->record.attribute_offset)
+-		+ 16; // to better describe
+-	err = update_index(vol, action, buffer, data, target, length);
++	if (length == 8) {
++		target = le16_to_cpu(action->record.record_offset)
++			+ le16_to_cpu(action->record.attribute_offset);
++		/* target is right-justified to end of attribute */
++		target += getle16(buffer, target + 8) - length;
++		err = update_index(vol, action, buffer, data, target, length);
++	}
+ 	return (err);
+ }
+ 
+@@ -3568,11 +3595,13 @@
+ 	data = ((const char*)&action->record)
+ 			+ get_undo_offset(&action->record);
+ 	length = le16_to_cpu(action->record.undo_length);
+-			/* target is left-justified to creation time */
+-	target = le16_to_cpu(action->record.record_offset)
+-		+ le16_to_cpu(action->record.attribute_offset)
+-		+ 16; // to better describe
+-	err = update_index(vol, action, buffer, data, target, length);
++	if (length == 8) {
++		target = le16_to_cpu(action->record.record_offset)
++			+ le16_to_cpu(action->record.attribute_offset);
++		/* target is right-justified to end of attribute */
++		target += getle16(buffer, target + 8) - length;
++		err = update_index(vol, action, buffer, data, target, length);
++	}
+ 	return (err);
+ }
+ 
+@@ -3775,12 +3804,14 @@
+ 	expected = ((const char*)&action->record)
+ 			+ get_redo_offset(&action->record);
+ 	length = le16_to_cpu(action->record.undo_length);
+-		/* the fixup is right-justified to the name length */
+-	target = le16_to_cpu(action->record.record_offset)
+-		+ le16_to_cpu(action->record.attribute_offset)
+-		+ 16; // explanation needed
+-	err = change_resident_expect(vol, action, buffer, data, expected,
+-			target, length, AT_INDEX_ROOT);
++	if (length == 8) {
++		target = le16_to_cpu(action->record.record_offset)
++			+ le16_to_cpu(action->record.attribute_offset);
++		/* target is right-justified to end of attribute */
++		target += getle16(buffer, target + 8) - length;
++		err = change_resident_expect(vol, action, buffer, data,
++				expected, target, length, AT_INDEX_ROOT);
++	}
+ 	return (err);
+ }
+ 
+@@ -4083,8 +4114,10 @@
+ 			err = redo_add_root_index(vol, action, buffer);
+ 		break;
+ 	case ClearBitsInNonResidentBitMap :
+-		if (action->record.undo_operation
+-		    == const_cpu_to_le16(SetBitsInNonResidentBitMap))
++		if ((action->record.undo_operation
++			== const_cpu_to_le16(SetBitsInNonResidentBitMap))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_force_bits(vol, action, buffer);
+ 		break;
+ 	case CompensationlogRecord :
+@@ -4093,28 +4126,38 @@
+ 			err = redo_compensate(vol, action, buffer);
+ 		break;
+ 	case CreateAttribute :
+-		if (action->record.undo_operation
+-		    == const_cpu_to_le16(DeleteAttribute))
++		if ((action->record.undo_operation
++			== const_cpu_to_le16(DeleteAttribute))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_create_attribute(vol, action, buffer);
+ 		break;
+ 	case DeallocateFileRecordSegment :
+-		if (action->record.undo_operation
++		if ((action->record.undo_operation
+ 			== const_cpu_to_le16(InitializeFileRecordSegment))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_delete_file(vol, action, buffer);
+ 		break;
+ 	case DeleteAttribute :
+-		if (action->record.undo_operation
+-		    == const_cpu_to_le16(CreateAttribute))
++		if ((action->record.undo_operation
++			== const_cpu_to_le16(CreateAttribute))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_delete_attribute(vol, action, buffer);
+ 		break;
+ 	case DeleteIndexEntryAllocation :
+-		if (action->record.undo_operation
+-		    == const_cpu_to_le16(AddIndexEntryAllocation))
++		if ((action->record.undo_operation
++			== const_cpu_to_le16(AddIndexEntryAllocation))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_delete_index(vol, action, buffer);
+ 		break;
+ 	case DeleteIndexEntryRoot :
+-		if (action->record.undo_operation
+-		        == const_cpu_to_le16(AddIndexEntryRoot))
++		if ((action->record.undo_operation
++			== const_cpu_to_le16(AddIndexEntryRoot))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_delete_root_index(vol, action, buffer);
+ 		break;
+ 	case InitializeFileRecordSegment :
+@@ -4133,8 +4176,10 @@
+ 			err = redo_force_bits(vol, action, buffer);
+ 		break;
+ 	case SetIndexEntryVcnAllocation :
+-		if (action->record.undo_operation
+-		    == const_cpu_to_le16(SetIndexEntryVcnAllocation))
++		if ((action->record.undo_operation
++			== const_cpu_to_le16(SetIndexEntryVcnAllocation))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_update_vcn(vol, action, buffer);
+ 		break;
+ 	case SetIndexEntryVcnRoot :
+@@ -4143,18 +4188,24 @@
+ 			err = redo_update_root_vcn(vol, action, buffer);
+ 		break;
+ 	case SetNewAttributeSizes :
+-		if (action->record.undo_operation
+-		    == const_cpu_to_le16(SetNewAttributeSizes))
++		if ((action->record.undo_operation
++			== const_cpu_to_le16(SetNewAttributeSizes))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_sizes(vol, action, buffer);
+ 		break;
+ 	case UpdateFileNameAllocation :
+-		if (action->record.undo_operation
+-		    == const_cpu_to_le16(UpdateFileNameAllocation))
++		if ((action->record.undo_operation
++			== const_cpu_to_le16(UpdateFileNameAllocation))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_update_index(vol, action, buffer);
+ 		break;
+ 	case UpdateFileNameRoot :
+-		if (action->record.undo_operation
+-		        == const_cpu_to_le16(UpdateFileNameRoot))
++		if ((action->record.undo_operation
++			== const_cpu_to_le16(UpdateFileNameRoot))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_update_root_index(vol, action, buffer);
+ 		break;
+ 	case UpdateMappingPairs :
+@@ -4176,8 +4227,10 @@
+ 		}
+ 		break;
+ 	case UpdateResidentValue :
+-		if (action->record.undo_operation
+-		    == const_cpu_to_le16(UpdateResidentValue))
++		if ((action->record.undo_operation
++			== const_cpu_to_le16(UpdateResidentValue))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_update_resident(vol, action, buffer);
+ 		break;
+ 	case Win10Action37 :
+@@ -4191,8 +4244,10 @@
+ 			err = redo_write_end(vol, action, buffer);
+ 		break;
+ 	case WriteEndOfIndexBuffer :
+-		if (action->record.undo_operation
+-		    == const_cpu_to_le16(WriteEndOfIndexBuffer))
++		if ((action->record.undo_operation
++			== const_cpu_to_le16(WriteEndOfIndexBuffer))
++		    || (action->record.undo_operation
++			== const_cpu_to_le16(CompensationlogRecord)))
+ 			err = redo_write_index(vol, action, buffer);
+ 		break;
+ 	case AttributeNamesDump :
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/utils.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/utils.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/utils.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/ntfsprogs/utils.c	2020-12-06 12:06:07.674798421 +0100
+@@ -364,9 +364,13 @@
+ 	if (scale) {
+ 		switch (suffix[0]) {
+ 			case 't': case 'T': result *= 1000;
++				/* FALLTHRU */
+ 			case 'g': case 'G': result *= 1000;
++				/* FALLTHRU */
+ 			case 'm': case 'M': result *= 1000;
++				/* FALLTHRU */
+ 			case 'k': case 'K': result *= 1000;
++				/* FALLTHRU */
+ 			case '-': case 0:
+ 				break;
+ 			default:
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/lowntfs-3g.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/lowntfs-3g.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/lowntfs-3g.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/lowntfs-3g.c	2020-12-06 12:06:07.674798421 +0100
+@@ -4,7 +4,7 @@
+  * Copyright (c) 2005-2007 Yura Pakhuchiy
+  * Copyright (c) 2005 Yuval Fledel
+  * Copyright (c) 2006-2009 Szabolcs Szakacsits
+- * Copyright (c) 2007-2017 Jean-Pierre Andre
++ * Copyright (c) 2007-2020 Jean-Pierre Andre
+  * Copyright (c) 2009 Erik Larsson
+  *
+  * This file is originated from the Linux-NTFS project.
+@@ -86,10 +86,6 @@
+ #include <sys/param.h>
+ #endif /* defined(__APPLE__) || defined(__DARWIN__), ... */
+ 
+-#ifdef HAVE_LINUX_FS_H
+-#include <linux/fs.h>
+-#endif
+-
+ #ifndef FUSE_CAP_POSIX_ACL  /* until defined in <fuse/fuse_common.h> */
+ #define FUSE_CAP_POSIX_ACL (1 << 18)
+ #endif /* FUSE_CAP_POSIX_ACL */
+@@ -133,12 +129,12 @@
+ #endif
+ 
+ #if !CACHEING
+-#define ATTR_TIMEOUT 0.0
+-#define ENTRY_TIMEOUT 0.0
++#define ATTR_TIMEOUT (ctx->ro ? TIMEOUT_RO : 0.0)
++#define ENTRY_TIMEOUT (ctx->ro ? TIMEOUT_RO : 0.0)
+ #else
+ #if defined(__sun) && defined (__SVR4)
+-#define ATTR_TIMEOUT 10.0
+-#define ENTRY_TIMEOUT 10.0
++#define ATTR_TIMEOUT (ctx->ro ? TIMEOUT_RO : 10.0)
++#define ENTRY_TIMEOUT (ctx->ro ? TIMEOUT_RO : 10.0)
+ #else /* defined(__sun) && defined (__SVR4) */
+ 	/*
+ 	 * FUSE cacheing is only usable with basic permissions
+@@ -148,11 +144,13 @@
+ #warning "Fuse cacheing is only usable with basic permissions checked by kernel"
+ #endif
+ #if KERNELACLS
+-#define ATTR_TIMEOUT 10.0
+-#define ENTRY_TIMEOUT 10.0
++#define ATTR_TIMEOUT (ctx->ro ? TIMEOUT_RO : 10.0)
++#define ENTRY_TIMEOUT (ctx->ro ? TIMEOUT_RO : 10.0)
+ #else /* KERNELACLS */
+-#define ATTR_TIMEOUT (ctx->vol->secure_flags & (1 << SECURITY_DEFAULT) ? 10.0 : 0.0)
+-#define ENTRY_TIMEOUT (ctx->vol->secure_flags & (1 << SECURITY_DEFAULT) ? 10.0 : 0.0)
++#define ATTR_TIMEOUT (ctx->ro ? TIMEOUT_RO : \
++	(ctx->vol->secure_flags & (1 << SECURITY_DEFAULT) ? 10.0 : 0.0))
++#define ENTRY_TIMEOUT (ctx->ro ? TIMEOUT_RO : \
++	(ctx->vol->secure_flags & (1 << SECURITY_DEFAULT) ? 10.0 : 0.0))
+ #endif /* KERNELACLS */
+ #endif /* defined(__sun) && defined (__SVR4) */
+ #endif /* !CACHEING */
+@@ -203,6 +201,9 @@
+ typedef struct fill_context {
+ 	struct fill_item *first;
+ 	struct fill_item *last;
++#ifndef DISABLE_PLUGINS
++	u64 fh;
++#endif /* DISABLE_PLUGINS */
+ 	off_t off;
+ 	fuse_req_t req;
+ 	fuse_ino_t ino;
+@@ -260,7 +261,7 @@
+ "\n"
+ "Copyright (C) 2005-2007 Yura Pakhuchiy\n"
+ "Copyright (C) 2006-2009 Szabolcs Szakacsits\n"
+-"Copyright (C) 2007-2017 Jean-Pierre Andre\n"
++"Copyright (C) 2007-2020 Jean-Pierre Andre\n"
+ "Copyright (C) 2009 Erik Larsson\n"
+ "\n"
+ "Usage:    %s [-o option[,...]] <device|image_file> <mount_point>\n"
+@@ -269,8 +270,11 @@
+ "          umask=, fmask=, dmask=, streams_interface=.\n"
+ "          Please see the details in the manual (type: man ntfs-3g).\n"
+ "\n"
+-"Example: ntfs-3g /dev/sda1 /mnt/windows\n"
++"Example: lowntfs-3g /dev/sda1 /mnt/windows\n"
+ "\n"
++#ifdef PLUGIN_DIR
++"Plugin path: " PLUGIN_DIR "\n\n"
++#endif /* PLUGIN_DIR */
+ "%s";
+ 
+ static const char ntfs_bad_reparse[] = "unsupported reparse point";
+@@ -704,6 +708,9 @@
+ 	memset(stbuf, 0, sizeof(struct stat));
+ 	withusermapping = (scx->mapping[MAPUSERS] != (struct MAPPING*)NULL);
+ 	stbuf->st_nlink = le16_to_cpu(ni->mrec->link_count);
++	if (ctx->posix_nlink
++	    && !(ni->flags & FILE_ATTR_REPARSE_POINT))
++		stbuf->st_nlink = ntfs_dir_link_cnt(ni);
+ 	if ((ni->mrec->flags & MFT_RECORD_IS_DIRECTORY)
+ 	    || (ni->flags & FILE_ATTR_REPARSE_POINT)) {
+ 		if (ni->flags & FILE_ATTR_REPARSE_POINT) {
+@@ -766,7 +773,8 @@
+ 			}
+ 			stbuf->st_size = ni->data_size;
+ 			stbuf->st_blocks = ni->allocated_size >> 9;
+-			stbuf->st_nlink = 1;	/* Make find(1) work */
++			if (!ctx->posix_nlink)
++				stbuf->st_nlink = 1;	/* Make find(1) work */
+ 		}
+ 	} else {
+ 		/* Regular or Interix (INTX) file. */
+@@ -1071,10 +1079,9 @@
+ 		REPARSE_POINT *reparse;
+ 
+ 		res = CALL_REPARSE_PLUGIN(ni, readlink, &buf);
+-		if (res) {
++		if (res || !buf) {
+ 			buf = strdup(ntfs_bad_reparse);
+-			if (!buf)
+-				res = -errno;
++			res = (buf ? 0 : -errno);
+ 		}
+ #else /* DISABLE_PLUGINS */
+ 		errno = 0;
+@@ -1169,6 +1176,9 @@
+ 		/* never return inodes 0 and 1 */
+ 	if (MREF(mref) > 1) {
+ 		struct stat st = { .st_ino = MREF(mref) };
++#ifndef DISABLE_PLUGINS
++		ntfs_inode *ni;
++#endif /* DISABLE_PLUGINS */
+ 		 
+ 		switch (dt_type) {
+ 		case NTFS_DT_DIR :
+@@ -1189,6 +1199,26 @@
+ 		case NTFS_DT_CHR :
+ 			st.st_mode = S_IFCHR;
+ 			break;
++		case NTFS_DT_REPARSE :
++			st.st_mode = S_IFLNK | 0777; /* default */
++#ifndef DISABLE_PLUGINS
++			/* get emulated type from plugin if available */
++			ni = ntfs_inode_open(ctx->vol, mref);
++			if (ni && (ni->flags & FILE_ATTR_REPARSE_POINT)) {
++				const plugin_operations_t *ops;
++				REPARSE_POINT *reparse;
++				int res;
++
++				res = CALL_REPARSE_PLUGIN(ni, getattr, &st);
++				if (!res)
++					apply_umask(&st);
++				else
++					st.st_mode = S_IFLNK;
++			}
++			if (ni)
++				ntfs_inode_close(ni);
++#endif /* DISABLE_PLUGINS */
++			break;
+ 		default : /* unexpected types shown as plain files */
+ 		case NTFS_DT_REG :
+ 			st.st_mode = S_IFREG | (0777 & ~ctx->fmask);
+@@ -1292,6 +1322,17 @@
+ 			if (!ntfs_allowed_access(&security,ni,accesstype))
+ 				res = -EACCES;
+ 		}
++		if (ni->flags & FILE_ATTR_REPARSE_POINT) {
++#ifndef DISABLE_PLUGINS
++			const plugin_operations_t *ops;
++			REPARSE_POINT *reparse;
++
++			fi->fh = 0;
++			res = CALL_REPARSE_PLUGIN(ni, opendir, fi);
++#else /* DISABLE_PLUGINS */
++			res = -EOPNOTSUPP;
++#endif /* DISABLE_PLUGINS */
++		}
+ 		if (ntfs_inode_close(ni))
+ 			set_fuse_error(&res);
+ 		if (!res) {
+@@ -1305,6 +1346,9 @@
+ 				fill->filled = FALSE;
+ 				fill->ino = ino;
+ 				fill->off = 0;
++#ifndef DISABLE_PLUGINS
++				fill->fh = fi->fh;
++#endif /* DISABLE_PLUGINS */
+ 			}
+ 			fi->fh = (long)fill;
+ 		}
+@@ -1321,9 +1365,15 @@
+ 			fuse_ino_t ino __attribute__((unused)),
+ 			struct fuse_file_info *fi)
+ {
++#ifndef DISABLE_PLUGINS
++	struct fuse_file_info ufi;
++	ntfs_inode *ni;
++#endif /* DISABLE_PLUGINS */
+ 	ntfs_fuse_fill_context_t *fill;
+ 	ntfs_fuse_fill_item_t *current;
++	int res;
+ 
++	res = 0;
+ 	fill = (ntfs_fuse_fill_context_t*)(long)fi->fh;
+ 	if (fill && (fill->ino == ino)) {
+ 			/* make sure to clear results */
+@@ -1333,16 +1383,38 @@
+ 			free(fill->first);
+ 			fill->first = current;
+ 		}
++#ifndef DISABLE_PLUGINS
++		if (fill->fh) {
++			const plugin_operations_t *ops;
++			REPARSE_POINT *reparse;
++
++			ni = ntfs_inode_open(ctx->vol, INODE(ino));
++			if (ni) {
++				if (ni->flags & FILE_ATTR_REPARSE_POINT) {
++					memcpy(&ufi, fi, sizeof(ufi));
++					ufi.fh = fill->fh;
++					res = CALL_REPARSE_PLUGIN(ni, release,
++								 &ufi);
++				}
++				if (ntfs_inode_close(ni) && !res)
++					res = -errno;
++			} else
++				res = -errno;
++		}
++#endif /* DISABLE_PLUGINS */
+ 		fill->ino = 0;
+ 		free(fill);
+ 	}
+-	fuse_reply_err(req, 0);
++	fuse_reply_err(req, -res);
+ }
+ 
+ static void ntfs_fuse_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
+ 			off_t off __attribute__((unused)),
+ 			struct fuse_file_info *fi __attribute__((unused)))
+ {
++#ifndef DISABLE_PLUGINS
++	struct fuse_file_info ufi;
++#endif /* DISABLE_PLUGINS */
+ 	ntfs_fuse_fill_item_t *first;
+ 	ntfs_fuse_fill_item_t *current;
+ 	ntfs_fuse_fill_context_t *fill;
+@@ -1379,10 +1451,27 @@
+ 				if (!ni)
+ 					err = -errno;
+ 				else {
+-					if (ntfs_readdir(ni, &pos, fill,
+-						(ntfs_filldir_t)
++					if (ni->flags
++						& FILE_ATTR_REPARSE_POINT) {
++#ifndef DISABLE_PLUGINS
++						const plugin_operations_t *ops;
++						REPARSE_POINT *reparse;
++
++						memcpy(&ufi, fi, sizeof(ufi));
++						ufi.fh = fill->fh;
++						err = CALL_REPARSE_PLUGIN(ni,
++							readdir, &pos, fill,
++							(ntfs_filldir_t)
++							ntfs_fuse_filler, &ufi);
++#else /* DISABLE_PLUGINS */
++						err = -EOPNOTSUPP;
++#endif /* DISABLE_PLUGINS */
++					} else {
++						if (ntfs_readdir(ni, &pos, fill,
++							(ntfs_filldir_t)
+ 							ntfs_fuse_filler))
+-						err = -errno;
++							err = -errno;
++					}
+ 					fill->filled = TRUE;
+ 					ntfs_fuse_update_times(ni,
+ 						NTFS_UPDATE_ATIME);
+@@ -1927,15 +2016,41 @@
+ 			if (to_set & FUSE_SET_ATTR_ATIME_NOW)
+ 				mask |= NTFS_UPDATE_ATIME;
+ 			else
+-				if (to_set & FUSE_SET_ATTR_ATIME)
++				if (to_set & FUSE_SET_ATTR_ATIME) {
++#ifdef HAVE_STRUCT_STAT_ST_ATIMESPEC
++					ni->last_access_time
++						= timespec2ntfs(stin->st_atimespec);
++#elif defined(HAVE_STRUCT_STAT_ST_ATIM)
+ 					ni->last_access_time
+ 						= timespec2ntfs(stin->st_atim);
++#else
++					ni->last_access_time.tv_sec
++						= stin->st_atime;
++#ifdef HAVE_STRUCT_STAT_ST_ATIMENSEC
++					ni->last_access_time.tv_nsec
++						= stin->st_atimensec;
++#endif
++#endif
++				}
+ 			if (to_set & FUSE_SET_ATTR_MTIME_NOW)
+ 				mask |= NTFS_UPDATE_MTIME;
+ 			else
+-				if (to_set & FUSE_SET_ATTR_MTIME)
++				if (to_set & FUSE_SET_ATTR_MTIME) {
++#ifdef HAVE_STRUCT_STAT_ST_ATIMESPEC
++					ni->last_data_change_time
++						= timespec2ntfs(stin->st_mtimespec);
++#elif defined(HAVE_STRUCT_STAT_ST_ATIM)
+ 					ni->last_data_change_time 
+ 						= timespec2ntfs(stin->st_mtim);
++#else
++					ni->last_data_change_time.tv_sec
++						= stin->st_mtime;
++#ifdef HAVE_STRUCT_STAT_ST_ATIMENSEC
++					ni->last_data_change_time.tv_nsec
++						= stin->st_mtimensec;
++#endif
++#endif
++				}
+ 			ntfs_inode_update_times(ni, mask);
+ #if !KERNELPERMS | (POSIXACLS & !KERNELACLS)
+ 		} else
+@@ -2949,7 +3064,14 @@
+ 			}
+ 			memcpy(buf, data, in_bufsz);
+ 		}
+-		ret = ntfs_ioctl(ni, cmd, arg, flags, buf);
++		/*
++		 * Linux defines the request argument of ioctl() to be an
++		 * unsigned long, which fuse 2.x forwards as a signed int
++		 * into which the request sometimes does not fit.
++		 * So we must expand the value and make sure it is not
++		 * sign-extended.
++		 */
++		ret = ntfs_ioctl(ni, (unsigned int)cmd, arg, flags, buf);
+ 		if (ntfs_inode_close (ni))
+ 			set_fuse_error(&ret);
+ 	}
+@@ -3064,7 +3186,7 @@
+ 		|| !(ctx->secure_flags & (1 << SECURITY_ACL))
+ 		|| (setting && ctx->inherit))
+ 	    && foracl) {
+-		if (ctx->silent)
++		if (ctx->silent && !ctx->security.mapping[MAPUSERS])
+ 			errno = 0;
+ 		else
+ 			errno = EOPNOTSUPP;
+@@ -3251,9 +3373,18 @@
+ 	free(list);
+ }
+ 
++#if defined(__APPLE__) || defined(__DARWIN__)
++static void ntfs_fuse_getxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
++			  size_t size, uint32_t position)
++#else
+ static void ntfs_fuse_getxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
+ 			  size_t size)
++#endif
+ {
++#if !(defined(__APPLE__) || defined(__DARWIN__))
++	static const unsigned int position = 0U;
++#endif
++
+ 	ntfs_inode *ni;
+ 	ntfs_inode *dir_ni;
+ 	ntfs_attr *na = NULL;
+@@ -3266,6 +3397,16 @@
+ 	int namespace;
+ 	struct SECURITY_CONTEXT security;
+ 
++#if defined(__APPLE__) || defined(__DARWIN__)
++	/* If the attribute is not a resource fork attribute and the position
++	 * parameter is non-zero, we return with EINVAL as requesting position
++	 * is not permitted for non-resource fork attributes. */
++	if (position && strcmp(name, XATTR_RESOURCEFORK_NAME)) {
++		fuse_reply_err(req, EINVAL);
++		return;
++	}
++#endif
++
+ 	attr = ntfs_xattr_system_type(name,ctx->vol);
+ 	if (attr != XATTR_UNMAPPED) {
+ 		/*
+@@ -3343,7 +3484,7 @@
+ 		/* trusted only readable by root */
+ 	if ((namespace == XATTRNS_TRUSTED)
+ 	    && security.uid) {
+-		res = -ENODATA;
++		res = -NTFS_NOXATTR_ERRNO;
+ 		goto out;
+ 	}
+ #endif
+@@ -3354,7 +3495,7 @@
+ 	}
+ 		/* Return with no result for symlinks, fifo, etc. */
+ 	if (!user_xattrs_allowed(ctx, ni)) {
+-		res = -ENODATA;
++		res = -NTFS_NOXATTR_ERRNO;
+ 		goto exit;
+ 	}
+ 		/* otherwise file must be readable */
+@@ -3371,7 +3512,7 @@
+ 	}
+ 	na = ntfs_attr_open(ni, AT_DATA, lename, lename_len);
+ 	if (!na) {
+-		res = -ENODATA;
++		res = -NTFS_NOXATTR_ERRNO;
+ 		goto exit;
+ 	}
+ 	rsize = na->data_size;
+@@ -3380,11 +3521,13 @@
+ 	    && (na->data_flags & ATTR_IS_ENCRYPTED)
+ 	    && NAttrNonResident(na))
+ 		rsize = ((na->data_size + 511) & ~511) + 2;
++	rsize -= position;
+ 	if (size) {
+ 		if (size >= (size_t)rsize) {
+ 			value = (char*)ntfs_malloc(rsize);
+ 			if (value)
+-				res = ntfs_attr_pread(na, 0, rsize, value);
++				res = ntfs_attr_pread(na, position, rsize,
++						value);
+ 			if (!value || (res != rsize))
+ 				res = -errno;
+ 		} else
+@@ -3409,9 +3552,21 @@
+ 	free(value);
+ }
+ 
++#if defined(__APPLE__) || defined(__DARWIN__)
++static void ntfs_fuse_setxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
++			  const char *value, size_t size, int flags,
++			  uint32_t position)
++#else
+ static void ntfs_fuse_setxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
+ 			  const char *value, size_t size, int flags)
++#endif
+ {
++#if !(defined(__APPLE__) || defined(__DARWIN__))
++	static const unsigned int position = 0U;
++#else
++	BOOL is_resource_fork;
++#endif
++
+ 	ntfs_inode *ni;
+ 	ntfs_inode *dir_ni;
+ 	ntfs_attr *na = NULL;
+@@ -3423,6 +3578,17 @@
+ 	int namespace;
+ 	struct SECURITY_CONTEXT security;
+ 
++#if defined(__APPLE__) || defined(__DARWIN__)
++	/* If the attribute is not a resource fork attribute and the position
++	 * parameter is non-zero, we return with EINVAL as requesting position
++	 * is not permitted for non-resource fork attributes. */
++	is_resource_fork = strcmp(name, XATTR_RESOURCEFORK_NAME) ? FALSE : TRUE;
++	if (position && !is_resource_fork) {
++		fuse_reply_err(req, EINVAL);
++		return;
++	}
++#endif
++
+ 	attr = ntfs_xattr_system_type(name,ctx->vol);
+ 	if (attr != XATTR_UNMAPPED) {
+ 		/*
+@@ -3582,7 +3748,7 @@
+ 	}
+ 	if (!na) {
+ 		if (flags == XATTR_REPLACE) {
+-			res = -ENODATA;
++			res = -NTFS_NOXATTR_ERRNO;
+ 			goto exit;
+ 		}
+ 		if (ntfs_attr_add(ni, AT_DATA, lename, lename_len, NULL, 0)) {
+@@ -3598,6 +3764,11 @@
+ 			res = -errno;
+ 			goto exit;
+ 		}
++#if defined(__APPLE__) || defined(__DARWIN__)
++	} else if (is_resource_fork) {
++		/* In macOS, the resource fork is a special case. It doesn't
++		 * ever shrink (it would have to be removed and re-added). */
++#endif
+ 	} else {
+ 			/* currently compressed streams can only be wiped out */
+ 		if (ntfs_attr_truncate(na, (s64)0 /* size */)) {
+@@ -3609,8 +3780,8 @@
+ 	res = 0;
+ 	if (size) {
+ 		do {
+-			part = ntfs_attr_pwrite(na, total, size - total,
+-					 &value[total]);
++			part = ntfs_attr_pwrite(na, position + total,
++					 size - total, &value[total]);
+ 			if (part > 0)
+ 				total += part;
+ 		} while ((part > 0) && (total < size));
+@@ -3820,7 +3991,7 @@
+ 	}
+ 	if (ntfs_attr_remove(ni, AT_DATA, lename, lename_len)) {
+ 		if (errno == ENOENT)
+-			errno = ENODATA;
++			errno = NTFS_NOXATTR_ERRNO;
+ 		res = -errno;
+ 	}
+ 	if (!res) {
+@@ -4323,7 +4494,8 @@
+ 	else {
+ 		ctx->abs_mnt_point = (char*)ntfs_malloc(PATH_MAX);
+ 		if (ctx->abs_mnt_point) {
+-			if (getcwd(ctx->abs_mnt_point,
++			if ((strlen(opts.mnt_point) < PATH_MAX)
++			    && getcwd(ctx->abs_mnt_point,
+ 				     PATH_MAX - strlen(opts.mnt_point) - 1)) {
+ 				strcat(ctx->abs_mnt_point, "/");
+ 				strcat(ctx->abs_mnt_point, opts.mnt_point);
+@@ -4331,6 +4503,9 @@
+ 			/* Solaris also wants the absolute mount point */
+ 				opts.mnt_point = ctx->abs_mnt_point;
+ #endif /* defined(__sun) && defined (__SVR4) */
++			} else {
++				free(ctx->abs_mnt_point);
++				ctx->abs_mnt_point = (char*)NULL;
+ 			}
+ 		}
+ 	}
+@@ -4387,14 +4562,19 @@
+         
+ 	/* Force read-only mount if the device was found read-only */
+ 	if (!ctx->ro && NVolReadOnly(ctx->vol)) {
++		ctx->rw = FALSE;
+ 		ctx->ro = TRUE;
+ 		if (ntfs_strinsert(&parsed_options, ",ro")) 
+                 	goto err_out;
+-	}
++		ntfs_log_info("Could not mount read-write, trying read-only\n");
++	} else
++		if (ctx->rw && ntfs_strinsert(&parsed_options, ",rw"))
++			goto err_out;
+ 	/* We must do this after ntfs_open() to be able to set the blksize */
+ 	if (ctx->blkdev && set_fuseblk_options(&parsed_options))
+ 		goto err_out;
+ 
++	ctx->vol->abs_mnt_point = ctx->abs_mnt_point;
+ 	ctx->security.vol = ctx->vol;
+ 	ctx->vol->secure_flags = ctx->secure_flags;
+ #ifdef HAVE_SETXATTR	/* extended attributes interface required */
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g.8.in work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g.8.in
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g.8.in	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g.8.in	2020-12-06 12:06:07.674798421 +0100
+@@ -52,6 +52,8 @@
+ powercfg /h off
+ .sp
+ .RE
++If either Windows is hibernated or its fast restart is enabled, partitions
++on internal disks are forced to be mounted in read-only mode.
+ .SS Access Handling and Security
+ By default, files and directories are owned by the effective 
+ user and group of the mounting process, and everybody has
+@@ -248,6 +250,13 @@
+ When a file is renamed or linked with a new name, the hidden flag is
+ adjusted to the latest name.
+ .TP
++.B posix_nlink
++Compute the count of hard links of a file or directory according to
++the Posix specifications. When this option is not set, a count of 1
++is set for directories, and the short name of files is accounted for.
++Using the option entails some penalty as the count is not stored and
++has to be computed.
++.TP
+ .B windows_names
+ This option prevents files, directories and extended attributes to be
+ created with a name not allowed by windows, because
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g.c	2020-12-06 12:06:07.674798421 +0100
+@@ -4,7 +4,7 @@
+  * Copyright (c) 2005-2007 Yura Pakhuchiy
+  * Copyright (c) 2005 Yuval Fledel
+  * Copyright (c) 2006-2009 Szabolcs Szakacsits
+- * Copyright (c) 2007-2017 Jean-Pierre Andre
++ * Copyright (c) 2007-2020 Jean-Pierre Andre
+  * Copyright (c) 2009 Erik Larsson
+  *
+  * This file is originated from the Linux-NTFS project.
+@@ -196,7 +196,7 @@
+ "\n"
+ "Copyright (C) 2005-2007 Yura Pakhuchiy\n"
+ "Copyright (C) 2006-2009 Szabolcs Szakacsits\n"
+-"Copyright (C) 2007-2017 Jean-Pierre Andre\n"
++"Copyright (C) 2007-2020 Jean-Pierre Andre\n"
+ "Copyright (C) 2009 Erik Larsson\n"
+ "\n"
+ "Usage:    %s [-o option[,...]] <device|image_file> <mount_point>\n"
+@@ -207,6 +207,9 @@
+ "\n"
+ "Example: ntfs-3g /dev/sda1 /mnt/windows\n"
+ "\n"
++#ifdef PLUGIN_DIR 
++"Plugin path: " PLUGIN_DIR "\n\n"
++#endif /* PLUGIN_DIR */
+ "%s";
+ 
+ static const char ntfs_bad_reparse[] = "unsupported reparse point";
+@@ -787,6 +790,9 @@
+ 	}
+ #endif
+ 	stbuf->st_nlink = le16_to_cpu(ni->mrec->link_count);
++	if (ctx->posix_nlink
++	    && !(ni->flags & FILE_ATTR_REPARSE_POINT))
++		stbuf->st_nlink = ntfs_dir_link_cnt(ni);
+ 
+ 	if (((ni->mrec->flags & MFT_RECORD_IS_DIRECTORY)
+ 		|| (ni->flags & FILE_ATTR_REPARSE_POINT))
+@@ -849,7 +855,8 @@
+ 			}
+ 			stbuf->st_size = ni->data_size;
+ 			stbuf->st_blocks = ni->allocated_size >> 9;
+-			stbuf->st_nlink = 1;	/* Make find(1) work */
++			if (!ctx->posix_nlink)
++				stbuf->st_nlink = 1;	/* Make find(1) work */
+ 		}
+ 	} else {
+ 		/* Regular or Interix (INTX) file. */
+@@ -1199,6 +1206,9 @@
+ 		return 0;
+ 	} else {
+ 		struct stat st = { .st_ino = MREF(mref) };
++#ifndef DISABLE_PLUGINS
++		ntfs_inode *ni;
++#endif /* DISABLE_PLUGINS */
+ 		 
+ 		switch (dt_type) {
+ 		case NTFS_DT_DIR :
+@@ -1219,6 +1229,26 @@
+ 		case NTFS_DT_CHR :
+ 			st.st_mode = S_IFCHR;
+ 			break;
++		case NTFS_DT_REPARSE :
++			st.st_mode = S_IFLNK | 0777; /* default */
++#ifndef DISABLE_PLUGINS
++			/* get emulated type from plugin if available */
++			ni = ntfs_inode_open(ctx->vol, mref);
++			if (ni && (ni->flags & FILE_ATTR_REPARSE_POINT)) {
++				const plugin_operations_t *ops;
++				REPARSE_POINT *reparse;
++				int res;
++
++				res = CALL_REPARSE_PLUGIN(ni, getattr, &st);
++				if (!res)
++					apply_umask(&st);
++				else
++					st.st_mode = S_IFLNK;
++			}
++			if (ni)
++				ntfs_inode_close(ni);
++#endif /* DISABLE_PLUGINS */
++			break;
+ 		default : /* unexpected types shown as plain files */
+ 		case NTFS_DT_REG :
+ 			st.st_mode = S_IFREG | (0777 & ~ctx->fmask);
+@@ -1300,6 +1330,17 @@
+ 						ni,accesstype))
+ 				res = -EACCES;
+ 		}
++		if (ni->flags & FILE_ATTR_REPARSE_POINT) {
++#ifndef DISABLE_PLUGINS
++			const plugin_operations_t *ops;
++			REPARSE_POINT *reparse;
++
++			fi->fh = 0;
++			res = CALL_REPARSE_PLUGIN(ni, opendir, fi);
++#else /* DISABLE_PLUGINS */
++			res = -EOPNOTSUPP;
++#endif /* DISABLE_PLUGINS */
++		}
+ 		if (ntfs_inode_close(ni))
+ 			set_fuse_error(&res);
+ 	} else
+@@ -1323,9 +1364,22 @@
+ 	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
+ 	if (!ni)
+ 		return -errno;
+-	if (ntfs_readdir(ni, &pos, &fill_ctx,
+-			(ntfs_filldir_t)ntfs_fuse_filler))
+-		err = -errno;
++
++	if (ni->flags & FILE_ATTR_REPARSE_POINT) {
++#ifndef DISABLE_PLUGINS
++		const plugin_operations_t *ops;
++		REPARSE_POINT *reparse;
++
++		err = CALL_REPARSE_PLUGIN(ni, readdir, &pos, &fill_ctx,
++				(ntfs_filldir_t)ntfs_fuse_filler, fi);
++#else /* DISABLE_PLUGINS */
++		err = -EOPNOTSUPP;
++#endif /* DISABLE_PLUGINS */
++	} else {
++		if (ntfs_readdir(ni, &pos, &fill_ctx,
++				(ntfs_filldir_t)ntfs_fuse_filler))
++			err = -errno;
++	}
+ 	ntfs_fuse_update_times(ni, NTFS_UPDATE_ATIME);
+ 	if (ntfs_inode_close(ni))
+ 		set_fuse_error(&err);
+@@ -1972,7 +2026,7 @@
+ 	if (!dir_ni || (dir_ni->mft_no == FILE_Extend)) {
+ 		free(path);
+ 		res = -errno;
+-		if (dir_ni->mft_no == FILE_Extend)
++		if (dir_ni)
+ 			res = -EPERM;
+ 		goto exit;
+ 	}
+@@ -2319,7 +2373,7 @@
+ 		/* deny unlinking metadata files from $Extend */
+ 	if (!dir_ni || (dir_ni->mft_no == FILE_Extend)) {
+ 		res = -errno;
+-		if (dir_ni->mft_no == FILE_Extend)
++		if (dir_ni)
+ 			res = -EPERM;
+ 		goto exit;
+ 	}
+@@ -2753,7 +2807,13 @@
+ 	if (!ni)
+ 		return -errno;
+ 
+-	ret = ntfs_ioctl(ni, cmd, arg, flags, data);
++	/*
++	 * Linux defines the request argument of ioctl() to be an
++	 * unsigned long, which fuse 2.x forwards as a signed int into
++	 * which the request sometimes does not fit.
++	 * So we must expand the value and make sure it is not sign-extended.
++	 */
++	ret = ntfs_ioctl(ni, (unsigned int)cmd, arg, flags, data);
+ 
+ 	if (ntfs_inode_close (ni))
+ 		set_fuse_error(&ret);
+@@ -2855,7 +2915,7 @@
+ 			|| !(ctx->secure_flags & (1 << SECURITY_ACL))
+ 			|| (setting && ctx->inherit))
+ 		    && foracl) {
+-			if (ctx->silent)
++			if (ctx->silent && !ctx->security.mapping[MAPUSERS])
+ 				errno = 0;
+ 			else
+ 				errno = EOPNOTSUPP;
+@@ -3091,9 +3151,18 @@
+ 	return ret;
+ }
+ 
++#if defined(__APPLE__) || defined(__DARWIN__)
++static int ntfs_fuse_getxattr(const char *path, const char *name,
++				char *value, size_t size, uint32_t position)
++#else
+ static int ntfs_fuse_getxattr(const char *path, const char *name,
+ 				char *value, size_t size)
++#endif
+ {
++#if !(defined(__APPLE__) || defined(__DARWIN__))
++	static const unsigned int position = 0U;
++#endif
++
+ 	ntfs_inode *ni;
+ 	ntfs_inode *dir_ni;
+ 	ntfs_attr *na = NULL;
+@@ -3104,6 +3173,15 @@
+ 	int namespace;
+ 	struct SECURITY_CONTEXT security;
+ 
++#if defined(__APPLE__) || defined(__DARWIN__)
++	/* If the attribute is not a resource fork attribute and the position
++	 * parameter is non-zero, we return with EINVAL as requesting position
++	 * is not permitted for non-resource fork attributes. */
++	if (position && strcmp(name, XATTR_RESOURCEFORK_NAME)) {
++		return -EINVAL;
++	}
++#endif
++
+ 	attr = ntfs_xattr_system_type(name,ctx->vol);
+ 	if (attr != XATTR_UNMAPPED) {
+ #if !KERNELPERMS | (POSIXACLS & !KERNELACLS)
+@@ -3176,14 +3254,14 @@
+ 		/* trusted only readable by root */
+ 	if ((namespace == XATTRNS_TRUSTED)
+ 	    && security.uid)
+-		    return -ENODATA;
++		    return -NTFS_NOXATTR_ERRNO;
+ #endif
+ 	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
+ 	if (!ni)
+ 		return -errno;
+ 		/* Return with no result for symlinks, fifo, etc. */
+ 	if (!user_xattrs_allowed(ctx, ni)) {
+-		res = -ENODATA;
++		res = -NTFS_NOXATTR_ERRNO;
+ 		goto exit;
+ 	}
+ 		/* otherwise file must be readable */
+@@ -3200,7 +3278,7 @@
+ 	}
+ 	na = ntfs_attr_open(ni, AT_DATA, lename, lename_len);
+ 	if (!na) {
+-		res = -ENODATA;
++		res = -NTFS_NOXATTR_ERRNO;
+ 		goto exit;
+ 	}
+ 	rsize = na->data_size;
+@@ -3209,9 +3287,10 @@
+ 	    && (na->data_flags & ATTR_IS_ENCRYPTED)
+ 	    && NAttrNonResident(na))
+ 		rsize = ((na->data_size + 511) & ~511) + 2;
++	rsize -= position;
+ 	if (size) {
+ 		if (size >= (size_t)rsize) {
+-			res = ntfs_attr_pread(na, 0, rsize, value);
++			res = ntfs_attr_pread(na, position, rsize, value);
+ 			if (res != rsize)
+ 				res = -errno;
+ 		} else
+@@ -3227,9 +3306,21 @@
+ 	return res;
+ }
+ 
++#if defined(__APPLE__) || defined(__DARWIN__)
++static int ntfs_fuse_setxattr(const char *path, const char *name,
++				const char *value, size_t size, int flags,
++				uint32_t position)
++#else
+ static int ntfs_fuse_setxattr(const char *path, const char *name,
+ 				const char *value, size_t size, int flags)
++#endif
+ {
++#if !(defined(__APPLE__) || defined(__DARWIN__))
++	static const unsigned int position = 0U;
++#else
++	BOOL is_resource_fork;
++#endif
++
+ 	ntfs_inode *ni;
+ 	ntfs_inode *dir_ni;
+ 	ntfs_attr *na = NULL;
+@@ -3241,6 +3332,16 @@
+ 	int namespace;
+ 	struct SECURITY_CONTEXT security;
+ 
++#if defined(__APPLE__) || defined(__DARWIN__)
++	/* If the attribute is not a resource fork attribute and the position
++	 * parameter is non-zero, we return with EINVAL as requesting position
++	 * is not permitted for non-resource fork attributes. */
++	is_resource_fork = strcmp(name, XATTR_RESOURCEFORK_NAME) ? FALSE : TRUE;
++	if (position && !is_resource_fork) {
++		return -EINVAL;
++	}
++#endif
++
+ 	attr = ntfs_xattr_system_type(name,ctx->vol);
+ 	if (attr != XATTR_UNMAPPED) {
+ #if !KERNELPERMS | (POSIXACLS & !KERNELACLS)
+@@ -3390,7 +3491,7 @@
+ 	}
+ 	if (!na) {
+ 		if (flags == XATTR_REPLACE) {
+-			res = -ENODATA;
++			res = -NTFS_NOXATTR_ERRNO;
+ 			goto exit;
+ 		}
+ 		if (ntfs_attr_add(ni, AT_DATA, lename, lename_len, NULL, 0)) {
+@@ -3406,6 +3507,11 @@
+ 			res = -errno;
+ 			goto exit;
+ 		}
++#if defined(__APPLE__) || defined(__DARWIN__)
++	} else if (is_resource_fork) {
++		/* In macOS, the resource fork is a special case. It doesn't
++		 * ever shrink (it would have to be removed and re-added). */
++#endif
+ 	} else {
+ 			/* currently compressed streams can only be wiped out */
+ 		if (ntfs_attr_truncate(na, (s64)0 /* size */)) {
+@@ -3417,8 +3523,8 @@
+ 	res = 0;
+ 	if (size) {
+ 		do {
+-			part = ntfs_attr_pwrite(na, total, size - total,
+-					 &value[total]);
++			part = ntfs_attr_pwrite(na, position + total,
++					 size - total, &value[total]);
+ 			if (part > 0)
+ 				total += part;
+ 		} while ((part > 0) && (total < size));
+@@ -3620,7 +3726,7 @@
+ 	}
+ 	if (ntfs_attr_remove(ni, AT_DATA, lename, lename_len)) {
+ 		if (errno == ENOENT)
+-			errno = ENODATA;
++			errno = NTFS_NOXATTR_ERRNO;
+ 		res = -errno;
+ 	}
+ 	if (!res) {
+@@ -3732,6 +3838,7 @@
+ #if !KERNELPERMS | (POSIXACLS & !KERNELACLS)
+ 	.access		= ntfs_fuse_access,
+ 	.opendir	= ntfs_fuse_opendir,
++	.releasedir	= ntfs_fuse_release,
+ #endif
+ #ifdef HAVE_SETXATTR
+ 	.getxattr	= ntfs_fuse_getxattr,
+@@ -4000,13 +4107,28 @@
+ 	
+ 	if (fuse_opt_add_arg(&args, "") == -1)
+ 		goto err;
++	if (ctx->ro) {
++		char buf[128];
++		int len;
++        
++		len = snprintf(buf, sizeof(buf), "-ouse_ino,kernel_cache"
++				",attr_timeout=%d,entry_timeout=%d",
++				(int)TIMEOUT_RO, (int)TIMEOUT_RO);
++		if ((len < 0)
++		    || (len >= (int)sizeof(buf))
++		    || (fuse_opt_add_arg(&args, buf) == -1))
++			goto err;
++	} else {
+ #if !CACHEING
+-	if (fuse_opt_add_arg(&args, "-ouse_ino,kernel_cache,attr_timeout=0") == -1)
+-		goto err;
++		if (fuse_opt_add_arg(&args, "-ouse_ino,kernel_cache"
++				",attr_timeout=0") == -1)
++			goto err;
+ #else
+-	if (fuse_opt_add_arg(&args, "-ouse_ino,kernel_cache,attr_timeout=1") == -1)
+-		goto err;
++		if (fuse_opt_add_arg(&args, "-ouse_ino,kernel_cache"
++				",attr_timeout=1") == -1)
++			goto err;
+ #endif
++	}
+ 	if (ctx->debug)
+ 		if (fuse_opt_add_arg(&args, "-odebug") == -1)
+ 			goto err;
+@@ -4123,7 +4245,8 @@
+ 	else {
+ 		ctx->abs_mnt_point = (char*)ntfs_malloc(PATH_MAX);
+ 		if (ctx->abs_mnt_point) {
+-			if (getcwd(ctx->abs_mnt_point,
++			if ((strlen(opts.mnt_point) < PATH_MAX)
++			    && getcwd(ctx->abs_mnt_point,
+ 				     PATH_MAX - strlen(opts.mnt_point) - 1)) {
+ 				strcat(ctx->abs_mnt_point, "/");
+ 				strcat(ctx->abs_mnt_point, opts.mnt_point);
+@@ -4131,6 +4254,9 @@
+ 			/* Solaris also wants the absolute mount point */
+ 				opts.mnt_point = ctx->abs_mnt_point;
+ #endif /* defined(__sun) && defined (__SVR4) */
++			} else {
++				free(ctx->abs_mnt_point);
++				ctx->abs_mnt_point = (char*)NULL;
+ 			}
+ 		}
+ 	}
+@@ -4187,14 +4313,19 @@
+ 	
+ 	/* Force read-only mount if the device was found read-only */
+ 	if (!ctx->ro && NVolReadOnly(ctx->vol)) {
++		ctx->rw = FALSE;
+ 		ctx->ro = TRUE;
+ 		if (ntfs_strinsert(&parsed_options, ",ro")) 
+                 	goto err_out;
+-	}
++		ntfs_log_info("Could not mount read-write, trying read-only\n");
++	} else
++		if (ctx->rw && ntfs_strinsert(&parsed_options, ",rw"))
++			goto err_out;
+ 	/* We must do this after ntfs_open() to be able to set the blksize */
+ 	if (ctx->blkdev && set_fuseblk_options(&parsed_options))
+ 		goto err_out;
+ 
++	ctx->vol->abs_mnt_point = ctx->abs_mnt_point;
+ 	ctx->security.vol = ctx->vol;
+ 	ctx->vol->secure_flags = ctx->secure_flags;
+ #ifdef HAVE_SETXATTR	/* extended attributes interface required */
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g_common.c work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g_common.c
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g_common.c	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g_common.c	2020-12-06 12:06:07.674798421 +0100
+@@ -1,7 +1,7 @@
+ /**
+  * ntfs-3g_common.c - Common definitions for ntfs-3g and lowntfs-3g.
+  *
+- * Copyright (c) 2010-2016 Jean-Pierre Andre
++ * Copyright (c) 2010-2020 Jean-Pierre Andre
+  * Copyright (c) 2010      Erik Larsson
+  *
+  * This program/include file is free software; you can redistribute it and/or
+@@ -85,6 +85,7 @@
+ 	{ "atime", OPT_ATIME, FLGOPT_BOGUS },
+ 	{ "relatime", OPT_RELATIME, FLGOPT_BOGUS },
+ 	{ "delay_mtime", OPT_DMTIME, FLGOPT_DECIMAL | FLGOPT_OPTIONAL },
++	{ "rw", OPT_RW, FLGOPT_BOGUS },
+ 	{ "fake_rw", OPT_FAKE_RW, FLGOPT_BOGUS },
+ 	{ "fsname", OPT_FSNAME, FLGOPT_NOSUPPORT },
+ 	{ "no_def_opts", OPT_NO_DEF_OPTS, FLGOPT_BOGUS },
+@@ -125,6 +126,7 @@
+ 	{ "usermapping", OPT_USERMAPPING, FLGOPT_STRING },
+ 	{ "xattrmapping", OPT_XATTRMAPPING, FLGOPT_STRING },
+ 	{ "efs_raw", OPT_EFS_RAW, FLGOPT_BOGUS },
++	{ "posix_nlink", OPT_POSIX_NLINK, FLGOPT_BOGUS },
+ 	{ (const char*)NULL, 0, 0 } /* end marker */
+ } ;
+ 
+@@ -291,6 +293,9 @@
+ 			case OPT_FAKE_RW :
+ 				ctx->ro = TRUE;
+ 				break;
++			case OPT_RW :
++				ctx->rw = TRUE;
++				break;
+ 			case OPT_NOATIME :
+ 				ctx->atime = ATIME_DISABLED;
+ 				break;
+@@ -422,7 +427,14 @@
+ 				}
+ 				break;
+ 			case OPT_USER_XATTR :
++#if defined(__APPLE__) || defined(__DARWIN__)
++				/* macOS builds use non-namespaced extended
++				 * attributes by default since it matches the
++				 * standard behaviour of macOS filesystems. */
++				ctx->streams = NF_STREAMS_INTERFACE_OPENXATTR;
++#else
+ 				ctx->streams = NF_STREAMS_INTERFACE_XATTR;
++#endif
+ 				break;
+ 			case OPT_NOAUTO :
+ 				/* Don't pass noauto option to fuse. */
+@@ -488,6 +500,9 @@
+ 				ctx->efs_raw = TRUE;
+ 				break;
+ #endif /* HAVE_SETXATTR */
++			case OPT_POSIX_NLINK :
++				ctx->posix_nlink = TRUE;
++				break;
+ 			case OPT_FSNAME : /* Filesystem name. */
+ 			/*
+ 			 * We need this to be able to check whether filesystem
+@@ -542,6 +557,7 @@
+ 	if (ctx->ro) {
+ 		ctx->secure_flags &= ~(1 << SECURITY_ADDSECURIDS);
+ 		ctx->hiberfile = FALSE;
++		ctx->rw = FALSE;
+ 	}
+ exit:
+ 	free(options);
+@@ -796,7 +812,7 @@
+ 	const struct plugin_operations *ops;
+ 	void *handle;
+ 	REPARSE_POINT *reparse;
+-	le32 tag;
++	le32 tag, seltag;
+ 	plugin_list_t *plugin;
+ 	plugin_init_t pinit;
+ 
+@@ -804,7 +820,8 @@
+ 	reparse = ntfs_get_reparse_point(ni);
+ 	if (reparse) {
+ 		tag = reparse->reparse_tag;
+-		for (plugin=ctx->plugins; plugin && (plugin->tag != tag);
++		seltag = tag & IO_REPARSE_PLUGIN_SELECT;
++		for (plugin=ctx->plugins; plugin && (plugin->tag != seltag);
+ 						plugin = plugin->next) { }
+ 		if (plugin) {
+ 			ops = plugin->ops;
+@@ -814,12 +831,12 @@
+ 
+ 			snprintf(name,sizeof(name), PLUGIN_DIR
+ 					"/ntfs-plugin-%08lx.so",
+-					(long)le32_to_cpu(tag));
++					(long)le32_to_cpu(seltag));
+ #else
+ 			char name[64];
+ 
+ 			snprintf(name,sizeof(name), "ntfs-plugin-%08lx.so",
+-					(long)le32_to_cpu(tag));
++					(long)le32_to_cpu(seltag));
+ #endif
+ 			handle = dlopen(name, RTLD_LAZY);
+ 			if (handle) {
+@@ -828,13 +845,14 @@
+ 				/* pinit() should set errno if it fails */
+ 					ops = (*pinit)(tag);
+ 					if (ops && register_reparse_plugin(ctx,
+-							tag, ops, handle))
++							seltag, ops, handle))
+ 						ops = (struct plugin_operations*)NULL;
+ 				} else
+ 					errno = ELIBBAD;
+ 				if (!ops)
+ 					dlclose(handle);
+ 			} else {
++				errno = ELIBACC;
+ 				if (!(ctx->errors_logged & ERR_PLUGIN)) {
+ 					ntfs_log_perror(
+ 						"Could not load plugin %s",
+diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g_common.h work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g_common.h
+--- work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g_common.h	2017-03-23 10:42:44.000000000 +0100
++++ work/ntfs-3g_ntfsprogs-2017.3.23/ntfs-3g_ntfsprogs-2017.3.23/src/ntfs-3g_common.h	2020-12-06 12:06:07.674798421 +0100
+@@ -51,6 +51,7 @@
+ 	OPT_ATIME,
+ 	OPT_RELATIME,
+ 	OPT_DMTIME,
++	OPT_RW,
+ 	OPT_FAKE_RW,
+ 	OPT_FSNAME,
+ 	OPT_NO_DEF_OPTS,
+@@ -91,6 +92,7 @@
+ 	OPT_USERMAPPING,
+ 	OPT_XATTRMAPPING,
+ 	OPT_EFS_RAW,
++	OPT_POSIX_NLINK,
+ } ;
+ 
+ 			/* Option flags */
+@@ -135,6 +137,7 @@
+ 	ntfs_atime_t atime;
+ 	s64 dmtime;
+ 	BOOL ro;
++	BOOL rw;
+ 	BOOL show_sys_files;
+ 	BOOL hide_hid_files;
+ 	BOOL hide_dot_files;
+@@ -151,6 +154,7 @@
+ 	BOOL no_detach;
+ 	BOOL blkdev;
+ 	BOOL mounted;
++	BOOL posix_nlink;
+ #ifdef HAVE_SETXATTR	/* extended attributes interface required */
+ 	BOOL efs_raw;
+ #ifdef XATTR_MAPPINGS
