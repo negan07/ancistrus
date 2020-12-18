@@ -100,10 +100,8 @@ pre_inst:
 	@mkdir -p -m 777 $(IMAGEDIR)/$(RCINITD) $(BUILD_TARGET)$(RCINITDIR) || exit 1
 	@echo -e "\\e[35m$(CUR_REL_PATH): creating partition dir \\e[36mopkg \\e[0m"
 	@mkdir -p -m 777 $(IMAGEDIR)/opkg $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR) || exit 1
-	echo -e "\\e[35m$(CUR_REL_PATH): removing old shared lib references on \\e[36m$(BUILD_TARGET) \\e[0m"
+	echo -e "\\e[35m$(CUR_REL_PATH): removing old mandatory shared lib references on \\e[36m$(BUILD_TARGET) \\e[0m"
 	rm $(BUILD_TARGET)$(RCLDLIB)/libz.so* $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so* $(BUILD_TARGET)$(RCLDLIB)/libssl.so* $(BUILD_TARGET)$(RCLDLIB)/libcurl.so* || exit 1
-	echo -e "\\e[35m$(CUR_REL_PATH): removing old $(RCBOOTDIR)/iproute2 dir on \\e[36m$(BUILD_TARGET) \\e[0m"
-	rm -r $(BUILD_TARGET)$(RCBOOTDIR)/iproute2 || exit 1
 
 opkg_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(BUILD_TARGET) \\e[0m"
@@ -118,23 +116,72 @@ opkg_inst:
 
 post_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): making FS post install modifications on \\e[36m$(BUILD_TARGET) \\e[0m"
-	@mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCBOOT_NAME) $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1
-	@mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCNVRAMSO) $(BUILD_TARGET)$(RCTMPDIR)/libz.so* $(BUILD_TARGET)$(RCTMPDIR)/libcrypto.so* $(BUILD_TARGET)$(RCTMPDIR)/libssl.so* $(BUILD_TARGET)$(RCTMPDIR)/libcurl.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1
-	@ln -sf libz.so.$(RCZLIBVER) $(BUILD_TARGET)$(RCLDLIB)/libz.so || exit 1
-	@ln -sf libz.so.$(RCZLIBVER) $(BUILD_TARGET)$(RCLDLIB)/libz.so.$(RCZLIBMAINVER) || exit 1
-	@ln -sf libcrypto.so.$(RCSSLVER) $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so || exit 1
-	@ln -sf libssl.so.$(RCSSLVER) $(BUILD_TARGET)$(RCLDLIB)/libssl.so || exit 1
-	@ln -sf libcrypto.so.$(RCSSLVER) $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so.$(RCOLDSSLVER) || exit 1
-	@ln -sf libssl.so.$(RCSSLVER) $(BUILD_TARGET)$(RCLDLIB)/libssl.so.$(RCOLDSSLVER) || exit 1
-	@ln -sf libcurl.so.$(RCCURLVER) $(BUILD_TARGET)$(RCLDLIB)/libcurl.so || exit 1
-	@ln -sf libcurl.so.$(RCCURLVER) $(BUILD_TARGET)$(RCLDLIB)/libcurl.so.$(RCCURLMAINVER) || exit 1
-	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBOOTDIR)/$(RCAPPSNAME) || exit 1
-	@mv $(BUILD_TARGET)$(RCTMPDIR)/openssl.cnf $(BUILD_TARGET)$(RCTMPDIR)/profile $(BUILD_TARGET)$(RCTMPDIR)/iproute2 $(BUILD_TARGET)$(RCTMPDIR)/mini_httpd.pem $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1
-	@mv $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMDBIN) || exit 1
-	@ln -sf $(RCBINDIR)/$(PROJ_TAG) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) || exit 1
-	@mv $(BUILD_TARGET)$(RCTMPDIR)/openssl $(BUILD_TARGET)$(RCTMPDIR)/curl $(BUILD_TARGET)$(RCTMPDIR)/busybox $(BUILD_TARGET)$(RCTMPDIR)/ip $(BUILD_TARGET)$(RCTMPDIR)/tc $(BUILD_TARGET)$(RCTMPDIR)/mini_httpd $(BUILD_TARGET)$(RCBINDIR)/ || exit 1
-	@for F in $(RCMAINSERV); do mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCAPPDIR)/ || exit 1; done
-	@for F in `cat $(BUSYBOX)/busybox.links`; do mv $(BUILD_TARGET)$(RCTMPDIR)/`basename $$F` $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; done
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep zlib`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mzlib \\e[0m"; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/libz.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
+	for L in $(BUILD_TARGET)$(RCLDLIB)/libz.so $(BUILD_TARGET)$(RCLDLIB)/libz.so.$(RCZLIBMAINVER); do ln -sf libz.so.$(RCZLIBVER) $$L || exit 1; done; \
+	else \
+	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mzlib package is mandatory\\e[0m" && exit 1; \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep openssl`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mopenssl \\e[0m"; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/libcrypto.so* $(BUILD_TARGET)$(RCTMPDIR)/libssl.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/openssl $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/openssl.cnf $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
+	for L in $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so.$(RCOLDSSLVER); do ln -sf libcrypto.so.$(RCSSLVER) $$L || exit 1; done; \
+	for L in $(BUILD_TARGET)$(RCLDLIB)/libssl.so $(BUILD_TARGET)$(RCLDLIB)/libssl.so.$(RCOLDSSLVER); do ln -sf libssl.so.$(RCSSLVER) $$L || exit 1; done; \
+	else \
+	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mopenssl package is mandatory\\e[0m" && exit 1; \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep curl`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mcurl \\e[0m"; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/libcurl.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/curl $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
+	for L in $(BUILD_TARGET)$(RCLDLIB)/libcurl.so $(BUILD_TARGET)$(RCLDLIB)/libcurl.so.$(RCCURLMAINVER); do ln -sf libcurl.so.$(RCCURLVER) $$L || exit 1; done; \
+	else \
+	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mcurl package is mandatory\\e[0m" && exit 1; \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep ancistrus-core`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mcore \\e[0m"; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCBOOT_NAME) $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCNVRAMSO) $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMDBIN) || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/rc_printserver $(BUILD_TARGET)$(RCAPPDIR)/ || exit 1; \
+	for L in $(BUILD_TARGET)$(RCBOOTDIR)/$(RCAPPSNAME) $(BUILD_TARGET)$(RCBINDIR)/$(RCDSLCMD); do ln -sf $(RCBINDIR)/$(PROJ_TAG) $$L || exit 1; done; \
+	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mmain web pages \\e[0m"; \
+	$(foreach F, $(RCMAINWEB), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWDIR)/$(F) || exit 1;) \
+	$(foreach F, $(RCMAINCSS), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWCSSDIR)/$(F) || exit 1;) \
+	else \
+	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mcore package is mandatory\\e[0m" && exit 1; \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep busybox`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mbusybox \\e[0m"; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/busybox $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
+	for F in `cat $(BUSYBOX)/busybox.links`; do mv $(BUILD_TARGET)$(RCTMPDIR)/`basename $$F` $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; done; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/profile $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep qos-sqm`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36miproute2@qos-sqm \\e[0m"; \
+	rm -r $(BUILD_TARGET)$(RCBOOTDIR)/iproute2 || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/iproute2 $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/ip $(BUILD_TARGET)$(RCTMPDIR)/tc $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep mini_httpd`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mmini_httpd \\e[0m"; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/mini_httpd.pem $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/mini_httpd $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/currentsetting.htm $(BUILD_TARGET)$(RCWWWDIR)/ || exit 1; \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep utelnetd`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mutelnetd \\e[0m"; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/rc_debug_mode $(BUILD_TARGET)$(RCAPPDIR)/ || exit 1; \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep samba`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36msamba \\e[0m"; \
+	rm $(BUILD_TARGET)$(RCLDLIB)/libntpass.so* || exit 1; \
+	ln -sf libiconv.so.0.0 $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 || exit 1; \
+	for L in nmbd smbd smbpasswd; do ln -sf samba_multicall $(BUILD_TARGET)$(RCBINDIR)/$$L || exit 1; done; \
+	fi
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep xdsl-driver`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
 	for F in $(RCDSLKO); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCLDLIBMOD)/ || exit 1; done; \
@@ -143,17 +190,13 @@ post_inst:
 	for F in $(RCDSLBINS); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; done; \
 	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf remove `cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep "Package: xdsl-driver" | sed 's/Package: //'` || exit 1; \
 	fi
+	@echo -e "\\e[35m$(CUR_REL_PATH): checking for tmp inst file presence on \\e[36m$(BUILD_TARGET)$(RCTMPDIR)/ \\e[0m"
+	@[ -z "$$(ls -A $(BUILD_TARGET)$(RCTMPDIR)/)" ] || exit 1
 	@echo -e "\\e[35m$(CUR_REL_PATH): parsing \\e[36m$(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status \\e[0m"
 	@sed -i 's/Status: install user unpacked/Status: install user installed/g' $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status || exit 1
-	@echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mmain web pages \\e[0m"
-	@$(foreach F, $(RCMAINWEB), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWDIR)/$(F) || exit 1;)
-	@$(foreach F, $(RCMAINCSS), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWCSSDIR)/$(F) || exit 1;)
-	@mv $(BUILD_TARGET)$(RCTMPDIR)/currentsetting.htm $(BUILD_TARGET)$(RCWWWDIR)/ || exit 1
 	@echo -e "\\e[35m$(CUR_REL_PATH): moving $(RCINITD) & opkg dirs content from \\e[36m$(BUILD_TARGET) \\e[0m"
 	@mv $(BUILD_TARGET)$(RCINITDIR)/* $(IMAGEDIR)/$(RCINITD) || exit 1
 	@mv $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/* $(IMAGEDIR)/opkg || exit 1
-	@echo -e "\\e[35m$(CUR_REL_PATH): checking for tmp inst file presence on \\e[36m$(BUILD_TARGET)$(RCTMPDIR)/ \\e[0m"
-	@[ -z "$$(ls -A $(BUILD_TARGET)$(RCTMPDIR)/)" ] || exit 1
 
 clean_build:
 	@if [ -d $(BUILD_DIR_PATH) ]; then \
