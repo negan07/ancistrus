@@ -132,7 +132,7 @@ postinst:
 	@echo "	fi" >> $(POSTINST)
 	@echo "fi" >> $(POSTINST)
 	@echo "echo \"Updating rc services...\"" >> $(POSTINST)
-	@echo "for F in $(RCMAINSERV); do [ -x $(TMPDIR)/\$$F ] && mv -f $(TMPDIR)/\$$F $(USRSBINRCAPP)/\$$F; done" >> $(POSTINST)
+	@echo "[ -x $(TMPDIR)/rc_printserver ] && mv -f $(TMPDIR)/rc_printserver $(USRSBINRCAPP)/rc_printserver" >> $(POSTINST)
 	@echo "echo \"Updating main web pages & styles...\"" >> $(POSTINST)
 	@echo "for F in $(RCMAINWEB); do [ -f $(TMPDIR)/\$$F ] && mv -f $(TMPDIR)/\$$F $(WWW)/\$$F; done" >> $(POSTINST)
 	@echo "for F in $(RCMAINCSS); do [ -f $(TMPDIR)/\$$F ] && mv -f $(TMPDIR)/\$$F $(RCWWWCSSDIR)/\$$F; done" >> $(POSTINST)
