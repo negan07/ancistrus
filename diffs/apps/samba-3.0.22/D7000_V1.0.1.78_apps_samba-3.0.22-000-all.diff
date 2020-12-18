@@ -1,13 +1,15 @@
 diff -urN D7000_V1.0.1.78_WW_src/Source/apps/samba-3.0.22/Makefile D7000_V1.0.1.78_WW_src/Source/apps/samba-3.0.22/Makefile
 --- D7000_V1.0.1.78_WW_src/Source/apps/samba-3.0.22/Makefile	2016-10-11 17:56:30.000000000 +0200
 +++ D7000_V1.0.1.78_WW_src/Source/apps/samba-3.0.22/Makefile	2017-04-29 23:33:46.370034371 +0200
-@@ -19,47 +19,28 @@
+@@ -19,47 +19,22 @@
  	ln -sf libntpass.so.0 libntpass.so
  	mv libntpass.so.0 ../../target/lib/
  	mv libntpass.so ../../target/lib/
 -
++	rm -f ../../target/usr/etc/samba.conf/*
  	cp -rf etc/samba ../../target/usr/etc/
- 	cp -rf etc/samba.conf ../../target/usr/etc/
+-	cp -rf etc/samba.conf ../../target/usr/etc/
++	cp -f etc/samba.conf/smb.conf etc/samba.conf/smbpasswd ../../target/usr/etc/samba.conf/
  	cp source/bin/nmbd $(TARDIR)/usr/sbin/
 -	$(STRIP) $(TARDIR)/usr/sbin/nmbd
 +	$(SSTRIP) $(TARDIR)/usr/sbin/nmbd
@@ -31,10 +33,9 @@ diff -urN D7000_V1.0.1.78_WW_src/Source/apps/samba-3.0.22/Makefile D7000_V1.0.1.
 -	#$(STRIP) $(TARDIR)/usr/sbin/smbmount
 -	#cp -f $(TARDIR)/usr/sbin/smbmount ../../target/usr/sbin/smbmount
 -
- 	cp source/bin/smbstatus $(TARDIR)/usr/sbin/
+-	cp source/bin/smbstatus $(TARDIR)/usr/sbin/
 -	$(STRIP) $(TARDIR)/usr/sbin/smbstatus
-+	$(SSTRIP) $(TARDIR)/usr/sbin/smbstatus
- 	cp -f $(TARDIR)/usr/sbin/smbstatus ../../target/usr/sbin/
+-	cp -f $(TARDIR)/usr/sbin/smbstatus ../../target/usr/sbin/
 -
  	rm -rf  $(TARDIR)
 -	
@@ -42,13 +43,14 @@ diff -urN D7000_V1.0.1.78_WW_src/Source/apps/samba-3.0.22/Makefile D7000_V1.0.1.
  clean:
  	rm -f *.[oa] *~ core
  	for i in $(SUB) ; do ${MAKE} -C $$i clean || exit 1; done
- 	rm -f ../../target/lib/libntpass.so*
- 	rm -f ../../target/usr/sbin/nmbd
+-	rm -f ../../target/lib/libntpass.so*
+-	rm -f ../../target/usr/sbin/nmbd
 -	#rm -f ../../target/usr/sbin/smbmnt
- 	rm -f ../../target/usr/sbin/smbpasswd
- 	rm -f ../../target/usr/sbin/smbd
+-	rm -f ../../target/usr/sbin/smbpasswd
+-	rm -f ../../target/usr/sbin/smbd
 -	#rm -f ../../target/usr/sbin/smbmount
- 	rm -f ../../target/usr/sbin/smbstatus
+-	rm -f ../../target/usr/sbin/smbstatus
++	rm -f ../../target/lib/libntpass.so* ../../target/usr/sbin/nmbd ../../target/usr/sbin/smbpasswd ../../target/usr/sbin/smbd
  
 -#prepare:
 -#	ln -nsf $(shell pwd)/lib_samba.c  $(TOP_DIR)/sercomm/user/rc_new/libapp
