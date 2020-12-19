@@ -1,0 +1,83 @@
+diff -urN work/samba-3.6.25/Makefile work/samba-3.6.25/Makefile
+--- work/samba-3.6.25/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/samba-3.6.25/Makefile	2018-10-23 23:01:08.566300143 +0200
+@@ -0,0 +1,79 @@
++include ../Rules.mak
++
++SRCDIR			:= source3
++BINNAMES		:= nmbd smbd smbpasswd
++BINS			:= samba_multicall
++STARTUP			:= rc_smb
++SMB_CONF_INST_DIR_NAME	:= $(ETCDIR)/samba
++SMB_CONF_INST_DIR	:= $(SMB_CONF_INST_DIR_NAME).conf
++SMB_CONF_DIR_NAME	:= $(TMPETC)/samba
++SMB_CONF_DIR		:= $(SMB_CONF_DIR_NAME).conf
++
++all: config
++	$(MAKE) -C $(SRCDIR)
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(SRCDIR) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s -DSC_BUILD" CPPFLAGS=-I$(WORK_DIR)/$(ZLIB)/$(ZLIB) LDFLAGS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) -lz" --with-libiconv=$(WORK_DIR)/$(LIBICONV)/$(LIBICONV) --with-codepagedir=$(SMB_CONF_DIR_NAME) --with-configdir=$(SMB_CONF_DIR_NAME) --with-lockdir=$(VARLIB)/lock --with-nmbdsocketdir=$(VARLIB)/nmbd --with-piddir=$(VARLIB)/run --with-privatedir=$(SMB_CONF_DIR_NAME) --with-included-iniparser --with-included-popt --with-sendfile-support --disable-static --disable-shared --disable-shared-libs --disable-debug --disable-developer --disable-cups --disable-pie --disable-relro --disable-swat --disable-external-libtalloc --disable-external-libtdb --disable-external-libtevent --without-acl-support --without-cluster-support --without-dmapi --without-krb5 --without-ldap --without-pam --without-winbind --without-libnetapi --without-libsmbsharemodes --without-libaddns --without-sys-quotas ac_cv_lib_attr_getxattr=no ac_cv_search_getxattr=no ac_cv_file__proc_sys_kernel_core_pattern=yes libreplace_cv_HAVE_C99_VSNPRINTF=yes libreplace_cv_HAVE_GETADDRINFO=yes libreplace_cv_HAVE_IFACE_IFCONF=yes libreplace_cv_HAVE_IPV6=no libreplace_cv_HAVE_IPV6_V6ONLY=no LINUX_LFS_SUPPORT=yes samba_cv_CC_NEGATIVE_ENUM_VALUES=yes samba_cv_HAVE_GETTIMEOFDAY_TZ=yes samba_cv_HAVE_IFACE_IFCONF=yes samba_cv_HAVE_KERNEL_OPLOCKS_LINUX=yes samba_cv_HAVE_SECURE_MKSTEMP=yes samba_cv_HAVE_WRFILE_KEYTAB=no samba_cv_USE_SETREUID=yes samba_cv_USE_SETRESUID=yes samba_cv_have_setreuid=yes samba_cv_have_setresuid=yes ac_cv_header_libunwind_h=no ac_cv_path_PYTHON=""
++
++install: control
++	$(SSTRIP) $(SRCDIR)/bin/$(BINS)
++	for D in $(SMB_CONF_INST_DIR_NAME) $(SMB_CONF_INST_DIR) $(BINDIR); do install -m 0755 -d $$D; done
++	install -m 0644 $(SRCDIR)/etc/samba.conf/* $(SMB_CONF_INST_DIR)
++	install -m 0755 $(SRCDIR)/bin/$(BINS) $(BINDIR)
++
++clean:
++	$(MAKE) -C $(SRCDIR) realclean
++
++realclean: clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(SRCDIR) distclean
++
++ifndef BUILD
++control:
++else
++PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
++PRERM			:= $(CTRL_DIR)/prerm
++POSTRM			:= $(CTRL_DIR)/postrm
++
++control: preinst postinst prerm postrm
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PREINST)
++	@echo "for F in smbd nmbd; do sleep 1; killall -9 \$$F >/dev/null 2>&1; done" >> $(PREINST)
++	@echo "rm -rf $(LDLIB)/libntpass.so* $(USRSBIN)/smb* $(USRSBIN)/*mbd $(USRETC)/samba*/ $(TMPDIR)/smb.* $(TMPDIR)/smbmount.* $(SMB_CONF_DIR_NAME)*/ $(TMPETC)/*.smb" >> $(PREINST)
++	@echo "sync" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "for B in $(BINNAMES); do ln -sf $(BINS) $(USRSBIN)/\$$B; done" >> $(POSTINST)
++	@echo "ln -sf libiconv.so.0.0 $(LDLIB)/libiconv.so.2" >> $(POSTINST)
++	@echo "cp -rf $(USRETC)/samba*/ $(TMPETC)/" >> $(POSTINST)
++	@echo "sync" >> $(POSTINST)
++	@echo "$(RC) smb restart" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PRERM)
++	@echo "for F in smbd nmbd; do sleep 1; killall -9 \$$F >/dev/null 2>&1; done" >> $(PRERM)
++	@echo "exit 0" >> $(PRERM)
++
++postrm:
++	@echo "#!/bin/sh" > $(POSTRM)
++	@echo "for B in $(BINNAMES); do rm -f $(USRSBIN)/\$$B; done" >> $(POSTRM)
++	@echo "rm -rf $(LDLIB)/libiconv.so.2 $(TMPDIR)/smb.* $(TMPDIR)/smbmount.* $(SMB_CONF_DIR_NAME)*/ $(TMPETC)/*.smb " >> $(POSTRM)
++	@echo "sync" >> $(POSTRM)
++	@echo "exit 0" >> $(POSTRM)
++endif
++

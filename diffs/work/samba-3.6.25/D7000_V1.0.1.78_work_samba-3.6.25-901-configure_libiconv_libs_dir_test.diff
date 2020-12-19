@@ -1,0 +1,12 @@
+diff -urN work/samba-3.6.25/source3/configure work/samba-3.6.25/source3/configure
+--- work/samba-3.6.25/source3/configure	2020-12-08 14:31:33.932160000 +0100
++++ work/samba-3.6.25/source3/configure	2020-12-08 17:38:26.761330381 +0100
+@@ -22752,7 +22752,7 @@
+     # installed, I've decided to fix the linker warnings.
+     # -- Kai
+     # For IA64 HPUX systems, the libs are located in lib/hpux32 instead of lib.
+-    for l in "lib" "lib32" "lib/hpux32"; do
++    for l in "lib" "lib/.libs" "lib32" "lib/hpux32"; do
+         if test -d "$i/$l" ; then
+                 LDFLAGS="$save_LDFLAGS -L$i/$l"
+ 		LIBS=

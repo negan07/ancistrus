@@ -1,0 +1,23 @@
+diff -urN work/samba-3.6.25/source3/Makefile.in diff -urN work/samba-3.6.25/source3/Makefile.in
+--- work/samba-3.6.25/source3/Makefile.in	2020-12-08 14:31:33.940160000 +0100
++++ work/samba-3.6.25/source3/Makefile.in	2020-12-08 17:51:42.555956686 +0100
+@@ -216,7 +216,7 @@
+ 
+ # Note that all executable programs now provide for an optional executable suffix.
+ 
+-SBIN_PROGS = bin/samba_multicall@EXEEXT@ bin/smbd@EXEEXT@ bin/nmbd@EXEEXT@ @SWAT_SBIN_TARGETS@ @EXTRA_SBIN_PROGS@
++SBIN_PROGS = bin/samba_multicall@EXEEXT@
+ 
+ BIN_PROGS1 = bin/smbclient@EXEEXT@ bin/net@EXEEXT@ bin/smbspool@EXEEXT@ \
+ 	bin/testparm@EXEEXT@ bin/smbstatus@EXEEXT@ bin/smbget@EXEEXT@ \
+@@ -1553,9 +1553,7 @@
+ ######################################################################
+ # now the rules...
+ ######################################################################
+-all:: SHOWFLAGS basics libs $(SBIN_PROGS) $(BIN_PROGS) \
+-	$(MODULES) $(NSS_MODULES) $(PAM_MODULES) \
+-	$(EXTRA_ALL_TARGETS)
++all:: SHOWFLAGS basics libs $(SBIN_PROGS)
+ 
+ basics:: samba3-idl
+ 

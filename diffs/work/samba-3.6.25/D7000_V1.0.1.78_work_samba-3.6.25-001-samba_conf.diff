@@ -1,0 +1,53 @@
+diff -urN work/samba-3.6.25/source3/etc/samba.conf/smb.conf work/samba-3.6.25/source3/etc/samba.conf/smb.conf
+--- work/samba-3.6.25/source3/etc/samba.conf/smb.conf	2018-10-23 23:00:46.662292000 +0200
++++ work/samba-3.6.25/source3/etc/samba.conf/smb.conf	2018-10-23 23:01:08.566300143 +0200
+@@ -0,0 +1,44 @@
++[global]
++	config file=/etc/samba/smb.conf
++	private dir=/etc/samba
++	display charset = utf8 
++	unix charset = utf8 
++	dos charset = cp866
++	;os level = 8
++	workgroup = DG834GVU 
++	server string = Sercomm
++	netbios name = Sercomm DG834GVU
++	netbios aliases = Sercomm 
++	protocol = SMB2
++	load printers = no
++	disable spoolss = yes
++	max log size = 10
++	security = user
++	encrypt passwords = yes
++	smb passwd file = /etc/samba/smbpasswd
++	socket options = TCP_NODELAY SO_KEEPALIVE SO_SNDBUF=131072 SO_RCVBUF=131072
++	min receivefile size = 16384
++	use sendfile = yes
++	;preferred master = yes
++	dns proxy = no 
++	preserve case = yes
++	short preserve case = yes
++	default case = upper
++	case sensitive = yes
++	mangled names = yes 
++	null passwords = yes
++	dos filetimes = yes
++	kernel oplocks = no
++	veto files = /.ShareConfFile/quota.user/quota.user~/$AttrDef/$BadClus/$Bitmap/$Boot/$Extend/$LogFile/$MFT/$MFTMirr/$Secure/$UpCase/$Volume/lost+found/System Volume Information/
++	delete veto files = False
++	force directory mode=771
++	force create mode=660
++	create mask=771
++	;if set map system as true, it would cause file treat as executable file
++	map system=no
++	syslog=0
++	log file=/dev/null
++	guest ok=yes
++	guest account=nobody
++
++
+diff -urN work/samba-3.6.25/source3/etc/samba.conf/smbpasswd work/samba-3.6.25/source3/etc/samba.conf/smbpasswd
+--- work/samba-3.6.25/source3/etc/samba.conf/smbpasswd	2018-10-23 23:00:46.662292000 +0200
++++ work/samba-3.6.25/source3/etc/samba.conf/smbpasswd	2018-10-23 23:01:08.566300143 +0200
+@@ -0,0 +1 @@
++nobody:501:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX:[DU         ]:LCT-00000000:

@@ -1,0 +1,1566 @@
+diff -urN work/samba-3.6.25/lib/util/params.c work/samba-3.6.25/lib/util/params.c
+--- work/samba-3.6.25/lib/util/params.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/lib/util/params.c	2020-12-09 14:37:21.981068304 +0100
+@@ -259,18 +259,10 @@
+         break;
+ 
+       default:                        /* All else are a valid name chars.   */
+-        if( isspace( c ) )              /* One space per whitespace region. */
+-          {
+-          InFile->bufr[end] = ' ';
+-          i = end + 1;
+-          c = EatWhitespace( InFile );
+-          }
+-        else                            /* All others copy verbatim.        */
+-          {
++          //To make the samba support multi white space in share name
+           InFile->bufr[i++] = c;
+           end = i;
+           c = mygetc( InFile );
+-          }
+       }
+     }
+ 
+diff -urN work/samba-3.6.25/lib/util/util_pw.c work/samba-3.6.25/lib/util/util_pw.c
+--- work/samba-3.6.25/lib/util/util_pw.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/lib/util/util_pw.c	2020-12-09 12:48:48.709028352 +0100
+@@ -27,6 +27,7 @@
+ #include "includes.h"
+ #include "system/passwd.h"
+ #include "lib/util/util_pw.h"
++#include <fcntl.h>
+ 
+ /**************************************************************************
+  Wrappers for setpwent(), getpwent() and endpwent()
+@@ -47,10 +47,130 @@
+ 	endpwent();
+ }
+ 
++#if 1 //def __UCLIBC_HAS_THREADS__
++#include <pthread.h>
++pthread_mutex_t __getgrent_lock;
++# define LOCK   pthread_mutex_lock(&__getgrent_lock)
++# define UNLOCK pthread_mutex_unlock(&__getgrent_lock);
++#else
++# define LOCK
++# define UNLOCK
++#endif
++
++static char *line_buff = NULL;
++static char **members = NULL;
+ /**************************************************************************
+  Wrappers for getpwnam(), getpwuid(), getgrnam(), getgrgid()
+ ****************************************************************************/
++/*
++ * This is the core group-file read function.  It behaves exactly like
++ * getgrent() except that it is passed a file descriptor.  getgrent()
++ * is just a wrapper for this function.
++ */
++struct group *__getgrent(int grp_fd, char *line_buff, char **members)
++{
++    short line_index;
++    short buff_size;
++    static struct group group;
++    register char *ptr;
++    char *field_begin;
++    short member_num;
++    char *endptr;
++    int line_len;
++
++
++    /* We use the restart label to handle malformatted lines */
++restart:
++    line_index = 0;
++    buff_size = 256;
++
++    line_buff = realloc(line_buff, buff_size);
++    while (1) {
++		if ((line_len = read(grp_fd, line_buff + line_index,
++				buff_size - line_index)) <= 0) {
++		    return NULL;
++		}
++		field_begin = strchr(line_buff, '\n');
++		if (field_begin != NULL) {
++		    lseek(grp_fd,
++			    (long) (1 + field_begin -
++				    (line_len + line_index + line_buff)), SEEK_CUR);
++		    *field_begin = '\0';
++		    if (*line_buff == '#' || *line_buff == ' '
++			    || *line_buff == '\n' || *line_buff == '\t')
++			goto restart;
++		    break;
++		} else {				/* Allocate some more space */
++	
++		    line_index = buff_size;
++		    buff_size += 256;
++		    line_buff = realloc(line_buff, buff_size);
++		}
++    }
++    /* Now parse the line */
++    group.gr_name = line_buff;
++    ptr = strchr(line_buff, ':');
++    if (ptr == NULL)
++	goto restart;
++    *ptr++ = '\0';
++
++    group.gr_passwd = ptr;
++    ptr = strchr(ptr, ':');
++    if (ptr == NULL)
++	goto restart;
++    *ptr++ = '\0';
++
++    field_begin = ptr;
++    ptr = strchr(ptr, ':');
++    if (ptr == NULL)
++	goto restart;
++    *ptr++ = '\0';
++
++    group.gr_gid = (gid_t) strtoul(field_begin, &endptr, 10);
++    if (*endptr != '\0')
++	goto restart;
++
++    member_num = 0;
++    field_begin = ptr;
+ 
++    if (members != NULL)
++		free(members);
++    members = (char **) malloc((member_num + 1) * sizeof(char *));
++    for ( ; field_begin && *field_begin != '\0'; field_begin = ptr) {
++		if ((ptr = strchr(field_begin, ',')) != NULL)
++		    *ptr++ = '\0';
++		members[member_num++] = field_begin;
++		members = (char **) realloc(members, (member_num + 1) * sizeof(char *));
++    }
++    members[member_num] = NULL;
++
++    group.gr_mem = members;
++    return &group;
++}
++struct group *getgrnam(const char *name)
++{
++	int grp_fd;
++	struct group *group;
++
++	if (name == NULL) {
++		return NULL;
++	}
++
++	if ((grp_fd = open("/etc/group", O_RDONLY)) < 0)
++		return NULL;
++
++	LOCK;
++	while ((group = __getgrent(grp_fd, line_buff, members)) != NULL)
++		if (!strcmp(group->gr_name, name)) {
++			close(grp_fd);
++			UNLOCK;
++			return group;
++		}
++
++	close(grp_fd);
++	UNLOCK;
++	return NULL;
++}
+ struct passwd *sys_getpwnam(const char *name)
+ {
+ 	return getpwnam(name);
+diff -urN work/samba-3.6.25/source3/client/client.c work/samba-3.6.25/source3/client/client.c
+--- work/samba-3.6.25/source3/client/client.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/client/client.c	2020-12-07 23:33:47.485631717 +0100
+@@ -40,7 +40,9 @@
+ #ifndef REGISTER
+ #define REGISTER 0
+ #endif
++DOM_SID domain_sid;
+ 
++#if 0
+ extern int do_smb_browse(void); /* mDNS browsing */
+ 
+ extern bool override_logfile;
+@@ -5407,3 +5409,4 @@
+ 	TALLOC_FREE(frame);
+ 	return rc;
+ }
++#endif
+diff -urN work/samba-3.6.25/source3/include/smb.h work/samba-3.6.25/source3/include/smb.h
+--- work/samba-3.6.25/source3/include/smb.h	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/include/smb.h	2020-12-09 12:09:01.479519634 +0100
+@@ -176,6 +176,9 @@
+ 				 * mode database.
+ 				 */
+ 	unsigned long gen_id;
++#ifdef SC_BUILD
++	int  sc_lock; /* use for sharing files between applications. */
++#endif
+ };
+ 
+ struct idle_event;
+diff -urN work/samba-3.6.25/source3/lib/util.c work/samba-3.6.25/source3/lib/util.c
+--- work/samba-3.6.25/source3/lib/util.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/lib/util.c	2020-12-09 12:25:59.152189694 +0100
+@@ -1083,10 +1083,6 @@
+ 	char *p;
+ 	gid_t g;
+ 
+-	g = (gid_t)strtol(name, &p, 0);
+-	if ((p != name) && (*p == '\0'))
+-		return g;
+-
+ 	grp = sys_getgrnam(name);
+ 	if (grp)
+ 		return(grp->gr_gid);
+diff -urN work/samba-3.6.25/source3/libsmb/namequery.c work/samba-3.6.25/source3/libsmb/namequery.c
+--- work/samba-3.6.25/source3/libsmb/namequery.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/libsmb/namequery.c	2020-12-09 12:37:11.413989979 +0100
+@@ -898,6 +898,9 @@
+ 	}
+ 
+ 	/* W2K PDC's seem not to respond to '*'#0. JRA */
++	if(!strlen(q_name))
++		make_nmb_name(&nname, "*SMBSERVER", 0x20);
++	else
+ 	make_nmb_name(&nname, q_name, q_type);
+ 	status = node_status_query(talloc_tos(), &nname, to_ss,
+ 				   &addrs, &count, NULL);
+diff -urN work/samba-3.6.25/source3/modules/vfs_recycle.c work/samba-3.6.25/source3/modules/vfs_recycle.c
+--- work/samba-3.6.25/source3/modules/vfs_recycle.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/modules/vfs_recycle.c	2020-12-09 14:13:21.754689078 +0100
+@@ -66,7 +66,7 @@
+ {
+ 	const char *tmp_str = NULL;
+ 
+-	tmp_str = lp_parm_const_string(SNUM(handle->conn), "recycle", "repository",".recycle");
++	tmp_str = lp_parm_const_string(SNUM(handle->conn), "recycle", "repository","Recycle Bin");
+ 
+ 	DEBUG(10, ("recycle: repository = %s\n", tmp_str));
+ 
+@@ -77,7 +77,7 @@
+ {
+ 	bool ret;
+ 
+-	ret = lp_parm_bool(SNUM(handle->conn), "recycle", "keeptree", False);
++	ret = lp_parm_bool(SNUM(handle->conn), "recycle", "keeptree", True);
+ 
+ 	DEBUG(10, ("recycle_bin: keeptree = %s\n", ret?"True":"False"));
+ 
+@@ -88,7 +88,7 @@
+ {
+ 	bool ret;
+ 
+-	ret = lp_parm_bool(SNUM(handle->conn), "recycle", "versions", False);
++	ret = lp_parm_bool(SNUM(handle->conn), "recycle", "versions", True);
+ 
+ 	DEBUG(10, ("recycle: versions = %s\n", ret?"True":"False"));
+ 
+@@ -320,6 +320,7 @@
+ 				ret = False;
+ 				goto done;
+ 			}
++			chmod(new_dir, 0777);
+ 		}
+ 		safe_strcat(new_dir, "/", len);
+ 		mode = recycle_subdir_mode(handle);
+@@ -589,6 +590,7 @@
+ 			rc = SMB_VFS_NEXT_UNLINK(handle, smb_fname);
+ 			goto done;
+ 		}
++		chmod(temp_name, 0777);
+ 	}
+ 
+ 	if (asprintf(&final_name, "%s/%s", temp_name, base) == -1) {
+diff -urN work/samba-3.6.25/source3/nmbd/nmbd.c work/samba-3.6.25/source3/nmbd/nmbd.c
+--- work/samba-3.6.25/source3/nmbd/nmbd.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/nmbd/nmbd.c	2020-12-09 14:22:45.107760151 +0100
+@@ -755,6 +755,7 @@
+ 		OPT_NO_PROCESS_GROUP,
+ 		OPT_LOG_STDOUT
+ 	};
++	static char *priority = NULL;
+ 	struct poptOption long_options[] = {
+ 	POPT_AUTOHELP
+ 	{"daemon", 'D', POPT_ARG_NONE, NULL, OPT_DAEMON, "Become a daemon(default)" },
+@@ -764,6 +765,7 @@
+ 	{"log-stdout", 'S', POPT_ARG_NONE, NULL, OPT_LOG_STDOUT, "Log to stdout" },
+ 	{"hosts", 'H', POPT_ARG_STRING, &p_lmhosts, 0, "Load a netbios hosts file"},
+ 	{"port", 'p', POPT_ARG_INT, &global_nmb_port, 0, "Listen on the specified port" },
++	{"Priority", 'P', POPT_ARG_STRING, &priority, 0, "Set priority by renice"},
+ 	POPT_COMMON_SAMBA
+ 	{ NULL }
+ 	};
+@@ -805,6 +807,12 @@
+ 			exit(1);
+ 		}
+ 	};
++	// Renice 
++	if(priority!=NULL)
++	{
++		nice(atoi(priority));
++		free(priority);
++	}
+ 	poptFreeContext(pc);
+ 
+ 	global_in_nmbd = true;
+diff -urN work/samba-3.6.25/source3/param/loadparm.c work/samba-3.6.25/source3/param/loadparm.c
+--- work/samba-3.6.25/source3/param/loadparm.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/param/loadparm.c	2020-12-09 14:26:58.974440213 +0100
+@@ -4884,9 +4884,9 @@
+ 			string_set(&pService->szQueuepausecommand, "");
+ 			string_set(&pService->szQueueresumecommand, "");
+ #else
+-			string_set(&pService->szLpqcommand, "lpq -P'%p'");
+-			string_set(&pService->szLprmcommand, "lprm -P'%p' %j");
+-			string_set(&pService->szPrintcommand, "lpr -P'%p' %s; rm %s");
++			string_set(&pService->szLpqcommand, "/usr/sbin/lpq -P'%p'");
++			string_set(&pService->szLprmcommand, "/usr/sbin/lprm -P'%p' %j");
++			string_set(&pService->szPrintcommand, "/usr/sbin/lpr -P'%p' -o raw %s");
+ 			string_set(&pService->szLppausecommand, "lp -i '%p-%j' -H hold");
+ 			string_set(&pService->szLpresumecommand, "lp -i '%p-%j' -H resume");
+ 			string_set(&pService->szQueuepausecommand, "disable '%p'");
+diff -urN work/samba-3.6.25/source3/passdb/pdb_smbpasswd.c work/samba-3.6.25/source3/passdb/pdb_smbpasswd.c
+--- work/samba-3.6.25/source3/passdb/pdb_smbpasswd.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/passdb/pdb_smbpasswd.c	2020-12-09 14:38:53.816271349 +0100
+@@ -1339,7 +1339,7 @@
+ 
+ 	if (!sid_peek_check_rid(get_global_sam_sid(), sid, &rid))
+ 		return NT_STATUS_UNSUCCESSFUL;
+-
++#if 0
+ 	/* More special case 'guest account' hacks... */
+ 	if (rid == DOMAIN_RID_GUEST) {
+ 		const char *guest_account = lp_guestaccount();
+@@ -1349,7 +1349,7 @@
+ 		}
+ 		return smbpasswd_getsampwnam(my_methods, sam_acct, guest_account);
+ 	}
+-
++#endif
+ 	/* Open the sam password file - not for update. */
+ 	fp = startsmbfilepwent(smbpasswd_state->smbpasswd_file, PWF_READ, &(smbpasswd_state->pw_file_lock_depth));
+ 
+diff -urN work/samba-3.6.25/source3/smbd/close.c work/samba-3.6.25/source3/smbd/close.c
+--- work/samba-3.6.25/source3/smbd/close.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/close.c	2020-12-10 20:59:57.738951090 +0100
+@@ -29,6 +29,10 @@
+ #include "auth.h"
+ #include "messages.h"
+ 
++#ifdef SC_BUILD
++extern int sc_check_writable(const char *file);
++#endif
++
+ /****************************************************************************
+  Run a file if it is a magic script.
+ ****************************************************************************/
+@@ -427,7 +431,22 @@
+ 
+ 		changed_user = true;
+ 	}
+-
++//Added by Shearer to support Thumbnails on web		
++		char *pThumb=NULL;
++		if(IsPicture(fsp->fsp_name->base_name)){
++#define	THUMBNAIL_PREFIX	"Thumbnail_"
++#define	THUMB_FOLDER		".Thumb_DB"		
++			pThumb=malloc(strlen(fsp->fsp_name->base_name)+strlen(THUMBNAIL_PREFIX)+strlen(THUMB_FOLDER)+4);
++			if(pThumb){
++#undef sprintf				
++				memset(pThumb, 0, strlen(fsp->fsp_name->base_name)+strlen(THUMBNAIL_PREFIX)+strlen(THUMB_FOLDER)+4);	
++				sprintf(pThumb, THUMB_FOLDER"/"THUMBNAIL_PREFIX"%s", fsp->fsp_name->base_name);
++				if(!access(pThumb, F_OK))
++					remove(pThumb);		
++				free(pThumb);
++				pThumb=NULL;			
++			}
++		}
+ 	/* We can only delete the file if the name we have is still valid and
+ 	   hasn't been renamed. */
+ 
+@@ -605,6 +624,32 @@
+ 	return s2;
+ }
+ 
++//Added by Shearer to support Thumbnails on web		
++#define	SUPPORTED_PHOTO_FORMAT	".gif.jpg.jpeg.jpe."
++
++int IsPicture(char *pSuffix)
++{
++	char tmp_str[64]={0}, *p=NULL;
++	int len=0,i=0;
++
++	if(!pSuffix)
++		return 0;
++	p=strrchr(pSuffix, '.');
++	if(!p)
++		return 0;
++	len=strlen(p);
++	if(len > sizeof(tmp_str)-1)
++		return 0;
++	for(i=0;i<len;i++)
++		tmp_str[i]=tolower(p[i]);
++	tmp_str[i]='.';	
++	tmp_str[i+1]=0;	
++
++	if(strstr(SUPPORTED_PHOTO_FORMAT, tmp_str))
++		return 1;
++	return 0;
++}	
++
+ /****************************************************************************
+  Close a file.
+ 
+@@ -760,7 +805,11 @@
+ 		if(SMB_VFS_LSTAT(conn, smb_dname_full) != 0) {
+ 			goto err_break;
+ 		}
+-
++#ifdef SC_BUILD
++                if ((st.st_ex_mode & (S_IFREG|S_IFLNK)) && sc_check_writable(fullname) < 0) {
++                goto err_break;
++                }
++#endif
+ 		if(smb_dname_full->st.st_ex_mode & S_IFDIR) {
+ 			if(!recursive_rmdir(ctx, conn, smb_dname_full)) {
+ 				goto err_break;
+@@ -915,6 +964,11 @@
+ 			if(SMB_VFS_LSTAT(conn, smb_dname_full) != 0) {
+ 				goto err_break;
+ 			}
++#ifdef SC_BUILD
++                        if ((st.st_ex_mode & (S_IFREG|S_IFLNK)) && sc_check_writable(fullname) < 0) {
++                                goto err_break;
++                        }
++#endif
+ 			if(smb_dname_full->st.st_ex_mode & S_IFDIR) {
+ 				if(!recursive_rmdir(ctx, conn,
+ 						    smb_dname_full)) {
+@@ -1140,7 +1194,9 @@
+ 		SMB_ASSERT(base_fsp->base_fsp == NULL);
+ 		close_file(req, base_fsp, close_type);
+ 	}
+-
++#ifdef SC_BUILD
++        sync();
++#endif
+ 	return status;
+ }
+ 
+diff -urN work/samba-3.6.25/source3/smbd/dosmode.c work/samba-3.6.25/source3/smbd/dosmode.c
+--- work/samba-3.6.25/source3/smbd/dosmode.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/dosmode.c	2020-12-09 20:22:17.362110024 +0100
+@@ -723,7 +723,7 @@
+ 
+ 	new_create_timespec = smb_fname->st.st_ex_btime;
+ 
+-	old_mode = dos_mode(conn, smb_fname);
++	old_mode = smb_fname->st.st_ex_mode & (S_IRWXU|S_IRWXG|S_IRWXO);
+ 
+ 	if (dosmode & FILE_ATTRIBUTE_OFFLINE) {
+ 		if (!(old_mode & FILE_ATTRIBUTE_OFFLINE)) {
+@@ -839,8 +839,10 @@
+ 	if((errno != EPERM) && (errno != EACCES))
+ 		return -1;
+ 
+-	if(!lp_dos_filemode(SNUM(conn)))
+-		return -1;
++	if(!lp_dos_filemode(SNUM(conn))){
++		if((int)old_mode==(int)unixmode) return 0;
++		else return -1;
++	}
+ 
+ 	/* We want DOS semantics, ie allow non owner with write permission to change the
+ 		bits on a file. Just like file_ntimes below.
+@@ -870,7 +872,9 @@
+ 			smb_fname->st.st_ex_mode = unixmode;
+ 		}
+ 	}
+-
++#ifdef SC_BUILD
++        sync();
++#endif
+ 	return( ret );
+ }
+ 
+diff -urN work/samba-3.6.25/source3/smbd/files.c work/samba-3.6.25/source3/smbd/files.c
+--- work/samba-3.6.25/source3/smbd/files.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/files.c	2020-12-09 20:23:50.329644848 +0100
+@@ -110,6 +110,9 @@
+ 
+ 	fsp->fh->ref_count = 1;
+ 	fsp->fh->fd = -1;
++#ifdef SC_BUILD
++        fsp->fh->sc_lock = -1;
++#endif
+ 
+ 	fsp->conn = conn;
+ 	fsp->fh->gen_id = get_gen_count(sconn);
+diff -urN work/samba-3.6.25/source3/smbd/msdfs.c work/samba-3.6.25/source3/smbd/msdfs.c
+--- work/samba-3.6.25/source3/smbd/msdfs.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/msdfs.c	2020-12-09 20:26:33.408863678 +0100
+@@ -1506,6 +1506,10 @@
+ 		}
+ 	}
+ 
++#ifdef SC_BUILD
++        sync();
++#endif	
++
+ 	ret = True;
+ 
+ out:
+@@ -1543,6 +1547,9 @@
+ 	TALLOC_FREE(smb_fname);
+ 	vfs_ChDir(conn, cwd);
+ 	SMB_VFS_DISCONNECT(conn);
++#ifdef SC_BUILD
++        sync();
++#endif
+ 	conn_free(conn);
+ 	return ret;
+ }
+diff -urN work/samba-3.6.25/source3/smbd/nttrans.c work/samba-3.6.25/source3/smbd/nttrans.c
+--- work/samba-3.6.25/source3/smbd/nttrans.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/nttrans.c	2020-12-09 20:28:00.488458167 +0100
+@@ -2128,6 +2128,7 @@
+ 					       uint32 data_count,
+ 					       uint32 max_data_count)
+ {
++#if 0
+ 	char *params= *ppparams;
+ 	char *data = *ppdata;
+ 	files_struct *fsp = NULL;
+@@ -2171,6 +2172,7 @@
+ 	}
+ 
+   done:
++#endif
+ 	send_nt_replies(conn, req, NT_STATUS_OK, NULL, 0, NULL, 0);
+ 	return;
+ }
+diff -urN work/samba-3.6.25/source3/smbd/open.c work/samba-3.6.25/source3/smbd/open.c
+--- work/samba-3.6.25/source3/smbd/open.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/open.c	2020-12-09 20:31:23.459530454 +0100
+@@ -192,7 +192,49 @@
+ 				access_mask,
+ 				&access_granted);
+ }
++#ifdef SC_BUILD
++#include <sys/file.h>
++int sc_lockf(int fd, int shared, int wait)
++{
++    int ret;
++    int op;
++
++    if (fd < 0) {
++        return 0;
++    }
++
++    if (shared)
++        op = LOCK_SH;
++    else
++        op = LOCK_EX;
++    if (!wait)
++        op |= LOCK_NB;
++
++    ret = flock(fd, op);
++
++    return ret;
++}
++void sc_unlockf(int fd)
++{
++    if (fd < 0)
++        return;
++    flock(fd, LOCK_UN);
++}
++int sc_check_writable(const char *file)
++{
++    int fd;
++    int ret;
+ 
++    fd = open(file, O_RDWR);
++    if (fd >= 0) {
++        ret = flock(fd, LOCK_EX|LOCK_NB);
++        close(fd);
++        if (ret == -1)
++            return 0;
++    }
++    return 1;
++}
++#endif
+ /****************************************************************************
+  fd support routines - attempt to do a dos_open.
+ ****************************************************************************/
+@@ -257,7 +299,13 @@
+ 	if (fsp->fh->ref_count > 1) {
+ 		return NT_STATUS_OK; /* Shared handle. Only close last reference. */
+ 	}
+-
++#ifdef SC_BUILD
++    if (fsp->fh->sc_lock != -1) {
++        sc_unlockf(fsp->fh->sc_lock);
++        close(fsp->fh->sc_lock);
++        fsp->fh->sc_lock = -1;
++    }
++#endif
+ 	ret = SMB_VFS_CLOSE(fsp);
+ 	fsp->fh->fd = -1;
+ 	if (ret == -1) {
+@@ -308,6 +356,9 @@
+ 	become_root();
+ 	ret = SMB_VFS_FCHOWN(fsp, smb_fname_parent->st.st_ex_uid, (gid_t)-1);
+ 	unbecome_root();
++#ifdef SC_BUILD
++        sync();
++#endif
+ 	if (ret == -1) {
+ 		DEBUG(0,("change_file_owner_to_parent: failed to fchown "
+ 			 "file %s to parent directory uid %u. Error "
+@@ -751,7 +802,20 @@
+ 		 smb_fname_str_dbg(smb_fname),
+ 		 BOOLSTR(fsp->can_read), BOOLSTR(fsp->can_write),
+ 		 conn->num_files_open));
+-
++#ifdef SC_BUILD
++    if (fsp->fh->fd >= 0) {
++        int new_fd;
++        if((new_fd = open(fsp->fsp_name->base_name, O_RDWR))<0) return NT_STATUS_MEDIA_WRITE_PROTECTED;
++        if (fsp->can_write) {
++            if(sc_lockf(new_fd, 0, 0) < 0) {
++                close(new_fd);
++                return NT_STATUS_MEDIA_WRITE_PROTECTED;
++            }
++        }
++        sc_lockf(new_fd, 1, 1);
++        fsp->fh->sc_lock = new_fd;
++    }
++#endif
+ 	errno = 0;
+ 	return NT_STATUS_OK;
+ }
+diff -urN work/samba-3.6.25/source3/smbd/posix_acls.c work/samba-3.6.25/source3/smbd/posix_acls.c
+--- work/samba-3.6.25/source3/smbd/posix_acls.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/posix_acls.c	2020-12-10 21:04:47.300728505 +0100
+@@ -952,10 +952,12 @@
+ 			 * ensure the POSIX ACL types are the same. */
+ 
+ 			if (!dir_acl) {
+-				can_merge = (dom_sid_equal(&curr_ace->trustee, &curr_ace_outer->trustee) &&
++				can_merge = ((dom_sid_equal(&curr_ace->trustee, &curr_ace_outer->trustee) || 
++						(curr_ace->unix_ug.uid == curr_ace_outer->unix_ug.uid)) &&
+ 						(curr_ace->attr == curr_ace_outer->attr));
+ 			} else {
+-				can_merge = (dom_sid_equal(&curr_ace->trustee, &curr_ace_outer->trustee) &&
++				can_merge = ((dom_sid_equal(&curr_ace->trustee, &curr_ace_outer->trustee) || 
++						(curr_ace->unix_ug.uid == curr_ace_outer->unix_ug.uid)) &&
+ 						(curr_ace->type == curr_ace_outer->type) &&
+ 						(curr_ace->attr == curr_ace_outer->attr));
+ 			}
+@@ -3490,6 +3492,9 @@
+ 	/* Case (1). */
+ 	status = vfs_chown_fsp(fsp, uid, gid);
+ 	if (NT_STATUS_IS_OK(status)) {
++#ifdef SC_BUILD
++        sync();
++#endif
+ 		return status;
+ 	}
+ 
+@@ -3517,6 +3522,9 @@
+ 			become_root();
+ 			status = vfs_chown_fsp(fsp, uid, gid);
+ 			unbecome_root();
++#ifdef SC_BUILD
++                        sync();
++#endif
+ 			return status;
+ 		}
+ 	}
+@@ -3538,7 +3546,9 @@
+ 	/* Keep the current file gid the same. */
+ 	status = vfs_chown_fsp(fsp, uid, (gid_t)-1);
+ 	unbecome_root();
+-
++#ifdef SC_BUILD
++        sync();
++#endif
+ 	return status;
+ }
+ 
+diff -urN work/samba-3.6.25/source3/smbd/reply.c work/samba-3.6.25/source3/smbd/reply.c
+--- work/samba-3.6.25/source3/smbd/reply.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/reply.c	2020-12-10 19:01:11.562823725 +0100
+@@ -40,6 +40,10 @@
+ #include "auth.h"
+ #include "smbprofile.h"
+ 
++#ifdef SC_BUILD
++extern int sc_check_writable(const char *file);
++#endif
++
+ /****************************************************************************
+  Ensure we check the path in *exactly* the same way as W2K for a findfirst/findnext
+  path or anything including wildcards.
+@@ -2426,6 +2430,11 @@
+ 		return NT_STATUS_OK;
+ 	}
+ 
++#ifdef SC_BUILD
++        if (!sc_check_writable(fsp->fsp_name->base_name))
++                return NT_STATUS_MEDIA_WRITE_PROTECTED;
++#endif
++
+ 	return NT_STATUS_ACCESS_DENIED;
+ }
+ 
+@@ -2553,7 +2562,10 @@
+ 		close_file(req, fsp, NORMAL_CLOSE);
+ 		return status;
+ 	}
+-
++#ifdef SC_BUILD
++        if (!sc_check_writable(fsp->fsp_name->base_name))
++                return NT_STATUS_ACCESS_DENIED;
++#endif
+ 	/* The set is across all open files on this dev/inode pair. */
+ 	if (!set_delete_on_close(fsp, true,
+ 				conn->session_info->security_token,
+@@ -6315,7 +6327,9 @@
+ 
+  out:
+ 	TALLOC_FREE(smb_fname_dst);
+-
++#ifdef SC_BUILD
++    sync();
++#endif
+ 	return status;
+ }
+ 
+@@ -6476,7 +6490,9 @@
+ 					      attrs, replace_if_exists);
+ 
+ 		close_file(req, fsp, NORMAL_CLOSE);
+-
++#ifdef SC_BUILD
++                sync();
++#endif
+ 		DEBUG(3, ("rename_internals: Error %s rename %s -> %s\n",
+ 			  nt_errstr(status), smb_fname_str_dbg(smb_fname_src),
+ 			  smb_fname_str_dbg(smb_fname_dst)));
+@@ -6648,7 +6664,9 @@
+ 		TALLOC_FREE(talloced);
+ 	}
+ 	TALLOC_FREE(dir_hnd);
+-
++#ifdef SC_BUILD
++            sync();
++#endif
+ 	if (count == 0 && NT_STATUS_IS_OK(status) && errno != 0) {
+ 		status = map_nt_error_from_unix(errno);
+ 	}
+diff -urN work/samba-3.6.25/source3/smbd/server.c work/samba-3.6.25/source3/smbd/server.c
+--- work/samba-3.6.25/source3/smbd/server.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/server.c	2020-12-09 21:34:05.738697588 +0100
+@@ -906,7 +906,8 @@
+    prototype generation system is too complicated. */
+ 
+ extern void build_options(bool screen);
+-
++#include <sys/types.h>
++#include <unistd.h>
+  int main(int argc,const char *argv[])
+ {
+ 	/* shall I run as a daemon */
+@@ -915,6 +916,7 @@
+ 	bool Fork = true;
+ 	bool no_process_group = false;
+ 	bool log_stdout = false;
++	char *priority = NULL;
+ 	char *ports = NULL;
+ 	char *profile_level = NULL;
+ 	int opt;
+@@ -936,7 +938,8 @@
+ 	{"log-stdout", 'S', POPT_ARG_NONE, NULL, OPT_LOG_STDOUT, "Log to stdout" },
+ 	{"build-options", 'b', POPT_ARG_NONE, NULL, 'b', "Print build options" },
+ 	{"port", 'p', POPT_ARG_STRING, &ports, 0, "Listen on the specified ports"},
+-	{"profiling-level", 'P', POPT_ARG_STRING, &profile_level, 0, "Set profiling level","PROFILE_LEVEL"},
++	{"Priority", 'P', POPT_ARG_STRING, &priority, 0, "Set priority by renice"},
++	{"profiling-level", 'L', POPT_ARG_STRING, &profile_level, 0, "Set profiling level","PROFILE_LEVEL"},
+ 	POPT_COMMON_SAMBA
+ 	POPT_COMMON_DYNCONFIG
+ 	POPT_TABLEEND
+@@ -992,6 +995,14 @@
+ 			exit(1);
+ 		}
+ 	}
++	
++	// Renice 
++	if(priority!=NULL)
++	{
++		nice(atoi(priority));
++		free(priority);
++	}
++
+ 	poptFreeContext(pc);
+ 
+ 	if (interactive) {
+diff -urN work/samba-3.6.25/source3/smbd/sesssetup.c work/samba-3.6.25/source3/smbd/sesssetup.c
+--- work/samba-3.6.25/source3/smbd/sesssetup.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/sesssetup.c	2020-12-09 21:36:29.561947267 +0100
+@@ -135,7 +135,7 @@
+ 		reply_nterror(req, NT_STATUS_NO_MEMORY);
+ 	}
+ }
+-
++#if 0
+ /****************************************************************************
+  Do a 'guest' logon, getting back the
+ ****************************************************************************/
+@@ -167,7 +167,7 @@
+ 	free_user_info(&user_info);
+ 	return nt_status;
+ }
+-
++#endif
+ 
+ #ifdef HAVE_KRB5
+ 
+@@ -1609,7 +1609,7 @@
+ 
+ 	if (!*user) {
+ 
+-		nt_status = check_guest_password(&server_info);
++		//nt_status = check_guest_password(&server_info);
+ 
+ 	} else if (doencrypt) {
+ 		struct auth_context *negprot_auth_context = NULL;
+diff -urN work/samba-3.6.25/source3/smbd/trans2.c work/samba-3.6.25/source3/smbd/trans2.c
+--- work/samba-3.6.25/source3/smbd/trans2.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/trans2.c	2020-12-09 23:34:33.249854634 +0100
+@@ -41,6 +41,10 @@
+ 
+ #define DIR_ENTRY_SAFETY_MARGIN 4096
+ 
++#ifdef SC_BUILD
++extern int sc_check_writable(const char *file);
++#endif
++
+ static char *store_file_unix_basic(connection_struct *conn,
+ 				char *pdata,
+ 				files_struct *fsp,
+@@ -5611,6 +5615,9 @@
+ 			 nt_errstr(status), smb_fname_old->base_name,
+ 			 smb_fname_new->base_name));
+ 	}
++#ifdef SC_BUILD
++        sync();
++#endif
+ 	return status;
+ }
+ 
+@@ -6001,6 +6008,11 @@
+ 		}
+ 	}
+ 
++#ifdef SC_BUILD
++            if (!sc_check_writable(fsp->fsp_name->base_name))
++                return NT_STATUS_ACCESS_DENIED;
++#endif
++
+ 	/* The set is across all open files on this dev/inode pair. */
+ 	if (!set_delete_on_close(fsp, delete_on_close,
+ 				 conn->session_info->security_token,
+@@ -6105,7 +6117,9 @@
+ 	if (SMB_VFS_SYMLINK(conn,link_target,newname) != 0) {
+ 		return map_nt_error_from_unix(errno);
+ 	}
+-
++#ifdef SC_BUILD
++            sync();
++#endif
+ 	return NT_STATUS_OK;
+ }
+ 
+@@ -7003,7 +7017,9 @@
+ 					 unixmode);
+ 		TALLOC_FREE(parent);
+ 	}
+-
++#ifdef SC_BUILD
++                sync();
++#endif
+ 	return NT_STATUS_OK;
+ }
+ 
+@@ -7197,6 +7213,9 @@
+ 			}
+ 			return status;
+ 		}
++#ifdef SC_BUILD
++            sync();
++#endif
+ 	}
+ 
+ 	/* Deal with any size changes. */
+diff -urN work/samba-3.6.25/source3/smbd/vfs.c work/samba-3.6.25/source3/smbd/vfs.c
+--- work/samba-3.6.25/source3/smbd/vfs.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/smbd/vfs.c	2020-12-09 23:42:34.491238092 +0100
+@@ -553,6 +553,25 @@
+ 
+ int vfs_set_filelen(files_struct *fsp, SMB_OFF_T len)
+ {
++#if 1
++	int ret=0;
++	SMB_STRUCT_STAT st;
++
++	ret=SMB_VFS_FSTAT(fsp, &fsp->fsp_name->st);
++	if(ret==-1)
++		return ret;
++	contend_level2_oplocks_begin(fsp, LEVEL2_CONTEND_SET_FILE_LEN);
++	flush_write_cache(fsp, SIZECHANGE_FLUSH);
++	
++	if(len<st.st_ex_size){
++		if ((ret = SMB_VFS_FTRUNCATE(fsp, len)) != -1)
++			set_filelen_write_cache(fsp, len);
++	}
++	else
++		set_filelen_write_cache(fsp, len);
++	contend_level2_oplocks_end(fsp, LEVEL2_CONTEND_SET_FILE_LEN);
++	return ret;
++#else
+ 	int ret;
+ 
+ 	contend_level2_oplocks_begin(fsp, LEVEL2_CONTEND_SET_FILE_LEN);
+@@ -571,6 +590,7 @@
+ 	contend_level2_oplocks_end(fsp, LEVEL2_CONTEND_SET_FILE_LEN);
+ 
+ 	return ret;
++#endif
+ }
+ 
+ /****************************************************************************
+@@ -1263,6 +1283,9 @@
+ 		       mode_t mode)
+ {
+ 	VFS_FIND(mkdir);
++#ifdef SC_BUILD
++    sync();
++#endif
+ 	return handle->fns->mkdir(handle, path, mode);
+ }
+ 
+diff -urN work/samba-3.6.25/source3/utils/smbpasswd.c work/samba-3.6.25/source3/utils/smbpasswd.c
+--- work/samba-3.6.25/source3/utils/smbpasswd.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/utils/smbpasswd.c	2020-12-10 12:25:23.582771304 +0100
+@@ -31,9 +31,9 @@
+ extern int optind;
+ 
+ /* forced running in root-mode */
+-static bool got_username = False;
++static bool got_pass = False, got_username = False;
+ static bool stdin_passwd_get = False;
+-static fstring user_name;
++static fstring user_name, user_password;
+ static char *new_passwd = NULL;
+ static const char *remote_machine = NULL;
+ 
+@@ -46,9 +46,9 @@
+ static void usage(void)
+ {
+ 	printf("When run by root:\n");
+-	printf("    smbpasswd [options] [username]\n");
++	printf("    smbpasswd [options] [username] [password]\n");
+ 	printf("otherwise:\n");
+-	printf("    smbpasswd [options]\n\n");
++	printf("    smbpasswd [options] [password]\n\n");
+ 
+ 	printf("options:\n");
+ 	printf("  -L                   local mode (must be first option)\n");
+@@ -66,7 +66,6 @@
+ 	printf("  -i                   interdomain trust account\n");
+ 	printf("  -m                   machine trust account\n");
+ 	printf("  -n                   set no password\n");
+-	printf("  -W                   use stdin ldap admin password\n");
+ 	printf("  -w PASSWORD          ldap admin password\n");
+ 	printf("  -x                   delete user\n");
+ 	printf("  -R ORDER             name resolve order\n");
+@@ -91,10 +90,11 @@
+ 	local_flags |= LOCAL_SET_PASSWORD;
+ 
+ 	ZERO_STRUCT(user_name);
++	ZERO_STRUCT(user_password);
+ 
+ 	user_name[0] = '\0';
+ 
+-	while ((ch = getopt(argc, argv, "c:axdehminjr:sw:R:D:U:LW")) != EOF) {
++	while ((ch = getopt(argc, argv, "c:axdehminjr:sw:R:D:U:L")) != EOF) {
+ 		switch(ch) {
+ 		case 'L':
+ #if !defined(NSS_WRAPPER)
+@@ -158,12 +158,16 @@
+ 			lp_set_cmdline("log level", optarg);
+ 			break;
+ 		case 'U': {
++			char *lp;
+ 			got_username = True;
+ 			fstrcpy(user_name, optarg);
+-			break;
+-		case 'W':
+-			local_flags |= LOCAL_SET_LDAP_ADMIN_PW;
+-			*ldap_secret = '\0';
++			if ((lp = strchr(user_name, '%'))) {
++				*lp = 0;
++				fstrcpy(user_password, lp + 1);
++				got_pass = True;
++				memset(strchr_m(optarg, '%') + 1, 'X',
++				       strlen(user_password));
++			}
+ 			break;
+ 		}
+ 		case 'h':
+@@ -182,7 +186,7 @@
+ 		break;
+ 	case 1:
+ 		if (!(local_flags & LOCAL_AM_ROOT)) {
+-			usage();
++			new_passwd = argv[0];
+ 		} else {
+ 			if (got_username) {
+ 				usage();
+@@ -191,6 +195,11 @@
+ 			}
+ 		}
+ 		break;
++	case 2:
++		if (!(local_flags & LOCAL_AM_ROOT) || got_username || got_pass) usage();
++		fstrcpy(user_name, argv[0]);
++		new_passwd = smb_xstrdup(argv[1]);
++		break;
+ 	default:
+ 		usage();
+ 	}
+@@ -243,7 +252,7 @@
+ 	NTSTATUS ret;
+ 	char *err_str = NULL;
+ 	char *msg_str = NULL;
+-
++#if 0
+ 	if (remote_mach != NULL) {
+ 		if (local_flags & (LOCAL_ADD_USER|LOCAL_DELETE_USER|
+ 				   LOCAL_DISABLE_USER|LOCAL_ENABLE_USER|
+@@ -255,9 +264,10 @@
+ 		ret = remote_password_change(remote_mach, username,
+ 					     old_passwd, new_pw, &err_str);
+ 	} else {
++#endif
+ 		ret = local_password_change(username, local_flags, new_pw,
+ 					    &err_str, &msg_str);
+-	}
++	//}
+ 
+ 	if (msg_str) {
+ 		printf("%s", msg_str);
+@@ -307,10 +317,6 @@
+ 		}
+ 
+ 		printf("Setting stored password for \"%s\" in secrets.tdb\n", ldap_admin_dn);
+-		if ( ! *ldap_secret ) {
+-			new_passwd = prompt_for_new_password(stdin_passwd_get);
+-			fstrcpy(ldap_secret, new_passwd);
+-		}
+ 		if (!store_ldap_admin_pw(ldap_secret)) {
+ 			DEBUG(0,("ERROR: Failed to store the ldap admin password!\n"));
+ 		}
+@@ -432,7 +438,7 @@
+ 					exit(1);
+ 				}
+ 
+-				if(pdb_get_nt_passwd(sampass) == NULL) {
++				if((sampass != False) && (pdb_get_nt_passwd(sampass) == NULL)) {
+ 					local_flags |= LOCAL_SET_PASSWORD;
+ 				}
+ 				TALLOC_FREE(sampass);
+@@ -513,7 +519,7 @@
+ 			fstrcpy(user_name,pwd->pw_name);
+ 			TALLOC_FREE(pwd);
+ 		} else {
+-			fprintf(stderr, "smbpasswd: cannot lookup user name for uid %u\n", (unsigned int)getuid());
++			fprintf(stderr, "smbpasswd: you don't exist - go away\n");
+ 			exit(1);
+ 		}
+ 	}
+@@ -579,8 +585,6 @@
+ 		local_flags = LOCAL_AM_ROOT;
+ 	}
+ 
+-	load_case_tables();
+-
+ 	local_flags = process_options(argc, argv, local_flags);
+ 
+ 	setup_logging("smbpasswd", DEBUG_STDERR);
+diff -urN work/samba-3.6.25/source3/utils/status.c work/samba-3.6.25/source3/utils/status.c
+--- work/samba-3.6.25/source3/utils/status.c	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/utils/status.c	2020-12-10 14:44:26.004893617 +0100
+@@ -30,6 +30,8 @@
+  * This program reports current SMB connections
+  */
+ 
++#define NO_SYSLOG
++
+ #include "includes.h"
+ #include "system/filesys.h"
+ #include "popt_common.h"
+@@ -40,30 +42,31 @@
+ #include "messages.h"
+ #include "serverid.h"
+ 
+-#define SMB_MAXPIDS		2048
+-static uid_t 		Ucrit_uid = 0;               /* added by OH */
++#define	MOUNT_PATH	"/harddisk/volume_6_/data"
++#define SMB_MAXPIDS		512
+ static struct server_id	Ucrit_pid[SMB_MAXPIDS];  /* Ugly !!! */   /* added by OH */
++static pstring 		Ucrit_username = "";               /* added by OH */
+ static int		Ucrit_MaxPid=0;                    /* added by OH */
+ static unsigned int	Ucrit_IsActive = 0;                /* added by OH */
++static uid_t 		Ucrit_uid = 0;               /* added by OH */
+ 
+-static bool verbose, brief;
+-static bool shares_only;            /* Added by RJS */
+-static bool locks_only;            /* Added by RJS */
+-static bool processes_only;
+-static bool show_brl;
+-static bool numeric_only;
++char prefix[12]={0};
+ 
+-const char *username = NULL;
++#define TMP_STATUS	"/tmp/smb.status"
++#define TMP_LOCKED	"/tmp/smb.locked"
+ 
+ extern bool status_profile_dump(bool be_verbose);
+ extern bool status_profile_rates(bool be_verbose);
+ 
++#if 0
+ /* added by OH */
+-static void Ucrit_addUid(uid_t uid)
++static void Ucrit_addUsername(const char *username)
+ {
+-	Ucrit_uid = uid;
+-	Ucrit_IsActive = 1;
++	pstrcpy(Ucrit_username, username);	
++	if ( strlen(Ucrit_username) > 0 )
++		Ucrit_IsActive = 1;
+ }
++#endif
+ 
+ static unsigned int Ucrit_checkUid(uid_t uid)
+ {
+@@ -76,29 +79,22 @@
+ 	return 0;
+ }
+ 
+-static unsigned int Ucrit_checkPid(struct server_id pid)
++static unsigned int Ucrit_checkUsername(const char *username)
+ {
+-	int i;
+-
+ 	if ( !Ucrit_IsActive ) 
+ 		return 1;
+ 
+-	for (i=0;i<Ucrit_MaxPid;i++) {
+-		if (cluster_id_equal(&pid, &Ucrit_pid[i])) 
+-			return 1;
+-	}
++	if ( strcmp(Ucrit_username,username) == 0 ) 
++		return 1;
+ 
+ 	return 0;
+ }
+ 
+ static bool Ucrit_addPid( struct server_id pid )
+ {
+-	if ( !Ucrit_IsActive )
+-		return True;
+-
+ 	if ( Ucrit_MaxPid >= SMB_MAXPIDS ) {
+ 		d_printf("ERROR: More than %d pids for user %s!\n",
+-			 SMB_MAXPIDS, uidtoname(Ucrit_uid));
++			 SMB_MAXPIDS, Ucrit_username);
+ 
+ 		return False;
+ 	}
+@@ -113,68 +109,18 @@
+ 			     const char *fname,
+ 			     void *dummy)
+ {
+-	static int count;
+-
+-	if (!is_valid_share_mode_entry(e)) {
+-		return;
+-	}
+-
+-	if (!process_exists(e->pid)) {
+-		return;
+-	}
+-
+-	if (count==0) {
+-		d_printf("Locked files:\n");
+-		d_printf("Pid          Uid        DenyMode   Access      R/W        Oplock           SharePath   Name   Time\n");
+-		d_printf("--------------------------------------------------------------------------------------------------\n");
+-	}
+-	count++;
+-
+-	if (Ucrit_checkPid(e->pid)) {
+-		d_printf("%-11s  ",procid_str_static(&e->pid));
+-		d_printf("%-9u  ", (unsigned int)e->uid);
+-		switch (map_share_mode_to_deny_mode(e->share_access,
+-						    e->private_options)) {
+-			case DENY_NONE: d_printf("DENY_NONE  "); break;
+-			case DENY_ALL:  d_printf("DENY_ALL   "); break;
+-			case DENY_DOS:  d_printf("DENY_DOS   "); break;
+-			case DENY_READ: d_printf("DENY_READ  "); break;
+-			case DENY_WRITE:printf("DENY_WRITE "); break;
+-			case DENY_FCB:  d_printf("DENY_FCB "); break;
+-			default: {
+-				d_printf("unknown-please report ! "
+-					 "e->share_access = 0x%x, "
+-					 "e->private_options = 0x%x\n",
+-					 (unsigned int)e->share_access,
+-					 (unsigned int)e->private_options );
+-				break;
+-			}
+-		}
+-		d_printf("0x%-8x  ",(unsigned int)e->access_mask);
+-		if ((e->access_mask & (FILE_READ_DATA|FILE_WRITE_DATA))==
+-				(FILE_READ_DATA|FILE_WRITE_DATA)) {
+-			d_printf("RDWR       ");
+-		} else if (e->access_mask & FILE_WRITE_DATA) {
+-			d_printf("WRONLY     ");
+-		} else {
+-			d_printf("RDONLY     ");
+-		}
+-
+-		if((e->op_type & (EXCLUSIVE_OPLOCK|BATCH_OPLOCK)) == 
+-					(EXCLUSIVE_OPLOCK|BATCH_OPLOCK)) {
+-			d_printf("EXCLUSIVE+BATCH ");
+-		} else if (e->op_type & EXCLUSIVE_OPLOCK) {
+-			d_printf("EXCLUSIVE       ");
+-		} else if (e->op_type & BATCH_OPLOCK) {
+-			d_printf("BATCH           ");
+-		} else if (e->op_type & LEVEL_II_OPLOCK) {
+-			d_printf("LEVEL_II        ");
+-		} else {
+-			d_printf("NONE            ");
+-		}
+-
+-		d_printf(" %s   %s   %s",sharepath, fname, time_to_asc((time_t)e->time.tv_sec));
++	char path[64]={0};		
++	
++	if(!fname||!fname[0])
++ 		return;
++#undef sprintf	
++	sprintf(path,"%s/%s",MOUNT_PATH,prefix);
++	if(!strncmp(fname,path,strlen(path))){
++		printf("print_share_mode:pid '%d'\n",e->pid);
++		Ucrit_addPid(procid_to_pid(&e->pid));
+ 	}
++	
++	return;
+ }
+ 
+ static void print_brl(struct file_id id,
+@@ -247,14 +193,24 @@
+ 	if (crec->cnum == -1)
+ 		return 0;
+ 
+-	if (!process_exists(crec->pid) || !Ucrit_checkUid(crec->uid)) {
++	if (!process_exists(crec->pid)) {
+ 		return 0;
+ 	}
+ 
+-	d_printf("%-10s   %s   %-12s  %s",
+-		 crec->servicename,procid_str_static(&crec->pid),
+-		 crec->machine,
+-		 time_to_asc(crec->start));
++	printf("crec->servicename=%s,prefix=%s\n",crec->servicename,prefix);
++	printf("crec->uid=%d\n",crec->uid);
++	if(strstr(prefix, "FLASH_") || strstr(prefix, "HDD_")){
++		if( !strncmp(crec->servicename,prefix,strlen(prefix)) ){
++			printf("traverse_fn1: pid '%d'\n",crec->pid);
++			Ucrit_addPid(procid_to_pid(&crec->pid));
++		}
++	}
++	else{
++		if( crec->uid==atoi(prefix) ){
++			printf("traverse_fn1: pid '%d'\n",crec->pid);
++			Ucrit_addPid(procid_to_pid(&crec->pid));
++		}
++	}
+ 
+ 	return 0;
+ }
+@@ -262,115 +218,38 @@
+ static int traverse_sessionid(const char *key, struct sessionid *session,
+ 			      void *private_data)
+ {
+-	fstring uid_str, gid_str;
+-
+ 	if (!process_exists(session->pid)
+ 	    || !Ucrit_checkUid(session->uid)) {
+ 		return 0;
+ 	}
+ 
+-	Ucrit_addPid(session->pid);
+-
+-	fstr_sprintf(uid_str, "%u", (unsigned int)session->uid);
+-	fstr_sprintf(gid_str, "%u", (unsigned int)session->gid);
+-
+-	d_printf("%-7s   %-12s  %-12s  %-12s (%s)\n",
+-		 procid_str_static(&session->pid),
+-		 numeric_only ? uid_str : uidtoname(session->uid),
+-		 numeric_only ? gid_str : gidtoname(session->gid),
+-		 session->remote_machine, session->hostname);
+-
+ 	return 0;
+ }
+ 
++int main(int argc, char *argv[])
++{
++	int ret=0,num=0;
+ 
++	if(argc!=2){
++		printf("Usage: %s [FLASH_X_Y|HDD_X_Y]\n",argv[0]);
++		return(1);
++	}
+ 
+-
+- int main(int argc, char *argv[])
+-{
+-	int c;
+-	int profile_only = 0;
+-	bool show_processes, show_locks, show_shares;
+-	poptContext pc;
+-	struct poptOption long_options[] = {
+-		POPT_AUTOHELP
+-		{"processes",	'p', POPT_ARG_NONE,	NULL, 'p', "Show processes only" },
+-		{"verbose",	'v', POPT_ARG_NONE, 	NULL, 'v', "Be verbose" },
+-		{"locks",	'L', POPT_ARG_NONE,	NULL, 'L', "Show locks only" },
+-		{"shares",	'S', POPT_ARG_NONE,	NULL, 'S', "Show shares only" },
+-		{"user", 	'u', POPT_ARG_STRING,	&username, 'u', "Switch to user" },
+-		{"brief",	'b', POPT_ARG_NONE, 	NULL, 'b', "Be brief" },
+-		{"profile",     'P', POPT_ARG_NONE, NULL, 'P', "Do profiling" },
+-		{"profile-rates", 'R', POPT_ARG_NONE, NULL, 'R', "Show call rates" },
+-		{"byterange",	'B', POPT_ARG_NONE,	NULL, 'B', "Include byte range locks"},
+-		{"numeric",	'n', POPT_ARG_NONE,	NULL, 'n', "Numeric uid/gid"},
+-		POPT_COMMON_SAMBA
+-		POPT_TABLEEND
+-	};
+ 	TALLOC_CTX *frame = talloc_stackframe();
+-	int ret = 0;
+ 	struct messaging_context *msg_ctx;
+ 
+-	sec_init();
+-	load_case_tables();
+-
+-	setup_logging(argv[0], DEBUG_STDERR);
++	nice(-10);
++	memset(prefix,'\0',sizeof(prefix));
++	strncpy(prefix,argv[1],sizeof(prefix)-1);
+ 
++	sec_init();
++#if 0
+ 	if (getuid() != geteuid()) {
+ 		d_printf("smbstatus should not be run setuid\n");
+ 		ret = 1;
+ 		goto done;
+ 	}
+-
+-	pc = poptGetContext(NULL, argc, (const char **) argv, long_options, 
+-			    POPT_CONTEXT_KEEP_FIRST);
+-
+-	while ((c = poptGetNextOpt(pc)) != -1) {
+-		switch (c) {
+-		case 'p':
+-			processes_only = true;
+-			break;
+-		case 'v':
+-			verbose = true;
+-			break;
+-		case 'L':
+-			locks_only = true;
+-			break;
+-		case 'S':
+-			shares_only = true;
+-			break;
+-		case 'b':
+-			brief = true;
+-			break;
+-		case 'u':
+-			Ucrit_addUid(nametouid(poptGetOptArg(pc)));
+-			break;
+-		case 'P':
+-		case 'R':
+-			profile_only = c;
+-			break;
+-		case 'B':
+-			show_brl = true;
+-			break;
+-		case 'n':
+-			numeric_only = true;
+-			break;
+-		}
+-	}
+-
+-	/* setup the flags based on the possible combincations */
+-
+-	show_processes = !(shares_only || locks_only || profile_only) || processes_only;
+-	show_locks     = !(shares_only || processes_only || profile_only) || locks_only;
+-	show_shares    = !(processes_only || locks_only || profile_only) || shares_only;
+-
+-	if ( username )
+-		Ucrit_addUid( nametouid(username) );
+-
+-	if (verbose) {
+-		d_printf("using configfile = %s\n", get_dyn_CONFIGFILE());
+-	}
+-
++#endif
+ 	if (!lp_load_initial_only(get_dyn_CONFIGFILE())) {
+ 		fprintf(stderr, "Can't load %s - run testparm to debug it\n",
+ 			get_dyn_CONFIGFILE());
+@@ -400,103 +279,49 @@
+ 		}
+ 	}
+ 
+-	if (!lp_load(get_dyn_CONFIGFILE(),False,False,False,True)) {
++	if (!lp_load(get_dyn_CONFIGFILE(),True,False,False,True)) {
+ 		fprintf(stderr, "Can't load %s - run testparm to debug it\n",
+ 			get_dyn_CONFIGFILE());
+ 		ret = -1;
+ 		goto done;
+ 	}
+ 
+-	switch (profile_only) {
+-		case 'P':
+-			/* Dump profile data */
+-			return status_profile_dump(verbose);
+-		case 'R':
+-			/* Continuously display rate-converted data */
+-			return status_profile_rates(verbose);
+-		default:
+-			break;
+-	}
+-
+-	if ( show_processes ) {
+-		d_printf("\nSamba version %s\n",samba_version_string());
+-		d_printf("PID     Username      Group         Machine                        \n");
+-		d_printf("-------------------------------------------------------------------\n");
+-		if (lp_security() == SEC_SHARE) {
+-			d_printf(" <processes do not show up in "
+-				 "anonymous mode>\n");
+-		}
+-
+-		sessionid_traverse_read(traverse_sessionid, NULL);
+-
+-		if (processes_only) {
+-			goto done;
+-		}
+-	}
+-
+-	if ( show_shares ) {
+-		if (verbose) {
+-			d_printf("Opened %s\n", lock_path("connections.tdb"));
+-		}
+-
+-		if (brief) {
+-			goto done;
+-		}
+-
+-		d_printf("\nService      pid     machine       Connected at\n");
+-		d_printf("-------------------------------------------------------\n");
+-
+-		connections_forall_read(traverse_fn1, NULL);
+-
+-		d_printf("\n");
+-
+-		if ( shares_only ) {
+-			goto done;
+-		}
+-	}
+-
+-	if ( show_locks ) {
+-		int result;
+-		struct db_context *db;
+-		db = db_open(NULL, lock_path("locking.tdb"), 0,
+-			     TDB_CLEAR_IF_FIRST|TDB_INCOMPATIBLE_HASH, O_RDONLY, 0);
+-
+-		if (!db) {
+-			d_printf("%s not initialised\n",
+-				 lock_path("locking.tdb"));
+-			d_printf("This is normal if an SMB client has never "
+-				 "connected to your server.\n");
+-			exit(0);
+-		} else {
+-			TALLOC_FREE(db);
+-		}
+-
+-		if (!locking_init_readonly()) {
+-			d_printf("Can't initialise locking module - exiting\n");
+-			ret = 1;
+-			goto done;
+-		}
+-
+-		if (!serverid_init_readonly(frame)) {
+-			d_printf("Can't initialise serverid tdb - exiting\n");
+-			ret = 1;
+-			goto done;
+-		}
+-		result = share_mode_forall(print_share_mode, NULL);
+-
+-		if (result == 0) {
+-			d_printf("No locked files\n");
+-		} else if (result == -1) {
+-			d_printf("locked file list truncated\n");
+-		}
+-
+-		d_printf("\n");
+-
+-		if (show_brl) {
+-			brl_forall(print_brl, NULL);
+-		}
++	tdb = tdb_open_log(lock_path("sessionid.tdb"), 0, TDB_DEFAULT, O_RDONLY, 0);
++	if (!tdb) {
++		d_printf("sessionid.tdb not initialised\n");
++	}
++	else {
++		tdb_traverse(tdb, traverse_sessionid, NULL);
++		tdb_close(tdb);
++	}
++	tdb = tdb_open_log(lock_path("connections.tdb"), 0, TDB_DEFAULT, O_RDONLY, 0);
++	if (!tdb) {
++		d_printf("%s not initialised\n", lock_path("connections.tdb"));
++		d_printf("This is normal if an SMB client has never connected to your server.\n");
++	}
++	else  {
++		tdb_traverse(tdb, traverse_fn1, NULL);
++		tdb_close(tdb);
++	}
++	if (!locking_init(1)) {
++		d_printf("Can't initialise locking module - exiting\n");
++	}
++	ret = share_mode_forall(print_share_mode);
++	if (ret == 0) {
++		d_printf("No locked files\n");
++	}
++	else if (ret == -1) {
++		d_printf("locked file list truncated\n");
++	}
++	while(num<Ucrit_MaxPid){
++		kill(Ucrit_pid[num],SIGTERM);
++		sleep(1);
++		if(process_exists_by_pid(Ucrit_pid[num]))
++			kill(Ucrit_pid[num],SIGTERM);		
++		num++;
+ 
+-		locking_end();
++	d_printf("\n");		
++	locking_end();
+ 	}
+ 
+ done:

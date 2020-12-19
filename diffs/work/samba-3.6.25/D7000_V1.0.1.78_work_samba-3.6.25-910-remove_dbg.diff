@@ -1,0 +1,40 @@
+diff -urN work/samba-3.6.25/examples/libsmbclient/smbwrapper/smbw.h work/samba-3.6.25/examples/libsmbclient/smbwrapper/smbw.h
+--- work/samba-3.6.25/examples/libsmbclient/smbwrapper/smbw.h	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/examples/libsmbclient/smbwrapper/smbw.h	2020-12-13 21:08:52.926494713 +0100
+@@ -38,7 +38,7 @@
+ #endif
+ 
+ #undef DEBUG
+-#define DEBUG(level, s) do { if (level <= debug_level) printf s; } while (0)
++#define DEBUG(...)
+ 
+ 
+ #define SMBW_PREFIX "/smb"
+diff -urN work/samba-3.6.25/lib/util/util.h work/samba-3.6.25/lib/util/util.h
+--- work/samba-3.6.25/lib/util/util.h	2020-12-13 20:39:59.455225000 +0100
++++ work/samba-3.6.25/lib/util/util.h	2020-12-13 21:31:37.671648261 +0100
+@@ -52,9 +52,7 @@
+ 		 __FILE__, __LINE__, #b)); smb_panic("assert failed: " #b); }} while(0)
+ #else
+ /* redefine the assert macro for non-developer builds */
+-#define SMB_ASSERT(b) do { if (!(b)) { \
+-        DEBUG(3,("PANIC: assert failed at %s(%d): %s\n", \
+-	    __FILE__, __LINE__, #b)); }} while (0)
++#define SMB_ASSERT(...)
+ #endif
+ 
+ #ifndef ABS
+diff -urN work/samba-3.6.25/source3/include/smb_macros.h work/samba-3.6.25/source3/include/smb_macros.h
+--- work/samba-3.6.25/source3/include/smb_macros.h	2015-02-22 15:11:32.000000000 +0100
++++ work/samba-3.6.25/source3/include/smb_macros.h	2020-12-13 21:08:52.930494694 +0100
+@@ -34,9 +34,7 @@
+ #define IS_DOS_SYSTEM(test_mode)   (((test_mode) & FILE_ATTRIBUTE_SYSTEM) != 0)
+ #define IS_DOS_HIDDEN(test_mode)   (((test_mode) & FILE_ATTRIBUTE_HIDDEN) != 0)
+ 
+-#define SMB_WARN(condition, message) \
+-    ((condition) ? (void)0 : \
+-     DEBUG(0, ("WARNING: %s: %s\n", #condition, message)))
++#define SMB_WARN(...)
+ 
+ #define SMB_ASSERT_ARRAY(a,n) SMB_ASSERT((sizeof(a)/sizeof((a)[0])) >= (n))
+ 
