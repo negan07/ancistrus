@@ -51,7 +51,7 @@ diff -urN work/busybox-1.31.1/applets/install.sh work/busybox-1.31.1/applets/ins
  			chmod +x "$prefix/$i"
  		fi
  		echo "	$prefix/$i"
-@@ -107,31 +108,39 @@
+@@ -107,31 +108,35 @@
  			exit 1
  		fi
  	else
@@ -106,10 +106,6 @@ diff -urN work/busybox-1.31.1/applets/install.sh work/busybox-1.31.1/applets/ins
 +	. /etc/profile
 +	fi
 +sync
-+echo
-+echo "Busybox installation completed"
-+echo "This package can now be removed because new busybox binary and applet symlinks have been moved to the working binpath"
-+echo "Type 'opkg remove busybox'"
 +fi
 +exit 0
 +_EOF_
