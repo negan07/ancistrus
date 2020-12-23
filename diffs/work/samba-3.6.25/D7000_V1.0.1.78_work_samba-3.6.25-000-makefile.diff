@@ -76,7 +76,7 @@ diff -urN work/samba-3.6.25/Makefile work/samba-3.6.25/Makefile
 +postrm:
 +	@echo "#!/bin/sh" > $(POSTRM)
 +	@echo "for B in $(BINNAMES); do rm -f $(USRSBIN)/\$$B; done" >> $(POSTRM)
-+	@echo "rm -rf $(LDLIB)/libiconv.so.2 $(TMPDIR)/smb.* $(TMPDIR)/smbmount.* $(SMB_CONF_DIR_NAME)*/ $(TMPETC)/*.smb " >> $(POSTRM)
++	@echo "rm -rf $(LDLIB)/libiconv.so.2 $(TMPDIR)/smb.* $(TMPDIR)/smbmount.* $(SMB_CONF_DIR_NAME)*/ $(TMPETC)/*.smb" >> $(POSTRM)
 +	@echo "sync" >> $(POSTRM)
 +	@echo "exit 0" >> $(POSTRM)
 +endif
