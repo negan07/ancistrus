@@ -101,7 +101,7 @@ diff -urN D7000_V1.0.1.78_WW_src/Source/Makefile D7000_V1.0.1.78_WW_src/Source/M
  	$(STRIP) target/lib/*.so*
 -	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
 -	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
-+	cp -af $(CROSS_DIR_LIB)/libgcc_s.so $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
++	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
  	cd target/lib; ln -sf libscnvram.so libconfig.so
 +	$(foreach D, \
 +	target/opt/leafp2p target/opt/rcagent target/opt/rcagent/cgi target/opt/rcagent/scripts target/opt/remote target/opt/xagent \
