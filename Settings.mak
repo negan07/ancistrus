@@ -15,7 +15,7 @@ endif
 PROJECT_NAME		?= ancistrus
 PROJECT_TARGET		?= D7000
 PROJECT_FOUNDER		?= negan07
-PROJECT_PLOT		?= "Netgear's $(PROJECT_TARGET) Nighthawk Router Experience Distributed Project"
+PROJECT_PLOT		?= "Netgear's $(PROJECT_TARGET) (V1) Nighthawk Router Experience Distributed Project"
 LICENSE_NAME		?= GPLv2
 PROJECT_LICENSE		?= "License: $(LICENSE_NAME)"
 

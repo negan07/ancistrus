@@ -1,7 +1,7 @@
 diff -urN work/openvpn-2.5.0/Makefile work/openvpn-2.5.0/Makefile
 --- work/openvpn-2.5.0/Makefile	1970-01-01 01:00:00.000000000 +0100
 +++ work/openvpn-2.5.0/Makefile	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,73 @@
+@@ -0,0 +1,72 @@
 +include ../Rules.mak
 +
 +USROVPNDIR 		:= $(BINDIR)/../openvpn
@@ -72,6 +72,5 @@ diff -urN work/openvpn-2.5.0/Makefile work/openvpn-2.5.0/Makefile
 +	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PRERM)
 +	@echo "rm -f $(TMPETC)/$(INITD)/$(RCPOST)/$(POSTSCRIPT)" >> $(PRERM)
 +	@echo "exit 0" >> $(PRERM)
-+
 +endif
 +

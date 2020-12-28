@@ -8,7 +8,7 @@
 #define PROJFOUNDER	"negan07"
 #endif
 #ifndef PROJPLOT
-#define PROJPLOT	"Netgear's " PROJTARGET " Nighthawk Router Experience Distributed Project"
+#define PROJPLOT	"Netgear's " PROJTARGET " (V1) Nighthawk Router Experience Distributed Project"
 #endif
 #ifndef HOMEPAGE
 #define HOMEPAGE	"https://github.com/" PROJFOUNDER "/" PROJNAME
