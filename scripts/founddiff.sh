@@ -21,6 +21,21 @@
 
 LISTDIR="Kernel/bcm963xx/kernel/linux-3.4rt Kernel/bcm963xx/bcmdrivers Kernel/bcm963xx/hostTools Kernel/bcm963xx/shared Kernel/bcm963xx/targets Kernel/bcm963xx Source/apps Source/Builds Source/image Source/shared Source/target Source/uClibc-0.9.32 Source Makefile"
 
+run_diff() {
+
+[ $# -ne 4 ] && echo "run_diff(): missed diff params. Usage: run_diff <u(r)> <old> <new> <dest>" && exit 4
+
+diff -${1} -x '*.lo' -x '*.Po' -x '*.po' -x '*.Plo' -x '*.o' -x '*.d' -x '*.a' -x '*.la' -x '*.lai' -x '*.so*' -x '*.pc' -x '*.spec' -x '*.dep' -x '*.mod' -x '.patched' -x '.compiled' -x 'config.h' -x 'autoconf.h' -x 'compile.h' -x 'auto.conf' -x 'config.log' -x 'config.status' -x 'Module.symvers' -x 'modules.order' -x 'entries' -x 'scanner.c' -x 'cfg_l.c' -x 'requests' $2 $3 > $4 2>/dev/null
+[ ! -s $4 ] && rm -f $4
+}
+
+rm_void_dir() {
+
+[ -z "${1}" ] && echo "rm_void_dir(): dir name missed" && exit 5
+
+[ -d "${1}" ] && [ "`echo "${1}/"*`" = "${1}/*" ] && rmdir "${1}"
+}
+
 cd ..
 [ $# -ne 2 ] && echo "Usage: $0 <absdir1> <absdir2>" && exit 1
 
@@ -38,7 +53,7 @@ done
 
 TAG=`sudo echo ${1##*/} | cut -d '_' -f 1`_`echo ${1##*/} | cut -d '_' -f 2`
 
-DESTDIR=diff-${1##*/}-${2##*/}
+DESTDIR="diff-${1##*/}-${2##*/}"
 
 mkdir -p -m 0755 $DESTDIR
 
@@ -46,62 +61,70 @@ for D in $LISTDIR
 do
 	case $D in
 	Kernel/bcm963xx/kernel/linux-3.4rt)
-	mkdir -p -m 0755 $DESTDIR/$D
-	diff -urN $1/$D $2/$D > $DESTDIR/$D.diff
+	mkdir -p -m 0755 "$DESTDIR/$D"
+	run_diff ur "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
+	rm_void_dir "$DESTDIR/$D"
 	;;
 	Source/apps)
-	mkdir -p -m 0755 $DESTDIR/$D
-		for I in `ls $1/$D`
+	mkdir -p -m 0755 "$DESTDIR/$D"
+		for I in `ls "$1/$D"`
 		do
 			case $I in
 			apple)
-			mkdir -p -m 0755 $DESTDIR/$D/$I
-				for A in `ls $1/$D/$I`
+			mkdir -p -m 0755 "$DESTDIR/$D/$I"
+				for A in `ls "$1/$D/$I"`
 				do
-				diff -urN $1/$D/$I/$A $2/$D/$I/$A > $DESTDIR/$D/$I/${TAG}_apps_${I}-000-${A}.diff
+				run_diff ur "$1/$D/$I/$A" "$2/$D/$I/$A" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-${A}.diff"
 				done
+			rm_void_dir "$DESTDIR/$D/$I"
 			;;
 			mediaserver)
-			mkdir -p -m 0755 $DESTDIR/$D/$I
-				for M in `ls $1/$D/$I`
+			mkdir -p -m 0755 "$DESTDIR/$D/$I"
+				for M in `ls "$1/$D/$I"`
 				do
 					case $M in
 					library)
-						for L in `ls $1/$D/$I/$M`
+						for L in `ls "$1/$D/$I/$M"`
 						do
-						diff -urN $1/$D/$I/$M/$L $2/$D/$I/$M/$L > $DESTDIR/$D/$I/${TAG}_apps_${I}-000-${M}_${L}.diff
+						run_diff ur "$1/$D/$I/$M/$L" "$2/$D/$I/$M/$L" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-${M}_${L}.diff"
 						done
 					;;
 					*)
-					diff -urN $1/$D/$I/$M $2/$D/$I/$M > $DESTDIR/$D/$I/${TAG}_apps_${I}-000-${M}.diff
+					run_diff ur "$1/$D/$I/$M" "$2/$D/$I/$M" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-${M}.diff"
 					;;
 					esac
 				done
+			rm_void_dir "$DESTDIR/$D/$I"
 			;;
 			Makefile)
-			diff -uN $1/$D/$I $2/$D/$I > $DESTDIR/$D/${TAG}_misc-004-source_apps_makefile_cleanups_adaptations.diff
+			run_diff u "$1/$D/$I" "$2/$D/$I" "$DESTDIR/$D/${TAG}_misc-004-source_apps_makefile_cleanups_adaptations.diff"
 			;;
 			*)
-			mkdir -p -m 0755 $DESTDIR/$D/$I
-			diff -urN $1/$D/$I $2/$D/$I > $DESTDIR/$D/$I/${TAG}_apps_${I}-000-all.diff
+			mkdir -p -m 0755 "$DESTDIR/$D/$I"
+			run_diff ur "$1/$D/$I" "$2/$D/$I" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-all.diff"
+			rm_void_dir "$DESTDIR/$D/$I"
 			;;
 			esac
 		done
+	rm_void_dir "$DESTDIR/$D"
 	;;
 	Source/target)
-	for T in $*; do sudo tar xjf $T/$D.tar.bz2 -C $T/Source; done
-	diff -urN $1/$D $2/$D > $DESTDIR/$D.diff
+	for T in $*; do sudo tar xjf "$T/$D.tar.bz2" -C $T/Source; done
+	run_diff ur "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
 	;;
 	Source)
-	rm -f $1/$D/crosstools-*.tar.bz2 $2/$D/crosstools-*.tar.bz2
-	diff -uN $1/$D $2/$D > $DESTDIR/$D.diff
+	rm -f "$1/$D/crosstools-*.tar.bz2" "$2/$D/crosstools-*.tar.bz2"
+	run_diff u "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
 	;;
 	Makefile|Kernel/bcm963xx)	
-	diff -uN $1/$D $2/$D > $DESTDIR/$D.diff
+	run_diff u "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
 	;;
 	*)
-	diff -urN $1/$D $2/$D > $DESTDIR/$D.diff
+	run_diff ur "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
 	;;
 	esac
 done
 
+rm_void_dir $DESTDIR
+
+exit 0
