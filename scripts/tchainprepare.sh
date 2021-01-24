@@ -22,14 +22,7 @@
 && echo "Usage: $0 <prj_name> <fw_ver> <diff_dir> <source_dir> <crosstools_dir> <crosstools_tar> <inst_dir> <src_buildroot_dl_dir>" \
 && exit 1
 # var assignements
-PROJECT="$1"
-FWVER="$2"
-DIFFDIR="$3"
-SOURCEDIR="$4"
-TCDIR="$5"
-TARTC="$6"
-INSTDIR="$7"
-BRDLDIR="$8"
+for VAR in PROJECT FWVER DIFFDIR SOURCEDIR TCDIR TARTC INSTDIR BRDLDIR; do eval $VAR="${1}"; shift; done
 PKGS="autoconf-2.65 automake-1.11.1 gcc-4.6.2 gdb-7.3.1 m4-1.4.15 uClibc-0.9.32"
 # create compiled toolchain's root dir: the path cannot be modified
 sudo mkdir -p -m 0755 $INSTDIR
