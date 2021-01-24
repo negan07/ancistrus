@@ -36,9 +36,7 @@ control: preinst postinst prerm postrm
 preinst:
 	@echo "#!/bin/sh" > $(PREINST)
 	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PREINST)
-	@echo "[ -e $(TMPDIR)/tc ] && rm -rf $(TMPDIR)/ip" >> $(PREINST)
-	@echo "[ -e $(TMPDIR)/ip ] && rm -rf $(TMPDIR)/tc" >> $(PREINST)
-	@echo "[ -e $(TMPDIR)/iproute2 ] && rm -rf $(TMPDIR)/iproute2" >> $(PREINST)
+	@echo "for F in tc ip iproute2; do [ -e $(TMPDIR)/\$$F ] && rm -rf $(TMPDIR)/\$$F; done" >> $(PREINST)
 	@echo "exit 0" >> $(PREINST)
 
 postinst:
@@ -46,8 +44,7 @@ postinst:
 	@echo "[ ! -x $(TMPDIR)/ip -o ! -x $(TMPDIR)/tc -o ! -d $(TMPDIR)/iproute2 ] && exit 0" >> $(POSTINST)
 	@echo "echo \"Updating iproute2 bins & tables...\"" >> $(POSTINST)
 	@echo "mv -f $(TMPDIR)/ip $(TMPDIR)/tc $(USRSBIN)/" >> $(POSTINST)
-	@echo "[ -e $(USRETC)/iproute2 ] && rm -rf $(USRETC)/iproute2" >> $(POSTINST)
-	@echo "[ -e $(TMPETC)/iproute2 ] && rm -rf $(TMPETC)/iproute2" >> $(POSTINST)
+	@echo "for D in $(USRETC) $(TMPETC); do [ -e \$$D/iproute2 ] && rm -rf \$$D/iproute2; done" >> $(POSTINST)
 	@echo "cp -rf $(TMPDIR)/iproute2 $(USRETC)/" >> $(POSTINST)
 	@echo "mv -f $(TMPDIR)/iproute2 $(TMPETC)/" >> $(POSTINST)
 	@echo "sync" >> $(POSTINST)
