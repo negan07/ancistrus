@@ -7,7 +7,7 @@ CUR_REL_PATH		:= $(notdir $(CUR_PATH))
 SRC_PATH_NAME		:= $(shell cd ../$(SRC_DIR); pwd;)
 RULES			:= $(CUR_PATH)/Rules.mak
 ARCH_LCASE		:= $(shell echo $(CPU_ARCH_NAME) | tr A-Z a-z)
-OPKGBUILD		:= $(ZLIB) $(LIBARCHIVE) $(OPKG)
+OPKGBUILD		:= $(ZLIB) $(ARCHIVE) $(OPKG)
 NUMTHREAD		:= $$((2 * `getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1`))
 #NUMTHREAD		:= $$((2 * `grep processor /proc/cpuinfo | wc -l`))
 
@@ -182,6 +182,11 @@ post_inst:
 	ln -sf libiconv.so.0.0 $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 || exit 1; \
 	for L in nmbd smbd smbpasswd; do ln -sf samba_multicall $(BUILD_TARGET)$(RCBINDIR)/$$L || exit 1; done; \
 	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep speedtest-net`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mspeedtest-net \\e[0m"; \
+	[ ! $(BUILD_TARGET)$(RCBINDIR)/tar ] && echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mtar cmd missed, busybox package required\\e[0m" && exit 1; \
+	ln -sf $(BUILD_TARGET)$(RCTMPDIR)/.config/ookla/speedtest-cli.json $(BUILD_TARGET)$(RCWWWDIR)/speedtest-net || exit 1; \
+	fi
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep xdsl-driver`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
 	for F in $(RCDSLKO); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCLDLIBMOD)/ || exit 1; done; \
@@ -215,10 +220,8 @@ download:
 	@$(foreach D, $(SUBDIRS), echo -e "\\e[35m$(CUR_REL_PATH): download & extract \\e[36m$D \\e[0m"; \
 	[ -d $D ] || ../$(SCRIPTS_DIR)/dl_sources.sh $D $(DL_$D) $(TAR_$D) || exit 1; \
 	if [ ! -d $(D)/$(D) ];then \
-	if [ -f $(D)/Makefile.in ] || [ -f $(D)/configure.ac ] || [ -f $(D)/configure.in ] || [ -x $(D)/config ]; then \
-	FLIST=$$(ls -A $D); \
-	mkdir -p -m 0755 $(D)/$(D) || exit 1; \
-	cd $D; mv -f $${FLIST} $D || exit 1; cd ..; \
+	if [ -f $(D)/Makefile.in ] || [ -f $(D)/configure.ac ] || [ -f $(D)/configure.in ] || [ -x $(D)/config ] || cat $(D)/configure 2> /dev/null | grep LC_ALL > /dev/null 2>&1; then \
+	FLIST=$$(ls -A $D); mkdir -p -m 0755 $(D)/$(D) || exit 1; cd $D; mv -f $${FLIST} $D || exit 1; cd ..; \
 	fi; \
 	fi;)
 
