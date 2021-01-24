@@ -36,6 +36,10 @@ ERR=$?
 	UNTARBZ2 "${1}.tar.bz2"
 	rm -f "${1}.tar.bz2"
 	fi
+	if [ -f "${1}.tar.xz" ]; then
+	UNTARXZ "${1}.tar.xz"
+	rm -f "${1}.tar.xz"
+	fi
 }
 
 UNTARGZ() {										#check integrity and untar gz: set error exit code
@@ -45,6 +49,11 @@ ERR=$?
 
 UNTARBZ2() {										#check integrity and untar bz2: set error exit code
 tar xjf "${1}" -O > /dev/null 2>&1 && echo "Extracting: \"${1}\" ..." && tar xjf "${1}"
+ERR=$?
+}
+
+UNTARXZ() {										#check integrity and untar xz: set error exit code
+tar xJf "${1}" -O > /dev/null 2>&1 && echo "Extracting: \"${1}\" ..." && tar xJf "${1}"
 ERR=$?
 }
 
@@ -93,6 +102,9 @@ ERR=$?
 		;;
 		*.tar.bz2)
 		UNTARBZ2 "${SRCFILE}"
+		;;
+		*.tar.xz)
+		UNTARXZ "${SRCFILE}"
 		;;
 		*.sh)									#move script only
 		mv -f "${SRCFILE}" $DSTDIR
