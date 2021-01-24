@@ -131,3 +131,5 @@ sudo apt-get autoremove
 sudo apt-get autoclean
 sudo apt-get clean
 
+echo "Close and reopen a new shell terminal now, or reboot the machine."
+
