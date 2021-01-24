@@ -48,7 +48,7 @@ diff -urN D7000_V1.0.1.78_WW_src/Source/Makefile D7000_V1.0.1.78_WW_src/Source/M
  #need not add WW in version for WW release
  ifeq ($(REGION),WW)
  	VERSION=V$(VER)_$(SUB_VER)
-@@ -52,305 +32,212 @@
+@@ -52,305 +32,210 @@
  	ETCVERSION=$(ANNEX)$(VER)_$(SUB_VER)$(REGION)
  endif
  
@@ -61,30 +61,30 @@ diff -urN D7000_V1.0.1.78_WW_src/Source/Makefile D7000_V1.0.1.78_WW_src/Source/M
 -	IMG_NAME_GPL=$(BOARD_ID)-$(VERSION).img
 -	BIN_NAME=$(IMAGE_DIR)/$(BOARD_ID)-$(VERSION).bin
 -endif
--
--
++IMG_NAME=$(BOARD_ID)-$(VERSION).img
+ 
++all: $(WORK_DIR_NAME)
+ 
 -ifeq ($(BRIDGE),1)
 -	FUNC = 01
 -endif
-+IMG_NAME=$(BOARD_ID)-$(VERSION).img
++orig: clean_img clean_target pre_fs apps drivers prefs fs img
  
 -ifeq ($(MULTI_PVC),1)
 -	FUNC = 03
 -endif
-+all: $(WORK_DIR_NAME)
- 
--PID=$(FIRMWARE_DIR)/PID_$(VERSION)
-+orig: clean_img clean_target pre_fs apps drivers prefs fs img
- 
--all: build_test
 +$(WORK_DIR_NAME): clean_img clean_target pre_fs apps drivers third-party prefs fs img
  
--build_test: pre_fs apps drivers prefs fs img
+-PID=$(FIRMWARE_DIR)/PID_$(VERSION)
 +clean_all: clean_uclibc clean_apps clean_third-party clean_target clean_img
  
--build_image: clean build_target pid build_dpf fs img bin
+-all: build_test
 +clean: clean_target
  
+-build_test: pre_fs apps drivers prefs fs img
+-
+-build_image: clean build_target pid build_dpf fs img bin
+-
 -.PHONY: prepare target apps drivers ui
 +.PHONY: apps drivers
  
@@ -99,10 +99,11 @@ diff -urN D7000_V1.0.1.78_WW_src/Source/Makefile D7000_V1.0.1.78_WW_src/Source/M
 -	rm -rf target/lib/libcrypto.so
 +	rm -rf target/lib/libgcc_s.so target/lib/libstdc++.so.6.0.16-gdb.py target/lib/libconfig.so target/lib/libcrypto.so
  	$(STRIP) target/lib/*.so*
--	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
+ 	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
 -	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
-+	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
  	cd target/lib; ln -sf libscnvram.so libconfig.so
+-ifeq ($(ITUNES_SERVER),1)
+-	make -C uClibc-0.9.32/
 +	$(foreach D, \
 +	target/opt/leafp2p target/opt/rcagent target/opt/rcagent/cgi target/opt/rcagent/scripts target/opt/remote target/opt/xagent \
 +	target/usr/sbin target/usr/sbin/rc_app target/www.eng/cgi-bin, \
@@ -114,7 +115,7 @@ diff -urN D7000_V1.0.1.78_WW_src/Source/Makefile D7000_V1.0.1.78_WW_src/Source/M
 +	@echo -e "\\e[35mSOURCE: PRE_FS \\e[36mgarbage orphans cleanup\\e[0m"
 +	-find $(FS_DIR) -type c -name "spu" -exec rm -f '{}' \; >/dev/null 2>&1
 +	-@$(foreach L, "import_ca.cgi" "upgrade_driver.cgi" "upgrade_stringTbl.cgi", find $(FS_DIR) -type l -name $(L) -exec rm -f '{}' \; >/dev/null 2>&1;)
-+	-@$(foreach F, "*.gz" "*DGND*.jpg" "rcS.MT" "prepare_3g" "ipsec_init_conn.sh" "spuctl" "telnetenabled" "speedtest*" "libspuctl.so" "ipt_vpntrigger.ko" "vw_*" "vpn_*" "h_vpn*" "h_vauto*" "h_vman*" "index1.htm" "start1.htm" "*_demo.htm" "start_old_style.htm" "ORG-RST_status.htm" "DSL_PRO_config.html" "*3g*.htm" "adsl_test.htm" "StringTableUpload.html" "alert*" "at_cmd_log.htm" "choose_wan*" "debug*" "dongle_list.htm" "hidden.htm" "*lanip_mo*" "*odem*" "*mstatus*" "LGO_logout.htm" "menu*.htm" "m_status.htm" "ORG-index.htm" "TR069.htm" "*driver*" "wiz_failover.htm" "wiz_selwan.htm" "wiz_summary.htm" "md5" "utility_dlna.js", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
++	-@$(foreach F, "*.gz" "*DGND*.jpg" "rcS.MT" "prepare_3g" "ipsec_init_conn.sh" "spuctl" "telnetenabled" "speedtest*" "libspuctl.so" "ipt_vpntrigger.ko" "vw_*" "vpn_*" "tree*" "sub_*" "sh_*" "media*" "h_vpn*" "h_vauto*" "h_vman*" "index1.htm" "start1.htm" "*_demo.htm" "start_old_style.htm" "ORG-RST_status.htm" "DSL_PRO_config.html" "*3g*.htm" "adsl_test.htm" "StringTableUpload.html" "alert*" "at_cmd_log.htm" "choose_wan*" "debug*" "dongle_list.htm" "hidden.htm" "*lanip_mo*" "*odem*" "*mstatus*" "LGO_logout.htm" "menu*.htm" "m_status.htm" "ORG-index.htm" "TR069.htm" "*driver*" "wiz_failover.htm" "wiz_selwan.htm" "wiz_summary.htm" "md5" "utility_dlna.js", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
 +	@echo -e "\\e[35mSOURCE: PRE_FS \\e[36mduplicate removal\\e[0m"
 +	ln -sf nbtscan $(FS_DIR)/usr/sbin/nbtscan_refresh
 +	ln -sf nvram $(FS_DIR)/usr/sbin/readycloud_nvram
@@ -137,15 +138,13 @@ diff -urN D7000_V1.0.1.78_WW_src/Source/Makefile D7000_V1.0.1.78_WW_src/Source/M
 +	-@$(foreach D, "CHS" "ITA" "KOR" "ESP", find $(FS_DIR) -type d -name $(D) -exec rm -rf '{}' \; >/dev/null 2>&1;)
 +	-@$(foreach F, "Chinese.js" "Italian.js" "Korean.js" "Spanish.js", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
 +endif
- ifeq ($(ITUNES_SERVER),1)
--	make -C uClibc-0.9.32/
 +	@echo -e "\\e[35mSOURCE: make \\e[36mUCLIBC \\e[0m"
 +	@if [ ! -f uClibc-0.9.32/.compiled ]; then \
 +	make UCLIBC_EXTRA_CFLAGS="$(UCLIBC_EXTRA_CFLAGS)" -C uClibc-0.9.32/ || exit 1; \
 +	touch uClibc-0.9.32/.compiled; \
 +	fi
  	cp -af uClibc-0.9.32/lib/ld-uClibc-0.9.32.so target/lib/
- endif
+-endif
  
 -prepare:
 -	# tools
@@ -181,13 +180,13 @@ diff -urN D7000_V1.0.1.78_WW_src/Source/Makefile D7000_V1.0.1.78_WW_src/Source/M
 +	$(MAKE) -C $(THIRD_PARTY_DIR) opkg-local
  	$(MAKE) -C $(THIRD_PARTY_DIR)
 -	$(MAKE) -C $(THIRD_PARTY_DIR)	install
--
++	$(MAKE) BUILD=1 MONOLITHIC=1 -C $(THIRD_PARTY_DIR) monolithic
+ 
 -	
 -ui:
 -	@echo -e "\\e[35mSOURCE: make \\e[36mUI \\e[0m"	
 -	$(MAKE) -C $(UI_DIR) -s	
-+	$(MAKE) BUILD=1 MONOLITHIC=1 -C $(THIRD_PARTY_DIR) monolithic
- 
+-
 -	
  #
 -# Generate files in target/ before make squash image
