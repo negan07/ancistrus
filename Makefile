@@ -14,19 +14,15 @@ clean: clean_toolchain clean_sources
 dist_clean: dist_clean_sources dist_clean_work
 
 prepare_host:
-	@./$(SCRIPTS_DIR)/hostprepare.sh
-	@echo "close and open a new shell terminal now, or reboot the machine"
+	@[ ! -x $(SCRIPTS_DIR)/hostprepare.sh ] || ./$(SCRIPTS_DIR)/hostprepare.sh
 
 toolchain: prepare_toolchain
-	@if [ ! -d $(TCHAIN_DIR) ]; then \
-	sudo $(MAKE) -C $(TCHAIN_SRC_DIR); \
-	fi
+	@[ -d $(TCHAIN_DIR) ] || sudo $(MAKE) -C $(TCHAIN_SRC_DIR)
 
 prepare_toolchain: download_sources
-	@if [ ! -d $(TCHAIN_DIR) ]; then \
-	./$(SCRIPTS_DIR)/tchainprepare.sh $(PROJECT_TARGET) $(FWVER) $(DIFFS_DIR) $(SRC_DIR) \
-	$(TCHAIN_SRC_DIR) $(TCHAIN_TAR) $(TCHAIN_INST_DIR) $(TCHAIN_BROOT_DL_DIR); \
-	fi
+	@[ -d $(TCHAIN_DIR) ] || \
+	./$(SCRIPTS_DIR)/tchainprepare.sh \
+	$(PROJECT_TARGET) $(FWVER) $(DIFFS_DIR) $(SRC_DIR) $(TCHAIN_SRC_DIR) $(TCHAIN_TAR) $(TCHAIN_INST_DIR) $(TCHAIN_BROOT_DL_DIR)
 
 sources: patch_sources
 	@cd $(SRC_DIR); sudo $(MAKE) kernel && sudo $(MAKE) source;
@@ -46,34 +42,25 @@ patch_sources: download_sources
 	fi
 
 work: download_sources
-	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) -C $(WORK_SRC_DIR); \
-	fi
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) -C $(WORK_SRC_DIR)
 
 prepare_work: download_sources
-	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) -C $(WORK_SRC_DIR) prepare; \
-	fi
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) -C $(WORK_SRC_DIR) prepare
 
 download_work: download_sources
-	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) -C $(WORK_SRC_DIR) download; \
-	fi
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) -C $(WORK_SRC_DIR) download
 
 prepare_ipk: work
-	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) prepare_package; \
-	fi
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) BUILD=1 -C $(WORK_SRC_DIR) prepare_package
 
 build_ipk:
-	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) build_package; \
-	fi
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) BUILD=1 -C $(WORK_SRC_DIR) build_package
 
 index_ipk:
-	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) build_index; \
-	fi
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) BUILD=1 -C $(WORK_SRC_DIR) build_index
+
+opkg-local:
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) -C $(WORK_SRC_DIR) opkg-local
 
 clean_toolchain:
 	@echo "Removing toolchain source dir: $(TCHAIN_SRC_DIR) ..."
@@ -84,38 +71,26 @@ dist_clean_toolchain: clean_toolchain
 	@sudo rm -rf $(TCHAIN_INST_DIR)
 
 clean_sources:
-	@if [ -d $(SRC_DIR) ]; then \
-	sudo $(MAKE) -C $(SRC_DIR) all_clean; \
-	fi
+	@[ ! -d $(SRC_DIR) ] || sudo $(MAKE) -C $(SRC_DIR) all_clean
 
 dist_clean_sources:
 	@echo "Removing source dir: $(SRC_DIR) ..."
 	@sudo rm -rf $(SRC_DIR)
 
 clean_work:
-	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) -C $(WORK_SRC_DIR) clean; \
-	fi
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) -C $(WORK_SRC_DIR) clean
 
 clean_tars_work:
-	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) -C $(WORK_SRC_DIR) clean_tars; \
-	fi
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) -C $(WORK_SRC_DIR) clean_tars
 
 clean_ipk:
-	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) clean_build; \
-	fi
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) BUILD=1 -C $(WORK_SRC_DIR) clean_build
 
 dist_clean_work:
-	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) -C $(WORK_SRC_DIR) dist_clean; \
-	fi
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) -C $(WORK_SRC_DIR) dist_clean
 
 dist_clean_ipk:
-	@if [ -d $(WORK_SRC_DIR) ]; then \
-	$(MAKE) BUILD=1 -C $(WORK_SRC_DIR) dist_clean_build; \
-	fi
+	@[ ! -d $(WORK_SRC_DIR) ] || $(MAKE) BUILD=1 -C $(WORK_SRC_DIR) dist_clean_build
 
 info:
 	@echo $(PROJECT_NAME)
@@ -148,6 +123,7 @@ help: info
 	@echo "make  prepare_ipk	- download sources, download/copy, config, patch, compile work-thirdparty apps, prepare ipk packets"
 	@echo "make build_ipk		- build already prepared ipk packages"
 	@echo "make index_ipk		- build already prepared ipk packages index"
+	@echo "make opkg-local		- download sources, download/copy, config, patch work-thirdparty apps, compile & install local opkg"
 	@echo "make clean_toolchain	- delete toolchain sources dir"
 	@echo "make dist_clean_toolchain- delete toolchain sources dir & delete all built toolchains"
 	@echo "make clean_sources	- cleanup kernel & app sources (included work-thirdparty apps), target, img"
