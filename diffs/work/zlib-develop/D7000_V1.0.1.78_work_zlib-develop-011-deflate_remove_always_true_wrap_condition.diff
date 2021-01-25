@@ -1,0 +1,12 @@
+diff -urN work/zlib-develop/zlib-develop/deflate.c work/zlib-develop/zlib-develop/deflate.c
+--- work/zlib-develop/zlib-develop/deflate.c	2017-04-06 18:00:46.662292000 +0200
++++ work/zlib-develop/zlib-develop/deflate.c	2017-04-06 18:01:08.566300143 +0200
+@@ -1111,7 +1111,7 @@ int ZEXPORT deflate (strm, flush)
+     /* If avail_out is zero, the application will call deflate again
+      * to flush the rest.
+      */
+-    if (s->wrap > 0) s->wrap = -s->wrap; /* write the trailer only once! */
++    s->wrap = -s->wrap; /* write the trailer only once! */
+     return s->pending != 0 ? Z_OK : Z_STREAM_END;
+ }
+ 
