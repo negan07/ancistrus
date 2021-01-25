@@ -1,6 +1,6 @@
-diff -urN work/curl-7.73.0/curl-7.73.0/lib/vtls/mbedtls.c work/curl-7.73.0/curl-7.73.0/lib/vtls/mbedtls.c
---- work/curl-7.73.0/curl-7.73.0/lib/vtls/mbedtls.c	2018-10-23 23:00:46.662292000 +0200
-+++ work/curl-7.73.0/curl-7.73.0/lib/vtls/mbedtls.c	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/curl-7.74.0/curl-7.74.0/lib/vtls/mbedtls.c work/curl-7.74.0/curl-7.74.0/lib/vtls/mbedtls.c
+--- work/curl-7.74.0/curl-7.74.0/lib/vtls/mbedtls.c	2018-10-23 23:00:46.662292000 +0200
++++ work/curl-7.74.0/curl-7.74.0/lib/vtls/mbedtls.c	2018-10-23 23:01:08.566300143 +0200
 @@ -841,7 +841,7 @@
  {
  #ifdef MBEDTLS_VERSION_C
