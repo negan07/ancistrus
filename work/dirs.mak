@@ -564,6 +564,23 @@ DEP_$(FFMPEG)			:= $(NAME_$(ZLIB)),$(NAME_$(ICONV))
 DESC_$(FFMPEG)			:= A/V stream digital package in numerous formats
 DIRLIST				+= $(FFMPEG)
 TARLIST				+= $(TAR_$(FFMPEG))
+# SQLITE
+SQLITE_NAME			:= sqlite
+VER_$(SQLITE_NAME)		:= src-3340100
+SQLITE				:= $(SQLITE_NAME)-$(VER_$(SQLITE_NAME))
+NAME_$(SQLITE)			:= $(SQLITE_NAME)$(DBG)
+SUBVER_$(SQLITE)		:= 
+VER_$(SQLITE)			:= $(VER_$(SQLITE_NAME))$(SUBVER_$(SQLITE))
+DL_$(SQLITE)			:= https://www.sqlite.org/2021
+TAR_$(SQLITE)			:= $(SQLITE).zip
+HOME_$(SQLITE)			:= http://www.sqlite.org/
+LIC_$(SQLITE)			:= Public Domain
+SEC_$(SQLITE)			:= aux
+PRIO_$(SQLITE)			:= required
+DEP_$(SQLITE)			:= $(NAME_$(ZLIB))
+DESC_$(SQLITE)			:= SQLite (v3.x) database engine
+DIRLIST				+= $(SQLITE)
+TARLIST				+= $(TAR_$(SQLITE))
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
@@ -603,6 +620,7 @@ THIRDPARTY			+= $(SMONTOOLS)
 THIRDPARTY			+= $(NTFSPROGS)
 endif
 BUILTINLIB			+= $(FFMPEG)
+BUILTINLIB			+= $(SQLITE)
 # SPEEDTESTS
 ifdef SPEEDTESTS
 THIRDPARTY			+= $(NETPERF)
