@@ -598,6 +598,23 @@ DEP_$(ID3TAG)			:= $(NAME_$(ZLIB))
 DESC_$(ID3TAG)			:= ID3 tag manipulation library
 DIRLIST				+= $(ID3TAG)
 TARLIST				+= $(TAR_$(ID3TAG))
+# EXIF
+EXIF_NAME			:= libexif
+VER_$(EXIF_NAME)		:= 0.6.22
+EXIF				:= $(EXIF_NAME)-$(VER_$(EXIF_NAME))
+NAME_$(EXIF)			:= $(EXIF_NAME)$(DBG)
+SUBVER_$(EXIF)			:= 
+VER_$(EXIF)			:= $(VER_$(EXIF_NAME))$(SUBVER_$(EXIF))
+DL_$(EXIF)			:= https://github.com/libexif/libexif/releases/download/libexif-0_6_22-release
+TAR_$(EXIF)			:= $(EXIF).tar.gz
+HOME_$(EXIF)			:= https://github.com/libexif/libexif/
+LIC_$(EXIF)			:= LGPLv2.1
+SEC_$(EXIF)			:= aux
+PRIO_$(EXIF)			:= required
+DEP_$(EXIF)			:= $(NAME_$(ICONV))
+DESC_$(EXIF)			:= A library for parsing, editing, and saving EXIF data
+DIRLIST				+= $(EXIF)
+TARLIST				+= $(TAR_$(EXIF))
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
@@ -639,6 +656,7 @@ endif
 BUILTINLIB			+= $(FFMPEG)
 BUILTINLIB			+= $(SQLITE)
 BUILTINLIB			+= $(ID3TAG)
+BUILTINLIB			+= $(EXIF)
 # SPEEDTESTS
 ifdef SPEEDTESTS
 THIRDPARTY			+= $(NETPERF)

@@ -1,0 +1,58 @@
+diff -urN work/libexif-0.6.22/Makefile work/libexif-0.6.22/Makefile
+--- work/libexif-0.6.22/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/libexif-0.6.22/Makefile	2018-10-23 23:01:08.566300143 +0200
+@@ -0,0 +1,54 @@
++include ../Rules.mak
++
++LIBSNAME		:= libexif.so
++LIBSMAINVER		:= 12
++LIBSVER			:= $(LIBSMAINVER).3.4
++LIBSDIRNAME		:= $(EXIF)/libexif/.libs
++LIBS			:= $(LIBSNAME).$(LIBSVER)
++
++all: config
++	$(MAKE) -C $(EXIF)
++	$(STRIP) $(STRIPFLAGS) $(LIBSDIRNAME)/*.a
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(EXIF) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(ICONV)/$(ICONV)/include" LDFLAGS="-L$(WORK_DIR)/$(ICONV)/$(ICONV)/lib/.libs" LIBS="-liconv" --enable-static --disable-shared --disable-dependency-tracking --disable-docs --disable-nls --disable-rpath
++
++install: control
++	#$(STRIP) $(LIBSDIRNAME)/$(LIBS)
++	#for D in $(LIBDIR); do install -m 0755 -d $$D; done
++	#install -m 0755 $(LIBSDIRNAME)/$(LIBS) $(LIBDIR)
++
++clean:
++	$(MAKE) -C $(EXIF) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(EXIF) distclean
++
++ifndef BUILD
++control:
++else
++POSTINST		:= $(CTRL_DIR)/postinst
++POSTRM			:= $(CTRL_DIR)/postrm
++
++control: postinst postrm
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "for L in $(LIBSNAME) $(LIBSNAME).$(LIBSMAINVER); do ln -sf $(LIBS) $(LDLIB)/\$$L; done" >> $(POSTINST)
++	@echo "sync" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++
++postrm:
++	@echo "#!/bin/sh" > $(POSTRM)
++	@echo "rm -f $(LDLIB)/$(LIBSNAME)*" >> $(POSTRM)
++	@echo "sync" >> $(POSTRM)
++	@echo "exit 0" >> $(POSTRM)
++endif
++
