@@ -615,6 +615,23 @@ DEP_$(EXIF)			:= $(NAME_$(ICONV))
 DESC_$(EXIF)			:= A library for parsing, editing, and saving EXIF data
 DIRLIST				+= $(EXIF)
 TARLIST				+= $(TAR_$(EXIF))
+# JPEG
+JPEG_NAME			:= jpeg
+VER_$(JPEG_NAME)		:= 9d
+JPEG				:= $(JPEG_NAME)-$(VER_$(JPEG_NAME))
+NAME_$(JPEG)			:= $(JPEG_NAME)$(DBG)
+SUBVER_$(JPEG)			:= 
+VER_$(JPEG)			:= $(VER_$(JPEG_NAME))$(SUBVER_$(JPEG))
+DL_$(JPEG)			:= http://jpegclub.org/reference/wp-content/uploads/2020/01
+TAR_$(JPEG)			:= $(JPEG_NAME)src.v$(VER_$(JPEG_NAME)).tar.gz
+HOME_$(JPEG)			:= https://jpegclub.org/
+LIC_$(JPEG)			:= https://jpegclub.org/reference/libjpeg-license/
+SEC_$(JPEG)			:= aux
+PRIO_$(JPEG)			:= required
+DEP_$(JPEG)			:= 
+DESC_$(JPEG)			:= Still image codec
+DIRLIST				+= $(JPEG)
+TARLIST				+= $(TAR_$(JPEG))
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
@@ -657,6 +674,7 @@ BUILTINLIB			+= $(FFMPEG)
 BUILTINLIB			+= $(SQLITE)
 BUILTINLIB			+= $(ID3TAG)
 BUILTINLIB			+= $(EXIF)
+BUILTINLIB			+= $(JPEG)
 # SPEEDTESTS
 ifdef SPEEDTESTS
 THIRDPARTY			+= $(NETPERF)
