@@ -632,6 +632,23 @@ DEP_$(JPEG)			:=
 DESC_$(JPEG)			:= Still image codec
 DIRLIST				+= $(JPEG)
 TARLIST				+= $(TAR_$(JPEG))
+# OGG
+OGG_NAME			:= libogg
+VER_$(OGG_NAME)			:= 1.3.4
+OGG				:= $(OGG_NAME)-$(VER_$(OGG_NAME))
+NAME_$(OGG)			:= $(OGG_NAME)$(DBG)
+SUBVER_$(OGG)			:= 
+VER_$(OGG)			:= $(VER_$(OGG_NAME))$(SUBVER_$(OGG))
+DL_$(OGG)			:= https://downloads.xiph.org/releases/ogg/
+TAR_$(OGG)			:= $(OGG).tar.gz
+HOME_$(OGG)			:= https://xiph.org/ogg
+LIC_$(OGG)			:= BSD-3-Clause
+SEC_$(OGG)			:= aux
+PRIO_$(OGG)			:= required
+DEP_$(OGG)			:= 
+DESC_$(OGG)			:= The ogg container format
+DIRLIST				+= $(OGG)
+TARLIST				+= $(TAR_$(OGG))
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
@@ -675,6 +692,7 @@ BUILTINLIB			+= $(SQLITE)
 BUILTINLIB			+= $(ID3TAG)
 BUILTINLIB			+= $(EXIF)
 BUILTINLIB			+= $(JPEG)
+BUILTINLIB			+= $(OGG)
 # SPEEDTESTS
 ifdef SPEEDTESTS
 THIRDPARTY			+= $(NETPERF)
