@@ -112,6 +112,7 @@ work/qos-netgear-*/rc_qos
 *.img
 *.bin
 *.bz2
+*.xz
 .patched
 .compiled
 .configured
@@ -142,4 +143,13 @@ work/easy-rsa-*/
 work/hd-idle*/
 work/mini_httpd*/
 work/samba-*/
+work/ffmpeg-*/
+work/sqlite3-*/
+work/id3tag-*/
+work/exif-*/
+work/jpeg-*/
+work/ogg-*/
+work/vorbis-*/
+work/FLAC-*/
+work/minidlna-*/
 
