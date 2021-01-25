@@ -1,0 +1,219 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+var data_array=[@reclist_media_server_paths#];
+var root_dir="/mnt/shares";
+
+function setDefs() {
+	var cf=document.forms[0], i;
+	var nflg=[cf.media_server_enable, cf.media_server_inotify, cf.media_server_strictdlna, cf.media_server_subtitles, cf.media_server_thumbnails, cf.media_server_only_filenames, cf.tivo_enable];
+	var nflgval=[false, true, false, true, true, false, false];
+	var nvar=[cf.media_server_name, cf.media_server_port];
+	var nval=["ReadyDLNA", "8200"];
+	var h_nvar=[cf.h_media_server_notify_int, cf.h_media_server_loglevel];
+	var hnvar=[cf.media_server_notify_int, cf.media_server_loglevel];
+	var hnval=["30", "info"];
+
+	for(i=0;i<nflg.length;i++) if(nflg[i].value=="") nflg[i].checked=nflgval[i];
+	for(i=0;i<nvar.length;i++) if(nvar[i].value=="") nvar[i].value=nval[i];
+	for(i=0;i<h_nvar.length;i++) if(h_nvar[i].value=="") hnvar[i].value=hnval[i];
+}
+
+function varInit() {
+
+	AncdataToVisible(document.forms[0]);
+	setDefs();
+}
+
+function delDir() {
+	var cf=document.forms[0];
+
+	cf.selected.value=getRadioCheckedValue(cf.DirSelect);
+		if(cf.selected.value=="") {
+		alert("No Media Dir selected !\n");
+		return false;
+		}
+	AncstdAction(cf,'minidlna.htm','','del','');
+	return true;
+}
+
+function populateDirTable() {
+	var txt="";
+	var field=["audio", "video", "pics"], ftag=['A', 'V', 'P'], fval=["0", "0", "0"];
+
+		for(var i=0;i<data_array.length;i++) {
+		for(var r=0;r<fval.length;r++) fval[r]="0";  //reinizialize media flags
+			if(data_array[i][0][0]=='/') {  //all media selected
+			for(r=0;r<fval.length;r++) fval[r]="1";
+			var dir=data_array[i][0];
+			}
+			else {  //media categories selected ('A|V|P',dir)
+			for(var j=0;data_array[i][0][j]!=',';j++)
+			for(var s=0;s<ftag.length;s++) if(data_array[i][0][j]==ftag[s]) fval[s]="1";
+			var dir=data_array[i][0].substr(j+1);  //point next to ',' to obtain dir
+			}
+		txt+="<tr><td width='10%' align='center'><input name='DirSelect' type='radio' value='"+data_array[i][0]+"'></td>";
+		txt+="<td width='60%' align='left'><input name='media_path_"+i+"' type='text' value='"+dir+"' size=32 maxlength=255 readonly></td>";
+		for(var k=0;k<field.length;k++) txt+="<td width='10%' align='center'><input name='"+field[k]+"_"+i+"' type='checkbox' value='' onclick='return false'></td><input type='hidden' name='h_"+field[k]+"_"+i+"' value='"+fval[k]+"'>";
+		txt+="</tr>";
+		}
+		if(data_array.length==0) {  //default dir (all shares)
+		txt+="<tr><td width='10%' align='center'><b>Default</b></td><td width='60%' valign='middle'><div align='center'><input name='media_path_0' type='text' value='"+root_dir+"' size=32 maxlength=255 readonly></div></td>";
+		for(var k=0;k<field.length;k++) txt+="<td width='10%' align='center'><input name='"+field[k]+"_0' type='checkbox' value='1' onclick='return false'></td><input type='hidden' name='h_"+field[k]+"_0' value='1'>";
+		}
+	document.write(txt);
+}
+
+function checkServEnable() {
+	var cf=document.forms[0];
+
+		if(cf.media_server_enable.value!='1') {
+		alert('Error ! Media Server must be enabled !');
+		return false;
+		}
+		else return true;
+}
+
+function checkData() {
+	var cf=document.forms[0];
+	var msg="";
+
+	msg+=checkBlank(cf.media_server_name, getErrorMsgByVar("gsm_msg_invalid_mediaserver_name"));
+	if(!checkInvalidChars(cf.media_server_name.value, invalid_media_name_char)) msg+=getErrorMsgByVar("gsm_msg_invalid_mediaserver_name");
+	if(strlen_utf8(cf.media_server_name.value)>24) msg+=getErrorMsgByVar("gsm_msg_invalid_mediaserver_name");
+	if(cf.media_server_port.value!="") msg+=checkInt(cf.media_server_port, "DLNA Server Port", 1, 65534, true);
+
+	if(msg.length>1) {
+	alert(msg);
+	return false;
+	}
+	AncdataToHidden(cf);
+	return true;
+}
+
+//-->
+</script></head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
+<form name="minidlna" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<div><a class="page_title" href="javascript:gotoWiki('minidlna-package/');">MINIDLNA</a></div>
+<div class="fix_button">
+<table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
+&nbsp;
+<input class="common_bt" type="button" name="show_status" value="Show Server Status" onClick="if(checkServEnable()) window.open('http://'+window.location.hostname+':'+this.form.media_server_port.value)">
+&nbsp;
+<input class="common_bt" type="button" name="show_log" value="Show Log" onClick="if(checkServEnable()) AncstdAction(this.form,'anc_run.htm','minidlna.htm','pipe','');">
+&nbsp;
+<input class="common_bt" type="button" name="delete_log" value="Delete Log" onClick="AncstdAction(this.form,'minidlna.htm','minidlna.htm','home','/usr/sbin/rc mediaserver clearlog');">
+&nbsp;
+<input class="common_bt" type="button" name="dbregen" value="Rescan Media Files" onClick="if(checkServEnable()) AncstdAction(this.form,'minidlna.htm','minidlna.htm','home','/usr/sbin/rc mediaserver dbregen');">
+&nbsp;
+<input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return checkData()">
+</td></tr></table>
+</div>
+<div id="main" class="main_top_button">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td nowrap colspan="2"><input type="checkbox" name="media_server_enable" value="@h_media_server_enable#">
+<a href="javascript:gotoWiki('minidlna-package#minidlna');"><b>Enable DLNA Media Server</b></a></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('minidlna-package#minidlna');"><b>Media Server Name</b></a>&nbsp;</td>
+<td nowrap align="right"><input type="text" name="media_server_name" value="@media_server_name#" size=32 maxlength=24>&nbsp;<span>:D7000</span></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('minidlna-package#dlna-server-port');"><b>DLNA Server Port</b></a></td>
+<td nowrap align="right"><input type="text" class="num" name="media_server_port" value="@media_server_port#" size=6 maxlength=5></td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('minidlna-package#notify-interval');"><b>Notify Interval</b></a></span></td>
+	<td align="right"><select name="media_server_notify_int" size=1>
+		<option value="10">10 Sec.</option>
+		<option value="30">30 Sec. (DEF)</option>
+		<option value="60">1 Min.</option>
+		<option value="120">2 Min.</option>
+		<option value="180">3 Min.</option>
+		<option value="300">5 Min.</option>
+		<option value="600">10 Min.</option>
+		<option value="900">15 Min.</option>
+		<option value="1800">30 Min.</option>
+		<option value="3600">1 Hour</option>
+	</select></td>
+</tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="media_server_inotify" value="@h_media_server_inotify#"><a href="javascript:gotoWiki('minidlna-package#automatic-content-scan');"><b>Automatic Content Scan on New Additions</b></a></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="media_server_strictdlna" value="@h_media_server_strictdlna#"><a href="javascript:gotoWiki('minidlna-package#strict-dlna-protocol');"><b>Strict DLNA Protocol</b></a></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="media_server_subtitles" value="@h_media_server_subtitles#"><a href="javascript:gotoWiki('minidlna-package#subtitles-support-on-unknown-clients');"><b>Subtitle Support on Unknown Clients</b></a></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="media_server_thumbnails" value="@h_media_server_thumbnails#"><a href="javascript:gotoWiki('minidlna-package#artwork-metadata-thumbnails');"><b>Artwork Metadata Thumbnails</b></a></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="media_server_only_filenames" value="@h_media_server_only_filenames#"><a href="javascript:gotoWiki('minidlna-package#native-filenames');"><b>Native Filenames</b></a></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="tivo_enable" value="@h_tivo_enable#"><a href="javascript:gotoWiki('minidlna-package#tivo-support');"><b>TiVo<sup>&reg;</sup> support</b></a></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('minidlna-package#log-verbosity-level');"><b>Log Verbosity Level</b></a></span></td>
+	<td align="right"><select name="media_server_loglevel" size=1>
+		<option value="off">Off</option>
+		<option value="fatal">Fatal</option>
+		<option value="error">Error</option>
+		<option value="warn">Warning</option>
+		<option value="info">Info (DEF)</option>
+		<option value="debug">Debug</option>
+	</select></td>
+</tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr></tr><tr></tr>
+<tr><td align="left"><a href="javascript:gotoWiki('minidlna-package#select-media-directories');"><b>Media Directories</b></a></td></tr>
+<tr></tr><tr></tr>
+
+<tr><td colspan="2"><table class="tables" border="1" cellpadding="2" cellspacing="0" width="60%" text-align="left" align="center">
+	<tr class="table_header">
+	<td nowrap width="10%" align="center"><span class="thead"><b>Select</b></span></td>
+	<td nowrap width="60%" align="left"><span class="thead"><b>Media Dir Name</b></span></td>
+	<td nowrap width="10%" align="center"><span class="thead"><b>Audio</b></span></td>
+	<td nowrap width="10%" align="center"><span class="thead"><b>Video</b></span></td>
+	<td nowrap width="10%" align="center"><span class="thead"><b>Pictures</b></span></td>
+	</tr>
+	<script>populateDirTable()</script>
+</table></td></tr>
+<tr></tr><tr></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center">
+<input class="add_bt" type="button" name="do_browse" value="Add Media Dir" onClick="window.open('setup.cgi?next_file=sub_folder.htm&media_type=1', 'browse_folder', 'width=768,height=560,scrollbars,menubar,resizable,status,dependent=yes').focus()">
+&nbsp;
+<input class="block_delete_bt" type="button" name="rm_dir" value="Remove Media Dir" onClick="delDir()">
+&nbsp;
+<input class="block_delete_bt" type="button" name="clear_dir" value="Clear Media Dir List" onClick="if(!confirm('Warning! Media Server Dir List is being removed: proceed ?')) return false;AncstdAction(this.form,'minidlna.htm','','clear','');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="save">
+<input type="hidden" name="todo" value="/usr/sbin/rc mediaserver start">
+<input type="hidden" name="next_file" value="minidlna.htm">
+<input type="hidden" name="old_file" value="">
+<input type="hidden" name="pipe_cmd" value="/usr/sbin/rc_app/rc_mediaserver showlog">
+<input type="hidden" name="add" value="">
+<input type="hidden" name="del" value="reclist_media_server_paths">
+<input type="hidden" name="clear" value="reclist_media_server_paths">
+<input type="hidden" name="selected" value="">
+<input type="hidden" name="media_server_paths" value="">
+<input type="hidden" name="h_media_server_enable" value="@h_media_server_enable#">
+<input type="hidden" name="h_media_server_notify_int" value="@h_media_server_notify_int#">
+<input type="hidden" name="h_media_server_inotify" value="@h_media_server_inotify#">
+<input type="hidden" name="h_media_server_strictdlna" value="@h_media_server_strictdlna#">
+<input type="hidden" name="h_media_server_subtitles" value="@h_media_server_subtitles#">
+<input type="hidden" name="h_media_server_thumbnails" value="@h_media_server_thumbnails#">
+<input type="hidden" name="h_media_server_only_filenames" value="@h_media_server_only_filenames#">
+<input type="hidden" name="h_tivo_enable" value="@h_tivo_enable#">
+<input type="hidden" name="h_media_server_loglevel" value="@h_media_server_loglevel#">
+</div>
+</form>
+<script>printHelp();</script>
+</body></html>

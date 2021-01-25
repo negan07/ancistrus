@@ -1,0 +1,142 @@
+diff -urN work/minidlna-1.3.0/rc_snmp work/minidlna-1.3.0/rc_mediaserver
+--- work/minidlna-1.3.0/rc_mediaserver	1970-01-01 01:00:00.000000000 +0100
++++ work/minidlna-1.3.0/rc_mediaserver	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,138 @@
++#!/bin/sh
++#
++# ancistrus
++#
++# Netgear's D7000 (V1) Nighthawk Router Experience Distributed Project
++#
++# https://github.com/negan07/ancistrus
++#
++# License: GPLv2
++#
++#
++# Rc script for mediaserver (minidlna daemon).
++#
++# Usage: $0 < start restart startforced restartforced stop dbregen dbclear dbpurge showlog clearlog > (<debug>)
++#
++# <debug> runs daemon in foreground mode with pedantic debug messages.
++#
++
++stop() {
++	# Kill all clients
++	for PID in `pidof ${DAEMON}`
++	do
++	[ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
++	done
++}
++
++start() {
++	# Checking if service is enabled
++	[ "`anc nvram drget media_server_enable 0`" = "1" ] || [ ! -z "$1" ] || return 1
++
++	# Checking if the service is already running
++	[ ! -z "`pidof ${DAEMON}`" ] && echo "${DAEMON} already running..." && exit 1
++
++	# Generating conf file
++	gen_conf
++
++	# Starting daemon
++	$BIN -R -f $CONFFILE
++
++	# Sanity check
++	BIN_RC=$?
++	[ $BIN_RC -ne 0 ] && echo "$0: Error ${BIN_RC} starting ${BIN}..." && exit $BIN_RC
++}
++
++gen_conf() {
++	# Common vars
++	for VAR in \
++	friendly_name="`anc nvram drget media_server_name ${DEFSERVNAME}`:D7000" \
++	port="`anc nvram drget media_server_port 8200`" \
++	notify_interval="`anc nvram drget media_server_notify_int 30`" \
++	db_dir=${DBDIR} \
++	log_dir=${LOGDIR} \
++	log_level="`anc nvram drget media_server_loglevel info`" \
++	inotify="$([ `anc nvram drget media_server_inotify 1` = 1 ] && echo yes || echo no)" \
++	strict_dlna="$([ `anc nvram drget media_server_strictdlna 0` = 1 ] && echo yes || echo no)" \
++	wide_links="$([ `anc nvram drget media_server_wide_links 0` = 1 ] && echo yes || echo no)" \
++	enable_subtitles="$([ `anc nvram drget media_server_subtitles 1` = 1 ] && echo yes || echo no)" \
++	thumbnails="$([ `anc nvram drget media_server_thumbnails 1` = 1 ] && echo yes || echo no)" \
++	only_filenames="$([ `anc nvram drget media_server_only_filenames 0` = 1 ] && echo yes || echo no)" \
++	enable_tivo="$([ `anc nvram drget tivo_enable 0` = 1 ] && echo yes || echo no)" \
++	network_interface="`anc nvram drget lan_if group1`" \
++	album_art_names="Cover.jpg/cover.jpg/AlbumArtSmall.jpg/albumartsmall.jpg/AlbumArt.jpg/albumart.jpg/Album.jpg/album.jpg/Folder.jpg/folder.jpg/Thumb.jpg/thumb.jpg" \
++	model_name="Windows Media Connect compatible (Netgear Netgear)" \
++	model_number="1" \
++	serial="987654321"
++	do echo $VAR; done >$CONFFILE
++	# Media directories
++	for VAR in $([ -n "`anc nvram rget media_server_paths`" ] && anc nvtotxt media_server_paths | sed 's/ /:/g' || echo "${ROOTSHDIR}")
++	do echo media_dir="`echo ${VAR} | sed 's/:/ /g'`"; done >>$CONFFILE
++}
++
++db_clear() {
++	# Acting only if daemon not running
++	[ -z "`pidof ${DAEMON}`" ] && [ -d "${DBDIR}" ] && rm -rf "${DBDIR}/files.db" "${DBDIR}/art_cache"
++}
++
++db_purge() {
++	# Acting only if daemon not running
++	[ -z "`pidof ${DAEMON}`" ] && [ -d "${DBDIR}" ] && rm -rf "${DBDIR}"
++	[ -z "`pidof ${DAEMON}`" ] && [ -d "${LOGDIR}" ] && rm -f "${LOGDIR}/${DAEMON}.log"
++}
++
++show_log() {
++	[ -f "${LOGDIR}/${DAEMON}.log" ] && cat "${LOGDIR}/${DAEMON}.log" 2>/dev/null
++}
++
++clear_log() {
++	[ -f "${LOGDIR}/${DAEMON}.log" ] && echo -n >"${LOGDIR}/${DAEMON}.log"
++}
++
++# Dirs
++CONFDIR=/etc
++BINDIR=/usr/sbin
++
++# Debug purpose
++#BINDIR=/tmp/etc/ancdbg
++
++# Names
++DAEMON=minidlna
++CONFFILE=${CONFDIR}/${DAEMON}.conf
++BIN=${BINDIR}/${DAEMON}
++DEFSERVNAME=ReadyDLNA
++ROOTSHDIR=/mnt/shares/
++DEFDBDIR="${ROOTSHDIR}`mount | grep /dev/sd | head -n 1 | awk '{printf $3}' | tail -c 1`/.${DEFSERVNAME}"
++DBDIR="`anc nvram drget media_server_dbdir ${DEFDBDIR}`"
++LOGDIR="`anc nvram drget media_server_logdir ${DEFDBDIR}`"
++
++# Debug running
++[ "${2}" = "debug" ] && BIN="${BINDIR}/${DAEMON} -d -v"
++
++case $1 in
++start|restart|dbregen)
++stop
++start
++;;
++startforced|restartforced)
++stop
++start $1
++;;
++stop)
++stop
++;;
++dbclear)
++db_clear
++;;
++dbpurge)
++db_purge
++;;
++showlog)
++show_log
++;;
++clearlog)
++clear_log
++;;
++*)
++echo "Usage: $0 < start restart startforced restartforced stop dbregen dbclear dbpurge showlog clearlog > (<debug>)"
++;;
++esac

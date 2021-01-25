@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Subdirectory</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Expires" content="0">
+<link rel="stylesheet" href="style/form.css">
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+function first_load() {
+
+	if(!parent.sh_bar.file_loaded) load_timeout = setTimeout("first_load()", 500);
+	else parent.sh_bar.set_current("@this_folder#");
+}
+
+//-->
+</script></head>
+<body bgcolor="#FFFFFF" marginheight="0" marginwidth="0" topmargin="0" leftmargin="0" onLoad="first_load()">
+<form name="path_form" bgcolor="#FFFFFF"><div class="page_title"></div>
+<div class="fix_button"><table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="button" name="do_close" value="Cancel" onClick="parent.sh_bar.close()">
+&nbsp;
+<input class="apply_bt" type="button" name="do_ok" value="Apply" onClick="parent.sh_bar.finish()">
+</td></tr></table></div>
+<div id="main" class="main_top_button">
+<table cellSpacing=0 bgcolor="#FFFFFF" cellPadding=2 border=0 width="100%">
+<tr><td><dl><dt><a href="javascript:(parent.sh_bar.open_dir('/'))"><img height=13 src="folder_o.gif" width=16 border=0>/</a></dt> 
+<dd><a href="javascript:(parent.sh_bar.uptoParent())"><img name='' src="up_icon.gif" width="15" height="15" border=0></a>
+<a href="javascript:(parent.sh_bar.uptoParent())">.. (Parent Directory)</a><br/>@folder_list#</dd></dl></td></tr>
+<tr><td nowrap background="liteblue.gif" height="12"></td></tr></table>
+<input type="hidden" name="this_file" value="sh_tree.htm">
+<input type="hidden" name="next_file" value="sh_tree.htm">
+</div></form></body></html>

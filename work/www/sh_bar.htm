@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Browse Folders</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Expires" content="0">
+<link rel="stylesheet" href="style/form.css">
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+var current_dir="/";
+var file_loaded=false;
+
+function set_defs() {
+	var cf=document.forms[0];
+	var nflg=[cf.media_all, cf.media_audio, cf.media_video, cf.media_pics];
+
+	AncdataToVisible(cf);
+	for(var r=0;r<nflg.length;r++) nflg[r].checked=true;
+	for(r=1;r<nflg.length;r++) nflg[r].disabled=true;
+}
+
+function set_current(folder_name) {	
+
+	current_dir = folder_name;
+	document.path_form.sub_path.value = current_dir;
+}
+
+function set_flag() {
+	var cf=document.path_form;
+	var nflg=[cf.media_audio, cf.media_video, cf.media_pics];
+
+	if(cf.media_all.checked) {
+	for(var r=0;r<nflg.length;r++) nflg[r].checked=true;
+	for(r=0;r<nflg.length;r++) nflg[r].disabled=true;
+	}
+	else for(var r=0;r<nflg.length;r++) nflg[r].disabled=false;
+}
+
+function open_dir(dir_name) {
+	var cf=document.path_form;
+	var tmp_path;
+	
+		if(dir_name=="/"){
+		cf.sub_path.value="/";
+		cf.todo.value="open_dir";
+		}
+		else if(dir_name.length == 0) cf.todo.value="open_dir";
+		else if(dir_name != current_dir) {
+		cf.todo.value="open_dir";
+		if(current_dir == '/') tmp_path = "/" + dir_name;
+		else tmp_path = current_dir + "/" + dir_name;
+			if(strlen_utf8(tmp_path) > 255) {
+			alert("\nToo deep directory.");
+			return;
+			}
+		cf.sub_path.value=tmp_path;
+		}
+	cf.submit();
+}
+
+function uptoParent() {
+	var cf=document.path_form;
+
+	if(current_dir != "/"){
+	cf.todo.value="up";
+	cf.action_dir.value=current_dir;
+	cf.submit();
+	}
+	else alert("\nAlready in top directory.");
+}
+
+function close() {
+
+	parent.close();
+}
+
+function finish() {
+	var cf=document.path_form;
+	var cfp=parent.opener.document.forms[0];
+	var nflg=[cf.media_audio, cf.media_video, cf.media_pics], nval=["A","V","P"];
+	var flgchk=0;
+
+		if(!cf.media_all.checked) {
+			for(var r=0;r<nflg.length;r++) {
+				if(nflg[r].checked) {
+				cfp.media_server_paths.value+=nval[r];
+				flgchk++;
+				}
+			}
+			if(!flgchk) {
+			alert("\nNo Media Category selected !");
+			return false;
+			}
+		cfp.media_server_paths.value+=",";
+		}
+	if(cf.sub_path.value=="/") cfp.media_server_paths.value+="/mnt/shares";
+	else cfp.media_server_paths.value+="/mnt"+cf.sub_path.value;
+
+	addOpt(cfp,'reclist_media_server_paths',cfp.media_server_paths,'Media Dir','minidlna.htm','');
+	cfp.submit();
+	parent.close();
+}
+
+//-->
+</script></head>
+<body bgcolor="#FFFFFF" marginheight="0" marginwidth="0" topmargin="0" leftmargin="0" onLoad="set_defs();file_loaded=true;">
+<form name="path_form" action="setup.cgi?@post_par2#" method="post" target="sh_tree" onSubmit="open_dir('')">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td colspan="3"><h1>Browse Folders</h1></td></tr>
+<tr><td colspan="3" nowrap background="liteblue.gif" height="12"></td></tr>
+<tr><td width="120" align="right" nowrap><font size="2"><strong><font color="#000000">Current Folder:</font></strong></font></td>
+<td colspan="2" valign="middle" nowrap> &nbsp; <input maxlength=255 size=64 name="sub_path" value="@sub_path#" style="background-color: #DDDDDD" readonly></td></tr>
+<tr><td colspan="3" nowrap background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="left" nowrap> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>All Media</b> &nbsp;&nbsp; <b>Audio</b> &nbsp;&nbsp; <b>Video</b> &nbsp;&nbsp; <b>Pictures</b></td></tr>
+<tr><td colspan="4" align="left" nowrap> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" name="media_all" value="" onclick="set_flag()"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" name="media_audio" value=""> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" name="media_video" value=""> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" name="media_pics" value="">
+</td></tr>
+<tr><td colspan="3" nowrap background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="">
+<input type="hidden" name="todo" value="">
+<input type="hidden" name="this_file" value="sh_tree.htm">
+<input type="hidden" name="next_file" value="sh_tree.htm">
+<input type="hidden" name="h_media_all" value="">
+<input type="hidden" name="h_media_audio" value="">
+<input type="hidden" name="h_media_video" value="">
+<input type="hidden" name="h_media_pics" value="">
+<input type="hidden" name="action_dir" value="@action_dir#">
+<input type="hidden" name="media_type" value="@media_type#">
+</form></body></html>

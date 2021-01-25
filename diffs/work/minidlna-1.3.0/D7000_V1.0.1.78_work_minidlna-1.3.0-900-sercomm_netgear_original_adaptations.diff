@@ -1,0 +1,99 @@
+diff -urN work/minidlna-1.3.0/minidlna-1.3.0/configure work/minidlna-1.3.0/minidlna-1.3.0/configure
+--- work/minidlna-1.3.0/minidlna-1.3.0/configure	2020-11-24 20:01:14.000000000 +0100
++++ work/minidlna-1.3.0/minidlna-1.3.0/configure	2020-12-28 22:01:55.529373781 +0100
+@@ -4706,7 +4706,7 @@
+ fi
+ 
+ # On IRIX 5.3, sys/types and inttypes.h are conflicting.
+-for ac_header in sys/types.h sys/stat.h stdlib.h string.h memory.h strings.h \
++for ac_header in sys/types.h stdlib.h string.h memory.h strings.h \
+ 		  inttypes.h stdint.h unistd.h
+ do :
+   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+diff -urN work/minidlna-1.3.0/minidlna-1.3.0/metadata.c work/minidlna-1.3.0/minidlna-1.3.0/metadata.c
+--- work/minidlna-1.3.0/minidlna-1.3.0/metadata.c	2020-11-24 19:53:50.000000000 +0100
++++ work/minidlna-1.3.0/minidlna-1.3.0/metadata.c	2020-12-28 22:07:09.515844643 +0100
+@@ -353,6 +353,14 @@
+ 		strcpy(type, "pcm");
+ 		m.mime = strdup("audio/L16");
+ 	}
++	/* 80000 files HDD own small and special m2ts files, 
++	 * parse it format, it is pcm ,so we add m2ts audio support
++	 */
++	else if( ends_with(path, ".m2ts") )
++	{
++		strcpy(type, "pcm");
++		m.mime = strdup("audio/L16");
++	}
+ 	else if( ends_with(path, ".dsf") )
+ 	{
+ 		strcpy(type, "dsf");
+@@ -1294,8 +1302,6 @@
+ 								off += sprintf(m.dlna_pn+off, "3GPP_SP_L0B_AMR");
+ 								break;
+ 							default:
+-								DPRINTF(E_DEBUG, L_METADATA, "No DLNA profile found for MPEG4-P2 3GP/%d file %s\n",
+-								        audio_profile, basepath);
+ 								free(m.dlna_pn);
+ 								m.dlna_pn = NULL;
+ 								break;
+@@ -1542,6 +1548,14 @@
+ 			xasprintf(&m.mime, "video/x-matroska");
+ 		else if( strcmp(ctx->iformat->name, "flv") == 0 )
+ 			xasprintf(&m.mime, "video/x-flv");
++		else if( strcmp(ctx->iformat->name, "m2v") == 0 )
++				xasprintf(&m.mime, "video/mpeg");
++		else if( strcmp(ctx->iformat->name, "iso") == 0 )
++				xasprintf(&m.mime, "video/mp4");
++		else if( strcmp(ctx->iformat->name, "rm") == 0 )
++				xasprintf(&m.mime, "video/x-pn-realvideo");            
++	    else if( strcmp(ctx->iformat->name, "rmvb") == 0 )
++				xasprintf(&m.mime, "video/x-pn-realvideo");
+ 		else
+ 			DPRINTF(E_WARN, L_METADATA, "%s: Unhandled format: %s\n", path, ctx->iformat->name);
+ 	}
+diff -urN work/minidlna-1.3.0/minidlna-1.3.0/upnpglobalvars.h work/minidlna-1.3.0/minidlna-1.3.0/upnpglobalvars.h
+--- work/minidlna-1.3.0/minidlna-1.3.0/upnpglobalvars.h	2020-11-24 19:53:50.000000000 +0100
++++ work/minidlna-1.3.0/minidlna-1.3.0/upnpglobalvars.h	2020-12-28 22:08:46.247368573 +0100
+@@ -168,6 +168,7 @@
+ 	"http-get:*:video/x-flv:*," \
+ 	"http-get:*:video/x-tivo-mpeg:*," \
+ 	"http-get:*:video/quicktime:*," \
++	"http-get:*:video/x-pn-realvideo:*," \
+ 	"http-get:*:audio/mp4:*," \
+ 	"http-get:*:audio/x-wav:*," \
+ 	"http-get:*:audio/x-flac:*," \
+diff -urN work/minidlna-1.3.0/minidlna-1.3.0/utils.c work/minidlna-1.3.0/minidlna-1.3.0/utils.c
+--- work/minidlna-1.3.0/minidlna-1.3.0/utils.c	2020-11-24 19:53:50.000000000 +0100
++++ work/minidlna-1.3.0/minidlna-1.3.0/utils.c	2020-12-28 22:17:18.964823356 +0100
+@@ -400,20 +400,28 @@
+ #ifdef TIVO_SUPPORT
+ 		ends_with(file, ".TiVo") ||
+ #endif
++		ends_with(file, ".m2v")  ||    /* add support for m2v */
++		ends_with(file, ".iso")  ||    /* add support for iso */
++		ends_with(file, ".rm")   || ends_with(file, ".rmvb") ||   /* add support for rm/rmvb */
++		ends_with(file, ".vdr")  ||    /* add support for vdr */
+ 		ends_with(file, ".mov") || ends_with(file, ".3gp"));
+ }
+ 
+ int
+ is_audio(const char * file)
+ {
++	/* 80000 files HDD own small and special m2ts files, 
++	* parse it format, it is pcm ,so we add m2ts audio support
++	*/
+ 	return (ends_with(file, ".mp3") || ends_with(file, ".flac") ||
+ 		ends_with(file, ".wma") || ends_with(file, ".asf")  ||
+ 		ends_with(file, ".fla") || ends_with(file, ".flc")  ||
+ 		ends_with(file, ".m4a") || ends_with(file, ".aac")  ||
+ 		ends_with(file, ".mp4") || ends_with(file, ".m4p")  ||
+ 		ends_with(file, ".wav") || ends_with(file, ".ogg")  ||
+-		ends_with(file, ".pcm") || ends_with(file, ".3gp")  ||
+-		ends_with(file, ".dsf") || ends_with(file, ".dff"));
++		ends_with(file, ".m2ts") || ends_with(file, ".pcm") ||
++		ends_with(file, ".3gp") || ends_with(file, ".dsf")  ||
++		ends_with(file, ".dff"));
+ }
+ 
+ int

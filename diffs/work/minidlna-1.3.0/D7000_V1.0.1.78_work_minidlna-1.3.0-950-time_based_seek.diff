@@ -1,0 +1,153 @@
+--- work/minidlna-1.3.0/minidlna-1.3.0/upnphttp.c
++++ work/minidlna-1.3.0/minidlna-1.3.0/upnphttp.c
+@@ -352,6 +352,21 @@ ParseHttpHeaders(struct upnphttp * h)
+ 			else if(strncasecmp(line, "TimeSeekRange.dlna.org", 22)==0)
+ 			{
+ 				h->reqflags |= FLAG_TIMESEEK;
++				p = colon + 1;
++				while(isspace(*p))
++					p++;
++				if(strncasecmp(p, "npt=", 4)==0) {
++					h->req_TimeSeekStart = p+=4;
++					n = 0;
++					while(p[n] != '-')
++						n++;
++					h->req_TimeSeekStartLen = n;
++					h->req_TimeSeekEnd = p += n + 1;
++					n = 0;
++					while(p[n] != '\r')
++						n++;
++					h->req_TimeSeekEndLen = n;
++				}
+ 			}
+ 			else if(strncasecmp(line, "PlaySpeed.dlna.org", 18)==0)
+ 			{
+@@ -995,11 +1010,9 @@ ProcessHttpQuery_upnphttp(struct upnphttp * h)
+ 			return;
+ 		}
+ 		/* 7.3.33.4 */
+-		else if( (h->reqflags & (FLAG_TIMESEEK|FLAG_PLAYSPEED)) &&
+-		         !(h->reqflags & FLAG_RANGE) )
++		else if( (h->reqflags & FLAG_PLAYSPEED) && !(h->reqflags & FLAG_RANGE) )
+ 		{
+-			DPRINTF(E_WARN, L_HTTP, "DLNA %s requested, responding ERROR 406\n",
+-				h->reqflags&FLAG_TIMESEEK ? "TimeSeek" : "PlaySpeed");
++			DPRINTF(E_WARN, L_HTTP, "DLNA PlaySpeed requested, responding ERROR 406\n");
+ 			Send406(h);
+ 			return;
+ 		}
+@@ -1947,6 +1960,9 @@ SendResp_dlnafile(struct upnphttp *h, char *object)
+ 	off_t total, offset, size;
+ 	int64_t id;
+ 	int sendfh;
++	char *duration;
++	double duration_in_sec, cur_sec, end_sec;
++	char duration_in_sec_str[10];
+ 	uint32_t dlna_flags = DLNA_FLAG_DLNA_V1_5|DLNA_FLAG_HTTP_STALLING|DLNA_FLAG_TM_B;
+ 	uint32_t cflags = h->req_client ? h->req_client->type->flags : 0;
+ 	const char *tmode;
+@@ -2121,6 +2137,26 @@ SendResp_dlnafile(struct upnphttp *h, char *object)
+ 		              (intmax_t)total, (intmax_t)h->req_RangeStart,
+ 		              (intmax_t)h->req_RangeEnd, (intmax_t)size);
+ 	}
++	else if ( h->reqflags & FLAG_TIMESEEK )
++	{
++		if( ( duration = sql_get_text_field(db, "SELECT DURATION from DETAILS where ID = '%lld'", id) ) )
++		{
++			duration_in_sec = normalize_to_sec(duration);
++			sprintf(duration_in_sec_str, "%.3lf", duration_in_sec);
++			cur_sec = normalize_to_sec(h->req_TimeSeekStart);
++			offset = (off_t)(cur_sec * size / duration_in_sec);
++			end_sec = normalize_to_sec(h->req_TimeSeekEnd);
++			h->req_RangeEnd = (off_t)(end_sec ? end_sec * size / duration_in_sec : size - 1);
++			total = h->req_RangeEnd - offset;
++			strcatf(&str, "TimeSeekRange.dlna.org: npt=%.*s-%.*s/%s"
++				      " bytes %jd-%jd/%jd\r\n",
++				      h->req_TimeSeekStartLen, h->req_TimeSeekStart,
++				      h->req_TimeSeekEndLen, h->req_TimeSeekEnd,
++				      is_hms_format(h->req_TimeSeekStart) ? duration : duration_in_sec_str,
++				      offset, (intmax_t)h->req_RangeEnd, (intmax_t)size);
++			strcatf(&str, "Content-Length: %jd\r\n", (intmax_t)total);
++		}
++	}
+ 	else
+ 	{
+ 		h->req_RangeEnd = size - 1;
+--- work/minidlna-1.3.0/minidlna-1.3.0/upnphttp.h
++++ work/minidlna-1.3.0/minidlna-1.3.0/upnphttp.h
+@@ -98,6 +98,10 @@ struct upnphttp {
+ 	int req_SIDLen;
+ 	off_t req_RangeStart;
+ 	off_t req_RangeEnd;
++	const char * req_TimeSeekStart;
++	int req_TimeSeekStartLen;
++	const char * req_TimeSeekEnd;
++	int req_TimeSeekEndLen;
+ 	long int req_chunklen;
+ 	uint32_t reqflags;
+ 	/* response */
+--- work/minidlna-1.3.0/minidlna-1.3.0/upnpsoap.c
++++ work/minidlna-1.3.0/minidlna-1.3.0/upnpsoap.c
+@@ -1170,6 +1170,17 @@ callback(void *args, int argc, char **argv, char **azColName)
+ 						        resolution, dlna_buf, mime, detailID, ext, passed_args);
+ 					}
+ 					break;
++				case EPanasonic:
++					/* Panasonic UN-JS### series TVs recognize MPEG_TS_HD variants only if it was vnd.dlna.mpeg-tts, but
++ 			 		   require profile to be removed for time-based seek */
++					if ( dlna_pn && ( strncmp(dlna_pn, "MPEG_TS_HD", 7) == 0) && (strcmp(mime+6, "vnd.dlna.mpeg-tts") != 0))
++					{
++						strcpy(mime+6, "vnd.dlna.mpeg-tts");
++						sprintf(dlna_buf, "DLNA.ORG_OP=11;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01500000000000000000000000000000");
++						add_res(size, duration, bitrate, sampleFrequency, nrAudioChannels,
++							resolution, dlna_buf, mime, detailID, ext, passed_args);
++					}
++					break;
+ 				case ESamsungSeriesCDE:
+ 				case ELGDevice:
+ 				case ELGNetCastDevice:
+--- work/minidlna-1.3.0/minidlna-1.3.0/utils.c
++++ work/minidlna-1.3.0/minidlna-1.3.0/utils.c
+@@ -385,6 +385,31 @@ mime_to_ext(const char * mime)
+ 	return "dat";
+ }
+ 
++double
++normalize_to_sec(const char * hms_or_sec)
++{
++	unsigned int hours, min, sec, msec;
++	if ( sscanf(hms_or_sec, "%d:%02d:%02d.%03d", &hours, &min, &sec, &msec) >= 3 )
++	{
++		return hours*3600 + min*60 + sec + ((double)msec)/1000;
++	}
++	else if ( sscanf(hms_or_sec, "%d.%03d", &sec, &msec) >= 1 )
++	{
++		return sec + ((double)msec)/1000;
++	}
++	else
++	{
++		return 0;
++	}
++}
++
++int
++is_hms_format(const char * hms_or_sec)
++{
++	unsigned int hours, min, sec, msec;
++	return sscanf(hms_or_sec, "%d:%02d:%02d.%03d", &hours, &min, &sec, &msec) >= 3;
++}
++
+ int
+ is_video(const char * file)
+ {
+--- work/minidlna-1.3.0/minidlna-1.3.0/utils.h
++++ work/minidlna-1.3.0/minidlna-1.3.0/utils.h
+@@ -100,6 +100,8 @@ const char *mime_to_ext(const char * mime);
+ /* Others */
+ int make_dir(char * path, mode_t mode);
+ unsigned int DJBHash(uint8_t *data, int len);
++double normalize_to_sec(const char * hms_or_sec);
++int is_hms_format(const char * hms_or_sec);
+ 
+ /* Timeval manipulations */
+ void	timevaladd(struct timeval *t1, const struct timeval *t2);
