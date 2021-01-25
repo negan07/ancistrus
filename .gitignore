@@ -144,12 +144,12 @@ work/hd-idle*/
 work/mini_httpd*/
 work/samba-*/
 work/ffmpeg-*/
-work/sqlite3-*/
-work/id3tag-*/
-work/exif-*/
+work/sqlite-src*/
+work/libid3tag-*/
+work/libexif-*/
 work/jpeg-*/
-work/ogg-*/
-work/vorbis-*/
-work/FLAC-*/
+work/libogg-*/
+work/libvorbis-*/
+work/flac-*/
 work/minidlna-*/
 
