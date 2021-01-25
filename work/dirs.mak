@@ -649,6 +649,23 @@ DEP_$(OGG)			:=
 DESC_$(OGG)			:= The ogg container format
 DIRLIST				+= $(OGG)
 TARLIST				+= $(TAR_$(OGG))
+# VORBIS
+VORBIS_NAME			:= libvorbis
+VER_$(VORBIS_NAME)		:= 1.3.7
+VORBIS				:= $(VORBIS_NAME)-$(VER_$(VORBIS_NAME))
+NAME_$(VORBIS)			:= $(VORBIS_NAME)$(DBG)
+SUBVER_$(VORBIS)		:= 
+VER_$(VORBIS)			:= $(VER_$(VORBIS_NAME))$(SUBVER_$(VORBIS))
+DL_$(VORBIS)			:= https://downloads.xiph.org/releases/vorbis
+TAR_$(VORBIS)			:= $(VORBIS).tar.gz
+HOME_$(VORBIS)			:= https://xiph.org/vorbis
+LIC_$(VORBIS)			:= BSD-3-Clause
+SEC_$(VORBIS)			:= aux
+PRIO_$(VORBIS)			:= required
+DEP_$(VORBIS)			:= $(NAME_$(OGG))
+DESC_$(VORBIS)			:= Vorbis audio compression
+DIRLIST				+= $(VORBIS)
+TARLIST				+= $(TAR_$(VORBIS))
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
@@ -693,6 +710,7 @@ BUILTINLIB			+= $(ID3TAG)
 BUILTINLIB			+= $(EXIF)
 BUILTINLIB			+= $(JPEG)
 BUILTINLIB			+= $(OGG)
+BUILTINLIB			+= $(VORBIS)
 # SPEEDTESTS
 ifdef SPEEDTESTS
 THIRDPARTY			+= $(NETPERF)

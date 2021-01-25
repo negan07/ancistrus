@@ -1,0 +1,36 @@
+diff -urN work/libvorbis-1.3.7/libvorbis-1.3.7/Makefile.in work/libvorbis-1.3.7/libvorbis-1.3.7/Makefile.in
+--- work/libvorbis-1.3.7/libvorbis-1.3.7/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/libvorbis-1.3.7/libvorbis-1.3.7/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -384,7 +384,7 @@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ AUTOMAKE_OPTIONS = foreign 1.11 dist-zip dist-xz
+-SUBDIRS = m4 include vq lib test doc $(am__append_1)
++SUBDIRS = lib
+ m4datadir = $(datadir)/aclocal
+ m4data_DATA = vorbis.m4
+ pkgconfigdir = $(libdir)/pkgconfig
+diff -urN work/libvorbis-1.3.7/libvorbis-1.3.7/lib/Makefile.in work/libvorbis-1.3.7/libvorbis-1.3.7/lib/Makefile.in
+--- work/libvorbis-1.3.7/libvorbis-1.3.7/lib/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/libvorbis-1.3.7/libvorbis-1.3.7/lib/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -106,7 +106,7 @@
+ CONFIG_CLEAN_FILES =
+ CONFIG_CLEAN_VPATH_FILES =
+ am__EXEEXT_1 = test_sharedbook$(EXEEXT)
+-PROGRAMS = $(noinst_PROGRAMS)
++PROGRAMS = 
+ am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+ am__vpath_adj = case $$p in \
+     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+@@ -444,9 +444,9 @@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-SUBDIRS = modes books
++SUBDIRS = 
+ AM_CPPFLAGS = -I$(top_srcdir)/include @OGG_CFLAGS@
+-lib_LTLIBRARIES = libvorbis.la libvorbisfile.la libvorbisenc.la
++lib_LTLIBRARIES = libvorbis.la
+ libvorbis_la_SOURCES = mdct.c smallft.c block.c envelope.c window.c lsp.c \
+ 			lpc.c analysis.c synthesis.c psy.c info.c \
+ 			floor1.c floor0.c\
