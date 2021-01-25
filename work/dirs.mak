@@ -34,10 +34,10 @@ DEP_$(CORE_WORK)		:=
 DESC_$(CORE_WORK)		:= Main work tool & enhanced nvram lib
 # BUSYBOX
 BUSYBOX_NAME			:= busybox
-VER_$(BUSYBOX_NAME)		:= 1.31.1
+VER_$(BUSYBOX_NAME)		:= 1.32.1
 BUSYBOX				:= $(BUSYBOX_NAME)-$(VER_$(BUSYBOX_NAME))
 NAME_$(BUSYBOX)			:= $(BUSYBOX_NAME)$(DBG)
-SUBVER_$(BUSYBOX)		:= -178
+SUBVER_$(BUSYBOX)		:= 
 VER_$(BUSYBOX)			:= $(VER_$(BUSYBOX_NAME))$(SUBVER_$(BUSYBOX))
 DL_$(BUSYBOX)			:= https://busybox.net/downloads
 TAR_$(BUSYBOX)			:= $(BUSYBOX).tar.bz2

@@ -1,0 +1,18 @@
+diff -urN work/busybox-1.32.1/util-linux/chrt.c work/busybox-1.32.1/util-linux/chrt.c
+--- work/busybox-1.32.1/util-linux/chrt.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.32.1/util-linux/chrt.c	2018-10-31 22:15:36.748785153 +0100
+@@ -146,14 +146,8 @@
+ 		 */
+ 		pol &= ~SCHED_RESET_ON_FORK;
+ #endif
+-		printf("pid %u's %s scheduling policy: SCHED_%s\n",
+-			pid, current_new, policy_name(pol)
+-		);
+ 		if (sched_getparam(pid, &sp))
+ 			bb_perror_msg_and_die("can't get pid %u's attributes", (int)pid);
+-		printf("pid %u's %s scheduling priority: %d\n",
+-			(int)pid, current_new, sp.sched_priority
+-		);
+ 		if (!*argv) {
+ 			/* Either it was just "-p PID",
+ 			 * or it was "-p PRIO PID" and we came here

@@ -1,7 +1,7 @@
-diff -urN work/busybox-1.31.1/init/init.c work/busybox-1.31.1/init/init.c
---- work/busybox-1.31.1/init/init.c	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.31.1/init/init.c	2018-10-31 21:58:27.180671141 +0100
-@@ -160,7 +160,7 @@
+diff -urN work/busybox-1.32.1/init/init.c work/busybox-1.32.1/init/init.c
+--- work/busybox-1.32.1/init/init.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.32.1/init/init.c	2018-10-31 21:58:27.180671141 +0100
+@@ -153,7 +153,7 @@
  
  /* Default sysinit script. */
  #ifndef INIT_SCRIPT
@@ -10,7 +10,7 @@ diff -urN work/busybox-1.31.1/init/init.c work/busybox-1.31.1/init/init.c
  #endif
  
  /* Each type of actions can appear many times. They will be
-@@ -686,11 +686,7 @@
+@@ -680,11 +680,7 @@
  		/* Sysinit */
  		new_init_action(SYSINIT, INIT_SCRIPT, "");
  		/* Askfirst shell on tty1-4 */

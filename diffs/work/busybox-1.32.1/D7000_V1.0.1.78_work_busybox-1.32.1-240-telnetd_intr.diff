@@ -1,0 +1,11 @@
+diff -urN work/busybox-1.32.1/networking/telnetd.c work/busybox-1.32.1/networking/telnetd.c
+--- work/busybox-1.32.1/networking/telnetd.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.32.1/networking/telnetd.c	2018-11-01 21:16:26.148477636 +0100
+@@ -509,6 +509,7 @@
+ 
+ 	/* Restore default signal handling ASAP */
+ 	bb_signals((1 << SIGCHLD) + (1 << SIGPIPE), SIG_DFL);
++	signal(SIGINT, SIG_DFL);
+ 
+ 	pid = getpid();
+ 
