@@ -547,6 +547,23 @@ DEP_$(SAMBA)			:= $(NAME_$(ZLIB)),$(NAME_$(ICONV))
 DESC_$(SAMBA)			:= SMB/CIFS protocol for UNIX systems
 DIRLIST				+= $(SAMBA)
 TARLIST				+= $(TAR_$(SAMBA))
+# FFMPEG
+FFMPEG_NAME			:= ffmpeg
+VER_$(FFMPEG_NAME)		:= 4.3.1
+FFMPEG				:= $(FFMPEG_NAME)-$(VER_$(FFMPEG_NAME))
+NAME_$(FFMPEG)			:= $(FFMPEG_NAME)$(DBG)
+SUBVER_$(FFMPEG)		:= 
+VER_$(FFMPEG)			:= $(VER_$(FFMPEG_NAME))$(SUBVER_$(FFMPEG))
+DL_$(FFMPEG)			:= https://ffmpeg.org/releases
+TAR_$(FFMPEG)			:= $(FFMPEG).tar.gz
+HOME_$(FFMPEG)			:= https://ffmpeg.org/
+LIC_$(FFMPEG)			:= LGPLv2.1+,GPLv2
+SEC_$(FFMPEG)			:= aux
+PRIO_$(FFMPEG)			:= required
+DEP_$(FFMPEG)			:= $(NAME_$(ZLIB)),$(NAME_$(ICONV))
+DESC_$(FFMPEG)			:= A/V stream digital package in numerous formats
+DIRLIST				+= $(FFMPEG)
+TARLIST				+= $(TAR_$(FFMPEG))
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
@@ -585,6 +602,7 @@ BUILTIN				+= $(HDIDLE)
 THIRDPARTY			+= $(SMONTOOLS)
 THIRDPARTY			+= $(NTFSPROGS)
 endif
+BUILTINLIB			+= $(FFMPEG)
 # SPEEDTESTS
 ifdef SPEEDTESTS
 THIRDPARTY			+= $(NETPERF)

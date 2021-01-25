@@ -1,0 +1,29 @@
+diff -urN work/ffmpeg-4.3.1/Makefile work/ffmpeg-4.3.1/Makefile
+--- work/ffmpeg-4.3.1/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/ffmpeg-4.3.1/Makefile	2018-10-23 23:01:08.566300143 +0200
+@@ -0,0 +1,25 @@
++include ../Rules.mak
++
++all: config
++	$(MAKE) -C $(FFMPEG)
++	for L in avcodec avformat avutil swresample swscale; do $(STRIP) $(STRIPFLAGS) $(FFMPEG)/lib$$L/*.a || exit 1; done
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(FFMPEG) && ./configure --target-os=linux --cross-prefix=$(TARGET_NAME)- --extra-cflags="$(CFLAGS) -I$(WORK_DIR)/$(ZLIB)/$(ZLIB) -I$(WORK_DIR)/$(ICONV)/$(ICONV)/include -Os -s" --extra-ldflags="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) -L$(WORK_DIR)/$(ICONV)/$(ICONV)/lib/.libs" --extra-libs="-lz -liconv" --enable-cross-compile --arch=armv7a --disable-armv5te --disable-armv6 --disable-armv6t2 --disable-vfp --disable-neon --disable-fast-unaligned --enable-small --disable-runtime-cpudetect --enable-zlib --enable-iconv --disable-shared --disable-stripping --disable-debug --disable-programs --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages --enable-swresample --enable-swscale --disable-avdevice --disable-postproc --disable-avfilter --disable-decoders --disable-encoders --disable-hwaccels --disable-parsers --disable-demuxers --disable-muxers --disable-protocols --disable-filters --disable-bsfs --disable-indevs --disable-outdevs --enable-decoder=aac,ac3,flac,h264,hevc,mp2,mp3,mpeg1video,mpeg2video,mpeg4,mpegvideo,png,vc1,vorbis --enable-decoder=aac_latm,wmv1,wmv2,wmv3 --enable-decoder=vp8,vp9 --enable-parser=aac,ac3,flac,h264,hevc,mpegaudio,mpeg4video,mpegvideo,vc1 --enable-parser=aac_latm,vorbis,vp8,vp9 --enable-demuxer=avi,flac,matroska,mov,mp3,mpegps,mpegts,mpegvideo,ogg --enable-demuxer=aac,ac3,wav,asf --enable-protocol=file --enable-bsf=aac_adtstoasc,chomp,dca_core,mp3decomp
++
++install:
++	@echo "Nothing to install..."
++
++clean:
++	$(MAKE) -C $(FFMPEG) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(FFMPEG) distclean
++

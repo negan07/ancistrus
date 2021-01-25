@@ -1,0 +1,18 @@
+diff -urN work/ffmpeg-4.3.1/ffmpeg-4.3.1/configure work/ffmpeg-4.3.1/ffmpeg-4.3.1/configure
+--- work/ffmpeg-4.3.1/ffmpeg-4.3.1/configure
++++ work/ffmpeg-4.3.1/ffmpeg-4.3.1/configure
+@@ -4326,8 +4326,12 @@
+ 
+ pkg_config_fail_message=""
+ if ! $pkg_config --version >/dev/null 2>&1; then
+-    warn "$pkg_config not found, library detection may fail."
+-    pkg_config=false
++    if pkg-config --version >/dev/null 2>&1; then
++        pkg_config=pkg-config
++    else
++        warn "$pkg_config not found, library detection may fail."
++        pkg_config=false
++    fi
+ elif is_in -static $cc $LDFLAGS && ! is_in --static $pkg_config $pkg_config_flags; then
+     pkg_config_fail_message="
+ Note: When building a static binary, add --pkg-config-flags=\"--static\"."
