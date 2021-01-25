@@ -1,0 +1,58 @@
+diff -urN work/flac-1.3.3/flac-1.3.3/Makefile.in work/flac-1.3.3/flac-1.3.3/Makefile.in
+--- work/flac-1.3.3/flac-1.3.3/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/flac-1.3.3/flac-1.3.3/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -402,8 +402,7 @@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ ACLOCAL_AMFLAGS = -I m4
+-SUBDIRS = doc include m4 man src test build objs microbench \
+-	$(am__append_1)
++SUBDIRS = src
+ EXTRA_DIST = \
+ 	COPYING.FDL \
+ 	COPYING.GPL \
+diff -urN work/flac-1.3.3/flac-1.3.3/src/Makefile.in work/flac-1.3.3/flac-1.3.3/src/Makefile.in
+--- work/flac-1.3.3/flac-1.3.3/src/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/flac-1.3.3/flac-1.3.3/src/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -367,19 +367,7 @@
+ top_srcdir = @top_srcdir@
+ @FLaC__HAS_XMMS_TRUE@XMMS_DIRS = plugin_common plugin_xmms
+ @FLaC__WITH_CPPLIBS_TRUE@CPPLIBS_DIRS = libFLAC++ test_libFLAC++
+-SUBDIRS = \
+-	libFLAC \
+-	share \
+-	flac \
+-	metaflac \
+-	$(XMMS_DIRS) \
+-	test_grabbag \
+-	test_libs_common \
+-	test_libFLAC \
+-	test_seeking \
+-	test_streams \
+-	utils \
+-	$(CPPLIBS_DIRS)
++SUBDIRS = libFLAC share
+ 
+ EXTRA_DIST = \
+ 	Makefile.lite
+diff -urN work/flac-1.3.3/flac-1.3.3/src/libFLAC/Makefile.in work/flac-1.3.3/flac-1.3.3/src/libFLAC/Makefile.in
+--- work/flac-1.3.3/flac-1.3.3/src/libFLAC/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/flac-1.3.3/flac-1.3.3/src/libFLAC/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -173,7 +173,7 @@
+   }
+ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(m4datadir)" \
+ 	"$(DESTDIR)$(pkgconfigdir)"
+-LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
++LTLIBRARIES = $(lib_LTLIBRARIES)
+ libFLAC_static_la_DEPENDENCIES = $(LOCAL_EXTRA_LIBADD)
+ am__libFLAC_static_la_SOURCES_DIST = bitmath.c bitreader.c bitwriter.c \
+ 	cpu.c crc.c fixed.c fixed_intrin_sse2.c fixed_intrin_ssse3.c \
+@@ -516,7 +516,7 @@
+ @FLaC__CPU_IA32_TRUE@@FLaC__HAS_NASM_TRUE@@FLaC__NO_ASM_FALSE@ARCH_SUBDIRS = ia32
+ @FLaC__CPU_IA32_TRUE@@FLaC__HAS_NASM_TRUE@@FLaC__NO_ASM_FALSE@LOCAL_EXTRA_LIBADD = ia32/libFLAC-asm.la
+ libFLAC_la_LIBADD = $(LOCAL_EXTRA_LIBADD) @OGG_LIBS@ -lm
+-SUBDIRS = $(ARCH_SUBDIRS) include .
++SUBDIRS = .
+ m4datadir = $(datadir)/aclocal
+ m4data_DATA = libFLAC.m4
+ pkgconfigdir = $(libdir)/pkgconfig

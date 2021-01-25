@@ -666,6 +666,23 @@ DEP_$(VORBIS)			:= $(NAME_$(OGG))
 DESC_$(VORBIS)			:= Vorbis audio compression
 DIRLIST				+= $(VORBIS)
 TARLIST				+= $(TAR_$(VORBIS))
+# FLAC
+FLAC_NAME			:= flac
+VER_$(FLAC_NAME)		:= 1.3.3
+FLAC				:= $(FLAC_NAME)-$(VER_$(FLAC_NAME))
+NAME_$(FLAC)			:= $(FLAC_NAME)$(DBG)
+SUBVER_$(FLAC)			:= 
+VER_$(FLAC)			:= $(VER_$(FLAC_NAME))$(SUBVER_$(FLAC))
+DL_$(FLAC)			:= https://downloads.xiph.org/releases/flac
+TAR_$(FLAC)			:= $(FLAC).tar.xz
+HOME_$(FLAC)			:= https://xiph.org/flac
+LIC_$(FLAC)			:= BSD-3-Clause
+SEC_$(FLAC)			:= aux
+PRIO_$(FLAC)			:= required
+DEP_$(FLAC)			:= $(NAME_$(ICONV))
+DESC_$(FLAC)			:= Free lossless audio codec
+DIRLIST				+= $(FLAC)
+TARLIST				+= $(TAR_$(FLAC))
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
@@ -711,6 +728,7 @@ BUILTINLIB			+= $(EXIF)
 BUILTINLIB			+= $(JPEG)
 BUILTINLIB			+= $(OGG)
 BUILTINLIB			+= $(VORBIS)
+BUILTINLIB			+= $(FLAC)
 # SPEEDTESTS
 ifdef SPEEDTESTS
 THIRDPARTY			+= $(NETPERF)
