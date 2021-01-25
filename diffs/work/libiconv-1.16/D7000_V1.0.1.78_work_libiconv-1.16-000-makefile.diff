@@ -7,12 +7,12 @@ diff -urN work/libiconv-1.16/Makefile work/libiconv-1.16/Makefile
 +LIBSNAME		:= libiconv.so
 +LIBSMAINVER		:= 2
 +LIBSVER			:= 6.1
-+LIBSDIRNAME		:= $(LIBICONV)/lib/.libs
++LIBSDIRNAME		:= $(ICONV)/lib/.libs
 +LIBSORIGNAME		:= $(LIBSNAME).$(LIBSMAINVER).$(LIBSVER)
 +LIBS			:= $(LIBSNAME).0.0
 +
 +all: config
-+	$(MAKE) -C $(LIBICONV)
++	$(MAKE) -C $(ICONV)
 +	[ ! -f $(LIBSDIRNAME)/$(LIBSORIGNAME) ] || mv $(LIBSDIRNAME)/$(LIBSORIGNAME) $(LIBSDIRNAME)/$(LIBS)
 +	rm -f $(LIBSDIRNAME)/$(LIBSNAME) $(LIBSDIRNAME)/$(LIBSNAME).$(LIBSMAINVER)
 +	ln -sf $(LIBS) $(LIBSDIRNAME)/$(LIBSNAME)
@@ -25,7 +25,7 @@ diff -urN work/libiconv-1.16/Makefile work/libiconv-1.16/Makefile
 +	fi
 +
 +configure:
-+	cd $(LIBICONV) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" --disable-rpath --disable-nls
++	cd $(ICONV) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" --disable-rpath --disable-nls
 +
 +install: control
 +	$(STRIP) $(LIBSDIRNAME)/$(LIBS)
@@ -33,11 +33,11 @@ diff -urN work/libiconv-1.16/Makefile work/libiconv-1.16/Makefile
 +	install -m 0755 $(LIBSDIRNAME)/$(LIBS) $(LIBDIR)
 +
 +clean:
-+	$(MAKE) -C $(LIBICONV) clean
++	$(MAKE) -C $(ICONV) clean
 +
 +distclean:
 +	@rm -f h_config
-+	$(MAKE) -C $(LIBICONV) distclean
++	$(MAKE) -C $(ICONV) distclean
 +
 +ifndef BUILD
 +control:
