@@ -581,6 +581,23 @@ DEP_$(SQLITE)			:= $(NAME_$(ZLIB))
 DESC_$(SQLITE)			:= SQLite (v3.x) database engine
 DIRLIST				+= $(SQLITE)
 TARLIST				+= $(TAR_$(SQLITE))
+# ID3TAG
+ID3TAG_NAME			:= libid3tag
+VER_$(ID3TAG_NAME)		:= 0.15.1b
+ID3TAG				:= $(ID3TAG_NAME)-$(VER_$(ID3TAG_NAME))
+NAME_$(ID3TAG)			:= $(ID3TAG_NAME)$(DBG)
+SUBVER_$(ID3TAG)		:= -105
+VER_$(ID3TAG)			:= $(VER_$(ID3TAG_NAME))$(SUBVER_$(ID3TAG))
+DL_$(ID3TAG)			:= ftp://ftp.mars.org/pub/mpeg
+TAR_$(ID3TAG)			:= $(ID3TAG).tar.gz
+HOME_$(ID3TAG)			:= https://sourceforge.net/projects/mad/files/libid3tag/
+LIC_$(ID3TAG)			:= GPLv2
+SEC_$(ID3TAG)			:= aux
+PRIO_$(ID3TAG)			:= required
+DEP_$(ID3TAG)			:= $(NAME_$(ZLIB))
+DESC_$(ID3TAG)			:= ID3 tag manipulation library
+DIRLIST				+= $(ID3TAG)
+TARLIST				+= $(TAR_$(ID3TAG))
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
@@ -621,6 +638,7 @@ THIRDPARTY			+= $(NTFSPROGS)
 endif
 BUILTINLIB			+= $(FFMPEG)
 BUILTINLIB			+= $(SQLITE)
+BUILTINLIB			+= $(ID3TAG)
 # SPEEDTESTS
 ifdef SPEEDTESTS
 THIRDPARTY			+= $(NETPERF)

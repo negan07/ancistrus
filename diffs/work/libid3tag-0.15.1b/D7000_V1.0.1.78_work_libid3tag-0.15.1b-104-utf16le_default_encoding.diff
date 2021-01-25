@@ -1,0 +1,23 @@
+diff -urN work/libid3tag-0.15.1b/libid3tag-0.15.1b/utf16.c work/libid3tag-0.15.1b/libid3tag-0.15.1b/utf16.c
+--- work/libid3tag-0.15.1b/libid3tag-0.15.1b/utf16.c	2004-01-23 18:41:32.000000000 +0900
++++ work/libid3tag-0.15.1b/libid3tag-0.15.1b/utf16.c	2009-06-16 13:55:30.000000000 +0900
+@@ -164,15 +164,14 @@
+   if (ptr) {
+     switch (byteorder) {
+     default:
+-    case ID3_UTF16_BYTEORDER_BE:
+-      (*ptr)[0] = (utf16 >> 8) & 0xff;
+-      (*ptr)[1] = (utf16 >> 0) & 0xff;
+-      break;
+-
+     case ID3_UTF16_BYTEORDER_LE:
+       (*ptr)[0] = (utf16 >> 0) & 0xff;
+       (*ptr)[1] = (utf16 >> 8) & 0xff;
+       break;
++    case ID3_UTF16_BYTEORDER_BE:
++      (*ptr)[0] = (utf16 >> 8) & 0xff;
++      (*ptr)[1] = (utf16 >> 0) & 0xff;
++      break;
+     }
+ 
+     *ptr += 2;
