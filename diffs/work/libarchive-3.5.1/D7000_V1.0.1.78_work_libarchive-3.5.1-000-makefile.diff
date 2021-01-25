@@ -1,0 +1,46 @@
+diff -urN work/libarchive-3.5.1/Makefile work/libarchive-3.5.1/Makefile
+--- work/libarchive-3.5.1/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/libarchive-3.5.1/Makefile	2017-03-23 20:35:44.381701657 +0100
+@@ -0,0 +1,42 @@
++include ../Rules.mak
++
++all: config
++	$(MAKE) -C $(ARCHIVE)
++#	$(STRIP) $(ARCHIVE)/.libs/*.so.*
++	$(STRIP) $(STRIPFLAGS) $(ARCHIVE)/.libs/*.a
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++ifdef LOCAL
++configure: configure-local
++else
++configure: configure-cross
++endif
++
++configure-local:
++	cd $(ARCHIVE) && ./configure --build=$(BUILD_HOST) --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-shared LDFLAGS=-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) LIBS=-lz CPPFLAGS=-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)
++
++configure-cross:
++	cd $(ARCHIVE) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-shared LDFLAGS=-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) LIBS=-lz CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS=-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)
++
++install:
++	@echo "Nothing to install..."
++#	$(SSTRIP) $(ARCHIVE)/bsdtar
++#	$(SSTRIP) $(ARCHIVE)/bsdcat
++#	$(SSTRIP) $(ARCHIVE)/bsdcpio
++#	install -m 0755 -d $(LIBDIR)
++#	install -m 0755 -d $(BINDIR)
++#	cp -rf $(ARCHIVE)/.libs/*.so.* $(LIBDIR)
++#	cp -rf $(ARCHIVE)/bsdtar $(BINDIR)/tar
++
++clean:
++	$(MAKE) -C $(ARCHIVE) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(ARCHIVE) distclean
++

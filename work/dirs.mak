@@ -244,10 +244,10 @@ DIRLIST				+= $(CURL)
 TARLIST				+= $(TAR_$(CURL))
 # ARCHIVE
 ARCHIVE_NAME			:= libarchive
-VER_$(ARCHIVE_NAME)		:= 3.5.0
+VER_$(ARCHIVE_NAME)		:= 3.5.1
 ARCHIVE				:= $(ARCHIVE_NAME)-$(VER_$(ARCHIVE_NAME))
 NAME_$(ARCHIVE)			:= $(ARCHIVE_NAME)$(DBG)
-SUBVER_$(ARCHIVE)		:= -004
+SUBVER_$(ARCHIVE)		:= 
 VER_$(ARCHIVE)			:= $(VER_$(ARCHIVE_NAME))$(SUBVER_$(ARCHIVE))
 DL_$(ARCHIVE)			:= http://www.libarchive.org/downloads
 TAR_$(ARCHIVE)			:= $(ARCHIVE).tar.gz
