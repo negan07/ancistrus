@@ -1,7 +1,7 @@
 diff -urN work/samba-3.6.25/Makefile work/samba-3.6.25/Makefile
 --- work/samba-3.6.25/Makefile	2018-10-23 23:00:46.662292000 +0200
 +++ work/samba-3.6.25/Makefile	2018-10-23 23:01:08.566300143 +0200
-@@ -0,0 +1,79 @@
+@@ -0,0 +1,72 @@
 +include ../Rules.mak
 +
 +SRCDIR			:= source3
@@ -27,9 +27,11 @@ diff -urN work/samba-3.6.25/Makefile work/samba-3.6.25/Makefile
 +
 +install: control
 +	$(SSTRIP) $(SRCDIR)/bin/$(BINS)
-+	for D in $(SMB_CONF_INST_DIR_NAME) $(SMB_CONF_INST_DIR) $(BINDIR); do install -m 0755 -d $$D; done
++	for D in $(SMB_CONF_INST_DIR_NAME) $(SMB_CONF_INST_DIR) $(LIBDIR) $(BINDIR); do install -m 0755 -d $$D; done
 +	install -m 0644 $(SRCDIR)/etc/samba.conf/* $(SMB_CONF_INST_DIR)
 +	install -m 0755 $(SRCDIR)/bin/$(BINS) $(BINDIR)
++	ln -sf libiconv.so.0.0 $(LIBDIR)/libiconv.so.2
++	for B in $(BINNAMES); do ln -sf $(BINS) $(BINDIR)/$$B; done
 +
 +clean:
 +	$(MAKE) -C $(SRCDIR) realclean
@@ -46,24 +48,21 @@ diff -urN work/samba-3.6.25/Makefile work/samba-3.6.25/Makefile
 +PREINST			:= $(CTRL_DIR)/preinst
 +POSTINST		:= $(CTRL_DIR)/postinst
 +PRERM			:= $(CTRL_DIR)/prerm
-+POSTRM			:= $(CTRL_DIR)/postrm
 +
-+control: preinst postinst prerm postrm
++control: preinst postinst prerm
 +
 +preinst:
 +	@echo "#!/bin/sh" > $(PREINST)
 +	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PREINST)
 +	@echo "for F in smbd nmbd; do sleep 1; killall -9 \$$F >/dev/null 2>&1; done" >> $(PREINST)
-+	@echo "rm -rf $(LDLIB)/libntpass.so* $(USRSBIN)/smb* $(USRSBIN)/*mbd $(USRETC)/samba*/ $(TMPDIR)/smb.* $(TMPDIR)/smbmount.* $(SMB_CONF_DIR_NAME)*/ $(TMPETC)/*.smb" >> $(PREINST)
-+	@echo "sync" >> $(PREINST)
++	@echo "for F in $(LDLIB)/libntpass.so* $(USRSBIN)/smb* $(USRSBIN)/*mbd $(USRETC)/samba*/; do rm -rf \$$F; sync; done" >> $(PREINST)
++	@echo "rm -rf $(TMPDIR)/smb.* $(TMPDIR)/smbmount.* $(SMB_CONF_DIR_NAME)*/ $(TMPETC)/*.smb" >> $(PREINST)
 +	@echo "exit 0" >> $(PREINST)
 +
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
-+	@echo "for B in $(BINNAMES); do ln -sf $(BINS) $(USRSBIN)/\$$B; done" >> $(POSTINST)
-+	@echo "ln -sf libiconv.so.0.0 $(LDLIB)/libiconv.so.2" >> $(POSTINST)
-+	@echo "cp -rf $(USRETC)/samba*/ $(TMPETC)/" >> $(POSTINST)
 +	@echo "sync" >> $(POSTINST)
++	@echo "cp -rf $(USRETC)/samba*/ $(TMPETC)/" >> $(POSTINST)
 +	@echo "$(RC) smb restart" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +
@@ -71,13 +70,7 @@ diff -urN work/samba-3.6.25/Makefile work/samba-3.6.25/Makefile
 +	@echo "#!/bin/sh" > $(PRERM)
 +	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PRERM)
 +	@echo "for F in smbd nmbd; do sleep 1; killall -9 \$$F >/dev/null 2>&1; done" >> $(PRERM)
++	@echo "rm -rf $(TMPDIR)/smb.* $(TMPDIR)/smbmount.* $(SMB_CONF_DIR_NAME)*/ $(TMPETC)/*.smb" >> $(PRERM)
 +	@echo "exit 0" >> $(PRERM)
-+
-+postrm:
-+	@echo "#!/bin/sh" > $(POSTRM)
-+	@echo "for B in $(BINNAMES); do rm -f $(USRSBIN)/\$$B; done" >> $(POSTRM)
-+	@echo "rm -rf $(LDLIB)/libiconv.so.2 $(TMPDIR)/smb.* $(TMPDIR)/smbmount.* $(SMB_CONF_DIR_NAME)*/ $(TMPETC)/*.smb" >> $(POSTRM)
-+	@echo "sync" >> $(POSTRM)
-+	@echo "exit 0" >> $(POSTRM)
 +endif
 +

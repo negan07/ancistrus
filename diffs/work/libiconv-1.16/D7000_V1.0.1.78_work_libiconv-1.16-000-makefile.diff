@@ -1,7 +1,7 @@
 diff -urN work/libiconv-1.16/Makefile work/libiconv-1.16/Makefile
 --- work/libiconv-1.16/Makefile	2018-10-23 23:00:46.662292000 +0200
 +++ work/libiconv-1.16/Makefile	2018-10-23 23:01:08.566300143 +0200
-@@ -0,0 +1,52 @@
+@@ -0,0 +1,37 @@
 +include ../Rules.mak
 +
 +LIBSNAME		:= libiconv.so
@@ -15,8 +15,7 @@ diff -urN work/libiconv-1.16/Makefile work/libiconv-1.16/Makefile
 +	$(MAKE) -C $(ICONV)
 +	[ ! -f $(LIBSDIRNAME)/$(LIBSORIGNAME) ] || mv $(LIBSDIRNAME)/$(LIBSORIGNAME) $(LIBSDIRNAME)/$(LIBS)
 +	rm -f $(LIBSDIRNAME)/$(LIBSNAME) $(LIBSDIRNAME)/$(LIBSNAME).$(LIBSMAINVER)
-+	ln -sf $(LIBS) $(LIBSDIRNAME)/$(LIBSNAME)
-+	ln -sf $(LIBS) $(LIBSDIRNAME)/$(LIBSNAME).0
++	for V in "" ".0" ".2"; do ln -sf $(LIBS) $(LIBSDIRNAME)/$(LIBSNAME)$$V; done
 +
 +config:
 +	@if [ ! -f h_config ]; then \
@@ -27,10 +26,11 @@ diff -urN work/libiconv-1.16/Makefile work/libiconv-1.16/Makefile
 +configure:
 +	cd $(ICONV) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" --disable-rpath --disable-nls
 +
-+install: control
++install:
 +	$(STRIP) $(LIBSDIRNAME)/$(LIBS)
 +	for D in $(LIBDIR); do install -m 0755 -d $$D; done
 +	install -m 0755 $(LIBSDIRNAME)/$(LIBS) $(LIBDIR)
++	for V in "" ".0"; do ln -sf $(LIBS) $(LIBDIR)/$(LIBSNAME)$$V; done
 +
 +clean:
 +	$(MAKE) -C $(ICONV) clean
@@ -38,19 +38,4 @@ diff -urN work/libiconv-1.16/Makefile work/libiconv-1.16/Makefile
 +distclean:
 +	@rm -f h_config
 +	$(MAKE) -C $(ICONV) distclean
-+
-+ifndef BUILD
-+control:
-+else
-+POSTINST		:= $(CTRL_DIR)/postinst
-+
-+control: postinst
-+
-+postinst:
-+	@echo "#!/bin/sh" > $(POSTINST)
-+	@echo "ln -sf $(LIBS) $(LDLIB)/$(LIBSNAME)" >> $(POSTINST)
-+	@echo "ln -sf $(LIBS) $(LDLIB)/$(LIBSNAME).0" >> $(POSTINST)
-+	@echo "sync" >> $(POSTINST)
-+	@echo "exit 0" >> $(POSTINST)
-+endif
 +
