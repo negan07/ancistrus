@@ -97,16 +97,16 @@ build_index:
 
 pre_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): creating partition dir \\e[36m$(RCINITD) \\e[0m"
-	@mkdir -p -m 777 $(IMAGEDIR)/$(RCINITD) $(BUILD_TARGET)$(RCINITDIR) || exit 1
+	@mkdir -p -m 0777 $(IMAGEDIR)/$(RCINITD) $(BUILD_TARGET)$(RCINITDIR) || exit 1
 	@echo -e "\\e[35m$(CUR_REL_PATH): creating partition dir \\e[36mopkg \\e[0m"
-	@mkdir -p -m 777 $(IMAGEDIR)/opkg $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR) || exit 1
-	echo -e "\\e[35m$(CUR_REL_PATH): removing old mandatory shared lib references on \\e[36m$(BUILD_TARGET) \\e[0m"
-	rm $(BUILD_TARGET)$(RCLDLIB)/libz.so* $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so* $(BUILD_TARGET)$(RCLDLIB)/libssl.so* $(BUILD_TARGET)$(RCLDLIB)/libcurl.so* || exit 1
+	@mkdir -p -m 0777 $(IMAGEDIR)/opkg $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR) || exit 1
+	@echo -e "\\e[35m$(CUR_REL_PATH): removing old mandatory shared lib references on \\e[36m$(BUILD_TARGET) \\e[0m"
+	@rm $(BUILD_TARGET)$(RCLDLIB)/libz.so* $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so* $(BUILD_TARGET)$(RCLDLIB)/libssl.so* $(BUILD_TARGET)$(RCLDLIB)/libcurl.so* || exit 1
 
 opkg_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): opkg install packages on \\e[36m$(BUILD_TARGET) \\e[0m"
 	@[ -x $(GIT_ROOT)/$(LBIN_DIR)/opkg ] || exit 1
-	@[ -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf ] || exit 1
+	@[ -r $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf ] || exit 1
 	@$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf update || exit 1
 	@$(foreach P, $(SUBDIRS), echo "$(PKG_RM_LIST)" | grep "$(P)" > /dev/null 2>&1 || \
 	$(GIT_ROOT)/$(LBIN_DIR)/opkg -f $(GIT_ROOT)/$(LBIN_DIR)/opkg.conf install $(NAME_$(P)) || exit 1;)
@@ -179,13 +179,14 @@ post_inst:
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep samba`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36msamba \\e[0m"; \
 	rm $(BUILD_TARGET)$(RCLDLIB)/libntpass.so* || exit 1; \
-	ln -sf libiconv.so.0.0 $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 || exit 1; \
-	for L in nmbd smbd smbpasswd; do ln -sf samba_multicall $(BUILD_TARGET)$(RCBINDIR)/$$L || exit 1; done; \
 	fi
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep speedtest-net`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mspeedtest-net \\e[0m"; \
-	[ ! $(BUILD_TARGET)$(RCBINDIR)/tar ] && echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mtar cmd missed, busybox package required\\e[0m" && exit 1; \
-	ln -sf $(BUILD_TARGET)$(RCTMPDIR)/.config/ookla/speedtest-cli.json $(BUILD_TARGET)$(RCWWWDIR)/speedtest-net || exit 1; \
+	if [ ! -x $(BUILD_TARGET)$(RCBINDIR)/tar ]; then echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mtar cmd missed, busybox package required\\e[0m"; exit 1; fi \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep minidlna`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mminidlna \\e[0m"; \
+	for L in sqlite3 id3tag exif jpeg ogg vorbis FLAC; do rm $(BUILD_TARGET)$(RCLDLIB)/lib$$L.so* || exit 1; done; \
 	fi
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep xdsl-driver`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
