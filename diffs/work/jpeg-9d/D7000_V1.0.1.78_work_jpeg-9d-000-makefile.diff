@@ -1,7 +1,7 @@
 diff -urN work/jpeg-9d/Makefile work/jpeg-9d/Makefile
 --- work/jpeg-9d/Makefile	2018-10-23 23:00:46.662292000 +0200
 +++ work/jpeg-9d/Makefile	2018-10-23 23:01:08.566300143 +0200
-@@ -0,0 +1,54 @@
+@@ -0,0 +1,49 @@
 +include ../Rules.mak
 +
 +LIBSNAME		:= libjpeg.so
@@ -27,6 +27,7 @@ diff -urN work/jpeg-9d/Makefile work/jpeg-9d/Makefile
 +	#$(STRIP) $(LIBSDIRNAME)/$(LIBS)
 +	#for D in $(LIBDIR); do install -m 0755 -d $$D; done
 +	#install -m 0755 $(LIBSDIRNAME)/$(LIBS) $(LIBDIR)
++	#for L in $(LIBSNAME) $(LIBSNAME).$(LIBSMAINVER); do ln -sf $(LIBS) $(LIBDIR)/$$L; done
 +
 +clean:
 +	$(MAKE) -C $(JPEG) clean
@@ -38,21 +39,15 @@ diff -urN work/jpeg-9d/Makefile work/jpeg-9d/Makefile
 +ifndef BUILD
 +control:
 +else
-+POSTINST		:= $(CTRL_DIR)/postinst
-+POSTRM			:= $(CTRL_DIR)/postrm
++PREINST		:= $(CTRL_DIR)/preinst
 +
-+control: postinst postrm
++control: preinst
 +
-+postinst:
-+	@echo "#!/bin/sh" > $(POSTINST)
-+	@echo "for L in $(LIBSNAME) $(LIBSNAME).$(LIBSMAINVER); do ln -sf $(LIBS) $(LDLIB)/\$$L; done" >> $(POSTINST)
-+	@echo "sync" >> $(POSTINST)
-+	@echo "exit 0" >> $(POSTINST)
-+
-+postrm:
-+	@echo "#!/bin/sh" > $(POSTRM)
-+	@echo "rm -f $(LDLIB)/$(LIBSNAME)*" >> $(POSTRM)
-+	@echo "sync" >> $(POSTRM)
-+	@echo "exit 0" >> $(POSTRM)
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "echo \"Removing old lib ver & symlinks...\"" >> $(PREINST)
++	@echo "rm -f $(LDLIB)/$(LIBSNAME)*" >> $(PREINST)
++	@echo "sync" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
 +endif
 +
