@@ -24,7 +24,7 @@
 //#define ERR(...) fprintf(stderr, __VA_ARGS__)
 
 #ifdef DEBUG
-#define DBG ERR
+#define DBG fprintf(stderr, "%s(%d): ", __FUNCTION__, __LINE__); ERR
 //#define DBG(format, ...) printf(format, ##__VA_ARGS__)
 //#define DBG(...) printf
 //#define DBG printf
@@ -181,7 +181,7 @@ int oldwanip(MAINARGS);
  * FW
  * Add/delete a firewall ruleset.
  * Usage: 'anc fw <router|remote> <add|del> <ls|pf> <chainname> <udp|tcp|tcp/udp> <remport> <locport>' .
- * Example: 'anc fw add ls tcp SSH 8222-8222 22-22' .
+ * Example: 'anc fw remote add ls SSH tcp 8222 22' .
  * Input: argc, argv .
  * Return: '0' if success, '1' if error occurred.
  */

@@ -7,9 +7,26 @@
 #define EOV				"\r\n\r\n"						//multipart url end of var tag
 
 #ifdef DEBUG
-#define CGIDBG(format, ...)		fprintf(FPTTYP, format, ##__VA_ARGS__)			//console format output message
+#include <stdio.h>
+#define TTYDEV				"/dev/ttyp0"						//stdout text terminal used
+#define CGIDBG(format, ...)		do {							\
+					static FILE *FPTTYP;					\
+					SFPOPEN(FPTTYP, TTYDEV, "w") break;			\
+					else {							\
+					fprintf(FPTTYP, "%s(%d): ", __FUNCTION__, __LINE__);	\
+					fprintf(FPTTYP, format, ##__VA_ARGS__);			\
+					fclose(FPTTYP); }					\
+					} while(0)						//console format output message
+#define CGIQDBG(format, ...)		do {							\
+					static FILE *FPTTYP;					\
+					SFPOPEN(FPTTYP, TTYDEV, "w") break;			\
+					else {							\
+					fprintf(FPTTYP, format, ##__VA_ARGS__);			\
+					fclose(FPTTYP); }					\
+					} while(0)						//console format output query message
 #else
 #define CGIDBG(...)
+#define CGIQDBG(...)
 #endif
 
 #define QUERYFORMATCONV										\

@@ -161,11 +161,11 @@ const char
 *nvar[]={ "wan_dsl_mode", "bitswap", "sra", "trellis", "sesdrop", "cominmgn", "sos", "dynamicd", "dynamicf", "i24k", "monitortone", "phyrexmt", "ginp", "tpstc", "snr", "maxdataratedl", "maxdatarateul", "profile", "us0" }, 
 *def[]={ "MMODE", "on", "on", "on", "off", "off", "on", "on", "off", "on", "on", "1", "3", "14", "100", "0", "0", "17a", "on" };
 
-DBG("dslctl(): cmd is: %s\n", argv[0]);
+DBG("cmd is: %s\n", argv[0]);
 	if(argv[1]==NULL || strcmp(argv[1], "configure")) execvp(DSLBIN, argv);		//no parse
 	else if((fd=lock(LOCK_DSL))>=0) {						//parse: avoid race condition locking
 	profile=NV_SGET("anc_dslconfprofile");
-	DBG("dslctl(): dslconfprofile: %s\n", profile);
+	DBG("dslconfprofile: %s\n", profile);
 		if(!strcmp(profile, "own")) {						//own profile settings
 		SETMODULATIONVAL							//modulation setting
 		for(i=BITSWAP;i<SNR;i++) SETOPTIONVAL					//common setting
@@ -183,10 +183,10 @@ DBG("dslctl(): cmd is: %s\n", argv[0]);
 		SETMODULATIONVAL
 		for(i=BITSWAP;i<I24K;i++) SETOPTIONVAL
 		}
-	DBG("dslctl(): cmd to exec: %s\ndslctl(): cmd length: %d\n", cmd, strlen(cmd));
+	DBG("cmd to exec: %s\ncmd length: %d\n", cmd, strlen(cmd));
 	unlock(fd, LOCK_DSL);								//release lock
 	runexecve(cmd);									//run parsed xdslctl command
 	}
-DBG("dslctl(): execvp(e)() fail\n");
+DBG("execvp(e)() fail\n");
 return 1;										//here only on execvp(e)() fail
 }

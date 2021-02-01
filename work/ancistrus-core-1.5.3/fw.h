@@ -12,3 +12,8 @@
 #define getwanip(name) getipaddr("wan_ifname", name)
 #define getoldwanip() NV_SGET("old_wanip")
 
+#ifdef DEBUG
+#define SHOWRULES do { system("cat " RULES ";cat /proc/cnapt_serv"); } while(0);
+#else
+#define SHOWRULES
+#endif

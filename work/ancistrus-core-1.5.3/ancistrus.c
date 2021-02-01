@@ -108,7 +108,7 @@ int (*func)(MAINARGS);						//prototype function (same as 'name' without bracket
 char *corename;
 unsigned int i;
 
-DBG("main(): my name is %s\n", argv[0]);
+DBG("my name is %s\n", argv[0]);
 corename=basename(argv[0]);
 if(!strcmp(corename, CGI)) return i=cgi();			//core working as 'anc.cgi' web gui
 if(!strcmp(corename+1, DSLCMD)) return i=dslctl(argv);		//core working as 'adslctl' or 'xdslctl'

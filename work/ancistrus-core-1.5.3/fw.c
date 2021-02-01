@@ -26,7 +26,7 @@ char *intfval;
 
 	if(!*(intfval=NV_SGET(intf)) || ((sd=socket(AF_INET, SOCK_DGRAM, 0))<0)) strcpy(ip, "");		//interface unassigned
 	else {
-	DBG("getipaddr(): intf %s\n", intfval);
+	DBG("intf %s\n", intfval);
 	ifr.ifr_addr.sa_family=AF_INET;
 	snprintf(ifr.ifr_name, IFNAMSIZ-1, "%s", intfval);							//assing interface name
 		if(!ioctl(sd, SIOCGIFADDR, &ifr)) {								//fetching the addr/ip
@@ -34,7 +34,7 @@ char *intfval;
 		sprintf(ip, "%d.%d.%d.%d", (addr & 0xFF), (addr >> 8 & 0xFF), (addr >> 16 & 0xFF), (addr >> 24 & 0xFF));
 		}
 		else strcpy(ip, "");										//ip unassigned
-	DBG("getipaddr(): ip %s\n", ip);
+	DBG("ip %s\n", ip);
 	close(sd);
 	}
 return ip;													//return: ip or ""
@@ -183,7 +183,7 @@ char gw[256], wan[256], *oldgw, *oldwan;
 		}
 	}
 fclose(FP);
-DBG("fwrouter(): return code %d\n", err);
+DBG("return code %d\n", err);
 return err;
 }
 
@@ -192,9 +192,9 @@ enum { ROUTER=0, REMOTE };
 int i=0, fd;
 
 if(argc!=9) return 1;								//arg num check
-DBG("fw() main:%s addrm:%s type:%s name:%s prot:%s remport:%s locport:%s\n", argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8]);
+DBG("main:%s addrm:%s type:%s name:%s prot:%s remport:%s locport:%s\n", argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8]);
 	for(i=2;i<argc;i++) {							//arg string check
-	DBG("fw() checking arg: %d, ", i);
+	DBG("checking arg: %d, ", i);
 		switch(i) {
 		case MAIN: if(strcmp(argv[i], "router") && strcmp(argv[i], "remote")) i=argc+1;
 		break;
@@ -218,9 +218,6 @@ if(i>argc) return 1;
 	if(!i) runsyscmd(". " RULES NULLRED);					//if no error above execute the created rulescript
 	unlock(fd, LOCK_FW);							//release lock
 	}
-
-#ifdef DEBUG
-system("cat " RULES ";cat /proc/cnapt_serv");
-#endif
+SHOWRULES
 return i;
 }

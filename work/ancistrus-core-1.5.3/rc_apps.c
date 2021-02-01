@@ -44,10 +44,10 @@ int err=1;
 	DBG("... success\n");
 	WRITEPREPOSTPATH									//prepare script path
 	for(;err<argc;err++) snprintf(cmd, sizeof(cmd), "%s \"%s\"", cmd, argv[err]);		//append argvs
-	DBG("runprepost(): executing %s\n", cmd);
+	DBG("executing %s\n", cmd);
 	err=runsyscmd(cmd);
 	}
-DBG("\nrunprepost(): return code: %d\n", err);
+DBG("\nreturn code: %d\n", err);
 return err;
 }
 
@@ -63,7 +63,7 @@ int pid, status, err=1;
 pid_t p;
 
 	if((pid=fork())<0) {							//fork error
-	DBG("fork() error: unlocking fd %d\n", fd);
+	DBG("error: unlocking fd %d\n", fd);
 	unlock(fd, lock_path);
 	exit(2);
 	}
@@ -80,7 +80,7 @@ pid_t p;
 	DBG("Unlocking fd: %d on child thread\n", fd);
 	unlock(fd, lock_path);							//unlock
 	execvp(RCAPPS, argv);							//exec RCAPPS
-	DBG("run(): child execvp() fail\n");
+	DBG("child execvp() fail\n");
 	exit(1);
 	}
 }
@@ -93,7 +93,7 @@ int fd;
 char *serv, lock_path[LOCK_MAX_PATH];
 
 serv=basename(argv[0])+3;							//take the relative service name shifted of 'rc_'
-DBG("rc_apps(): service is: %s\n", serv);
+DBG("service is: %s\n", serv);
 	if((argc==1) || !strcmp(serv, "apps") || !strcmp(serv, "init") || !strcmp(serv, "start") || *NV_SGET("anc_boot_disable")=='1') 
 	execvp(RCAPPS, argv);							//avoid itself invocation, boot services, disable flag
 	else if(runprepost(serv, argc, argv, PRE) > 99) return 1;		//if PRE script has a 100+ $? skip next RCAPPS service execs
@@ -101,7 +101,7 @@ DBG("rc_apps(): service is: %s\n", serv);
 	snprintf(lock_path, sizeof(lock_path), "/var/lock/%s.lock", serv);
 	if((fd=lock(lock_path))>=0) run(serv, argc, argv, fd, lock_path);	//run() also includes runprepost(), unlock(), unlink()
 	}
-DBG("rc_apps(): execvp() fail\n");
+DBG("execvp() fail\n");
 return 1;									//here only on execvp() fail
 }
 

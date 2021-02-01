@@ -10,11 +10,6 @@
 #include "common.h"
 #include "cgi.h"
 
-#ifdef DEBUG
-#include <stdio.h>
-static FILE *FPTTYP;
-#endif
-
 /*
  * PARSEQUERYGET
  * GET method query parser separating couples `var=value` ('&'->'\0').
@@ -28,7 +23,7 @@ char hex[2], *e;
 int size;											//initialize len counting the '\0\0'
 
 if(oldq == NULL || !*oldq) return 0;								//check unparsed query string
-CGIDBG("parsequeryget(): unparsed query length: %d\nparsequeryget(): %s\n", strlen(oldq), oldq);
+CGIDBG("unparsed query length: %d\n%s\n", strlen(oldq), oldq);
 SMALLOCSTR(*query, (size=strlen(oldq)+2)) return 0;						//allocate memory for parsed query
 	for(e=*query;*oldq;oldq++) {								//analyze each single query character
 		if(*oldq=='%') {								//hex-encoded char founded
@@ -43,7 +38,7 @@ SMALLOCSTR(*query, (size=strlen(oldq)+2)) return 0;						//allocate memory for p
 	}
 *(e++)='\0';			//resultant query is equal/shorter than orig: to match nvram structure it must be null chopped twice at the end
 *e='\0';
-CGIDBG("parsequeryget(): parsed query length: %d\n", size-2);
+CGIDBG("parsed query length: %d\n", size-2);
 return size;											//return new parsed query size
 }
 
@@ -59,13 +54,13 @@ static int parsequerypost(char **query, int size) {
 char c, hex[2], *e;
 
 if(!size) return 0;										//size check (content type checked by caller)
-CGIDBG("parsequerypost(): unparsed query length: %d\nparsequerypost(): ", size);
+CGIDBG("unparsed query length: %d\n", size);
 SMALLOCSTR(*query, (size+=2)) return 0;								//allocate memory for parsed query
 	for(e=*query;READCH(c);e++) {								//read each single query character from stdin
-	CGIDBG("%c", c);
+	CGIQDBG("%c", c);
 		if(c == '%') {									//hex-encoded char founded
 		READ(hex);									//read hex code from stdin
-		CGIDBG("%s", hex);
+		CGIQDBG("%s", hex);
 		*e=QUERYFORMATCONV;								//format hex code conversion
 		size-=2;									//final size 2 chars less because of conversion
 		}
@@ -75,7 +70,8 @@ SMALLOCSTR(*query, (size+=2)) return 0;								//allocate memory for parsed quer
 	}
 *(e++)='\0';			//resultant query is equal/shorter than orig: to match nvram structure it must be null chopped twice at the end
 *e='\0';
-CGIDBG("\nparsequerypost(): parsed query length: %d\n", size-2);
+CGIQDBG("\n");
+CGIDBG("parsed query length: %d\n", size-2);
 return size;											//return new parsed query size
 }
 
@@ -90,7 +86,7 @@ const char *s;
 char c;
 unsigned int i=0;
 
-	CGIDBG("qrawstdinget(): var: %s\n", var);
+	CGIDBG("var: %s\n", var);
 	if(var==NULL || !*var) return 2;
 	else if(strlen(var)>=2*VARBUF) return 3;
 	for(s=var;READCH(c);) {									//find var data begin tag
@@ -101,7 +97,7 @@ unsigned int i=0;
 		for(i=0;READCH(c) && c!=LF_SYMBOL && c!=DQUOTE_SYMBOL && i<2*VARBUF;i++) val[i]=c;
 		if(i>=2*VARBUF) return 4;
 		val[i]='\0';
-		CGIDBG("qrawstdinget(): val: %s\n", val);
+		CGIDBG("val: %s\n", val);
 		return 0;									//var filled
 		}
 	}
@@ -121,13 +117,13 @@ unsigned int i, j=2;
 
 i=strlen(filename);
 while(READCH(c) && c!=LF_SYMBOL) bounds[j++]=c;							//fetch boundary tag
-CGIDBG("postqueryfilecontent(): boundary: %s\n", bounds);
+CGIDBG("boundary: %s\n", bounds);
 if((err=qrawstdinget(MP_CONTENTDISP "download\"; filename=\"", &filename[i]))) return err;	//fetch filename:'file' name must be 'download'
-CGIDBG("postqueryfilecontent(): filename: %s\n", filename);
+CGIDBG("filename: %s\n", filename);
 if((err=qrawstdinget(EOV, NULL))) return err;							//fetch file data begin tag 'LFCRLFCR'
 SFDAOPEN(fd, filename, O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) return 1;//open/create file with attr default: 0755
 	for(i=0;READCH(c);) {									//write file data
-	CGIDBG("%c", c);
+	CGIQDBG("%c", c);
 		if(c==bounds[i]) bounde[i++]=c;							//search for boundary (file end)
 		else {										//boundary not found: reset counter
 		if(i) write(fd, bounde, i);							//if bound not found write prev stored data
@@ -137,7 +133,7 @@ SFDAOPEN(fd, filename, O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH
 	if(i==j) break;										//exit loop on boundary match
 	}
 close(fd);
-CGIDBG("\n");
+CGIQDBG("\n");
 return err;
 }
 
@@ -154,7 +150,7 @@ char *query;
 int size;
 
 methodstr=getenv("REQUEST_METHOD");								//obtain method string from env variable
-CGIDBG("\nreadquery(): request method: %s\n", methodstr);
+CGIDBG("\nrequest method: %s\n", methodstr);
 	if(methodstr == NULL) return 3;								//not running through a web server
 	else if(!strcmp(methodstr, "GET")) {							//'0' <==> GET
 	if((size=parsequeryget(&query, getenv("QUERY_STRING"))) && !qram_load(query, size)) return 0;
@@ -181,7 +177,7 @@ char *s, *s_listval;
 if(listname==NULL || !*listname) return 1;
 	TOKENIZE(listval, s, "\3", s_listval) {
 	(!add ? NV_ADD(listname, s) : NV_DEL(listname, s));
-	CGIDBG("savelist(): -------------------------------------------> anc nvram %s %s \"%s\"\n", !add ? "add" : "delete", listname, s);
+	CGIDBG("----------------------------------------> anc nvram %s %s \"%s\"\n", !add ? "add" : "delete", listname, s);
 	}
 return 0;
 }
@@ -252,18 +248,18 @@ if(nvar==NULL || !*nvar) return 1;
 	if(!strncmp(nvar, "reclist_", 8) || !strncmp(nvar, "list_", 5)) {			//compound variable found
 	BOOLLISTTYPE;
 	val=NV_SGET(nvar+fde);
-	CGIDBG("getnvar():      val   %s\n", val);
+	CGIDBG("     val   %s\n", val);
 	if(fde==8 && getnvreclist(val)) return 1;
 	else if(fde==5 && getnvlist(val)) return 1;
 	}
 	else if(!strncmp(nvar, "part_", 5)) {							//flash partition for % used space
 	partperc(nvar+5, perc);
-	CGIDBG("getnvar():      perc  %s\n", perc);
+	CGIDBG("     perc  %s\n", perc);
 	TYPE(perc);
 	}
 	else {											//normal variable
 	val=NV_SGET(nvar);
-	CGIDBG("getnvar():      val   %s\n", val);
+	CGIDBG("     val   %s\n", val);
 	TYPE(val);
 	}
 return 0;
@@ -285,17 +281,17 @@ if(raw==NULL) return 15;									//raw array cannot be null
 	}
 	if(i!=VARBUF) {
 	raw[i]='\0';										//sanity check: if good set container end
-	CGIDBG("fetchformvar(): raw   %s\n", raw);
+	CGIDBG("raw   %s\n", raw);
 	}
 	else {											//each '@' must be followed by '#'
-	CGIDBG("fetchformvar(): webpage malformed\n");
+	CGIDBG("webpage malformed\n");
 	return 20;
 	}
 	if(nvar!=NULL) {									//fill name of nvram var skipping the raw tags
 	if(!strncmp(raw, "c4_", 3) || !strncmp(raw, "c6_", 3)) strcpy(nvar, raw+3);		//ipv4/ipv6 var tag
 	else if(!strncmp(raw, "h_", 2)) strcpy(nvar, raw+2);					//hidden var tag
 	else strcpy(nvar, raw);									//no var tags
-	CGIDBG("fetchformvar(): qnvar %s\n", nvar);
+	CGIDBG("qnvar %s\n", nvar);
 	}
 return 0;
 }
@@ -343,7 +339,7 @@ if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *
 			if(!*job || !strcmp(job, "upload")||!strcmp(job, "home")) getnvar(nvar);//### GET METHOD || HOME/UPLOAD FILE ###
 			else if(!strcmp(job, "save") || !strcmp(job, "savesys")) {		//### POST METHOD - SAVE ###
 			if(*(val=QSGET(raw))!='@' && strncmp(nvar, "list_", 5) && strncmp(nvar, "reclist_", 8)) NV_SET(nvar, val);//store value
-			CGIDBG("populatepage(): ----------------------------------------> anc nvram set %s \"%s\"\n", nvar, val);
+			CGIDBG("----------------------------------------> anc nvram set %s \"%s\"\n", nvar, val);
 			getnvar(nvar);								//retrieve nvram value like GET
 			}
 			else if(!strcmp(job, "add") || !strcmp(job, "del")) {			//### ADD/DELETE ###
@@ -388,7 +384,7 @@ const char *text;
 int fd;
 
 	if(!strcmp(todo, "edit")) {								//### EDIT FILE ###
-	CGIDBG("todorun(): edit file: \"%s\"\n", QSGET("edit_file"));
+	CGIDBG("edit file: \"%s\"\n", QSGET("edit_file"));
 	SFDAOPEN(fd, QSGET("edit_file"), O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) return -1;	//attr default: 0755
 	for(text=QSGET("text");*text;text++) if(*text!=LF_SYMBOL) write(fd, text, 1);		//update file skipping '0D' char
 	close(fd);
@@ -411,11 +407,6 @@ qvar qvars[]={ { "job", NULL, MP_CONTENTDISP "job\"" EOV, "" }, { "todo", NULL, 
 int method, err, fd;
 
 TYPE(HEADER);											//write html header on stdout for first
-
-#ifdef DEBUG
-SFPOPEN(FPTTYP, "/dev/ttyp0", "w") SFPOPEN(FPTTYP, "/dev/ttyp1", "w") TYPE("\ncgi(): tty console debug not open\n");
-#endif
-
 	switch(method=readquery()) {								//retrieve method, query file & query vars
 	case GET:										//urlencoded form
 	case POST:
@@ -430,16 +421,11 @@ SFPOPEN(FPTTYP, "/dev/ttyp0", "w") SFPOPEN(FPTTYP, "/dev/ttyp1", "w") TYPE("\ncg
 	default:
 	return method;
 	}
-CGIDBG("cgi(): job: \"%s\"\ncgi(): todo: \"%s\"\ncgi(): next_file: \"%s\"\n", qvars[JOB].val, qvars[TODO].val, qvars[NEXT_FILE].val);
+CGIDBG("\njob: \"%s\"\ntodo: \"%s\"\nnext_file: \"%s\"\n", qvars[JOB].val, qvars[TODO].val, qvars[NEXT_FILE].val);
 SFDOPEN(fd, qvars[NEXT_FILE].val, O_RDONLY) return 10;						//open webpage file descriptor
 err=populatepage(fd, qvars[JOB].val, qvars[TODO].val);						//populate webpage
 close(fd);											//close webpage file descriptor
 if(!err && method>GET && *qvars[TODO].val) err=todorun(qvars[JOB].val, qvars[TODO].val);	//run 'todo' cmd/instr (if any) on POSTs only
-CGIDBG("cgi(): returning code: %d\n", err);
-
-#ifdef DEBUG
-fclose(FPTTYP);
-#endif
-
+CGIDBG("returning code: %d\n|--------------------------------------------------------------------------------|\n", err);
 return err;
 }

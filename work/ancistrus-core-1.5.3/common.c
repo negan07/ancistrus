@@ -33,7 +33,7 @@ int err=1;
 	err=lockf(fd, F_ULOCK, 0);
 	close(fd);
 	unlink(lock_path);
-	DBG("fd: %d unlock() returning code: %d\n", fd, err);
+	DBG("fd: %d returning code: %d\n", fd, err);
 	}
 return err;
 }
@@ -90,7 +90,6 @@ char c;
 		else {										//child thread
 		close(fd[0]);									//close input side of pipe
 		runsyscmd(cmd);
-		DBG("runpipe(): child execve() fail\n");
 		exit(1);
 		}
 	}
@@ -106,7 +105,7 @@ int i=0;
 	TOKENIZE(cmd, s, " ", s_cmd) exargs[i++]=s;						//assign an argument for each token
 	exargs[i]=NULL;										//set last arg as null
 	execve(*exargs, exargs, envp);
-	DBG("runexecve(): execve() fail, cmd: %s, error number: %d\n", cmd, errno);
+	DBG("execve() fail, cmd: %s, error number: %d\n", cmd, errno);
 	}
 return 1;
 }
