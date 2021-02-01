@@ -11,7 +11,6 @@
 	classes.num.all.fontFamily="Courier";
 	classes.num.all.fontSize="10pt";
 </style>
-<script language="javascript" type="text/javascript" src="anc.js"></script>
 <script language="javascript" type="text/javascript" src="string.js"></script>
 <script language="javascript" type="text/javascript" src="funcs.js"></script>
 <script language="javascript" type="text/javascript" src="utility.js"></script>
@@ -21,26 +20,24 @@
 
 function setDefs() {
 	var cf=document.forms[0];
-	var licflag=[cf.license, cf.gdpr];
-	var xmlhttp=readFileTags("speedtest-net");
+	var nflg=[cf.speedtest_net_license, cf.speedtest_net_gdpr];
+	var nflgval=[false, false];
 
-		for(var i=0;i<licflag.length;i++) {
-		((xmlhttp.readyState==4 && xmlhttp.status==200 && xmlhttp.responseText.indexOf("\"LicenseAccepted\"")>-1 && xmlhttp.responseText.indexOf("\"GDPRTimeStamp\"")>-1) ? licflag[i].checked=true : licflag[i].checked=false);
-		}
+	for(i=0;i<nflg.length;i++) if(nflg[i].value=="") nflg[i].checked=nflgval[i];
 	cf.uom.value="-a";
 	cf.bindservid.value="";
 }
 
 function loadCheck() {
 	var cf=document.forms[0];
-	var div_obj, opt=["ru", "ruval", "srvid", "srvidval"], but=[cf.list_servers, cf.apply];
+	var div_obj, opt=["ru", "ruval", "srvid", "srvidval"], but=[cf.apply];
 
 	for(var i=0;i<opt.length;i++) {
 	div_obj=document.getElementById(opt[i]);
-	((div_obj!=null && cf.license.checked==true && cf.gdpr.checked==true) ? div_obj.style.display="inline" : div_obj.style.display="none");
+	((div_obj!=null && cf.speedtest_net_license.checked==true && cf.speedtest_net_gdpr.checked==true) ? div_obj.style.display="inline" : div_obj.style.display="none");
 	}
 	for(var i=0;i<but.length;i++) {
-	((cf.license.checked==true && cf.gdpr.checked==true) ? but[i].disabled=false : but[i].disabled=true);
+	((cf.speedtest_net_license.checked==true && cf.speedtest_net_gdpr.checked==true) ? but[i].disabled=false : but[i].disabled=true);
 	}
 }
 
@@ -55,8 +52,8 @@ function checkData() {
 	var cf=document.forms[0];
 	var msg="";
 
-	if(!cf.license.checked) msg+="EULA & Term of Use not accepted !\n";
-	if(!cf.gdpr.checked) msg+="GDPR Policy not accepted !\n";
+	if(!cf.speedtest_net_license.checked) msg+="EULA & Term of Use not accepted !\n";
+	if(!cf.speedtest_net_gdpr.checked) msg+="GDPR Policy not accepted !\n";
 	if(cf.bindservid.value!="") msg+=checkInt(cf.bindservid, "Remote Server ID Number", 1, 999999, true);
 
 	if(msg.length>1) {
@@ -80,7 +77,7 @@ function checkData() {
 <table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
 <input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
 &nbsp;
-<input class="common_bt" type="button" name="clear_files" value="Clean Files" onClick="AncstdAction(this.form,'speedtest-net.htm','speedtest-net.htm','home','/bin/rm -rf /tmp/speedtest* /tmp/.config/ /etc/ssl/');">
+<input class="common_bt" type="button" name="clear_files" value="Clean Files" onClick="AncstdAction(this.form,'speedtest-net.htm','speedtest-net.htm','home','/usr/sbin/scripts/speedtest-net.sh clean');">
 &nbsp;
 <input class="common_bt" type="button" name="list_servers" value="List Servers" onClick="this.form.pipe_cmd.value='/usr/sbin/scripts/speedtest-net.sh -L';AncstdAction(this.form,'anc_run.htm','speedtest-net.htm','pipe','');">
 &nbsp;
@@ -90,8 +87,8 @@ function checkData() {
 <div id="main" class="main_top_button">
 <table border="0" cellpadding="0" cellspacing="3" width="100%">
 <tr><td nowrap colspan="2" align="center"><img src="image/poweredbyookla.png" border="0"></td></tr>
-<tr><td nowrap colspan="2"><input type="checkbox" name="license" value="" onChange="loadCheck()"><b>Accept the <a style="color:#0000EE" href="https://www.speedtest.net/about/eula" target="_blank">End User License Agreement</a> & <a style="color:#0000EE" href="https://www.speedtest.net/about/terms" target="_blank">Terms of Use</a></b></td></tr>
-<tr><td nowrap colspan="2"><input type="checkbox" name="gdpr" value="" onChange="loadCheck()"><b>Accept the <a style="color:#0000EE" href="https://www.speedtest.net/about/privacy" target="_blank">General Data Protection Regulation (Privacy) Policy</a></b></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="speedtest_net_license" value="@h_speedtest_net_license#" onChange="loadCheck()"><b>Accept the <a style="color:#0000EE" href="https://www.speedtest.net/about/eula" target="_blank">End User License Agreement</a> & <a style="color:#0000EE" href="https://www.speedtest.net/about/terms" target="_blank">Terms of Use</a></b></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="speedtest_net_gdpr" value="@h_speedtest_net_gdpr#" onChange="loadCheck()"><b>Accept the <a style="color:#0000EE" href="https://www.speedtest.net/about/privacy" target="_blank">General Data Protection Regulation (Privacy) Policy</a></b></td></tr>
 <tr><td colspan="2" height="12"></td></tr>
 <tr><td align="left"><div id="ru"><a href="javascript:gotoWiki('speedtest-net-package#select-rate-unit-speed-per-second');"><b>Select Rate Unit Speed per second for measurement:</b></a></div></td>
 	<td align="right"><div id="ruval"><select name="uom" size=1>
@@ -111,6 +108,8 @@ function checkData() {
 <input type="hidden" name="pipe_cmd" value="">
 <input type="hidden" name="next_file" value="">
 <input type="hidden" name="old_file" value="">
+<input type="hidden" name="h_speedtest_net_license" value="@h_speedtest_net_license#">
+<input type="hidden" name="h_speedtest_net_gdpr" value="@h_speedtest_net_gdpr#">
 </div>
 </form>
 <script>printHelp();</script>
