@@ -1,8 +1,6 @@
 include ../Rules.mak
 
 WEB			:= ../www/$(SPEEDTESTNET_NAME).htm
-LICLINK			:= speedtest-net
-LICJSON			:= .config/ookla/speedtest-cli.json
 
 all:
 	@echo "Nothing to do: run 'make install' to install."
@@ -11,7 +9,6 @@ install: control
 	for D in $(SCRDIR) $(WWWDIR); do install -m 0755 -d $$D; done
 	install -m 0755 *.sh $(SCRDIR)
 	install -m 0664 $(WEB) $(WWWDIR)
-	ln -sf $(TMPDIR)/$(LICJSON) $(WWWDIR)/$(LICLINK)
 
 clean: 
 	@echo "Nothing to clean"
@@ -41,6 +38,7 @@ prerm:
 	@echo "killall -9 speedtest >/dev/null 2>&1" >> $(PRERM)
 	@echo "sleep 1" >> $(PRERM)
 	@echo "rm -rf $(TMPDIR)/speedtest $(TMPDIR)/.config/ $(TMPETC)/ssl/" >> $(PRERM)
+	@echo "for V in speedtest_net_license speedtest_net_gdpr; do nvram unset \$$V; done" >> $(PRERM)
 	@echo "exit 0" >> $(PRERM)
 endif
 
