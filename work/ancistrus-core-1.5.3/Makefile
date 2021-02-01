@@ -46,7 +46,7 @@ install: control
 	ln -sf $(USRSBIN)/$(PROJ_TAG) $(ETCDIR)/$(CGI)
 	ln -sf $(TMPETC)/$(CGI) $(WWWDIR)/$(CGI)
 	ln -sf $(TMPDIR)/$(DSLINFO) $(WWWDIR)/$(DSLINFO)
-	ln -sf $(TMPDIR)/nvram $(WWWDIR)/nvram
+	ln -sf $(TMPDIR)/nvram.zip $(WWWDIR)/nvram.zip
 
 clean:
 	rm -f *~ *.o *.so $(BINS)

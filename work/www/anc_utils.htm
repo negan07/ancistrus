@@ -105,13 +105,13 @@ function check_restore() {
 <td nowrap align="right"><select name="digest" size=1>
 	<option value="sha256">sha256</option>
 	<option value="sha512">sha512</option>
-</td></tr>
+</select></td></tr>
 <tr><td nowrap><span><a href="javascript:gotoWiki('Utilities#key-length');"><b>Key length:</b></a></span></td>
 <td nowrap align="right"><select name="keylen" size=1>
 	<option value="2048">2048 bits</option>
 	<option value="3072">3072 bits</option>
 	<option value="4096">4096 bits</option>
-</td></tr>
+</select></td></tr>
 <tr><td nowrap><span><a href="javascript:gotoWiki('Utilities#certificate-duration');"><b>Certificate duration:</b></a></span></td>
 <td nowrap align="right"><select name="days" size=1>
 	<option value="365">1 Year</option>
@@ -119,11 +119,11 @@ function check_restore() {
 	<option value="3650">10 Years</option>
 	<option value="7300">20 Years</option>
 	<option value="36500">100 Years</option>
-</td></tr>
+</select></td></tr>
 <tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Regenerate PEM" onClick="return check_pem();"></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Utilities#download-nvram-settings')" tabindex="-1"><b>Download Nvram Settings</b></a></td></tr>
-<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Download" onclick="window.location.href='anc.cgi?gen_file=nvram&next_file=anc_utils.htm&job=upload';"></td></tr>
+<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Download" onClick="window.location.href='anc.cgi?gen_file=nvram.zip&next_file=anc_utils.htm&job=upload&todo=/usr/sbin/zip -jq9 /tmp/nvram.zip /tmp/nvram';"></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 </table>
 <input type="hidden" name="job" value="">
