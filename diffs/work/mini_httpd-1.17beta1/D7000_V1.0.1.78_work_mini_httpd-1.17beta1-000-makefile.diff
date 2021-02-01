@@ -81,20 +81,26 @@ diff -urN work/mini_httpd-1.17beta1/Makefile work/mini_httpd-1.17beta1/Makefile
  endif
  
  ifeq ($(PNPX),1)
-@@ -64,31 +56,31 @@
+@@ -64,31 +56,38 @@
  # support netgear new login method
  CFLAGS += -DSMART_LOGOUT
  
 -LDLIBS += -L../nvram -lscnvram
 -CFLAGS += -I../rc/include -I../nvram
--
++ifdef DEBUG
++CFLAGS += -DDEBUG
++endif
+ 
 -#all:		mini_httpd #htpasswd
-+all: $(BINS)
++all: 
++	@[ -e .recompiled ] || rm -f mini_httpd *.o
++	@$(MAKE) $(BINS) || exit 1
  
 -mini_httpd:	mini_httpd.o match.o tdate_parse.o sc_sessionid.o
 -	${CC} ${CFLAGS} ${LDFLAGS} mini_httpd.o match.o tdate_parse.o sc_sessionid.o ${LDLIBS} -o mini_httpd
-+$(BINS): mini_httpd.o match.o tdate_parse.o sc_sessionid.o
-+	$(CC) $(LDFLAGS) mini_httpd.o match.o tdate_parse.o sc_sessionid.o $(LDLIBS) -o mini_httpd
++$(BINS): mini_httpd.o match.o tdate_parse.o sc_sessionid_upd.o
++	$(CC) $(LDFLAGS) mini_httpd.o match.o tdate_parse.o sc_sessionid_upd.o $(LDLIBS) -o mini_httpd
++	@touch .recompiled
  
 -install:mini_httpd
 -	$(SSTRIP) mini_httpd
@@ -120,39 +126,43 @@ diff -urN work/mini_httpd-1.17beta1/Makefile work/mini_httpd-1.17beta1/Makefile
 -	${CC} ${CFLAGS} -c tdate_parse.c
 +match.o: match.c match.h
 +	$(CC) $(CFLAGS) -c match.c
-+
+ 
+-sc_sessionid.o: sc_sessionid.c
+-	${CC} ${CFLAGS} -c sc_sessionid.c
 +tdate_parse.o: tdate_parse.c tdate_parse.h
 +	$(CC) $(CFLAGS) -c tdate_parse.c
- 
- sc_sessionid.o: sc_sessionid.c
--	${CC} ${CFLAGS} -c sc_sessionid.c
-+	$(CC) $(CFLAGS) -c sc_sessionid.c
++
++sc_sessionid_upd.o: sc_sessionid_upd.c
++	$(CC) $(CFLAGS) -c sc_sessionid_upd.c
  
  mime_encodings.h: mime_encodings.txt
  	rm -f mime_encodings.h
-@@ -102,27 +94,28 @@
+@@ -102,27 +101,28 @@
  	  -e 's/#.*//' -e 's/[ 	]*$$//' -e '/^$$/d' \
  	  -e 's/[ 	][ 	]*/", 0, "/' -e 's/^/{ "/' -e 's/$$/", 0 },/'
  
-+htpasswd: htpasswd.o
-+	$(CC) $(CFLAGS) $(LDFLAGS) htpasswd.o $(CRYPT_LIB) -o htpasswd
- 
+-
 -htpasswd:	htpasswd.o
 -	gcc ${CFLAGS} ${LDFLAGS} htpasswd.o ${CRYPT_LIB} -o htpasswd
 -
 -htpasswd.o:	htpasswd.c
 -	gcc ${CFLAGS} -c htpasswd.c
-+htpasswd.o: htpasswd.c
-+	$(CC) $(CFLAGS) -c htpasswd.c
- 
-+cert: $(CERTS)
- 
+-
+-
 -cert:		mini_httpd.pem
 -mini_httpd.pem:	mini_httpd.cnf
 -	openssl req -new -x509 -days 3650 -nodes -config mini_httpd.cnf -out mini_httpd.pem -keyout mini_httpd.pem
 -	openssl x509 -subject -dates -fingerprint -noout -in mini_httpd.pem
 -	chmod 600 mini_httpd.pem
 -
++htpasswd: htpasswd.o
++	$(CC) $(CFLAGS) $(LDFLAGS) htpasswd.o $(CRYPT_LIB) -o htpasswd
++ 
++htpasswd.o: htpasswd.c
++	$(CC) $(CFLAGS) -c htpasswd.c
++ 
++cert: $(CERTS)
++
 +$(CERTS):	$(SSL_TREE)/apps/openssl.cnf
 +	[ -f $(SSL_TREE)/apps/openssl.cnf ] || exit 3
 +	openssl genpkey -algorithm RSA -outform PEM -out $(CERTS) -pkeyopt rsa_keygen_bits:2048 || exit 2
@@ -172,7 +182,7 @@ diff -urN work/mini_httpd-1.17beta1/Makefile work/mini_httpd-1.17beta1/Makefile
  	  rm -rf $$name ; \
  	  mkdir $$name ; \
  	  tar cf - `cat FILES` | ( cd $$name ; tar xfBp - ) ; \
-@@ -131,3 +124,31 @@
+@@ -131,3 +131,31 @@
  	  tar cf $$name.tar $$name ; \
  	  rm -rf $$name ; \
  	  gzip $$name.tar
