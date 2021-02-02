@@ -1,13 +1,15 @@
 diff -urN work/openssl-1.0.2u/Makefile work/openssl-1.0.2u/Makefile
 --- work/openssl-1.0.2u/Makefile	2017-04-06 18:00:46.662292000 +0200
 +++ work/openssl-1.0.2u/Makefile	2017-04-06 18:01:08.566300143 +0200
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,66 @@
 +include ../Rules.mak
 +
 +LIBCRYPTONAME		:= libcrypto.so
 +LIBSSLNAME		:= libssl.so
-+LIBCRYPTO		:= $(LIBCRYPTONAME).$(RCSSLVER)
-+LIBSSL			:= $(LIBSSLNAME).$(RCSSLVER)
++SSLVER			:= 1.0.0
++OLDSSLVER		:= 0.9.8
++LIBCRYPTO		:= $(LIBCRYPTONAME).$(SSLVER)
++LIBSSL			:= $(LIBSSLNAME).$(SSLVER)
 +BINS			:= openssl
 +SSLCNF			:= $(BINS).cnf
 +
@@ -29,6 +31,8 @@ diff -urN work/openssl-1.0.2u/Makefile work/openssl-1.0.2u/Makefile
 +	$(SSTRIP) $(OPENSSL)/apps/$(BINS)
 +	install -m 0755 -d $(TMPINSTDIR)
 +	install -m 0755 $(OPENSSL)/$(LIBCRYPTO) $(OPENSSL)/$(LIBSSL) $(OPENSSL)/apps/$(BINS) $(OPENSSL)/apps/$(SSLCNF) $(TMPINSTDIR)
++	for L in $(LIBCRYPTONAME) $(LIBCRYPTONAME).$(OLDSSLVER); do ln -sf $(LIBCRYPTO) $(TMPINSTDIR)/$$L; done
++	for L in $(LIBSSLNAME) $(LIBSSLNAME).$(OLDSSLVER); do ln -sf $(LIBSSL) $(TMPINSTDIR)/$$L; done
 +
 +clean:
 +	$(MAKE) -C $(OPENSSL) clean
@@ -56,13 +60,10 @@ diff -urN work/openssl-1.0.2u/Makefile work/openssl-1.0.2u/Makefile
 +	@echo "#!/bin/sh" > $(POSTINST)
 +	@echo "[ ! -f $(TMPDIR)/$(BINS) ] && exit 0" >> $(POSTINST)
 +	@echo "echo \"Updating $(BINS) lib & bins ...\"" >> $(POSTINST)
-+	@echo "mv -f $(TMPDIR)/$(LIBCRYPTO) $(TMPDIR)/$(LIBSSL) $(LDLIB)/" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(LIBCRYPTONAME)* $(TMPDIR)/$(LIBSSLNAME)* $(LDLIB)/" >> $(POSTINST)
 +	@echo "mv -f $(TMPDIR)/$(BINS) $(USRSBIN)/" >> $(POSTINST)
-+	@echo "mv -f $(TMPDIR)/$(SSLCNF) $(USRETC)/" >> $(POSTINST)
-+	@echo "ln -sf $(LIBCRYPTO) $(LDLIB)/$(LIBCRYPTONAME)" >> $(POSTINST)
-+	@echo "ln -sf $(LIBSSL) $(LDLIB)/$(LIBSSLNAME)" >> $(POSTINST)
-+	@echo "ln -sf $(LIBCRYPTO) $(LDLIB)/$(LIBCRYPTONAME).$(RCOLDSSLVER)" >> $(POSTINST)
-+	@echo "ln -sf $(LIBSSL) $(LDLIB)/$(LIBSSLNAME).$(RCOLDSSLVER)" >> $(POSTINST)
++	@echo "cp -f $(TMPDIR)/$(SSLCNF) $(USRETC)/" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(SSLCNF) $(TMPETC)/" >> $(POSTINST)
 +	@echo "sync" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +endif

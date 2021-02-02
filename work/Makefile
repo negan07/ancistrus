@@ -119,7 +119,6 @@ post_inst:
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep zlib`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mzlib \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/libz.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
-	for L in $(BUILD_TARGET)$(RCLDLIB)/libz.so $(BUILD_TARGET)$(RCLDLIB)/libz.so.$(RCZLIBMAINVER); do ln -sf libz.so.$(RCZLIBVER) $$L || exit 1; done; \
 	else \
 	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mzlib package is mandatory\\e[0m" && exit 1; \
 	fi
@@ -128,8 +127,6 @@ post_inst:
 	mv $(BUILD_TARGET)$(RCTMPDIR)/libcrypto.so* $(BUILD_TARGET)$(RCTMPDIR)/libssl.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/openssl $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/openssl.cnf $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
-	for L in $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so $(BUILD_TARGET)$(RCLDLIB)/libcrypto.so.$(RCOLDSSLVER); do ln -sf libcrypto.so.$(RCSSLVER) $$L || exit 1; done; \
-	for L in $(BUILD_TARGET)$(RCLDLIB)/libssl.so $(BUILD_TARGET)$(RCLDLIB)/libssl.so.$(RCOLDSSLVER); do ln -sf libssl.so.$(RCSSLVER) $$L || exit 1; done; \
 	else \
 	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mopenssl package is mandatory\\e[0m" && exit 1; \
 	fi
@@ -137,7 +134,6 @@ post_inst:
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mcurl \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/libcurl.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/curl $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
-	for L in $(BUILD_TARGET)$(RCLDLIB)/libcurl.so $(BUILD_TARGET)$(RCLDLIB)/libcurl.so.$(RCCURLMAINVER); do ln -sf libcurl.so.$(RCCURLVER) $$L || exit 1; done; \
 	else \
 	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mcurl package is mandatory\\e[0m" && exit 1; \
 	fi

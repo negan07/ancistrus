@@ -1,11 +1,13 @@
 diff -urN work/curl-7.74.0/Makefile work/curl-7.74.0/Makefile
 --- work/curl-7.74.0/Makefile	2018-10-23 23:00:46.662292000 +0200
 +++ work/curl-7.74.0/Makefile	2018-10-23 23:01:08.566300143 +0200
-@@ -0,0 +1,59 @@
+@@ -0,0 +1,60 @@
 +include ../Rules.mak
 +
 +LIBSNAME		:= libcurl.so
-+LIBS			:= $(LIBSNAME).$(RCCURLVER)
++LIBSMAINVER		:= 4
++LIBSVER			:= $(LIBSMAINVER).7.0
++LIBS			:= $(LIBSNAME).$(LIBSVER)
 +BINS			:= curl
 +
 +all: config
@@ -26,6 +28,7 @@ diff -urN work/curl-7.74.0/Makefile work/curl-7.74.0/Makefile
 +	$(SSTRIP) $(CURL)/src/.libs/$(BINS)
 +	install -m 0755 -d $(TMPINSTDIR)
 +	install -m 0755 $(CURL)/lib/.libs/$(LIBS) $(CURL)/src/.libs/$(BINS) $(TMPINSTDIR)
++	for L in $(LIBSNAME) $(LIBSNAME).$(LIBSMAINVER); do ln -sf $(LIBS) $(TMPINSTDIR)/$$L; done
 +
 +clean:
 +	$(MAKE) -C $(CURL) clean
@@ -53,10 +56,8 @@ diff -urN work/curl-7.74.0/Makefile work/curl-7.74.0/Makefile
 +	@echo "#!/bin/sh" > $(POSTINST)
 +	@echo "[ ! -f $(TMPDIR)/$(BINS) ] && exit 0" >> $(POSTINST)
 +	@echo "echo \"Updating $(BINS) lib & bins ...\"" >> $(POSTINST)
-+	@echo "mv -f $(TMPDIR)/$(LIBS) $(LDLIB)/" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(LIBSNAME)* $(LDLIB)/" >> $(POSTINST)
 +	@echo "mv -f $(TMPDIR)/$(BINS) $(USRSBIN)/" >> $(POSTINST)
-+	@echo "ln -sf $(LIBS) $(LDLIB)/$(LIBSNAME)" >> $(POSTINST)
-+	@echo "ln -sf $(LIBS) $(LDLIB)/$(LIBSNAME).$(RCCURLMAINVER)" >> $(POSTINST)
 +	@echo "sync" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +endif

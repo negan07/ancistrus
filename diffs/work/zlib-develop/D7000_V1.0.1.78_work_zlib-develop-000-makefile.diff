@@ -1,7 +1,7 @@
 diff -urN work/zlib-develop/Makefile work/zlib-develop/Makefile
 --- work/zlib-develop/Makefile	2017-04-06 18:00:46.662292000 +0200
 +++ work/zlib-develop/Makefile	2017-04-06 18:01:08.566300143 +0200
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,64 @@
 +include ../Rules.mak
 +
 +LIBSNAME		:= libz.so
@@ -39,6 +39,7 @@ diff -urN work/zlib-develop/Makefile work/zlib-develop/Makefile
 +	$(STRIP) $(ZLIB)/$(LIBS)
 +	install -m 0755 -d $(TMPINSTDIR)
 +	install -m 0755 $(ZLIB)/$(LIBS) $(TMPINSTDIR)
++	for L in $(LIBSNAME) $(LIBSNAME).$(LIBSMAINVER); do ln -sf $(LIBS) $(TMPINSTDIR)/$$L; done
 +
 +ifndef BUILD
 +control:
@@ -59,9 +60,7 @@ diff -urN work/zlib-develop/Makefile work/zlib-develop/Makefile
 +	@echo "#!/bin/sh" > $(POSTINST)
 +	@echo "[ ! -f $(TMPDIR)/$(LIBS) ] && exit 0" >> $(POSTINST)
 +	@echo "echo \"Updating zlib ...\"" >> $(POSTINST)
-+	@echo "mv -f $(TMPDIR)/$(LIBS) $(LDLIB)/" >> $(POSTINST)
-+	@echo "ln -sf $(LIBS) $(LDLIB)/$(LIBSNAME)" >> $(POSTINST)
-+	@echo "ln -sf $(LIBS) $(LDLIB)/$(LIBSNAME).$(LIBSMAINVER)" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(LIBSNAME)* $(LDLIB)/" >> $(POSTINST)
 +	@echo "sync" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +endif
