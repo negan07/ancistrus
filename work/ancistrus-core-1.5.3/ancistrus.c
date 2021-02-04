@@ -100,6 +100,12 @@ if(*nv) puts(nv);
 return 0;
 }
 
+int redir(MAINARGS) {
+
+if(argc<3) return 1;
+return rc_apps(argc-2, argv+2);
+}
+
 int main(MAINARGS) {
 const struct {
 const char *name;						//name called as argv[x] string

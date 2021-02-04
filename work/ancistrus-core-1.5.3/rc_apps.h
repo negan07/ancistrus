@@ -2,15 +2,19 @@
 #define RCAPPS "/usr/sbin/rc_app/rc_apps"
 #endif
 
+#ifndef RCPREFIX					/* applets symlink prefix */
+#define RCPREFIX "rc_"
+#endif
+
 #ifndef TMPETC						/* path */
 #define TMPETC "/etc"
 #endif
 
-#ifndef INITD
+#ifndef INITD						/* init startup dirname */
 #define INITD "init.d"
 #endif
 
-#ifndef ETCINITD
+#ifndef ETCINITD					/* init startup path */
 #define ETCINITD TMPETC "/" INITD
 #endif
 

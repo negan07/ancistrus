@@ -118,6 +118,7 @@ exit(3);													\
 {"gateway", gateway},												\
 {"fw", fw},													\
 {"nvtotxt", nvtotxt},												\
+{"redir", redir},												\
 {"nvram", nvram}
 
 /*
@@ -138,10 +139,19 @@ int nvram(MAINARGS);
 int nvtotxt(MAINARGS);
 
 /*
+ * REDIR
+ * Redirect from 'rc_<service> argv' script to 'rc_apps argv' with <service> name as argv[0] .
+ * Used to mantain some original <service> instances on new service scripts.
+ * Input: argc, argv.
+ * Return: rc_apps() cmd exit code, '1' if argv[2]=NULL, invalid argv[0] or RCAPPS exec fail.
+ */
+int redir(MAINARGS);
+
+/*
  * RC_APPS
  * Run: prescript if any, 'rc_apps argv' with service name as argv[0], then postscript if any.
  * Input: argc, argv .
- * Return: last executed cmd exit code or '1' in case of pre-script inhibition or RCAPPS exec fail.
+ * Return: last executed cmd exit code or '1' in case of pre-script inhibition, invalid argv[0] or RCAPPS exec fail.
  */
 int rc_apps(MAINARGS);
 

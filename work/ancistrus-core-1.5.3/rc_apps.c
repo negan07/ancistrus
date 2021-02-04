@@ -25,7 +25,7 @@ char cmd[SCR_MAX_PATH];
 struct stat sb;
 
 WRITEPREPOSTPATH
-DBG("Verifying script: %s ...", cmd);
+DBG("Verifying script: %s ...\n", cmd);
 if(!access(cmd, F_OK|X_OK) && !stat(cmd, &sb) && S_ISREG(sb.st_mode)) return 0;	//success
 else return 1;									//fail
 }
@@ -47,7 +47,7 @@ int err=1;
 	DBG("executing %s\n", cmd);
 	err=runsyscmd(cmd);
 	}
-DBG("\nreturn code: %d\n", err);
+DBG("return code: %d\n", err);
 return err;
 }
 
@@ -92,7 +92,8 @@ int rc_apps(MAINARGS) {
 int fd;
 char *serv, lock_path[LOCK_MAX_PATH];
 
-serv=basename(argv[0])+3;							//take the relative service name shifted of 'rc_'
+if(strlen(argv[0])<=strlen(RCPREFIX)) return 1;					//safe service length check
+serv=basename(argv[0])+strlen(RCPREFIX);					//take the relative service name shifted of 'RCPREFIX'
 DBG("service is: %s\n", serv);
 	if((argc==1) || !strcmp(serv, "apps") || !strcmp(serv, "init") || !strcmp(serv, "start") || *NV_SGET("anc_boot_disable")=='1') 
 	execvp(RCAPPS, argv);							//avoid itself invocation, boot services, disable flag
