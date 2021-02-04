@@ -1,7 +1,7 @@
 diff -urN work/minidlna-1.3.0/rc_snmp work/minidlna-1.3.0/rc_mediaserver
 --- work/minidlna-1.3.0/rc_mediaserver	1970-01-01 01:00:00.000000000 +0100
 +++ work/minidlna-1.3.0/rc_mediaserver	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,138 @@
+@@ -0,0 +1,147 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -15,8 +15,10 @@ diff -urN work/minidlna-1.3.0/rc_snmp work/minidlna-1.3.0/rc_mediaserver
 +#
 +# Rc script for mediaserver (minidlna daemon).
 +#
-+# Usage: $0 < start restart startforced restartforced stop dbregen dbclear dbpurge showlog clearlog > (<debug>)
++# Usage: $0 < start restart startforced restartforced startorig stop dbregen dbclear dbpurge showlog clearlog * > (<debug>)
 +#
++# 'startorig' startup service through orig 'rc_apps' cmd.
++# '*' is for original 'rc_apps' service parameters usage only.
 +# <debug> runs daemon in foreground mode with pedantic debug messages.
 +#
 +
@@ -52,6 +54,7 @@ diff -urN work/minidlna-1.3.0/rc_snmp work/minidlna-1.3.0/rc_mediaserver
 +	friendly_name="`anc nvram drget media_server_name ${DEFSERVNAME}`:D7000" \
 +	port="`anc nvram drget media_server_port 8200`" \
 +	notify_interval="`anc nvram drget media_server_notify_int 30`" \
++	max_connections="`anc nvram drget media_server_max_connections 50`" \
 +	db_dir=${DBDIR} \
 +	log_dir=${LOGDIR} \
 +	log_level="`anc nvram drget media_server_loglevel info`" \
@@ -121,6 +124,9 @@ diff -urN work/minidlna-1.3.0/rc_snmp work/minidlna-1.3.0/rc_mediaserver
 +stop
 +start $1
 +;;
++startorig)
++anc redir `basename $0` restart
++;;
 +stop)
 +stop
 +;;
@@ -136,7 +142,10 @@ diff -urN work/minidlna-1.3.0/rc_snmp work/minidlna-1.3.0/rc_mediaserver
 +clearlog)
 +clear_log
 +;;
++"")
++echo "Usage: $0 < start restart startforced restartforced startorig stop dbregen dbclear dbpurge showlog clearlog * > (<debug>)"
++;;
 +*)
-+echo "Usage: $0 < start restart startforced restartforced stop dbregen dbclear dbpurge showlog clearlog > (<debug>)"
++anc redir `basename $0` "$@"
 +;;
 +esac
