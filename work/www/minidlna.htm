@@ -27,9 +27,9 @@ function setDefs() {
 	var nflgval=[false, true, false, true, true, false, false];
 	var nvar=[cf.media_server_name, cf.media_server_port];
 	var nval=["ReadyDLNA", "8200"];
-	var h_nvar=[cf.h_media_server_notify_int, cf.h_media_server_loglevel];
-	var hnvar=[cf.media_server_notify_int, cf.media_server_loglevel];
-	var hnval=["30", "info"];
+	var h_nvar=[cf.h_media_server_notify_int, cf.h_media_server_max_connections, cf.h_media_server_loglevel];
+	var hnvar=[cf.media_server_notify_int, cf.media_server_max_connections, cf.media_server_loglevel];
+	var hnval=["30", "50", "info"];
 
 	for(i=0;i<nflg.length;i++) if(nflg[i].value=="") nflg[i].checked=nflgval[i];
 	for(i=0;i<nvar.length;i++) if(nvar[i].value=="") nvar[i].value=nval[i];
@@ -60,13 +60,16 @@ function populateDirTable() {
 
 		for(var i=0;i<data_array.length;i++) {
 		for(var r=0;r<fval.length;r++) fval[r]="0";  //reinizialize media flags
-			if(data_array[i][0][0]=='/') {  //all media selected
+			if(data_array[i][0].charAt(0)=='/') {  //all media selected
 			for(r=0;r<fval.length;r++) fval[r]="1";
 			var dir=data_array[i][0];
 			}
 			else {  //media categories selected ('A|V|P',dir)
-			for(var j=0;data_array[i][0][j]!=',';j++)
-			for(var s=0;s<ftag.length;s++) if(data_array[i][0][j]==ftag[s]) fval[s]="1";
+				for(var j=0;data_array[i][0].charAt(j)!=',';j++) {
+					for(var s=0;s<ftag.length;s++) {
+					if(data_array[i][0].charAt(j)==ftag[s]) fval[s]="1";
+					}
+				}
 			var dir=data_array[i][0].substr(j+1);  //point next to ',' to obtain dir
 			}
 		txt+="<tr><td width='10%' align='center'><input name='DirSelect' type='radio' value='"+data_array[i][0]+"'></td>";
@@ -117,15 +120,13 @@ function checkData() {
 <table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
 <input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
 &nbsp;
-<input class="common_bt" type="button" name="show_status" value="Show Server Status" onClick="if(checkServEnable()) window.open('http://'+window.location.hostname+':'+this.form.media_server_port.value)">
+<input class="short_common_bt" type="button" name="show_status" value="Show Status" onClick="if(checkServEnable()) window.open('http://'+window.location.hostname+':'+this.form.media_server_port.value)">
 &nbsp;
-<input class="common_bt" type="button" name="show_log" value="Show Log" onClick="if(checkServEnable()) AncstdAction(this.form,'anc_run.htm','minidlna.htm','pipe','');">
+<input class="short_common_bt" type="button" name="show_log" value="Show Log" onClick="if(checkServEnable()) AncstdAction(this.form,'anc_run.htm','minidlna.htm','pipe','');">
 &nbsp;
-<input class="common_bt" type="button" name="delete_log" value="Delete Log" onClick="AncstdAction(this.form,'minidlna.htm','minidlna.htm','home','/usr/sbin/rc mediaserver clearlog');">
+<input class="short_common_bt" type="button" name="delete_log" value="Delete Log" onClick="AncstdAction(this.form,'minidlna.htm','minidlna.htm','home','/usr/sbin/rc mediaserver clearlog');">
 &nbsp;
-<input class="common_bt" type="button" name="dbregen" value="Rescan Media Files" onClick="if(checkServEnable()) AncstdAction(this.form,'minidlna.htm','minidlna.htm','home','/usr/sbin/rc mediaserver dbregen');">
-&nbsp;
-<input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return checkData()">
+<input class="apply_bt" type="SUBMIT" name="apply" value="Apply/Regen" onClick="return checkData()">
 </td></tr></table>
 </div>
 <div id="main" class="main_top_button">
@@ -151,6 +152,19 @@ function checkData() {
 		<option value="3600">1 Hour</option>
 	</select></td>
 </tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('minidlna-package#max-connections-number');"><b>Max Number of Simultaneous Connections</b></a></span></td>
+	<td align="right"><select name="media_server_max_connections" size=1>
+		<option value="10">10</option>
+		<option value="30">30</option>
+		<option value="50">50 (DEF)</option>
+		<option value="128">128</option>
+		<option value="256">256</option>
+		<option value="512">512</option>
+		<option value="1024">1024</option>
+		<option value="2048">2048</option>
+		<option value="4096">4096</option>
+	</select></td>
+</tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td nowrap colspan="2"><input type="checkbox" name="media_server_inotify" value="@h_media_server_inotify#"><a href="javascript:gotoWiki('minidlna-package#automatic-content-scan');"><b>Automatic Content Scan on New Additions</b></a></td></tr>
 <tr><td nowrap colspan="2"><input type="checkbox" name="media_server_strictdlna" value="@h_media_server_strictdlna#"><a href="javascript:gotoWiki('minidlna-package#strict-dlna-protocol');"><b>Strict DLNA Protocol</b></a></td></tr>
@@ -174,7 +188,6 @@ function checkData() {
 <tr></tr><tr></tr>
 <tr><td align="left"><a href="javascript:gotoWiki('minidlna-package#select-media-directories');"><b>Media Directories</b></a></td></tr>
 <tr></tr><tr></tr>
-
 <tr><td colspan="2"><table class="tables" border="1" cellpadding="2" cellspacing="0" width="60%" text-align="left" align="center">
 	<tr class="table_header">
 	<td nowrap width="10%" align="center"><span class="thead"><b>Select</b></span></td>
@@ -206,6 +219,7 @@ function checkData() {
 <input type="hidden" name="media_server_paths" value="">
 <input type="hidden" name="h_media_server_enable" value="@h_media_server_enable#">
 <input type="hidden" name="h_media_server_notify_int" value="@h_media_server_notify_int#">
+<input type="hidden" name="h_media_server_max_connections" value="@h_media_server_max_connections#">
 <input type="hidden" name="h_media_server_inotify" value="@h_media_server_inotify#">
 <input type="hidden" name="h_media_server_strictdlna" value="@h_media_server_strictdlna#">
 <input type="hidden" name="h_media_server_subtitles" value="@h_media_server_subtitles#">
