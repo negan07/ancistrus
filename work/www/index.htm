@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"><link rel="stylesheet" href="style/basic.css">
+<link rel="icon" type="image/png" href="favicon.png?v=JyAvbdGaYY">
+<script language=javascript type=text/javascript src=funcs.js></script>
+<script language=javascript type=text/javascript src=basic.js></script>
+<script language=javascript type=text/javascript src=top.js></script>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<title>NETGEAR Router @model_name#</title><meta http-equiv=content-type content='text/html; charset=UTF-8'>
+<meta content="MSHTML 6.00.2800.1141" name="GENERATOR"></head>
+<body onload="loadvalue();basic_menu_class_default();" onResize="change_size();">
+<form onsubmit="return false">
+<script>
+var enable_action=1;
+var enabled_wds=@wds_mode#;
+var enabled_modem=@modem_flag#;
+var enabled_wps=1;
+var type="basic";
+var charcount=0;
+var file_version=0;
+var file_region="";
+var netgear_version=0;
+var netgear_region="@netgear_region#";
+var help_info="_index";
+var wps_charcount=0;
+var wps_endis_configured=1;     // 1 for unconfigured, 5 for configured
+var wps_an_endis_configured=1;  // 1 for unconfigured, 5 for configured
+var folder_path="";     //save the browser's folder path, and show in USB creat/edit page
+var qos_check_time=0;
+var pin_refresh_time=0;
+var select_basic="1";
+var select_type="1";
+var endis_wl_radio="@enable_ap1#";
+var endis_wla_radio="@enable_ap1_an#";
+var wps_process=0;
+var enable_ap_flag=@ap_mode#;//bug 24666 according to the page 128 of spec 2.0,add AP mode
+var ParentalControl = "0";
+var home_page = "@firstpage#"
+var green_download=@greendown_enable#;
+var green_download_flag=@greendown_support#;
+var logs_checkbox_flag = 1;
+var thank_login_flag = 0;
+var host_name="D7000";
+var usb_router_flag = 1; 
+var readyShareSupportedLevel = @readysharesupportlevel#; 
+var an_router_flag = 1;
+var wireless_schedule_flag = 1;
+var guest_router_flag = 1;
+var traffic_router_flag=1;
+var qos_router_flag=1;
+var multi_lang_router_flag=1;
+var wds_router_flag=1;
+var video_router_flag=1;
+var transmit_router_flag=1;
+var pppoe_mac_router_flag=1;
+var ddns_oray_router_flag=0;
+var ddns_wildcards_flag=0;
+var dfs_channel_router_flag=0;
+var russian_ppp_flag=0;
+var russian_pppoe_flag=0;
+var l2tp_flag=1;
+var igmp_flag=1;
+var pppoe_intranet_flag=1;
+var dns_third_flag=1;
+var tr069_router_flag=0;
+var block_sites_flag=1;
+var ipv6_flag=1;
+var mode_is_300=1;
+var is_vc_release=0;
+var vpn_show_flag=1;
+var router_type="RangeMax(TM)";
+var max_bandwidth=1000;
+var wire_iso_flag=1;
+var bigpond_flag=0;
+var apmode_flag=1;
+var tivo_flag=1;
+var auto_conn_flag=1;
+var bridge_iptv_flag=1;
+var parental_ctrl_flag=1;
+var dfs_channel2_router_flag=1;
+var new_multiple_lang=1;
+//var gui_region="English";
+var gui_region="@h_language_sel#";
+
+function loadvalue() {
+	change_size();
+
+    if(guest_router_flag == 1 )
+	    document.getElementById("guest").style.display="";
+	    
+	if( (usb_router_flag == 1) && (green_download_flag == 1))
+		document.getElementById("greendown").style.display = "";
+		
+	click_action("home");
+
+	if( usb_router_flag == 0 )
+		document.getElementById("readyshare").style.display = "none";
+}
+
+function load_basicmenu(id) {
+	if(id=='gd')
+    {
+        if(green_download != formframe.gd_enable)
+        {
+            green_download = formframe.gd_enable;
+						basic_menu_class_default();
+        }
+    }
+}
+
+var item_focus = false;
+function focus_stat(obj, tf) {
+   if(obj.name == "search")
+   { item_focus = tf; }
+}
+
+</script>
+<div id="top"><iframe name="topframe" id="topframe" src="top.html" allowtransparency="true" scrolling="no" height="100%" width="100%" frameborder="0"></iframe></div>
+<div id="container" class="container_center"><div id="middle">
+<div id="menu">
+<div id="home" class="basic_button_purple" onclick="click_action('home');"><b><span languageCode = "3020">Home</span></b></div>
+<div id="internet" class="basic_button" onclick="click_action('internet');"><b><span languageCode = "36">Internet</span></b></div>
+<div id="wireless" class="basic_button" onclick="click_action('wireless');"><b><span languageCode = "351">Wireless</span></b></div>
+<div id="attached" class="basic_button" onclick="click_action('attached');"><b><span languageCode = "125">Attached Devices</span></b></div>
+<div id="parental" class="basic_button" onclick="click_action('parental');"><b><span languageCode = "3008">Parental Controls</span></b></div>
+<div id="readyshare" class="basic_button" onclick="click_action('readyshare');"><b><span languageCode = "3019">ReadySHARE</span></b></div>
+<div id="guest" class="basic_button" style="display:none" onclick="click_action('guest');"><b><span languageCode = "321">Guest Network</span></b></div>
+<div id="greendown" class="basic_button" style="display: none" onclick="click_action('greendown');"><b><span languageCode = "2038">NETGEAR Downloader</span></b></div></div>
+<div id="formframe_div">
+<iframe name="formframe" id="formframe" src="basic_wait.htm" allowtransparency="true" height="100%" width="100%" scrolling="no" frameborder="0" ></iframe></div>
+<div id="footer" class="footer"><img class="footer_img" src="image/footer/footer.gif">
+<div id="support"><b languageCode = "3012">HELP & SUPPORT</b> &nbsp;
+<a target="_blank" href="http://downloadcenter.netgear.com" languageCode = "335">Documentation</a> | 
+<a target="_blank" href="http://support.netgear.com" languageCode = "3104">Online Support</a> | 
+<a target="_blank" href="http://kb.netgear.com/app/answers/detail/a_id/12923" languageCode = "3013">Router FAQ</a> |
+<a target="_blank" href="./GPL_rev1.htm">GPL</a></div>
+<div id="search" align=right><b languageCode = "3014">SEARCH HELP</b>
+<input type="text" name="search" value="Enter Search Item" onKeyPress="detectEnter('num',event);" onBlur="focus_stat(this, false);" onFocus="focus_stat(this, true);this.select();" languageCode = "3063" >
+<input id="search_button" class="search_button" type="button" name="dosearch" value="GO" onClick="do_search();" languageCode = "3015">
+</div></div></div></div></form><script language="javascript" type="text/javascript" src="langs.js"></script></body></html>
