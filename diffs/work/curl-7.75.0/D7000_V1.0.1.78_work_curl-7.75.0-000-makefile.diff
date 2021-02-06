@@ -1,6 +1,6 @@
-diff -urN work/curl-7.74.0/Makefile work/curl-7.74.0/Makefile
---- work/curl-7.74.0/Makefile	2018-10-23 23:00:46.662292000 +0200
-+++ work/curl-7.74.0/Makefile	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/curl-7.75.0/Makefile work/curl-7.75.0/Makefile
+--- work/curl-7.75.0/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/curl-7.75.0/Makefile	2018-10-23 23:01:08.566300143 +0200
 @@ -0,0 +1,60 @@
 +include ../Rules.mak
 +
@@ -21,7 +21,7 @@ diff -urN work/curl-7.74.0/Makefile work/curl-7.74.0/Makefile
 +	fi
 +
 +configure:
-+	cd $(CURL) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --prefix=$(USRDIR) --sysconfdir=$(TMPETC) --libdir=$(LDLIB) --sharedstatedir=$(LDLIB) --bindir=$(USRSBIN) --sbindir=$(USRSBIN) --libexecdir=$(USRSBIN) --localstatedir=$(VARLIB) --with-zlib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-ssl=$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) --enable-shared=yes --enable-static=yes --enable-ipv6 --enable-tls-srp --disable-debug --disable-curldebug --disable-manual --disable-verbose --disable-socketpair --disable-get-easy-options --without-cyassl --without-brotli --without-mbedtls --without-wolfssl --without-zsh-functions-dir --without-bearssl CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(ZLIB)/$(ZLIB) -I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include" LDFLAGS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) -L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)" LIBS="-lz -lssl -lcrypto"
++	cd $(CURL) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --prefix=$(USRDIR) --sysconfdir=$(TMPETC) --libdir=$(LDLIB) --sharedstatedir=$(LDLIB) --bindir=$(USRSBIN) --sbindir=$(USRSBIN) --libexecdir=$(USRSBIN) --localstatedir=$(VARLIB) --with-zlib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-ssl=$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) --enable-shared=yes --enable-static=yes --enable-ipv6 --enable-tls-srp --disable-debug --disable-curldebug --disable-manual --disable-verbose --disable-socketpair --disable-get-easy-options --disable-ldap --disable-ldaps --without-cyassl --without-brotli --without-mbedtls --without-wolfssl --without-zsh-functions-dir --without-bearssl --without-libpsl --without-libidn2 CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(ZLIB)/$(ZLIB) -I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include" LDFLAGS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) -L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)" LIBS="-lz -lssl -lcrypto"
 +
 +install: control
 +	$(STRIP) $(CURL)/lib/.libs/$(LIBS)
