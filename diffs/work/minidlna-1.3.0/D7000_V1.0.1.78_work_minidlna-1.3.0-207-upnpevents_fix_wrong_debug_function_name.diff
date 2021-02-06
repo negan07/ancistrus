@@ -1,0 +1,17 @@
+--- work/minidlna-1.3.0/minidlna-1.3.0/upnpevents.c
++++ work/minidlna-1.3.0/minidlna-1.3.0/upnpevents.c
+@@ -290,12 +290,12 @@
+ 	addr.sin_family = AF_INET;
+ 	inet_aton(obj->addrstr, &addr.sin_addr);
+ 	addr.sin_port = htons(port);
+-	DPRINTF(E_DEBUG, L_HTTP, "%s: '%s' %hu '%s'\n", "upnp_event_notify_connect",
++	DPRINTF(E_DEBUG, L_HTTP, "%s: '%s' %hu '%s'\n", "upnp_event_create_notify",
+ 	       obj->addrstr, port, obj->path);
+ 	obj->state = EConnecting;
+ 	if(connect(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+ 		if(errno != EINPROGRESS && errno != EWOULDBLOCK) {
+-			DPRINTF(E_ERROR, L_HTTP, "%s: connect(): %s\n", "upnp_event_notify_connect", strerror(errno));
++			DPRINTF(E_ERROR, L_HTTP, "%s: connect(): %s\n", "upnp_event_create_notify", strerror(errno));
+ 			obj->state = EError;
+ 		}
+ 	} else {
