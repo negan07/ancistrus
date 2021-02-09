@@ -30,7 +30,7 @@ diff -urN work/libiconv-1.16/Makefile work/libiconv-1.16/Makefile
 +	$(STRIP) $(LIBSDIRNAME)/$(LIBS)
 +	for D in $(LIBDIR); do install -m 0755 -d $$D; done
 +	install -m 0755 $(LIBSDIRNAME)/$(LIBS) $(LIBDIR)
-+	for V in "" ".0"; do ln -sf $(LIBS) $(LIBDIR)/$(LIBSNAME)$$V; done
++	for V in "" ".0" ".2"; do ln -sf $(LIBS) $(LIBDIR)/$(LIBSNAME)$$V; done
 +
 +clean:
 +	$(MAKE) -C $(ICONV) clean
