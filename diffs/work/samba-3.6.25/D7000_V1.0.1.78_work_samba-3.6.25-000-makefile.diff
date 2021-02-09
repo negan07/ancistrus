@@ -27,10 +27,9 @@ diff -urN work/samba-3.6.25/Makefile work/samba-3.6.25/Makefile
 +
 +install: control
 +	$(SSTRIP) $(SRCDIR)/bin/$(BINS)
-+	for D in $(SMB_CONF_INST_DIR_NAME) $(SMB_CONF_INST_DIR) $(LIBDIR) $(BINDIR); do install -m 0755 -d $$D; done
++	for D in $(SMB_CONF_INST_DIR_NAME) $(SMB_CONF_INST_DIR) $(BINDIR); do install -m 0755 -d $$D; done
 +	install -m 0644 $(SRCDIR)/etc/samba.conf/* $(SMB_CONF_INST_DIR)
 +	install -m 0755 $(SRCDIR)/bin/$(BINS) $(BINDIR)
-+	ln -sf libiconv.so.0.0 $(LIBDIR)/libiconv.so.2
 +	for B in $(BINNAMES); do ln -sf $(BINS) $(BINDIR)/$$B; done
 +
 +clean:
@@ -62,6 +61,7 @@ diff -urN work/samba-3.6.25/Makefile work/samba-3.6.25/Makefile
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
 +	@echo "sync" >> $(POSTINST)
++	@echo "[ ! -f $(LDLIB)/libiconv.so.2 ] && ln -sf libiconv.so.0.0 $(LDLIB)/libiconv.so.2 && sync" >> $(POSTINST)
 +	@echo "cp -rf $(USRETC)/samba*/ $(TMPETC)/" >> $(POSTINST)
 +	@echo "$(RC) smb restart" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
