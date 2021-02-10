@@ -1,6 +1,6 @@
-diff -urN work/busybox-1.32.1/applets/install.sh work/busybox-1.32.1/applets/install.sh
---- work/busybox-1.32.1/applets/install.sh	2018-09-09 20:56:44.000000000 +0200
-+++ work/busybox-1.32.1/applets/install.sh	2018-10-31 22:11:47.013674367 +0100
+diff -urN work/busybox-1.33.0/applets/install.sh work/busybox-1.33.0/applets/install.sh
+--- work/busybox-1.33.0/applets/install.sh	2018-09-09 20:56:44.000000000 +0200
++++ work/busybox-1.33.0/applets/install.sh	2018-10-31 22:11:47.013674367 +0100
 @@ -18,6 +18,7 @@
  h=`sort busybox.links | uniq`
  
@@ -51,7 +51,7 @@ diff -urN work/busybox-1.32.1/applets/install.sh work/busybox-1.32.1/applets/ins
  			chmod +x "$prefix/$i"
  		fi
  		echo "	$prefix/$i"
-@@ -107,31 +108,35 @@
+@@ -107,31 +108,51 @@
  			exit 1
  		fi
  	else
@@ -89,8 +89,24 @@ diff -urN work/busybox-1.32.1/applets/install.sh work/busybox-1.32.1/applets/ins
 +POSTINST=${prefix}/CONTROL/postinst
 +touch ${POSTINST}
 +chmod 755 ${POSTINST}
++PREINST=${prefix}/CONTROL/preinst
++touch ${PREINST}
++chmod 755 ${PREINST}
 +[ -f profile ] && chmod 755 profile
 +[ -x profile ] && cp -f profile ${prefix}/${appdir}/
++
++echo '#!/bin/sh' >${PREINST}
++echo 'FREEBLOCKS=`df | grep mtd:rootfs | awk '"'{printf \$4}'"'`' >>${PREINST}
++echo 'MINFREEBLOCKS=1000' >>${PREINST}
++echo '[ -z "$FREEBLOCKS" ] && exit 0' >>${PREINST}
++echo '[ "$FREEBLOCKS" -eq "$FREEBLOCKS" >/dev/null 2>&1 ] || exit 0' >>${PREINST}
++echo '[ "$FREEBLOCKS" -ge "$MINFREEBLOCKS" ] && exit 0' >>${PREINST}
++echo 'echo "Fair free 'rootfs' partition blocks available ($FREEBLOCKS on a minimum of $MINFREEBLOCKS safe limit)"' >>${PREINST}
++cat <<_EOF_ >>${PREINST}
++echo "Busybox installation may be riskful."
++echo "Remove some packages to raise some more free space then try this installation again."
++exit 1
++_EOF_
 +
 +cat <<_EOF_ >${POSTINST}
 +#!/bin/sh

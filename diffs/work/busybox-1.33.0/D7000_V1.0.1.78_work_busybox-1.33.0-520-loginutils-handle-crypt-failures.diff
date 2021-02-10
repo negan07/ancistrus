@@ -1,7 +1,7 @@
-diff -urN work/busybox-1.32.1/loginutils/chpasswd.c work/busybox-1.32.1/loginutils/chpasswd.c
---- work/busybox-1.32.1/loginutils/chpasswd.c
-+++ work/busybox-1.32.1/loginutils/chpasswd.c
-@@ -97,6 +97,11 @@ int chpasswd_main(int argc UNUSED_PARAM,
+diff -urN work/busybox-1.33.0/loginutils/chpasswd.c work/busybox-1.33.0/loginutils/chpasswd.c
+--- work/busybox-1.33.0/loginutils/chpasswd.c
++++ work/busybox-1.33.0/loginutils/chpasswd.c
+@@ -89,6 +89,11 @@ int chpasswd_main(int argc UNUSED_PARAM,
  
  			crypt_make_pw_salt(salt, algo);
  			free_me = pass = pw_encrypt(pass, salt, 0);
@@ -13,10 +13,10 @@ diff -urN work/busybox-1.32.1/loginutils/chpasswd.c work/busybox-1.32.1/loginuti
  		}
  
  		/* This is rather complex: if user is not found in /etc/shadow,
-diff -urN work/busybox-1.32.1/loginutils/cryptpw.c work/busybox-1.32.1/loginutils/cryptpw.c
---- work/busybox-1.32.1/loginutils/cryptpw.c
-+++ work/busybox-1.32.1/loginutils/cryptpw.c
-@@ -95,7 +95,7 @@ int cryptpw_main(int argc UNUSED_PARAM,
+diff -urN work/busybox-1.33.0/loginutils/cryptpw.c work/busybox-1.33.0/loginutils/cryptpw.c
+--- work/busybox-1.33.0/loginutils/cryptpw.c
++++ work/busybox-1.33.0/loginutils/cryptpw.c
+@@ -87,7 +87,7 @@ int cryptpw_main(int argc UNUSED_PARAM,
  	/* Supports: cryptpw -m sha256 PASS 'rounds=999999999$SALT' */
  	char salt[MAX_PW_SALT_LEN + sizeof("rounds=999999999$")];
  	char *salt_ptr;
@@ -25,7 +25,7 @@ diff -urN work/busybox-1.32.1/loginutils/cryptpw.c work/busybox-1.32.1/loginutil
  	const char *opt_m, *opt_S;
  	int fd;
  
-@@ -140,8 +140,12 @@ int cryptpw_main(int argc UNUSED_PARAM,
+@@ -132,8 +132,12 @@ int cryptpw_main(int argc UNUSED_PARAM,
  		/* may still be NULL on EOF/error */
  	}
  
@@ -40,9 +40,9 @@ diff -urN work/busybox-1.32.1/loginutils/cryptpw.c work/busybox-1.32.1/loginutil
  
  	return EXIT_SUCCESS;
  }
-diff -urN work/busybox-1.32.1/loginutils/passwd.c work/busybox-1.32.1/loginutils/passwd.c
---- work/busybox-1.32.1/loginutils/passwd.c
-+++ work/busybox-1.32.1/loginutils/passwd.c
+diff -urN work/busybox-1.33.0/loginutils/passwd.c work/busybox-1.33.0/loginutils/passwd.c
+--- work/busybox-1.33.0/loginutils/passwd.c
++++ work/busybox-1.33.0/loginutils/passwd.c
 @@ -187,6 +187,10 @@ int passwd_main(int argc UNUSED_PARAM, c
  		if (!newp) {
  			logmode = LOGMODE_STDIO;

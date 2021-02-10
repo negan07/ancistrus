@@ -1,11 +1,11 @@
-diff -urN work/busybox-1.32.1/.config work/busybox-1.32.1/.config
---- work/busybox-1.32.1/.config	1970-01-01 01:00:00.000000000 +0100
-+++ work/busybox-1.32.1/.config	2018-11-01 21:50:01.107744900 +0100
-@@ -0,0 +1,1183 @@
+diff -urN work/busybox-1.33.0/.config work/busybox-1.33.0/.config
+--- work/busybox-1.33.0/.config	1970-01-01 01:00:00.000000000 +0100
++++ work/busybox-1.33.0/.config	2018-11-01 21:50:01.107744900 +0100
+@@ -0,0 +1,1189 @@
 +#
 +# Automatically generated make config: don't edit
-+# Busybox version: 1.32.1
-+# Sun Jan 24 18:33:46 2021
++# Busybox version: 1.33.0
++# Sun Feb  7 21:40:54 2021
 +#
 +CONFIG_HAVE_DOT_CONFIG=y
 +
@@ -40,7 +40,6 @@ diff -urN work/busybox-1.32.1/.config work/busybox-1.32.1/.config
 +# CONFIG_FEATURE_CLEAN_UP is not set
 +# CONFIG_FEATURE_SYSLOG_INFO is not set
 +CONFIG_FEATURE_SYSLOG=y
-+CONFIG_PLATFORM_LINUX=y
 +
 +#
 +# Build Options
@@ -59,6 +58,7 @@ diff -urN work/busybox-1.32.1/.config work/busybox-1.32.1/.config
 +CONFIG_EXTRA_LDLIBS=""
 +# CONFIG_USE_PORTABLE_CODE is not set
 +# CONFIG_STACK_OPTIMIZATION_386 is not set
++# CONFIG_STATIC_LIBGCC is not set
 +
 +#
 +# Installation Options ("make install" behavior)
@@ -335,6 +335,7 @@ diff -urN work/busybox-1.32.1/.config work/busybox-1.32.1/.config
 +# CONFIG_UNLINK is not set
 +CONFIG_USLEEP=y
 +# CONFIG_UUDECODE is not set
++# CONFIG_BASE32 is not set
 +# CONFIG_BASE64 is not set
 +# CONFIG_UUENCODE is not set
 +CONFIG_WC=y
@@ -623,7 +624,6 @@ diff -urN work/busybox-1.32.1/.config work/busybox-1.32.1/.config
 +# CONFIG_GETOPT is not set
 +# CONFIG_FEATURE_GETOPT_LONG is not set
 +# CONFIG_HEXDUMP is not set
-+# CONFIG_FEATURE_HEXDUMP_REVERSE is not set
 +# CONFIG_HD is not set
 +# CONFIG_XXD is not set
 +# CONFIG_HWCLOCK is not set
@@ -711,6 +711,7 @@ diff -urN work/busybox-1.32.1/.config work/busybox-1.32.1/.config
 +# CONFIG_FEATURE_VOLUMEID_BCACHE is not set
 +# CONFIG_FEATURE_VOLUMEID_BTRFS is not set
 +# CONFIG_FEATURE_VOLUMEID_CRAMFS is not set
++# CONFIG_FEATURE_VOLUMEID_EROFS is not set
 +# CONFIG_FEATURE_VOLUMEID_EXFAT is not set
 +# CONFIG_FEATURE_VOLUMEID_EXT is not set
 +# CONFIG_FEATURE_VOLUMEID_F2FS is not set
@@ -871,6 +872,10 @@ diff -urN work/busybox-1.32.1/.config work/busybox-1.32.1/.config
 +# CONFIG_FEATURE_HTTPD_ERROR_PAGES is not set
 +# CONFIG_FEATURE_HTTPD_PROXY is not set
 +# CONFIG_FEATURE_HTTPD_GZIP is not set
++# CONFIG_FEATURE_HTTPD_ETAG is not set
++# CONFIG_FEATURE_HTTPD_LAST_MODIFIED is not set
++# CONFIG_FEATURE_HTTPD_DATE is not set
++# CONFIG_FEATURE_HTTPD_ACL_IP is not set
 +CONFIG_IFCONFIG=y
 +CONFIG_FEATURE_IFCONFIG_STATUS=y
 +# CONFIG_FEATURE_IFCONFIG_SLIP is not set
