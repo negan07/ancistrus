@@ -175,6 +175,7 @@ post_inst:
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep samba`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36msamba \\e[0m"; \
 	rm $(BUILD_TARGET)$(RCLDLIB)/libntpass.so* || exit 1; \
+	[ -f $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 ] || ln -sf libiconv.so.0.0 $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 || exit 1; \
 	fi
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep speedtest-net`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mspeedtest-net \\e[0m"; \
@@ -183,6 +184,7 @@ post_inst:
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep minidlna`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mminidlna \\e[0m"; \
 	for L in sqlite3 id3tag exif jpeg ogg vorbis FLAC; do rm $(BUILD_TARGET)$(RCLDLIB)/lib$$L.so* || exit 1; done; \
+	[ -f $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 ] || ln -sf libiconv.so.0.0 $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 || exit 1; \
 	fi
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep xdsl-driver`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
