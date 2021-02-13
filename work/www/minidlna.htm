@@ -23,8 +23,8 @@ var root_dir="/mnt/shares";
 
 function setDefs() {
 	var cf=document.forms[0], i;
-	var nflg=[cf.media_server_enable, cf.media_server_inotify, cf.media_server_strictdlna, cf.media_server_subtitles, cf.media_server_thumbnails, cf.media_server_only_filenames, cf.tivo_enable];
-	var nflgval=[false, true, false, true, true, false, false];
+	var nflg=[cf.media_server_enable, cf.media_server_inotify, cf.media_server_strictdlna, cf.media_server_subtitles, cf.media_server_thumbnails, cf.media_server_only_filenames, cf.media_server_live_browsing, cf.tivo_enable];
+	var nflgval=[false, true, false, true, true, false, false, false];
 	var nvar=[cf.media_server_name, cf.media_server_port];
 	var nval=["ReadyDLNA", "8200"];
 	var h_nvar=[cf.h_media_server_notify_int, cf.h_media_server_max_connections, cf.h_media_server_loglevel];
@@ -171,8 +171,9 @@ function checkData() {
 <tr><td nowrap colspan="2"><input type="checkbox" name="media_server_subtitles" value="@h_media_server_subtitles#"><a href="javascript:gotoWiki('minidlna-package#subtitles-support-on-unknown-clients');"><b>Subtitle Support on Unknown Clients</b></a></td></tr>
 <tr><td nowrap colspan="2"><input type="checkbox" name="media_server_thumbnails" value="@h_media_server_thumbnails#"><a href="javascript:gotoWiki('minidlna-package#artwork-metadata-thumbnails');"><b>Artwork Metadata Thumbnails</b></a></td></tr>
 <tr><td nowrap colspan="2"><input type="checkbox" name="media_server_only_filenames" value="@h_media_server_only_filenames#"><a href="javascript:gotoWiki('minidlna-package#native-filenames');"><b>Native Filenames</b></a></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="media_server_live_browsing" value="@h_media_server_live_browsing#"><a href="javascript:gotoWiki('minidlna-package#live-browsing-files-under-media-dir');"><b>Live Browsing Files under Media Dir</b></a></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td nowrap colspan="2"><input type="checkbox" name="tivo_enable" value="@h_tivo_enable#"><a href="javascript:gotoWiki('minidlna-package#tivo-support');"><b>TiVo<sup>&reg;</sup> support</b></a></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="tivo_enable" value="@h_tivo_enable#"><a href="javascript:gotoWiki('minidlna-package#tivo-support');"><b>TiVo<sup>&reg;</sup> Support</b></a></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('minidlna-package#log-verbosity-level');"><b>Log Verbosity Level</b></a></span></td>
 	<td align="right"><select name="media_server_loglevel" size=1>
@@ -225,6 +226,7 @@ function checkData() {
 <input type="hidden" name="h_media_server_subtitles" value="@h_media_server_subtitles#">
 <input type="hidden" name="h_media_server_thumbnails" value="@h_media_server_thumbnails#">
 <input type="hidden" name="h_media_server_only_filenames" value="@h_media_server_only_filenames#">
+<input type="hidden" name="h_media_server_live_browsing" value="@h_media_server_live_browsing#">
 <input type="hidden" name="h_tivo_enable" value="@h_tivo_enable#">
 <input type="hidden" name="h_media_server_loglevel" value="@h_media_server_loglevel#">
 </div>
