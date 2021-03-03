@@ -1,0 +1,952 @@
+--- work/smartmontools-7.3/smartmontools-7.3/dev_areca.h	2021-02-01 21:36:02.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/dev_areca.h	2021-03-02 21:29:19.565534944 +0100
+@@ -141,9 +141,9 @@ class areca_ata_device
+ public:
+   areca_ata_device(smart_interface * intf, const char * dev_name, int disknum, int encnum = 1);
+   ~areca_ata_device();
+-  bool arcmsr_lock() override { return true; }
+-  bool arcmsr_unlock() override { return true; }
+-  int arcmsr_do_scsi_io(struct scsi_cmnd_io * /* iop */) override
++  bool arcmsr_lock() { return true; }
++  bool arcmsr_unlock() { return true; }
++  int arcmsr_do_scsi_io(struct scsi_cmnd_io * /* iop */)
+   {
+       return -1;
+   }
+@@ -151,7 +151,7 @@ protected:
+   areca_ata_device(): smart_device(never_called)
+   {
+   }
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ };
+ 
+ // SAS(SCSI) device behind Areca RAID Controller
+@@ -162,9 +162,9 @@ class areca_scsi_device
+ public:
+   areca_scsi_device(smart_interface * intf, const char * dev_name, int disknum, int encnum = 1);
+   ~areca_scsi_device();
+-  bool arcmsr_lock() override { return true; }
+-  bool arcmsr_unlock() override { return true; }
+-  int arcmsr_do_scsi_io(struct scsi_cmnd_io * /* iop */) override
++  bool arcmsr_lock() { return true; }
++  bool arcmsr_unlock() { return true; }
++  int arcmsr_do_scsi_io(struct scsi_cmnd_io * /* iop */)
+   {
+       return -1;
+   }
+@@ -172,7 +172,7 @@ protected:
+   areca_scsi_device(): smart_device(never_called)
+   {
+   }
+-  virtual bool scsi_pass_through(scsi_cmnd_io * iop) override;
++  virtual bool scsi_pass_through(scsi_cmnd_io * iop);
+ };
+ 
+ #endif
+--- work/smartmontools-7.3/smartmontools-7.3/dev_ata_cmd_set.h	2021-02-01 21:36:02.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/dev_ata_cmd_set.h	2021-03-02 21:29:19.565534944 +0100
+@@ -26,7 +26,7 @@ class ata_device_with_command_set
+ {
+ public:
+   /// ATA pass through mapped to ata_command_interface().
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+ protected:
+   /// Old ATA interface called by ata_pass_through()
+--- work/smartmontools-7.3/smartmontools-7.3/dev_intelliprop.cpp	2021-02-01 21:36:02.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/dev_intelliprop.cpp	2021-03-02 21:32:36.816182923 +0100
+@@ -248,9 +248,9 @@ public:
+ 
+   virtual ~intelliprop_device();
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+ private:
+   unsigned m_phydrive;
+--- work/smartmontools-7.3/smartmontools-7.3/dev_jmb39x_raid.cpp	2021-02-01 21:36:02.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/dev_jmb39x_raid.cpp	2021-03-02 21:32:36.820182895 +0100
+@@ -319,11 +319,11 @@ public:
+ 
+   virtual ~jmb39x_device();
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool close() override;
++  virtual bool close();
+ 
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+ private:
+   uint8_t m_version;
+--- work/smartmontools-7.3/smartmontools-7.3/dev_legacy.cpp	2021-02-01 21:36:02.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/dev_legacy.cpp	2021-03-02 21:32:36.820182895 +0100
+@@ -57,11 +57,11 @@ public:
+ 
+   virtual ~legacy_smart_device();
+ 
+-  virtual bool is_open() const override;
++  virtual bool is_open() const;
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool close() override;
++  virtual bool close();
+ 
+ protected:
+   /// Return filedesc for derived classes.
+@@ -141,9 +141,9 @@ class legacy_scsi_device
+ public:
+   legacy_scsi_device(smart_interface * intf, const char * dev_name, const char * req_type);
+ 
+-  virtual smart_device * autodetect_open() override;
++  virtual smart_device * autodetect_open();
+ 
+-  virtual bool scsi_pass_through(scsi_cmnd_io * iop) override;
++  virtual bool scsi_pass_through(scsi_cmnd_io * iop);
+ };
+ 
+ legacy_scsi_device::legacy_scsi_device(smart_interface * intf,
+@@ -221,17 +221,17 @@ class legacy_smart_interface
+ : public /*implements*/ smart_interface
+ {
+ public:
+-  virtual std::string get_app_examples(const char * appname) override;
++  virtual std::string get_app_examples(const char * appname);
+ 
+   virtual bool scan_smart_devices(smart_device_list & devlist, const char * type,
+-    const char * pattern = 0) override;
++    const char * pattern = 0);
+ 
+ protected:
+-  virtual ata_device * get_ata_device(const char * name, const char * type) override;
++  virtual ata_device * get_ata_device(const char * name, const char * type);
+ 
+-  virtual scsi_device * get_scsi_device(const char * name, const char * type) override;
++  virtual scsi_device * get_scsi_device(const char * name, const char * type);
+ 
+-  virtual smart_device * autodetect_smart_device(const char * name) override;
++  virtual smart_device * autodetect_smart_device(const char * name);
+ };
+ 
+ 
+--- work/smartmontools-7.3/smartmontools-7.3/dev_tunnelled.h	2021-02-01 21:36:02.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/dev_tunnelled.h	2021-03-02 21:29:19.565534944 +0100
+@@ -29,15 +29,15 @@ protected:
+ public:
+   virtual ~tunnelled_device_base();
+ 
+-  virtual bool is_open() const override;
++  virtual bool is_open() const;
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool close() override;
++  virtual bool close();
+ 
+-  virtual bool owns(const smart_device * dev) const override;
++  virtual bool owns(const smart_device * dev) const;
+ 
+-  virtual void release(const smart_device * dev) override;
++  virtual void release(const smart_device * dev);
+ 
+ private:
+   smart_device * m_tunnel_base_dev;
+@@ -73,7 +73,7 @@ protected:
+     { }
+ 
+ public:
+-  virtual void release(const smart_device * dev) override
++  virtual void release(const smart_device * dev)
+     {
+       if (m_tunnel_dev == dev)
+         m_tunnel_dev = 0;
+--- work/smartmontools-7.3/smartmontools-7.3/os_darwin.cpp	2021-02-14 19:02:51.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/os_darwin.cpp	2021-03-02 21:32:36.820182895 +0100
+@@ -85,11 +85,11 @@ public:
+ 
+   virtual ~darwin_smart_device();
+ 
+-  virtual bool is_open() const override;
++  virtual bool is_open() const;
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool close() override;
++  virtual bool close();
+  
+ protected:
+   /// Return filedesc for derived classes.
+@@ -372,7 +372,7 @@ class darwin_ata_device
+ {
+ public:
+   darwin_ata_device(smart_interface * intf, const char * dev_name, const char * req_type);
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+ protected:
+   // virtual int ata_command_interface(smart_command_set command, int select, char * data);
+@@ -534,22 +534,22 @@ class darwin_smart_interface
+ : public /*implements*/ smart_interface
+ {
+ public:
+-  virtual std::string get_os_version_str() override;
++  virtual std::string get_os_version_str();
+ 
+-  virtual std::string get_app_examples(const char * appname) override;
++  virtual std::string get_app_examples(const char * appname);
+ 
+   virtual bool scan_smart_devices(smart_device_list & devlist, const char * type,
+-    const char * pattern = 0) override;
++    const char * pattern = 0);
+ 
+ protected:
+-  virtual ata_device * get_ata_device(const char * name, const char * type) override;
++  virtual ata_device * get_ata_device(const char * name, const char * type);
+   
+-  virtual scsi_device * get_scsi_device(const char * name, const char * type) override;
++  virtual scsi_device * get_scsi_device(const char * name, const char * type);
+ 
+   virtual nvme_device * get_nvme_device(const char * name, const char * type,
+-    unsigned nsid) override;
++    unsigned nsid);
+ 
+-  virtual smart_device * autodetect_smart_device(const char * name) override;
++  virtual smart_device * autodetect_smart_device(const char * name);
+ 
+ };
+ 
+@@ -564,7 +564,7 @@ public:
+   darwin_nvme_device(smart_interface * intf, const char * dev_name,
+     const char * req_type, unsigned nsid);
+ 
+-  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out) override;
++  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out);
+ };
+ 
+ darwin_nvme_device::darwin_nvme_device(smart_interface * intf, const char * dev_name,
+--- work/smartmontools-7.3/smartmontools-7.3/os_freebsd.cpp	2021-02-01 21:36:02.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/os_freebsd.cpp	2021-03-02 21:32:36.824182867 +0100
+@@ -240,7 +240,7 @@ class freebsd_ata_device
+ {
+ public:
+   freebsd_ata_device(smart_interface * intf, const char * dev_name, const char * req_type);
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+ protected:
+   virtual int do_cmd(struct ata_ioc_request* request, bool is_48bit_cmd);
+@@ -446,9 +446,9 @@ public:
+   freebsd_nvme_device(smart_interface * intf, const char * dev_name,
+     const char * req_type, unsigned nsid);
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out) override;
++  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out);
+ };
+ 
+ freebsd_nvme_device::freebsd_nvme_device(smart_interface * intf, const char * dev_name,
+@@ -562,8 +562,8 @@ public:
+     int escalade_type, int disknum);
+ 
+ protected:
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
+-  virtual bool open() override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
++  virtual bool open();
+ 
+ private:
+   int m_escalade_type; ///< Type string for escalade_command_interface().
+@@ -774,8 +774,8 @@ public:
+     unsigned char controller, unsigned char channel, unsigned char port);
+ 
+ protected:
+-  virtual int ata_command_interface(smart_command_set command, int select, char * data) override;
+-  virtual bool open() override;
++  virtual int ata_command_interface(smart_command_set command, int select, char * data);
++  virtual bool open();
+ 
+ private:
+   unsigned char m_hpt_data[3]; ///< controller/channel/port
+@@ -969,13 +969,13 @@ class freebsd_scsi_device
+ public:
+   freebsd_scsi_device(smart_interface * intf, const char * dev_name, const char * req_type);
+ 
+-  virtual smart_device * autodetect_open() override;
++  virtual smart_device * autodetect_open();
+ 
+-  virtual bool scsi_pass_through(scsi_cmnd_io * iop) override;
++  virtual bool scsi_pass_through(scsi_cmnd_io * iop);
+   
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool close() override;
++  virtual bool close();
+   
+ private:
+   struct cam_device *m_camdev;
+@@ -1172,10 +1172,10 @@ class freebsd_areca_ata_device
+ {
+ public:
+   freebsd_areca_ata_device(smart_interface * intf, const char * dev_name, int disknum, int encnum = 1);
+-  virtual smart_device * autodetect_open() override;
+-  virtual bool arcmsr_lock() override;
+-  virtual bool arcmsr_unlock() override;
+-  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop) override;
++  virtual smart_device * autodetect_open();
++  virtual bool arcmsr_lock();
++  virtual bool arcmsr_unlock();
++  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop);
+ };
+ 
+ ///////////////////////////////////////////////////////////////////
+@@ -1186,10 +1186,10 @@ class freebsd_areca_scsi_device
+ {
+ public:
+   freebsd_areca_scsi_device(smart_interface * intf, const char * dev_name, int disknum, int encnum = 1);
+-  virtual smart_device * autodetect_open() override;
+-  virtual bool arcmsr_lock() override;
+-  virtual bool arcmsr_unlock() override;
+-  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop) override;
++  virtual smart_device * autodetect_open();
++  virtual bool arcmsr_lock();
++  virtual bool arcmsr_unlock();
++  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop);
+ };
+ 
+ 
+@@ -1314,8 +1314,8 @@ class freebsd_cciss_device
+ public:
+   freebsd_cciss_device(smart_interface * intf, const char * name, unsigned char disknum);
+ 
+-  virtual bool scsi_pass_through(scsi_cmnd_io * iop) override;
+-  virtual bool open() override;
++  virtual bool scsi_pass_through(scsi_cmnd_io * iop);
++  virtual bool open();
+ 
+ private:
+   unsigned char m_disknum; ///< Disk number.
+@@ -1425,30 +1425,30 @@ class freebsd_smart_interface
+ : public /*implements*/ smart_interface
+ {
+ public:
+-  virtual std::string get_os_version_str() override;
++  virtual std::string get_os_version_str();
+ 
+-  virtual std::string get_app_examples(const char * appname) override;
++  virtual std::string get_app_examples(const char * appname);
+ 
+   virtual bool scan_smart_devices(smart_device_list & devlist, const char * type,
+-    const char * pattern = 0) override;
++    const char * pattern = 0);
+ 
+ protected:
+-  virtual ata_device * get_ata_device(const char * name, const char * type) override;
++  virtual ata_device * get_ata_device(const char * name, const char * type);
+ 
+ #if FREEBSDVER > 800100
+   virtual ata_device * get_atacam_device(const char * name, const char * type);
+ #endif
+ 
+-  virtual scsi_device * get_scsi_device(const char * name, const char * type) override;
++  virtual scsi_device * get_scsi_device(const char * name, const char * type);
+  
+   virtual nvme_device * get_nvme_device(const char * name, const char * type,
+-    unsigned nsid) override;
++    unsigned nsid);
+ 
+-  virtual smart_device * autodetect_smart_device(const char * name) override;
++  virtual smart_device * autodetect_smart_device(const char * name);
+ 
+-  virtual smart_device * get_custom_smart_device(const char * name, const char * type) override;
++  virtual smart_device * get_custom_smart_device(const char * name, const char * type);
+ 
+-  virtual std::string get_valid_custom_dev_types_str() override;
++  virtual std::string get_valid_custom_dev_types_str();
+ private:
+   bool get_nvme_devlist(smart_device_list & devlist, const char * type);
+ };
+--- work/smartmontools-7.3/smartmontools-7.3/os_linux.cpp	2021-02-01 21:36:02.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/os_linux.cpp	2021-03-02 21:32:36.824182867 +0100
+@@ -110,11 +110,11 @@ public:
+ 
+   virtual ~linux_smart_device();
+ 
+-  virtual bool is_open() const override;
++  virtual bool is_open() const;
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool close() override;
++  virtual bool close();
+ 
+ protected:
+   /// Return filedesc for derived classes.
+@@ -214,7 +214,7 @@ public:
+   linux_ata_device(smart_interface * intf, const char * dev_name, const char * req_type);
+ 
+ protected:
+-  virtual int ata_command_interface(smart_command_set command, int select, char * data) override;
++  virtual int ata_command_interface(smart_command_set command, int select, char * data);
+ };
+ 
+ linux_ata_device::linux_ata_device(smart_interface * intf, const char * dev_name, const char * req_type)
+@@ -918,9 +918,9 @@ public:
+   linux_scsi_device(smart_interface * intf, const char * dev_name,
+                     const char * req_type, bool scanning = false);
+ 
+-  virtual smart_device * autodetect_open() override;
++  virtual smart_device * autodetect_open();
+ 
+-  virtual bool scsi_pass_through(scsi_cmnd_io * iop) override;
++  virtual bool scsi_pass_through(scsi_cmnd_io * iop);
+ 
+ private:
+   bool m_scanning; ///< true if created within scan_smart_devices
+@@ -957,9 +957,9 @@ public:
+ 
+   virtual ~linux_aacraid_device();
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool scsi_pass_through(scsi_cmnd_io *iop) override;
++  virtual bool scsi_pass_through(scsi_cmnd_io *iop);
+ 
+ private:
+   //Device Host number
+@@ -1193,12 +1193,12 @@ public:
+ 
+   virtual ~linux_megaraid_device();
+ 
+-  virtual smart_device * autodetect_open() override;
++  virtual smart_device * autodetect_open();
+ 
+-  virtual bool open() override;
+-  virtual bool close() override;
++  virtual bool open();
++  virtual bool close();
+ 
+-  virtual bool scsi_pass_through(scsi_cmnd_io *iop) override;
++  virtual bool scsi_pass_through(scsi_cmnd_io *iop);
+ 
+ private:
+   unsigned int m_disknum;
+@@ -1511,7 +1511,7 @@ class linux_cciss_device
+ public:
+   linux_cciss_device(smart_interface * intf, const char * name, unsigned char disknum);
+ 
+-  virtual bool scsi_pass_through(scsi_cmnd_io * iop) override;
++  virtual bool scsi_pass_through(scsi_cmnd_io * iop);
+ 
+ private:
+   unsigned char m_disknum; ///< Disk number.
+@@ -1554,9 +1554,9 @@ public:
+   linux_escalade_device(smart_interface * intf, const char * dev_name,
+     escalade_type_t escalade_type, int disknum);
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+ private:
+   escalade_type_t m_escalade_type; ///< Controller type
+@@ -1986,10 +1986,10 @@ class linux_areca_ata_device
+ {
+ public:
+   linux_areca_ata_device(smart_interface * intf, const char * dev_name, int disknum, int encnum = 1);
+-  virtual smart_device * autodetect_open() override;
+-  virtual bool arcmsr_lock() override;
+-  virtual bool arcmsr_unlock() override;
+-  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop) override;
++  virtual smart_device * autodetect_open();
++  virtual bool arcmsr_lock();
++  virtual bool arcmsr_unlock();
++  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop);
+ };
+ 
+ ///////////////////////////////////////////////////////////////////
+@@ -2000,10 +2000,10 @@ class linux_areca_scsi_device
+ {
+ public:
+   linux_areca_scsi_device(smart_interface * intf, const char * dev_name, int disknum, int encnum = 1);
+-  virtual smart_device * autodetect_open() override;
+-  virtual bool arcmsr_lock() override;
+-  virtual bool arcmsr_unlock() override;
+-  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop) override;
++  virtual smart_device * autodetect_open();
++  virtual bool arcmsr_lock();
++  virtual bool arcmsr_unlock();
++  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop);
+ };
+ 
+ // Looks in /proc/scsi to suggest correct areca devices
+@@ -2667,9 +2667,9 @@ public:
+   linux_nvme_device(smart_interface * intf, const char * dev_name,
+     const char * req_type, unsigned nsid);
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out) override;
++  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out);
+ };
+ 
+ linux_nvme_device::linux_nvme_device(smart_interface * intf, const char * dev_name,
+@@ -2799,26 +2799,26 @@ class linux_smart_interface
+ : public /*implements*/ smart_interface
+ {
+ public:
+-  virtual std::string get_os_version_str() override;
++  virtual std::string get_os_version_str();
+ 
+-  virtual std::string get_app_examples(const char * appname) override;
++  virtual std::string get_app_examples(const char * appname);
+ 
+   virtual bool scan_smart_devices(smart_device_list & devlist,
+-    const smart_devtype_list & types, const char * pattern = 0) override;
++    const smart_devtype_list & types, const char * pattern = 0);
+ 
+ protected:
+-  virtual ata_device * get_ata_device(const char * name, const char * type) override;
++  virtual ata_device * get_ata_device(const char * name, const char * type);
+ 
+-  virtual scsi_device * get_scsi_device(const char * name, const char * type) override;
++  virtual scsi_device * get_scsi_device(const char * name, const char * type);
+ 
+   virtual nvme_device * get_nvme_device(const char * name, const char * type,
+-    unsigned nsid) override;
++    unsigned nsid);
+ 
+-  virtual smart_device * autodetect_smart_device(const char * name) override;
++  virtual smart_device * autodetect_smart_device(const char * name);
+ 
+-  virtual smart_device * get_custom_smart_device(const char * name, const char * type) override;
++  virtual smart_device * get_custom_smart_device(const char * name, const char * type);
+ 
+-  virtual std::string get_valid_custom_dev_types_str() override;
++  virtual std::string get_valid_custom_dev_types_str();
+ 
+ private:
+   static const int devxy_to_n_max = 103; // Max value of devxy_to_n() below
+--- work/smartmontools-7.3/smartmontools-7.3/os_netbsd.cpp	2021-02-01 21:36:02.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/os_netbsd.cpp	2021-03-02 21:32:36.828182841 +0100
+@@ -131,7 +131,7 @@ class netbsd_ata_device
+ {
+ public:
+   netbsd_ata_device(smart_interface * intf, const char * dev_name, const char * req_type);
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+ protected:
+   virtual int do_cmd(struct atareq* request, bool is_48bit_cmd);
+@@ -227,9 +227,9 @@ public:
+   netbsd_nvme_device(smart_interface * intf, const char * dev_name,
+     const char * req_type, unsigned nsid);
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out) override;
++  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out);
+ };
+ 
+ netbsd_nvme_device::netbsd_nvme_device(smart_interface * intf, const char * dev_name,
+@@ -331,9 +331,9 @@ class netbsd_scsi_device
+ public:
+   netbsd_scsi_device(smart_interface * intf, const char * dev_name, const char * req_type, bool scanning = false);
+ 
+-  virtual smart_device * autodetect_open() override;
++  virtual smart_device * autodetect_open();
+ 
+-  virtual bool scsi_pass_through(scsi_cmnd_io * iop) override;
++  virtual bool scsi_pass_through(scsi_cmnd_io * iop);
+ 
+ private:
+   bool m_scanning; ///< true if created within scan_smart_devices
+@@ -492,26 +492,26 @@ class netbsd_smart_interface
+ : public /*implements*/ smart_interface
+ {
+ public:
+-  virtual std::string get_os_version_str() override;
++  virtual std::string get_os_version_str();
+ 
+-  virtual std::string get_app_examples(const char * appname) override;
++  virtual std::string get_app_examples(const char * appname);
+ 
+   virtual bool scan_smart_devices(smart_device_list & devlist, const char * type,
+-    const char * pattern = 0) override;
++    const char * pattern = 0);
+ 
+ protected:
+-  virtual ata_device * get_ata_device(const char * name, const char * type) override;
++  virtual ata_device * get_ata_device(const char * name, const char * type);
+ 
+-  virtual scsi_device * get_scsi_device(const char * name, const char * type) override;
++  virtual scsi_device * get_scsi_device(const char * name, const char * type);
+ 
+   virtual nvme_device * get_nvme_device(const char * name, const char * type,
+-    unsigned nsid) override;
++    unsigned nsid);
+ 
+-  virtual smart_device * autodetect_smart_device(const char * name) override;
++  virtual smart_device * autodetect_smart_device(const char * name);
+ 
+-  virtual smart_device * get_custom_smart_device(const char * name, const char * type) override;
++  virtual smart_device * get_custom_smart_device(const char * name, const char * type);
+ 
+-  virtual std::string get_valid_custom_dev_types_str() override;
++  virtual std::string get_valid_custom_dev_types_str();
+ 
+ private:
+   int get_dev_names(char ***, const char *);
+--- work/smartmontools-7.3/smartmontools-7.3/os_openbsd.cpp	2021-02-01 21:36:02.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/os_openbsd.cpp	2021-03-02 21:32:36.828182841 +0100
+@@ -127,7 +127,7 @@ class openbsd_ata_device
+ {
+ public:
+   openbsd_ata_device(smart_interface * intf, const char * dev_name, const char * req_type);
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+ protected:
+   virtual int do_cmd(struct atareq* request, bool is_48bit_cmd);
+@@ -218,9 +218,9 @@ class openbsd_scsi_device
+ public:
+   openbsd_scsi_device(smart_interface * intf, const char * dev_name, const char * req_type, bool scanning = false);
+ 
+-  virtual smart_device * autodetect_open() override;
++  virtual smart_device * autodetect_open();
+ 
+-  virtual bool scsi_pass_through(scsi_cmnd_io * iop) override;
++  virtual bool scsi_pass_through(scsi_cmnd_io * iop);
+ 
+ private:
+   bool m_scanning; ///< true if created within scan_smart_devices
+@@ -369,23 +369,23 @@ class openbsd_smart_interface
+ : public /*implements*/ smart_interface
+ {
+ public:
+-  virtual std::string get_os_version_str() override;
++  virtual std::string get_os_version_str();
+ 
+-  virtual std::string get_app_examples(const char * appname) override;
++  virtual std::string get_app_examples(const char * appname);
+ 
+   virtual bool scan_smart_devices(smart_device_list & devlist, const char * type,
+-    const char * pattern = 0) override;
++    const char * pattern = 0);
+ 
+ protected:
+-  virtual ata_device * get_ata_device(const char * name, const char * type) override;
++  virtual ata_device * get_ata_device(const char * name, const char * type);
+ 
+-  virtual scsi_device * get_scsi_device(const char * name, const char * type) override;
++  virtual scsi_device * get_scsi_device(const char * name, const char * type);
+ 
+-  virtual smart_device * autodetect_smart_device(const char * name) override;
++  virtual smart_device * autodetect_smart_device(const char * name);
+ 
+-  virtual smart_device * get_custom_smart_device(const char * name, const char * type) override;
++  virtual smart_device * get_custom_smart_device(const char * name, const char * type);
+ 
+-  virtual std::string get_valid_custom_dev_types_str() override;
++  virtual std::string get_valid_custom_dev_types_str();
+ 
+ private:
+   int get_dev_names(char ***, const char *);
+--- work/smartmontools-7.3/smartmontools-7.3/os_win32.cpp	2021-02-01 22:34:40.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/os_win32.cpp	2021-03-02 21:32:36.832182813 +0100
+@@ -1322,13 +1322,13 @@ public:
+ 
+   virtual ~win_ata_device();
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool is_powered_down() override;
++  virtual bool is_powered_down();
+ 
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+-  virtual bool ata_identify_is_cached() const override;
++  virtual bool ata_identify_is_cached() const;
+ 
+ private:
+   bool open(bool query_device);
+@@ -2178,7 +2178,7 @@ class csmi_ata_device
+   virtual public /*implements*/ ata_device
+ {
+ public:
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+ protected:
+   csmi_ata_device()
+@@ -2299,17 +2299,17 @@ public:
+ 
+   virtual ~win_csmi_device();
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool close() override;
++  virtual bool close();
+ 
+-  virtual bool is_open() const override;
++  virtual bool is_open() const;
+ 
+   bool open_scsi();
+ 
+ protected:
+   virtual bool csmi_ioctl(unsigned code, IOCTL_HEADER * csmi_buffer,
+-    unsigned csmi_bufsiz) override;
++    unsigned csmi_bufsiz);
+ 
+ private:
+   HANDLE m_fh; ///< Controller device handle
+@@ -2468,11 +2468,11 @@ class win_tw_cli_device
+ public:
+   win_tw_cli_device(smart_interface * intf, const char * dev_name, const char * req_type);
+ 
+-  virtual bool is_open() const override;
++  virtual bool is_open() const;
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool close() override;
++  virtual bool close();
+ 
+ protected:
+   virtual int ata_command_interface(smart_command_set command, int select, char * data);
+@@ -2682,9 +2682,9 @@ class win_scsi_device
+ public:
+   win_scsi_device(smart_interface * intf, const char * dev_name, const char * req_type);
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool scsi_pass_through(scsi_cmnd_io * iop) override;
++  virtual bool scsi_pass_through(scsi_cmnd_io * iop);
+ 
+ private:
+   bool open(int pd_num, int ld_num, int tape_num, int sub_addr);
+@@ -3085,11 +3085,11 @@ class win_areca_scsi_device
+ {
+ public:
+   win_areca_scsi_device(smart_interface * intf, const char * dev_name, int disknum, int encnum = 1);
+-  virtual bool open() override;
+-  virtual smart_device * autodetect_open() override;
+-  virtual bool arcmsr_lock() override;
+-  virtual bool arcmsr_unlock() override;
+-  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop) override;
++  virtual bool open();
++  virtual smart_device * autodetect_open();
++  virtual bool arcmsr_lock();
++  virtual bool arcmsr_unlock();
++  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop);
+ 
+ private:
+   HANDLE m_mutex;
+@@ -3199,11 +3199,11 @@ class win_areca_ata_device
+ {
+ public:
+   win_areca_ata_device(smart_interface * intf, const char * dev_name, int disknum, int encnum = 1);
+-  virtual bool open() override;
+-  virtual smart_device * autodetect_open() override;
+-  virtual bool arcmsr_lock() override;
+-  virtual bool arcmsr_unlock() override;
+-  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop) override;
++  virtual bool open();
++  virtual smart_device * autodetect_open();
++  virtual bool arcmsr_lock();
++  virtual bool arcmsr_unlock();
++  virtual int arcmsr_do_scsi_io(struct scsi_cmnd_io * iop);
+ 
+ private:
+   HANDLE m_mutex;
+@@ -3336,9 +3336,9 @@ public:
+ 
+   virtual ~win_aacraid_device();
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool scsi_pass_through(struct scsi_cmnd_io *iop) override;
++  virtual bool scsi_pass_through(struct scsi_cmnd_io *iop);
+ 
+ private:
+   //Device Host number
+@@ -3529,9 +3529,9 @@ public:
+   win_nvme_device(smart_interface * intf, const char * dev_name,
+     const char * req_type, unsigned nsid);
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out) override;
++  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out);
+ 
+   bool open_scsi(int n);
+ 
+@@ -3726,9 +3726,9 @@ public:
+   win10_nvme_device(smart_interface * intf, const char * dev_name,
+     const char * req_type, unsigned nsid);
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out) override;
++  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out);
+ 
+ private:
+   bool open(int phydrive, int logdrive);
+@@ -3900,31 +3900,31 @@ class win_smart_interface
+ : public /*implements*/ smart_interface
+ {
+ public:
+-  virtual std::string get_os_version_str() override;
++  virtual std::string get_os_version_str();
+ 
+-  virtual std::string get_app_examples(const char * appname) override;
++  virtual std::string get_app_examples(const char * appname);
+ 
+ #ifndef __CYGWIN__
+-  virtual int64_t get_timer_usec() override;
++  virtual int64_t get_timer_usec();
+ #endif
+ 
+-  virtual bool disable_system_auto_standby(bool disable) override;
++  virtual bool disable_system_auto_standby(bool disable);
+ 
+   virtual bool scan_smart_devices(smart_device_list & devlist, const char * type,
+-    const char * pattern = 0) override;
++    const char * pattern = 0);
+ 
+ protected:
+-  virtual ata_device * get_ata_device(const char * name, const char * type) override;
++  virtual ata_device * get_ata_device(const char * name, const char * type);
+ 
+-  virtual scsi_device * get_scsi_device(const char * name, const char * type) override;
++  virtual scsi_device * get_scsi_device(const char * name, const char * type);
+ 
+-  virtual nvme_device * get_nvme_device(const char * name, const char * type, unsigned nsid) override;
++  virtual nvme_device * get_nvme_device(const char * name, const char * type, unsigned nsid);
+ 
+-  virtual smart_device * autodetect_smart_device(const char * name) override;
++  virtual smart_device * autodetect_smart_device(const char * name);
+ 
+-  virtual smart_device * get_custom_smart_device(const char * name, const char * type) override;
++  virtual smart_device * get_custom_smart_device(const char * name, const char * type);
+ 
+-  virtual std::string get_valid_custom_dev_types_str() override;
++  virtual std::string get_valid_custom_dev_types_str();
+ 
+ private:
+   smart_device * get_usb_device(const char * name, int phydrive, int logdrive = -1);
+--- work/smartmontools-7.3/smartmontools-7.3/scsiata.cpp	2021-02-07 17:34:57.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/scsiata.cpp	2021-03-02 21:32:36.832182813 +0100
+@@ -116,11 +116,11 @@ public:
+ 
+   virtual ~sat_device();
+ 
+-  virtual smart_device * autodetect_open() override;
++  virtual smart_device * autodetect_open();
+ 
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+-  virtual bool scsi_pass_through(scsi_cmnd_io * iop) override;
++  virtual bool scsi_pass_through(scsi_cmnd_io * iop);
+ 
+ private:
+   int m_passthrulen;
+@@ -615,7 +615,7 @@ public:
+   virtual ~usbcypress_device();
+ 
+ protected:
+-  virtual int ata_command_interface(smart_command_set command, int select, char * data) override;
++  virtual int ata_command_interface(smart_command_set command, int select, char * data);
+ 
+   unsigned char m_signature;
+ };
+@@ -887,9 +887,9 @@ public:
+ 
+   virtual ~usbjmicron_device();
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ 
+ private:
+   bool get_registers(unsigned short addr, unsigned char * buf, unsigned short size);
+@@ -1115,7 +1115,7 @@ public:
+ 
+   virtual ~usbprolific_device();
+ 
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ };
+ 
+ 
+@@ -1254,7 +1254,7 @@ public:
+ 
+   virtual ~usbsunplus_device();
+ 
+-  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out) override;
++  virtual bool ata_pass_through(const ata_cmd_in & in, ata_cmd_out & out);
+ };
+ 
+ 
+--- work/smartmontools-7.3/smartmontools-7.3/scsinvme.cpp	2021-02-01 22:34:40.000000000 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/scsinvme.cpp	2021-03-02 21:32:36.836182786 +0100
+@@ -40,7 +40,7 @@ public:
+ 
+   virtual ~sntasmedia_device();
+ 
+-  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out) override;
++  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out);
+ };
+ 
+ sntasmedia_device::sntasmedia_device(smart_interface * intf, scsi_device * scsidev,
+@@ -130,9 +130,9 @@ public:
+ 
+   virtual ~sntjmicron_device();
+ 
+-  virtual bool open() override;
++  virtual bool open();
+ 
+-  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out) override;
++  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out);
+ 
+ private:
+   enum {
+@@ -325,7 +325,7 @@ public:
+ 
+   virtual ~sntrealtek_device();
+ 
+-  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out) override;
++  virtual bool nvme_pass_through(const nvme_cmd_in & in, nvme_cmd_out & out);
+ };
+ 
+ sntrealtek_device::sntrealtek_device(smart_interface * intf, scsi_device * scsidev,

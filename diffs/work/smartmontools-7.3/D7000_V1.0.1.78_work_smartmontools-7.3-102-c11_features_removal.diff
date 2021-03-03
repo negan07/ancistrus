@@ -1,0 +1,420 @@
+--- work/smartmontools-7.3/smartmontools-7.3/json.h	2021-03-02 21:51:15.577073135 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/json.h	2020-11-07 16:38:57.000000000 +0100
+@@ -13,11 +13,9 @@
+ 
+ #include <stdint.h>
+ #include <stdio.h>
+-#include <initializer_list>
+-#include <map>
+-#include <memory>
+ #include <string>
+ #include <vector>
++#include <map>
+ 
+ /// Create and print JSON output.
+ class json
+@@ -26,11 +24,14 @@ private:
+   struct node_info
+   {
+     std::string key;
+-    int index = 0;
++    int index;
+ 
+-    node_info() = default;
+-    explicit node_info(const char * key_) : key(key_) { }
+-    explicit node_info(int index_) : index(index_) { }
++    node_info()
++      : index(0) { }
++    explicit node_info(const char * key_)
++      : key(key_), index(0) { }
++    explicit node_info(int index_)
++      : index(index_) { }
+   };
+ 
+   typedef std::vector<node_info> node_path;
+@@ -41,49 +42,7 @@ public:
+   static bool is_safe_uint(unsigned long long value)
+     { return (value < (1ULL << 53)); }
+ 
+-  enum node_type {
+-    nt_unset, nt_object, nt_array,
+-    nt_bool, nt_int, nt_uint, nt_uint128, nt_string
+-  };
+-
+-  // initializer_list<> elements.
+-  struct initlist_value {
+-    // cppcheck-suppress noExplicitConstructor
+-    initlist_value(node_type t) : type(t) {}
+-    // cppcheck-suppress noExplicitConstructor
+-    initlist_value(bool v) : type(nt_bool), intval(v ? 1 : 0) {}
+-    // cppcheck-suppress noExplicitConstructor
+-    initlist_value(int v) : initlist_value((long long)v) {}
+-    // cppcheck-suppress noExplicitConstructor
+-    initlist_value(unsigned v) : initlist_value((unsigned long long)v) {}
+-    // cppcheck-suppress noExplicitConstructor
+-    initlist_value(long v) : initlist_value((long long)v) {}
+-    // cppcheck-suppress noExplicitConstructor
+-    initlist_value(unsigned long v) : initlist_value((unsigned long long)v) {}
+-    // cppcheck-suppress noExplicitConstructor
+-    initlist_value(long long v) : type(nt_int), intval((uint64_t)(int64_t)v) {}
+-    // cppcheck-suppress noExplicitConstructor
+-    initlist_value(unsigned long long v) : type(nt_uint), intval((uint64_t)v) {}
+-    // cppcheck-suppress noExplicitConstructor
+-    initlist_value(const char * v) : type(nt_string), strval(v) {}
+-    // cppcheck-suppress noExplicitConstructor
+-    initlist_value(const std::string & v) : type(nt_string), strval(v.c_str()) {}
+-    node_type type;
+-    uint64_t intval = 0;
+-    const char * strval = nullptr;
+-  };
+-
+-  struct initlist_key_value_pair {
+-    initlist_key_value_pair(const char * k, const initlist_value & v) : key(k), value(v) {}
+-    initlist_key_value_pair(const char * k, const std::initializer_list<initlist_key_value_pair> & ilist)
+-      : key(k), value(nt_object), object(ilist) {}
+-    initlist_key_value_pair(const char * k, const std::initializer_list<initlist_value> & ilist)
+-      : key(k), value(nt_array), array(ilist) {}
+-    const char * key;
+-    initlist_value value;
+-    std::initializer_list<initlist_key_value_pair> object;
+-    std::initializer_list<initlist_value> array;
+-  };
++  json();
+ 
+   /// Reference to a JSON element.
+   class ref
+@@ -128,22 +87,13 @@ public:
+     void set_unsafe_uint128(uint64_t value_hi, uint64_t value_lo);
+     void set_unsafe_le128(const void * pvalue);
+ 
+-    /// Braced-init-list support for nested objects.
+-    void operator+=(std::initializer_list<initlist_key_value_pair> ilist);
+-    /// Braced-init-list support for simple arrays.
+-    void operator+=(std::initializer_list<initlist_value> ilist);
+-
+   private:
+     friend class json;
+-    explicit ref(json & js);
+     ref(json & js, const char * key);
+     ref(const ref & base, const char * key);
+     ref(const ref & base, int index);
+     ref(const ref & base, const char * /*dummy*/, const char * key_suffix);
+ 
+-    void operator=(const initlist_value & value)
+-      { m_js.set_initlist_value(m_path, value); }
+-
+     json & m_js;
+     node_path m_path;
+   };
+@@ -152,10 +102,6 @@ public:
+   ref operator[](const char * key)
+     { return ref(*this, key); }
+ 
+-  /// Braced-init-list support for top level object.
+-  void operator+=(std::initializer_list<initlist_key_value_pair> ilist)
+-    { ref(*this) += ilist; }
+-
+   /// Enable/disable JSON output.
+   void enable(bool yes = true)
+     { m_enabled = yes; }
+@@ -174,30 +120,35 @@ public:
+ 
+   /// Options for print().
+   struct print_options {
+-    bool pretty = false; //< Pretty-print output.
+-    bool sorted = false; //< Sort object keys.
+-    char format = 0; //< 'y': YAML, 'g': flat(grep, gron), other: JSON
++    bool pretty; //< Pretty-print output.
++    bool sorted; //< Sort object keys.
++    char format; //< 'y': YAML, 'g': flat(grep, gron), other: JSON
++    print_options()
++      : pretty(false), sorted(false), format(0) { }
+   };
+ 
+   /// Print JSON tree to a file.
+   void print(FILE * f, const print_options & options) const;
+ 
+ private:
++  enum node_type {
++    nt_unset, nt_object, nt_array,
++    nt_bool, nt_int, nt_uint, nt_uint128, nt_string
++  };
++
+   struct node
+   {
+     node();
+-    node(const node &) = delete;
+     explicit node(const std::string & key_);
+     ~node();
+-    void operator=(const node &) = delete;
+ 
+-    node_type type = nt_unset;
++    node_type type;
+ 
+-    uint64_t intval = 0, intval_hi = 0;
++    uint64_t intval, intval_hi;
+     std::string strval;
+ 
+     std::string key;
+-    std::vector< std::unique_ptr<node> > childs;
++    std::vector<node *> childs;
+     typedef std::map<std::string, unsigned> keymap;
+     keymap key2index;
+ 
+@@ -213,14 +164,21 @@ private:
+     private:
+       const node * m_node_p;
+       bool m_use_map;
+-      unsigned m_child_idx = 0;
++      unsigned m_child_idx;
+       keymap::const_iterator m_key_iter;
+     };
++
++#if __cplusplus >= 201103
++    node(const node &) = delete;
++    void operator=(const node &) = delete;
++#else
++    private: node(const node &); void operator=(const node &);
++#endif
+   };
+ 
+-  bool m_enabled = false;
+-  bool m_verbose = false;
+-  bool m_uint128_output = false;
++  bool m_enabled;
++  bool m_verbose;
++  bool m_uint128_output;
+ 
+   node m_root_node;
+ 
+@@ -232,7 +190,6 @@ private:
+   void set_uint128(const node_path & path, uint64_t value_hi, uint64_t value_lo);
+   void set_cstring(const node_path & path, const char * value);
+   void set_string(const node_path & path, const std::string & value);
+-  void set_initlist_value(const node_path & path, const initlist_value & value);
+ 
+   static void print_json(FILE * f, bool pretty, bool sorted, const node * p, int level);
+   static void print_yaml(FILE * f, bool pretty, bool sorted, const node * p, int level_o,
+--- work/smartmontools-7.3/smartmontools-7.3/json.cpp	2021-03-02 21:52:11.936698791 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/json.cpp	2020-11-07 16:38:57.000000000 +0100
+@@ -41,11 +41,6 @@ static void check_key(const char * key)
+     jassert(('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || (c == '_'));
+ }
+ 
+-json::ref::ref(json & js)
+-: m_js(js)
+-{
+-}
+-
+ json::ref::ref(json & js, const char * key)
+ : m_js(js)
+ {
+@@ -203,41 +198,31 @@ void json::ref::set_unsafe_le128(const v
+                      sg_get_unaligned_le64(                 pvalue    ));
+ }
+ 
+-void json::ref::operator+=(std::initializer_list<initlist_key_value_pair> ilist)
+-{
+-  for (const initlist_key_value_pair & kv : ilist) {
+-    jassert(kv.key && *kv.key);
+-    switch (kv.value.type) {
+-      default: operator[](kv.key) = kv.value; break;
+-      case nt_object: operator[](kv.key) += kv.object; break;
+-      case nt_array: operator[](kv.key) += kv.array; break;
+-    }
+-  }
+-}
+-
+-void json::ref::operator+=(std::initializer_list<initlist_value> ilist)
+-{
+-  int i = 0;
+-  for (const initlist_value & v : ilist)
+-    operator[](i++) = v;
+-}
+-
+ json::node::node()
++: type(nt_unset),
++  intval(0),
++  intval_hi(0)
+ {
+ }
+ 
+ json::node::node(const std::string & key_)
+-: key(key_)
++: type(nt_unset),
++  intval(0),
++  intval_hi(0),
++  key(key_)
+ {
+ }
+ 
+ json::node::~node()
+ {
++  for (size_t i = 0; i < childs.size(); i++)
++    delete childs[i];
+ }
+ 
+ json::node::const_iterator::const_iterator(const json::node * node_p, bool sorted)
+ : m_node_p(node_p),
+-  m_use_map(sorted && node_p->type == nt_object)
++  m_use_map(sorted && node_p->type == nt_object),
++  m_child_idx(0)
+ {
+   if (m_use_map)
+     m_key_iter = node_p->key2index.begin();
+@@ -268,9 +253,9 @@ void json::node::const_iterator::operato
+ const json::node * json::node::const_iterator::operator*() const
+ {
+   if (m_use_map)
+-    return m_node_p->childs[m_key_iter->second].get();
++    return m_node_p->childs[m_key_iter->second];
+   else
+-    return m_node_p->childs[m_child_idx].get();
++    return m_node_p->childs[m_child_idx];
+ }
+ 
+ json::node * json::find_or_create_node(const json::node_path & path, node_type type)
+@@ -289,12 +274,13 @@ json::node * json::find_or_create_node(c
+       node * p2;
+       if (ni != p->key2index.end()) {
+         // Object element exists
+-        p2 = p->childs[ni->second].get();
++        p2 = p->childs[ni->second];
+       }
+       else {
+         // Create new object element
+         p->key2index[pi.key] = (unsigned)p->childs.size();
+-        p->childs.push_back(std::unique_ptr<node>(p2 = new node(pi.key)));
++        p2 = new node(pi.key);
++        p->childs.push_back(p2);
+       }
+       jassert(p2 && p2->key == pi.key);
+       p = p2;
+@@ -310,14 +296,14 @@ json::node * json::find_or_create_node(c
+       // Existing or new array element?
+       if (pi.index < (int)p->childs.size()) {
+         // Array index exists
+-        p2 = p->childs[pi.index].get();
++        p2 = p->childs[pi.index];
+         if (!p2) // Already created ?
+-          p->childs[pi.index].reset(p2 = new node);
++          p->childs[pi.index] = p2 = new node;
+       }
+       else {
+         // Grow array, fill gap, create new element
+         p->childs.resize(pi.index + 1);
+-        p->childs[pi.index].reset(p2 = new node);
++        p->childs[pi.index] = p2 = new node;
+       }
+       jassert(p2 && p2->key.empty());
+       p = p2;
+@@ -333,6 +319,13 @@ json::node * json::find_or_create_node(c
+   return p;
+ }
+ 
++json::json()
++: m_enabled(false),
++  m_verbose(false),
++  m_uint128_output(false)
++{
++}
++
+ void json::set_bool(const node_path & path, bool value)
+ {
+   if (!m_enabled)
+@@ -367,7 +360,7 @@ void json::set_cstring(const node_path &
+ {
+   if (!m_enabled)
+     return;
+-  jassert(value != nullptr); // Limit: nullptr not supported
++  jassert(value != 0); // Limit: nullptr not supported
+   find_or_create_node(path, nt_string)->strval = value;
+ }
+ 
+@@ -378,18 +371,6 @@ void json::set_string(const node_path &
+   find_or_create_node(path, nt_string)->strval = value;
+ }
+ 
+-void json::set_initlist_value(const node_path & path, const initlist_value & val)
+-{
+-  if (!m_enabled)
+-    return;
+-  node * p = find_or_create_node(path, val.type);
+-  switch (p->type) {
+-    case nt_bool: case nt_int: case nt_uint: p->intval = val.intval; break;
+-    case nt_string: p->strval = val.strval; break;
+-    default: jassert(false);
+-  }
+-}
+-
+ static void print_quoted_string(FILE * f, const char * s)
+ {
+   putc('"', f);
+@@ -444,11 +425,13 @@ static char yaml_string_needs_quotes(con
+ 
+ void json::print_json(FILE * f, bool pretty, bool sorted, const node * p, int level)
+ {
+-  bool is_obj = (p->type == nt_object);
++  if (!p->key.empty())
++    fprintf(f, "\"%s\":%s", p->key.c_str(), (pretty ? " " : ""));
++
+   switch (p->type) {
+     case nt_object:
+     case nt_array:
+-      putc((is_obj ? '{' : '['), f);
++      putc((p->type == nt_object ? '{' : '['), f);
+       if (!p->childs.empty()) {
+         bool first = true;
+         for (node::const_iterator it(p, sorted); !it.at_end(); ++it) {
+@@ -459,13 +442,10 @@ void json::print_json(FILE * f, bool pre
+           const node * p2 = *it;
+           if (!p2) {
+             // Unset element of sparse array
+-            jassert(!is_obj);
++            jassert(p->type == nt_array);
+             fputs("null", f);
+           }
+           else {
+-            jassert(is_obj == !p2->key.empty());
+-            if (is_obj)
+-              fprintf(f, "\"%s\":%s", p2->key.c_str(), (pretty ? " " : ""));
+             // Recurse
+             print_json(f, pretty, sorted, p2, level + 1);
+           }
+@@ -474,7 +454,7 @@ void json::print_json(FILE * f, bool pre
+         if (pretty)
+           fprintf(f, "\n%*s", level * 2, "");
+       }
+-      putc((is_obj ? '}' : ']'), f);
++      putc((p->type == nt_object ? '}' : ']'), f);
+       break;
+ 
+     case nt_bool:
+@@ -578,16 +558,15 @@ void json::print_yaml(FILE * f, bool pre
+ void json::print_flat(FILE * f, const char * assign, bool sorted, const node * p,
+                       std::string & path)
+ {
+-  bool is_obj = (p->type == nt_object);
+   switch (p->type) {
+     case nt_object:
+     case nt_array:
+-      fprintf(f, "%s%s%s;\n", path.c_str(), assign, (is_obj ? "{}" : "[]"));
++      fprintf(f, "%s%s%s;\n", path.c_str(), assign, (p->type == nt_object ? "{}" : "[]"));
+       if (!p->childs.empty()) {
+         unsigned len = path.size();
+         for (node::const_iterator it(p, sorted); !it.at_end(); ++it) {
+           const node * p2 = *it;
+-          if (!is_obj) {
++          if (p->type == nt_array) {
+             char buf[10]; snprintf(buf, sizeof(buf), "[%u]", it.array_index());
+             path += buf;
+           }
+@@ -596,7 +575,7 @@ void json::print_flat(FILE * f, const ch
+           }
+           if (!p2) {
+             // Unset element of sparse array
+-            jassert(!is_obj);
++            jassert(p->type == nt_array);
+             fprintf(f, "%s%snull;\n", path.c_str(), assign);
+           }
+           else {

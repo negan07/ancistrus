@@ -1,0 +1,12 @@
+--- work/smartmontools-7.3/smartmontools-7.3/smartctl.cpp	2021-03-02 22:39:12.863609549 +0100
++++ work/smartmontools-7.3/smartmontools-7.3/smartctl.cpp	2021-03-02 22:38:08.720017000 +0100
+@@ -1569,7 +1569,8 @@
+   {
+     time_t now = time(nullptr);
+     dateandtimezoneepoch(startup_datetime_buf, now);
+-    jglb["local_time"] += { {"time_t", now}, {"asctime", startup_datetime_buf} };
++    jglb["local_time"]["time_t"] = now;
++    jglb["local_time"]["asctime"] = startup_datetime_buf;
+   }
+ 
+   const char * name = argv[argc-1];

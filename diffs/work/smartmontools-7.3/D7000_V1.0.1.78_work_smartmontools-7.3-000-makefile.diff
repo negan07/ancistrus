@@ -1,11 +1,13 @@
 diff -urN work/smartmontools-7.3/Makefile work/smartmontools-7.3/Makefile
 --- work/smartmontools-7.3/Makefile	2017-11-03 21:54:56.000000000 +0100
 +++ work/smartmontools-7.3/Makefile	2018-04-19 22:48:31.600116512 +0200
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,87 @@
 +include ../Rules.mak
 +
 +BINS			:= $(SMONTOOLS)/smartd $(SMONTOOLS)/smartctl
 +STARTUP			:= rc_smontools
++PRIOU			:= 10
++USBPOSTSCR		:= U$(PRIOU)smontools
 +POSTSCR			:= usb_service_post
 +WEB			:= ../www/$(SMONTOOLS_NAME).htm
 +SMARTD_CONF 		:= $(SMONTOOLS)/examplescripts/smartd.conf
@@ -20,16 +22,17 @@ diff -urN work/smartmontools-7.3/Makefile work/smartmontools-7.3/Makefile
 +	fi
 +
 +configure:
-+	cd $(SMONTOOLS) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s -W -Wall -Wno-psabi" CXXFLAGS="$(CFLAGS) -Os -s -W -Wall -Wno-psabi" --sbindir=$(USRSBIN) --sysconfdir=$(USRETC) --with-smartdscriptdir=$(USRSBINSCR) --with-scriptpath=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-smartdplugindir=no --with-systemdsystemunitdir=no --with-systemdenvfile=no --with-initscriptdir=no --without-nvme-devicescan --with-drivedbdir=$(USRETC) --with-update-smart-drivedb=no --with-gnupg=no --without-cxx11-option
++	cd $(SMONTOOLS) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s -W -Wall -Wno-psabi" CXXFLAGS="$(CFLAGS) -Os -s -W -Wall -Wno-psabi -std=c++0x" --sbindir=$(USRSBIN) --sysconfdir=$(USRETC) --with-smartdscriptdir=$(USRSBINSCR) --with-scriptpath=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-smartdplugindir=no --with-systemdsystemunitdir=no --with-systemdenvfile=no --with-initscriptdir=no --with-nvme-devicescan --with-drivedbdir=$(USRETC) --with-update-smart-drivedb=no --with-gnupg=no --without-cxx11-option
 +
-+install: smartd_conf control
++install: smartd_conf usbpostscr control
 +	$(SSTRIP) $(BINS)
-+	for D in $(ETCDIR) $(BINDIR) $(APPDIR) $(WWWDIR) $(INITDIR) $(POSTDIR); do install -m 0755 -d $$D; done
++	for D in $(TMPINSTDIR) $(ETCDIR) $(BINDIR) $(APPDIR) $(USBSERVDIR) $(WWWDIR); do install -m 0755 -d $$D; done
 +	install -m 0644 $(SMARTD_CONF) $(ETCDIR)
 +	install -m 0644 $(SMONTOOLS)/drivedb.h $(ETCDIR)/smart_drivedb.h
 +	install -m 0755 $(BINS) $(BINDIR)
 +	install -m 0755 $(STARTUP) $(APPDIR)
-+	install -m 0755 $(POSTSCR) $(POSTDIR)
++	install -m 0755 $(POSTSCR) $(TMPINSTDIR)
++	install -m 0755 $(USBPOSTSCR) $(USBSERVDIR)
 +	install -m 0664 $(WEB) $(WWWDIR)
 +
 +clean:
@@ -39,10 +42,27 @@ diff -urN work/smartmontools-7.3/Makefile work/smartmontools-7.3/Makefile
 +	@rm -f h_config
 +	$(MAKE) -C $(SMONTOOLS) distclean
 +
++usbpostscr:
++	@echo "#!/bin/sh" > $(USBPOSTSCR)
++	@echo "" >> $(USBPOSTSCR)
++	@echo "case \$$1 in" >> $(USBPOSTSCR)
++	@echo "stop)" >> $(USBPOSTSCR)
++	@echo "rc smontools stop" >> $(USBPOSTSCR)
++	@echo ";;" >> $(USBPOSTSCR)
++	@echo "start)" >> $(USBPOSTSCR)
++	@echo "killall -9 hd-idle >/dev/null 2>&1" >> $(USBPOSTSCR)
++	@echo "TOUT=\$$(( \`anc nvram drget hdidle_timeout 30\` * 60 ))" >> $(USBPOSTSCR)
++	@echo "[ "\$${TOUT}" -gt 0 >/dev/null 2>&1 ] && for D in \`cat /proc/partitions | awk '{print \$$4}' | grep sd | grep -v sd.[0-9]\`; do HDIDLEOPT="\$${HDIDLEOPT} -a \$$D -i \$${TOUT}"; done" >> $(USBPOSTSCR)
++	@echo "[ ! -z "\$${HDIDLEOPT}" ] && hd-idle \$${HDIDLEOPT}" >> $(USBPOSTSCR)
++	@echo "rc smontools start" >> $(USBPOSTSCR)
++	@echo ";;" >> $(USBPOSTSCR)
++	@echo "esac" >> $(USBPOSTSCR)
++
 +smartd_conf:
-+	@echo "/dev/sda -a -d removable -n standby -o off -W 0,0,50" > $(SMARTD_CONF)
-+	@echo "/dev/sdb -a -d removable -n standby -o off -W 0,0,50" >> $(SMARTD_CONF)
-+	@for L in $$(echo {c..h}); do echo "#/dev/sd$$L -a -d removable -n standby -o off -W 0,0,50" >> $(SMARTD_CONF); done
++	@echo "DEVICESCAN -a -d removable -n standby,q -o off -C 1 -U 1 -W 0,0,50" > $(SMARTD_CONF)
++	@echo "#/dev/sda -a -d removable -n standby,q -o off -C 1 -U 1 -W 0,0,50" >> $(SMARTD_CONF)
++	@echo "#/dev/sdb -a -d removable -n standby,q -o off -C 1 -U 1 -W 0,0,50" >> $(SMARTD_CONF)
++	@for L in $$(echo {c..h}); do echo "#/dev/sd$$L -a -d removable -n standby,q -o off -C 1 -U 1 -W 0,0,50" >> $(SMARTD_CONF); done
 +
 +ifndef BUILD
 +control:
@@ -54,13 +74,16 @@ diff -urN work/smartmontools-7.3/Makefile work/smartmontools-7.3/Makefile
 +
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
-+	@echo "cp -f $(USRETCINITDPOST)/$(POSTSCR) $(TMPETC)/$(INITD)/$(RCPOST)/" >> $(POSTINST)
++	@echo "cp -f $(USRETCINITDPUSB)/$(USBPOSTSCR) $(TMPETC)/$(INITD)/$(RCPOST)/$(USBSERV)/" >> $(POSTINST)
++	@echo "cp -f $(TMPDIR)/$(POSTSCR) $(USRETCINITDPOST)/" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(POSTSCR) $(TMPETC)/$(INITD)/$(RCPOST)/" >> $(POSTINST)
++	@echo "sync" >> $(POSTINST)
 +	@echo "$(USRSBINRCAPP)/$(STARTUP) start" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +
 +prerm:
 +	@echo "#!/bin/sh" > $(PRERM)
-+	@echo "rm -f $(TMPETC)/$(INITD)/$(RCPOST)/$(POSTSCR) $(TMPETC)/smart_drivedb.h $(TMPETC)/smartd.conf" >> $(PRERM)
++	@echo "rm -f $(TMPETC)/$(INITD)/$(RCPOST)/$(USBSERV)/$(USBPOSTSCR) $(TMPETC)/smart_drivedb.h $(TMPETC)/smartd.conf" >> $(PRERM)
 +	@echo "$(USRSBINRCAPP)/$(STARTUP) stop" >> $(PRERM)
 +	@echo "for PID in \`pidof smartctl\`; do [ -e /proc/\$$PID/stat ] && while kill -9 \$$PID >/dev/null 2>&1; do :; done; done" >> $(PRERM)
 +	@echo "exit 0" >> $(PRERM)
