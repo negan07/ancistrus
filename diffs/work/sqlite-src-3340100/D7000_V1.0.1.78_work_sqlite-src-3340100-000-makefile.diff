@@ -12,7 +12,7 @@ diff -urN work/sqlite-src-3340100/Makefile work/sqlite-src-3340100/Makefile
 +
 +all: config
 +	$(MAKE) -C $(SQLITE)
-+	$(STRIP) $(STRIPFLAGS) $(LIBSDIRNAME)/*.a
++	#$(STRIP) $(STRIPFLAGS) $(LIBSDIRNAME)/*.a
 +
 +config:
 +	@if [ ! -f h_config ]; then \
@@ -21,13 +21,13 @@ diff -urN work/sqlite-src-3340100/Makefile work/sqlite-src-3340100/Makefile
 +	fi
 +
 +configure:
-+	cd $(SQLITE) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s -DSQLITE_DEFAULT_MEMSTATUS=0 -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_LIKE_DOESNT_MATCH_BLOBS -DSQLITE_MAX_EXPR_DEPTH=0 -DSQLITE_OMIT_DECLTYPE -DSQLITE_OMIT_DEPRECATED -DSQLITE_OMIT_PROGRESS_CALLBACK -DSQLITE_OMIT_SHARED_CACHE -DSQLITE_USE_ALLOCA" CPPFLAGS="-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)" LDFLAGS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB)" LIBS="-lz" --disable-debug --disable-shared --enable-static --enable-threadsafe --disable-tcl --disable-load-extension --disable-editline --disable-readline --disable-all
++	cd $(SQLITE) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s -DSQLITE_DEFAULT_MEMSTATUS=0 -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_LIKE_DOESNT_MATCH_BLOBS -DSQLITE_MAX_EXPR_DEPTH=0 -DSQLITE_OMIT_DECLTYPE -DSQLITE_OMIT_DEPRECATED -DSQLITE_OMIT_PROGRESS_CALLBACK -DSQLITE_OMIT_SHARED_CACHE -DSQLITE_USE_ALLOCA" CPPFLAGS="-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)" LDFLAGS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB)" LIBS="-lz" --disable-debug --enable-shared --disable-static --enable-threadsafe --disable-tcl --disable-load-extension --disable-editline --disable-readline --disable-all
 +
 +install: control
-+	#$(STRIP) $(LIBSDIRNAME)/$(LIBS)
-+	#for D in $(LIBDIR); do install -m 0755 -d $$D; done
-+	#install -m 0755 $(LIBSDIRNAME)/$(LIBS) $(LIBDIR)
-+	#for L in $(LIBSNAME) $(LIBSNAME).$(LIBSMAINVER); do ln -sf $(LIBS) $(LIBDIR)/$$L; done
++	$(STRIP) $(LIBSDIRNAME)/$(LIBS)
++	for D in $(LIBDIR); do install -m 0755 -d $$D; done
++	install -m 0755 $(LIBSDIRNAME)/$(LIBS) $(LIBDIR)
++	for L in $(LIBSNAME) $(LIBSNAME).$(LIBSMAINVER); do ln -sf $(LIBS) $(LIBDIR)/$$L; done
 +
 +clean:
 +	$(MAKE) -C $(SQLITE) clean
