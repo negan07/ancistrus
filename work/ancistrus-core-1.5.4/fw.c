@@ -19,7 +19,7 @@ FWARGS
  * Input: interface nvram name, ip address (caller must take care of ip string allocation).
  * Return: interface ip address or "" if interface or ip not present.
  */
-static char *getipaddr(const char *intf, char *ip) {
+static void getipaddr(const char *intf, char *ip) {
 struct ifreq ifr;
 int sd, addr;
 char *intfval;
@@ -37,7 +37,25 @@ char *intfval;
 	DBG("ip %s\n", ip);
 	close(sd);
 	}
-return ip;													//return: ip or ""
+}
+
+/*
+ * GETSETOLDPORT
+ * Obtain old local service port stored into nvram or current port num if old port num not present (GET).
+ * Nvram set current port as old port for future nat rule removal (SET).
+ * Input: service name, current port num, old port num (caller must take care of oldport string allocation), enum port type, set flag.
+ */
+static void getsetoldport(const char *servname, const char *port, char* oldport, const int ptype, const int setflag) {
+int i;
+char nvservname[SRVNAMEMAXLENGTH+14];
+
+(ptype==LOCPORT ? snprintf(nvservname, sizeof(nvservname), "old_%s_loc_port", servname) : snprintf(nvservname, sizeof(nvservname), "old_%s_rem_port", servname));											//switch local or remote port
+for(i=0;nvservname[i]!='\0';i++) if(nvservname[i]>=65 && nvservname[i]<=90) nvservname[i]+=32;			//tolower(nvservname)
+if(!setflag) {													//get old port
+strcpy(oldport, NV_SGET(nvservname));
+if(!*oldport) strcpy(oldport, port);										//old port not present
+}
+else NV_SET(nvservname, port);											//set old port
 }
 
 int gateway(MAINUNUSEDARGS) {
@@ -139,15 +157,18 @@ return err;
  * Return: '0' success, '1' or more fail.
  */
 static int fwrouter(char** argv, const int fwtype) {
+enum { GET=0, SET };
 FILE *FP;
 int err=0;
-char gw[256], wan[256], *oldgw, *oldwan;
+char gw[256], wan[256], *oldgw, *oldwan, oldlocport[10], oldremport[10];
 
 	SFPOPEN(FP, RULES, "w") err=1;
 	else {									//### DEL ###
-	oldgw=getoldgatewayip();						//obtain old wan ip and gw ip
+	oldgw=getoldgatewayip();						//obtain old wan ip, gw ip and local/remote ports involved
 	oldwan=getoldwanip();
-	DBG("Old gateway ip: %s, old wan ip: %s\n", oldgw, oldwan);
+	getoldport(argv[NAME], argv[LOCPORT], oldlocport, LOCPORT);
+	getoldport(argv[NAME], argv[REMPORT], oldremport, REMPORT);
+	DBG("Old gateway ip: %s, old wan ip: %s, old local port: %s, old remote port: %s\n", oldgw, oldwan, oldlocport, oldremport);
 	fprintf(FP,
 	IPT " -t nat -D PREROUTING -j %s_NAT\n"					//always delete rules first at any time
 	IPT " -t nat -F %s_NAT\n"
@@ -157,7 +178,7 @@ char gw[256], wan[256], *oldgw, *oldwan;
 	IPT " -X %s\n"
 	CPM " del %s:1:%s:%s:%s-%s:%s:%s-%s\n"
 	, argv[NAME], argv[NAME], argv[NAME], argv[NAME], argv[NAME], argv[NAME]
-	, argv[FWTYPE], argv[PROT], oldgw, argv[LOCPORT], argv[LOCPORT], oldwan, argv[REMPORT], argv[REMPORT]);
+	, argv[FWTYPE], argv[PROT], oldgw, oldlocport, oldlocport, oldwan, oldremport, oldremport);
 		if(!strcmp(argv[ADDRM], "del")) err=0;				//avoid rule creation if del
 		else {
 		getgatewayip(gw);						//obtain current wan ip and gw ip
@@ -176,9 +197,13 @@ char gw[256], wan[256], *oldgw, *oldwan;
 				err+=fwremadd(argv, FP, wan, gw, "tcp", fwtype);
 				}
 				else err+=fwremadd(argv, FP, wan, gw, argv[PROT], fwtype);
-			if(!err) fprintf(FP,					//add napt rule to /proc/cnapt_serv
-			CPM " add %s:1:%s:%s:%s-%s:%s:%s-%s\n"
-			, argv[FWTYPE], argv[PROT], gw, argv[LOCPORT], argv[LOCPORT], wan, argv[REMPORT], argv[REMPORT]);
+				if(!err) {
+				fprintf(FP,					//add napt rule to /proc/cnapt_serv & nvram set port nums
+				CPM " add %s:1:%s:%s:%s-%s:%s:%s-%s\n"
+				, argv[FWTYPE], argv[PROT], gw, argv[LOCPORT], argv[LOCPORT], wan, argv[REMPORT], argv[REMPORT]);
+				setoldport(argv[NAME], argv[LOCPORT], LOCPORT);
+				setoldport(argv[NAME], argv[REMPORT], REMPORT);
+				}
 			}
 		}
 	}
@@ -202,7 +227,7 @@ DBG("main:%s addrm:%s type:%s name:%s prot:%s remport:%s locport:%s\n", argv[2],
 		break;
 		case FWTYPE: if(strcmp(argv[i], "ls") && strcmp(argv[i], "pf")) i=argc+1;
 		break;
-		case NAME: if(strlen(argv[i])>32) i=argc+1;			//safety limit for chain name
+		case NAME: if(strlen(argv[i])>SRVNAMEMAXLENGTH) i=argc+1;			//safety limit for chain name
 		break;
 		case PROT: if(strcmp(argv[i], "udp") && strcmp(argv[i], "tcp") && strcmp(argv[i], "tcp/udp")) i=argc+1;
 		break;
