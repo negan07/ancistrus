@@ -1,0 +1,55 @@
+diff -urN work/libevent-2.1.12-stable/Makefile work/libevent-2.1.12-stable/Makefile
+--- work/libevent-2.1.12-stable/Makefile
++++ work/libevent-2.1.12-stable/Makefile
+@@ -0,0 +1,51 @@
++include ../Rules.mak
++
++LIBSNAME		:= libevent
++LIBSMAINVER		:= -2.1.so.7
++LIBSOLDMAINVER		:= -2.0.so.5
++LIBSVER			:= $(LIBSMAINVER).0.1
++LIBSOLDVER		:= $(LIBSOLDMAINVER).1.9
++LIBSDIRNAME		:= $(EVENT)/.libs
++LIBS			:= $(LIBSNAME)*.so*
++
++all: config
++	$(MAKE) -C $(EVENT)
++	$(STRIP) $(STRIPFLAGS) $(LIBSDIRNAME)/*.a
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(EVENT) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)" LDFLAGS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB)" LIBS="-pthread -lm -lz" --enable-static --enable-shared --disable-openssl --disable-dependency-tracking --disable-debug-mode --disable-libevent-regress --disable-samples --enable-function-sections --disable-doxygen-html
++
++install: control
++	$(STRIP) $(LIBSDIRNAME)/$(LIBS)
++	for D in $(LIBDIR); do install -m 0755 -d $$D; done
++	cp -a $(LIBSDIRNAME)/$(LIBS) $(LIBDIR)
++	for L in $(LIBSNAME)$(LIBSOLDMAINVER) $(LIBSNAME)$(LIBSOLDVER); do ln -sf $(LIBSNAME)$(LIBSVER) $(LIBDIR)/$$L; done
++
++clean:
++	$(MAKE) -C $(EVENT) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(EVENT) distclean
++
++ifndef BUILD
++control:
++else
++PREINST		:= $(CTRL_DIR)/preinst
++
++control: preinst
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "echo \"Removing old lib ver & symlinks...\"" >> $(PREINST)
++	@echo "rm -f $(LDLIB)/$(LIBSNAME)*.so*" >> $(PREINST)
++	@echo "sync" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++endif
++
