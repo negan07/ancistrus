@@ -50,7 +50,7 @@ diff -urN work/minidlna-1.3.0/Makefile work/minidlna-1.3.0/Makefile
 +	@echo "echo \"Removing old binary...\"" >> $(PREINST)
 +	@echo "[ -f $(USRSBIN)/minidlna ] && rm -f $(USRSBIN)/minidlna && sync" >> $(PREINST)
 +	@echo "echo \"Removing orphan libs & symlinks...\"" >> $(PREINST)
-+	@echo "for L in sqlite3 id3tag exif jpeg ogg vorbis FLAC; do rm -f $(LDLIB)/lib\$$L.so*; sync; done" >> $(PREINST)
++	@echo "for L in id3tag exif jpeg ogg vorbis FLAC; do rm -f $(LDLIB)/lib\$$L.so*; sync; done" >> $(PREINST)
 +	@echo "echo \"Removing orphan htm webpages...\"" >> $(PREINST)
 +	@echo "rm -f $(WWW)/sub_* $(WWW)/sh_* $(WWW)/media*" >> $(PREINST)
 +	@echo "sync" >> $(PREINST)
