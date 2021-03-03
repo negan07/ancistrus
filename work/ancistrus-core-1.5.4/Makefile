@@ -65,6 +65,8 @@ control: preinst postinst postrm
 
 preinst:
 	@echo "#!/bin/sh" > $(PREINST)
+	@echo "echo \"Retrocompatibility check...\"" >> $(PREINST)
+	@echo "[ -f $(USRETCINITDPOST)/usb_service_post ] && rm -f $(USRETCINITDPOST)/usb_service_post" >> $(PREINST)
 	@echo "[ -d $(USRETCINITDRCSD) ] && [ -d $(USRETCINITDPRE) ] && [ -d $(USRETCINITDPOST) ] && exit 0" >> $(PREINST)
 	@echo "echo \"Preparing $(CORE_WORK) package installation...\"" >> $(PREINST)
 	@echo "echo" >> $(PREINST)
@@ -141,6 +143,8 @@ postinst:
 	@echo "for F in $(RCMAINCSS); do [ -f $(TMPDIR)/\$$F ] && mv -f $(TMPDIR)/\$$F $(RCWWWCSSDIR)/\$$F; done" >> $(POSTINST)
 	@echo "ln -sf $(USRSBIN)/$(PROJ_TAG) $(TMPETC)/$(CGI)" >> $(POSTINST)
 	@echo "sync" >> $(POSTINST)
+	@echo "echo \"Updating init.d...\"" >> $(POSTINST)
+	@echo "cp -rf $(USRETCINITD) $(TMPETC)/" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
 postrm:
@@ -151,7 +155,7 @@ postrm:
 	@echo "echo \"Reverting to original $(RCAPPSBIN) ...\"" >> $(POSTRM)
 	@echo "for L in $(USRETC) $(TMPETC); do ln -sf $(RCSBINDIR)/$(RCAPP)/$(RCAPPSBIN) \$$L/$(RCAPPSBIN); done" >> $(POSTRM)
 	@echo "sync" >> $(POSTRM)
-	@echo "echo \"Ram cleanup ...\"" >> $(POSTRM)
+	@echo "echo \"init.d ram cleanup ...\"" >> $(POSTRM)
 	@echo "rm -rf $(TMPETC)/$(INITD)/" >> $(POSTRM)
 	@echo "exit 0" >> $(POSTRM)
 endif
