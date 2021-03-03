@@ -70,27 +70,27 @@ function runTelCmd() {
 }
 
 function showAll() {
-	var inname=["Connection Check", "Periodic Firewall Check", "DNRD DNS Daemon", "Internal DNS Hijack", "Apple Time Machine", "Apple ITunes", "NTP Time", "POT Counter", "Kernel Messages Printing", "Schedule", "Scheduled Show Mem Log", "Logging", "Internal Cloud", "Led Control", "Print Server", "Upgrade Notifications", ""];
-	var inval=["check_conn", "check_fw", "dnrd", "dnshj", "apple", "iserver", "ntp", "potcounter", "printk", "schedule", "show_mem_log", "syslogd", "xCloud", "led_ctrl", "printserver", "anc_upgr", "telnet"];
-	var val=["@h_check_conn_disable#", "@h_check_fw_disable#", "@h_dnrd_disable#", "@h_dnshj_disable#", "@h_apple_disable#", "@h_iserver_disable#", "@h_ntp_disable#", "@h_potcounter_disable#", "@h_printk_disable#", "@h_schedule_disable#", "@h_show_mem_log_disable#", "@h_syslogd_disable#", "@h_xCloud_disable#", "@h_led_ctrl_disable#", "@h_printserver_disable#", "@h_anc_upgr_disable#", "@h_telnet_enable#"];
+	var inname=["Connection Check", "Periodic Firewall Check", "DNRD DNS Daemon", "Internal DNS Hijack", "Apple Time Machine", "Apple ITunes", "NTP Time", "FTP Server", "POT Counter", "Kernel Messages Printing", "Schedule", "Scheduled Show Mem Log", "Logging", "Internal Cloud", "Led Control", "Print Server", "Upgrade Notifications", ""];
+	var inval=["check_conn", "check_fw", "dnrd", "dnshj", "apple", "iserver", "ntp", "ftpd", "potcounter", "printk", "schedule", "show_mem_log", "syslogd", "xCloud", "led_ctrl", "printserver", "anc_upgr", "telnet"];
+	var val=["@h_check_conn_disable#", "@h_check_fw_disable#", "@h_dnrd_disable#", "@h_dnshj_disable#", "@h_apple_disable#", "@h_iserver_disable#", "@h_ntp_disable#", "@h_ftpd_disable#", "@h_potcounter_disable#", "@h_printk_disable#", "@h_schedule_disable#", "@h_show_mem_log_disable#", "@h_syslogd_disable#", "@h_xCloud_disable#", "@h_led_ctrl_disable#", "@h_printserver_disable#", "@h_anc_upgr_disable#", "@h_telnet_enable#"];
 
 	var xmlhttp=readFileTags("opkgstatus"), str="", txt="", tel=0;
 	if(xmlhttp.readyState==4 && xmlhttp.status==200) str=xmlhttp.responseText;
 	if(str.indexOf("telnet")>-1) tel=1;
 
 	for(var i=0;i<inval.length;i++) {
-	if(i==16 && !tel) continue;
+	if(i==17 && !tel) continue;
 	txt+="<tr><td nowrap><input type='checkbox' name='"+inval[i];
-	if(i!=16) txt+="_disable' ";
+	if(i!=17) txt+="_disable' ";
 	else txt+="_enable' ";
 	txt+="value='"+val[i]+"'><a href='javascript:gotoWiki(\"Service-Inhibitions#";
-	if(i!=15) txt+=inval[i];
+	if(i!=16) txt+=inval[i];
 	else txt+="upgrade-notifications";
-	if(i!=16) txt+="\");'><b>Inhibit "+inname[i];
+	if(i!=17) txt+="\");'><b>Inhibit "+inname[i];
 	else txt+="\");'><b>Turn Telnet Daemon On";
 	txt+="</b></a></td><td nowrap align='right'><input class='apply_bt' type='submit' value='Apply' onClick='return run";
-	if(i<15) txt+="InhCmd(\""+inval[i]+"\", "+inval[i]+"_disable);'>";
-	else if(i==15) txt+="UpgCmd();'>";
+	if(i<16) txt+="InhCmd(\""+inval[i]+"\", "+inval[i]+"_disable);'>";
+	else if(i==16) txt+="UpgCmd();'>";
 	else txt+="TelCmd();'>";
 	txt+="</td></tr><tr><td colspan='2' background='liteblue.gif' height='12'></td></tr>";
 	}
@@ -120,6 +120,7 @@ function showAll() {
 <input type="hidden" name="h_apple_disable" value="@h_apple_disable#">
 <input type="hidden" name="h_iserver_disable" value="@h_iserver_disable#">
 <input type="hidden" name="h_ntp_disable" value="@h_ntp_disable#">
+<input type="hidden" name="h_ftpd_disable" value="@h_ftpd_disable#">
 <input type="hidden" name="h_potcounter_disable" value="@h_potcounter_disable#">
 <input type="hidden" name="h_printk_disable" value="@h_printk_disable#">
 <input type="hidden" name="h_schedule_disable" value="@h_schedule_disable#">
