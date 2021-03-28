@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #include "nvram.h"
 #include "ancistrus.h"
 #include "common.h"
@@ -235,13 +236,39 @@ return 0;
 }
 
 /*
+ * PARTPERC
+ * Obtain partition percentage used space.
+ * Input: mount path.
+ * Return: '0' on success, '1' on failure.
+ */
+static int partperc(const char *path) {
+char perc[4], buf[32], *p;
+long long int percnum;
+int i=0;
+struct statvfs vfs;
+
+if(path==NULL || *path!='/' || statvfs(path, &vfs) || !vfs.f_blocks) return 1;
+percnum=((vfs.f_blocks-vfs.f_bfree)*100ULL+vfs.f_blocks/2)/(vfs.f_blocks);
+CGIDBG("    percnum  %lld%%\n", percnum);
+	for(p=buf+31;percnum;percnum/=10) {
+	*p--='0'+(percnum%10);
+	i++;
+	}
+memcpy(perc, ++p, sizeof(perc));
+perc[i]='\0';
+CGIDBG("    perc     %s%%\n", perc);
+TYPE(perc);TYPECH("%");
+return 0;
+}
+
+/*
  * GETNVAR
  * Read an nvram var and print value.
  * Input: nvram var name.
  * Return: '0' on success, '1' on void/null variable.
  */
 static int getnvar(const char *nvar) {
-char *val, perc[5];
+char *val;
 int fde;
 
 if(nvar==NULL || !*nvar) return 1;
@@ -252,11 +279,7 @@ if(nvar==NULL || !*nvar) return 1;
 	if(fde==8 && getnvreclist(val)) return 1;
 	else if(fde==5 && getnvlist(val)) return 1;
 	}
-	else if(!strncmp(nvar, "part_", 5)) {							//flash partition for % used space
-	partperc(nvar+5, perc);
-	CGIDBG("     perc  %s\n", perc);
-	TYPE(perc);
-	}
+	else if(!strncmp(nvar, "part_", 5)) partperc(nvar+5);					//flash partition for % used space
 	else {											//normal variable
 	val=NV_SGET(nvar);
 	CGIDBG("     val   %s\n", val);
@@ -338,7 +361,8 @@ if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *
 		if((err=fetchformvar(raw, nvar, fd))) return err;				//fetch vars & check if webpage is malformed
 			if(!*job || !strcmp(job, "upload")||!strcmp(job, "home")) getnvar(nvar);//### GET METHOD || HOME/UPLOAD FILE ###
 			else if(!strcmp(job, "save") || !strcmp(job, "savesys")) {		//### POST METHOD - SAVE ###
-			if(*(val=QSGET(raw))!='@' && strncmp(nvar, "list_", 5) && strncmp(nvar, "reclist_", 8)) NV_SET(nvar, val);//store value
+			if(*(val=QSGET(raw))!='@' && strncmp(nvar, "list_", 5) && strncmp(nvar, "reclist_", 8)
+			&& strncmp(nvar, "part_", 5)) NV_SET(nvar, val);			//store value
 			CGIDBG("----------------------------------------> anc nvram set %s \"%s\"\n", nvar, val);
 			getnvar(nvar);								//retrieve nvram value like GET
 			}

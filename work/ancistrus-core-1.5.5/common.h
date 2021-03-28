@@ -20,14 +20,6 @@ int lock(const char *lock_path);
 int unlock(int fd, const char *lock_path);
 
 /*
- * PARTFREEPERC
- * Obtain partition percentage used space.
- * Input: mount path, destination string (caller must take care of dest allocation).
- * Return: '0' on success, '1' on failure.
- */
-int partperc(const char *path, char *dest);
-
-/*
  * CHECKNUMRANGE
  * Check if a numeric value belong to an interval.
  * Input: value as string, start, end interval delimiters.

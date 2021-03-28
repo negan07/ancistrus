@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <sys/wait.h>
-#include <sys/statvfs.h>
 #include <errno.h>
 #include "ancistrus.h"
 #include "common.h"
@@ -36,14 +35,6 @@ int err=1;
 	DBG("fd: %d returning code: %d\n", fd, err);
 	}
 return err;
-}
-
-int partperc(const char *path, char *dest) {
-struct statvfs vfs;
-
-if(path==NULL || *path!='/' || statvfs(path, &vfs) || !vfs.f_blocks) return 1;
-sprintf(dest, "%lld%%", ((vfs.f_blocks-vfs.f_bfree)*100ULL+vfs.f_blocks/2)/(vfs.f_blocks));
-return 0;
 }
 
 int checknumrange(const char* value, const int start, const int end) {
