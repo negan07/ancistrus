@@ -123,6 +123,9 @@ function check_restore() {
 </select></td></tr>
 <tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Regenerate PEM" onClick="return check_pem();"></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Utilities#renew-ca-bundle-certs')" tabindex="-1"><b>Renew SSL CA Bundle Certificates</b></a></td></tr>
+<tr><td colspan="2" align="center"><input class="common_bt" type="submit" value="Renew Certs" onClick="this.form.job.value='home';this.form.todo.value='/usr/sbin/scripts/renew_crt.sh';if(!confirm('Updating CA Bundle Certs: proceed ?')) return false;else return true"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Utilities#download-nvram-settings')" tabindex="-1"><b>Download Nvram Settings</b></a></td></tr>
 <tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Download" onClick="window.location.href='anc.cgi?gen_file=nvram.zip&next_file=anc_utils.htm&job=upload&todo=/usr/sbin/zip -jq9 /tmp/nvram.zip /tmp/nvram';"></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
