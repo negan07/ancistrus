@@ -19,7 +19,7 @@
 # Usage: $0 (<setlics>|<clean>) (<...> ... <...>)
 #
 # setlics = setup license flag storing them on nvram
-# clean = remove all the related bins, certs, license files & nvram stored license flags
+# clean = remove all the related bins, config, license files & nvram stored license flags
 #
 # <...> parameters are optional and appended to the basic 'speedtest' command & parameters. 
 # Type: '${BIN} -h' to see all the parameters available.
@@ -40,23 +40,22 @@ done
 
 clean_files() {
 # unset temp files & license flags
-rm -rf ${BIN}* ${CONFDIR}/.config/ ${CERTDIR}/
+rm -rf ${BIN}* ${CONFDIR}/.config/
 for V in ${NVARS}; do nvram unset ${V}; done
 }
 
 run_speedtest() {
 # download, extract files & run speedtest in non-interactive mode
 BINCMD=${BIN}													# command basic params
-[ ! ${HOME} ] && BINCMD="${BINCMD} --accept-license --accept-gdpr -p no"					# non interactive params
+[ ! ${HOME} ] && BINCMD="${BINCMD} --ca-certificate=${CERT} --accept-license --accept-gdpr -p no"		# non interactive params
+
+[ ! -r ${CERT} ] && cd ${CERTDIR} && curl -f -s -k -O -z ${PEMNAME} ${CERTURL} && chmod 600 ${PEM} && mv -f ${PEM} ${CERT}	# download cert
+[ ! -r ${CERT} ] && echo "Error: ${CERT} cert missing or unavailable !" && exit 2				# cert presence verification
 
 [ ! -x ${BIN} ] && curl -f -s -k -L ${BINURL} | tar -oxz -C ${BINDIR} ${BINNAME} && chmod 755 ${BIN}		# download & extract binary
-[ ! -x ${BIN} ] && echo "Error: ${BIN} binary missing or unavailable !" && exit 2				# bin presence verification
+[ ! -x ${BIN} ] && echo "Error: ${BIN} binary missing or unavailable !" && exit 1				# bin presence verification
 
-[ ! -d ${CERTDIR} ] && mkdir -p -m 0755 ${CERTDIR}								# create cert dir container
-[ ! -r ${CERT} ] && curl -f -s -k -o ${CERT} ${CERTURL} && chmod 600 ${CERT}					# download pem cert
-[ ! -d ${CERTDIR} -o ! -r ${CERT} ] && echo "Error: ${CERT} key file missing or unavailable !" && exit 1	# cert presence verification
-
-export HOME=${CONFDIR}												# export non empty HOME env var
+export HOME=${CONFDIR}												# avoid writing confdir on root
 [ ! -z "${1}" ] && BINCMD="${BINCMD} ${@}"									# append parameters if any
 nice -n -20 ${BINCMD}												# execute boosted command
 }
@@ -66,17 +65,19 @@ BINVER=1.0.0
 BINARCH=arm
 BINOS=linux
 BINARCNAME=ookla-${BINNAME}-${BINVER}-${BINARCH}-${BINOS}.tgz
-CERTNAME=cert.pem
+CERTNAME=ca-bundle.crt
+PEMNAME=cacert.pem
 NVARS="speedtest_net_license speedtest_net_gdpr"
 
 BINDIR=/tmp
 CONFDIR=/tmp
-CERTDIR=/etc/ssl
+CERTDIR=/etc
 CERT=${CERTDIR}/${CERTNAME}
+PEM=${CERTDIR}/${PEMNAME}
 BIN=${BINDIR}/${BINNAME}
 
 BINURL=https://bintray.com/ookla/download/download_file?file_path=${BINARCNAME}
-CERTURL=https://curl.se/ca/ca${CERTNAME}
+CERTURL=https://curl.se/ca/${PEMNAME}
 
 case "${1}" in
 setlics)
