@@ -134,6 +134,8 @@ post_inst:
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mcurl \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/libcurl.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/curl $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCCRT) $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCOPTCRT) $(BUILD_TARGET)$(RCOPTCRTDIR)/ || exit 1; \
 	else \
 	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mcurl package is mandatory\\e[0m" && exit 1; \
 	fi
@@ -176,10 +178,6 @@ post_inst:
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36msamba \\e[0m"; \
 	rm $(BUILD_TARGET)$(RCLDLIB)/libntpass.so* || exit 1; \
 	[ -f $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 ] || ln -sf libiconv.so.0.0 $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 || exit 1; \
-	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep smartmontools`" ]; then \
-	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36msmartmontools \\e[0m"; \
-	rm $(BUILD_TARGET)$(RCTMPDIR)/usb_service_post || exit 1; \
 	fi
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep speedtest-net`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mspeedtest-net \\e[0m"; \
