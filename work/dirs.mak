@@ -717,13 +717,30 @@ DEP_$(EVENT)			:= $(NAME_$(ZLIB))
 DESC_$(EVENT)			:= An event notification library
 DIRLIST				+= $(EVENT)
 TARLIST				+= $(TAR_$(EVENT))
+# TRANSMISSION
+TRANSM_NAME			:= transmission
+VER_$(TRANSM_NAME)		:= 3.00
+TRANSM				:= $(TRANSM_NAME)-$(VER_$(TRANSM_NAME))
+NAME_$(TRANSM)			:= $(TRANSM_NAME)$(DBG)
+SUBVER_$(TRANSM)		:= 
+VER_$(TRANSM)			:= $(VER_$(TRANSM_NAME))$(SUBVER_$(TRANSM))
+DL_$(TRANSM)			:= https://github.com/transmission/transmission-releases/raw/master
+TAR_$(TRANSM)			:= $(TRANSM).tar.xz
+HOME_$(TRANSM)			:= https://www.transmissionbt.com/
+LIC_$(TRANSM)			:= GPLv2+
+SEC_$(TRANSM)			:= storage
+PRIO_$(TRANSM)			:= optional
+DEP_$(TRANSM)			:= $(NAME_$(ZLIB)),$(NAME_$(ICONV)),$(NAME_$(EVENT)),$(NAME_$(CORE_WORK))
+DESC_$(TRANSM)			:= Simple BitTorrent client
+DIRLIST				+= $(TRANSM)
+TARLIST				+= $(TAR_$(TRANSM))
 # INITIALIZE CATEGORIES
 BUILTINLIB			:=
 BUILTIN				:=
 THIRDPARTYLIB			:=
 THIRDPARTY			:=
 # SUBGROUPS
-USBSTORAGE			:= $(SAMBA) $(E2FSPROGS) $(HDPARM) $(HDIDLE) $(SMONTOOLS) $(NTFSPROGS)
+USBSTORAGE			:= $(SAMBA) $(E2FSPROGS) $(HDPARM) $(HDIDLE) $(SMONTOOLS) $(NTFSPROGS) $(TRANSM)
 MEDIASERVER			:= $(FFMPEG) $(ID3TAG) $(EXIF) $(JPEG) $(OGG) $(VORBIS) $(FLAC)
 SPEEDTESTS			:= $(NETPERF) $(NETWORKTEST) $(SPEEDTESTNET)
 # ADDING IPK TO CATEGORIES
@@ -757,6 +774,7 @@ BUILTIN				+= $(HDPARM)
 BUILTIN				+= $(HDIDLE)
 THIRDPARTY			+= $(SMONTOOLS)
 THIRDPARTY			+= $(NTFSPROGS)
+THIRDPARTY			+= $(TRANSM)
 endif
 # MEDIASERVER
 ifdef MEDIASERVER

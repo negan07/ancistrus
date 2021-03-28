@@ -1,0 +1,23 @@
+--- work/transmission-3.00/transmission-3.00/web/index.html
++++ work/transmission-3.00/transmission-3.00/web/index.html
+@@ -174,7 +174,7 @@
+ 						<div class="row"><div class="key"><label for="peer-port">Peer listening port:</label></div>
+ 						                 <div class="value"><input type="number" min="0" max="65535" id="peer-port"/></div></div>
+ 						<div class="row"><div class="key">&nbsp;</div>
+-						                 <div class="value"><span id="port-label">Status: Unknown</span></div></div>
++						                 <div class="value"><span id="port-label"></span></div></div>
+ 						<div class="checkbox-row"><input type="checkbox" id="peer-port-random-on-start"/><label for="peer-port-random-on-start">Randomize port on launch</label></div>
+ 						<div class="checkbox-row"><input type="checkbox" id="port-forwarding-enabled"/><label for="port-forwarding-enabled">Use port forwarding from my router</label></div>
+ 					</div>
+--- work/transmission-3.00/transmission-3.00/web/javascript/prefs-dialog.js
++++ work/transmission-3.00/transmission-3.00/web/javascript/prefs-dialog.js
+@@ -75,8 +75,7 @@ function PrefsDialog(remote) {
+     };
+ 
+     var onPortChecked = function (response) {
+-        var is_open = response['arguments']['port-is-open'];
+-        var text = 'Port is <b>' + (is_open ? 'Open' : 'Closed') + '</b>';
++        var text = '<input type="button" id="check-port-button" value="Probe Port" onclick="window.open(\'https://www.grc.com/x/portprobe='+data.elements.root.find('#peer-port').val()+'\')"/>';
+         var e = data.elements.root.find('#port-label');
+         setInnerHTML(e[0], text);
+     };

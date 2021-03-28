@@ -1,0 +1,16 @@
+--- work/transmission-3.00/transmission-3.00/third-party/miniupnpc/updateminiupnpcstrings.sh
++++ work/transmission-3.00/transmission-3.00/third-party/miniupnpc/updateminiupnpcstrings.sh
+@@ -37,6 +37,13 @@ if [ "$OS_NAME" = "AmigaOS" ]; then
+ 	fi
+ fi
+ 
++# detecting the destination platform name and version
++RULESMAK=../../../../Rules.mak
++if [ -f $RULESMAK -a -n "`grep PROJECT $RULESMAK`" ]; then
++OS_NAME="Linux"
++OS_VERSION="`grep PROJECT $RULESMAK | awk '{printf $4}'`"
++fi
++
+ echo "Detected OS [$OS_NAME] version [$OS_VERSION]"
+ MINIUPNPC_VERSION=`cat "${VERSION_FILE}"`
+ echo "MiniUPnPc version [${MINIUPNPC_VERSION}]"

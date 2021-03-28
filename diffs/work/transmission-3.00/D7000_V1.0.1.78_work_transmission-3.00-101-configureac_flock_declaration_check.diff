@@ -1,0 +1,24 @@
+--- work/transmission-3.00/transmission-3.00/configure.ac
++++ work/transmission-3.00/transmission-3.00/configure.ac
+@@ -646,6 +646,21 @@ AM_CONDITIONAL(WIN32, test "x$have_msw"
+ 
+ dnl ----------------------------------------------------------------------------
+ dnl
++dnl  flock() presence
++AC_MSG_CHECKING(for flock declaration)
++have_flock=no
++AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
++#include <sys/file.h>
++]], [[void* p = flock]])],
++  [have_flock=yes])
++AC_MSG_RESULT($have_flock)
++
++if test "$have_flock" = yes ; then
++	AC_DEFINE(HAVE_FLOCK, 1, Define if you have the 'flock' function.)
++fi
++
++dnl ----------------------------------------------------------------------------
++dnl
+ dnl  Generate the output
+ 
+ AC_CONFIG_FILES([Makefile

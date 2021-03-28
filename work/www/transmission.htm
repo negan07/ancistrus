@@ -1,0 +1,200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta name="description" content="D7000">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>NETGEAR Router D7000</title>
+<link rel="stylesheet" href="style/form.css">
+<style type="text/javascript">
+	classes.num.all.fontFamily="Courier";
+	classes.num.all.fontSize="10pt";
+</style>
+<script language="javascript" type="text/javascript" src="string.js"></script>
+<script language="javascript" type="text/javascript" src="funcs.js"></script>
+<script language="javascript" type="text/javascript" src="utility.js"></script>
+<script language="javascript" type="text/javascript" src="linux.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+var root_dir="/mnt/shares/";
+var vol_dir=[@mntpointlist_/dev/sd#];
+
+function setDefs() {
+	var cf=document.forms[0], i;
+	var nflg=[cf.transmission_enable, cf.transmission_nocert, cf.transmission_incdldir_enable, cf.transmission_watchdir_enable];
+	var nflgval=[false, false, false, false];
+
+	for(i=0;i<nflg.length;i++) if(nflg[i].value=="") nflg[i].checked=nflgval[i];
+	if(cf.transmission_rpc_port.value=="") cf.transmission_rpc_port.value="9091";
+		if(cf.h_transmission_volumedir.value=="") {
+			for(i=0;i<vol_dir.length;i++) {
+			if(!checkVolume(vol_dir[i])) cf.transmission_volumedir.value=vol_dir[i];
+			break;
+			}
+		}
+	if(cf.transmission_dldir.value=="" && !checkAllVolumes()) cf.transmission_dldir.value=cf.transmission_volumedir.value+"/Downloads";
+}
+
+function varInit() {
+	var cf=document.forms[0];
+
+	AncdataToVisible(cf);
+	setDefs();
+		if(checkAllVolumes()) {
+		allToDisabled(cf);
+		allToDisabled(document.forms['blocklist']);
+		alert("No storage devices available: page locked !\n");
+		}
+}
+
+function showVolumes() {
+	var i, txt="";
+
+	for(i=0;i<vol_dir.length;i++) if(!checkVolume(vol_dir[i])) txt+="<option value=\""+vol_dir[i]+"\">"+vol_dir[i].charAt(vol_dir[i].length-1)+"</option>\n";
+	document.write(txt);
+}
+
+function checkAllVolumes() {
+
+	for(var i=0;i<vol_dir.length;i++) if(!checkVolume(vol_dir[i])) return 0;
+	return 1;
+}
+
+function checkVolume(vol) {
+	var letters="UTRS";
+
+	if((vol.substring(0,root_dir.length)==root_dir) && (letters.indexOf(vol.charAt(vol.length-1))>=0)) return 0;
+	return 1;
+}
+
+function checkServEnable() {
+	var cf=document.forms[0];
+
+		if(cf.transmission_enable.value!='1') {
+		alert('Error ! Transmission daemon must be running !');
+		return false;
+		}
+		else return true;
+}
+
+function checkData() {
+	var cf=document.forms[0];
+	var msg="";
+
+	msg+=checkInt(cf.transmission_rpc_port, "Web server port", 1, 65534, true);
+	msg+=checkBlank(cf.transmission_dldir, "Download dir");
+	if(cf.transmission_dldir.value.substring(0,cf.transmission_volumedir.value.length)!=cf.transmission_volumedir.value) 
+	msg+="Download dir must begin with: "+cf.transmission_volumedir.value+" .\n";
+	if(!checkInvalidChars(cf.transmission_dldir.value, invalid_folder_char)) msg+="Invalid download dir name: characters not allowed.\n";
+	if(strlen_utf8(cf.transmission_dldir.value)>128) msg+="Invalid download dir name: too long.\n";
+
+	if(msg.length>1) {
+	alert(msg);
+	return false;
+	}
+	AncdataToHidden(cf);
+	return true;
+}
+
+function checkBlocklist() {
+	var cf=document.forms['blocklist'];
+	var cf0=document.forms['transmission'];
+	var filename="";
+	var destdir="/tmp/";
+	var sddestdir=cf0.h_transmission_volumedir.value;
+	var IEPlfm = /MSIE [67]/g;
+	var diskprefix = /^.:\\/g;
+
+	if(cf0.h_transmission_volumedir.value=="") sddestdir=cf0.transmission_volumedir.value;
+		if(typeof cf.download.files[0]!='undefined') filename=cf.download.files[0].name;
+		else {
+		alert(getErrorMsgByVar("gsm_msg_bku_no_blank_filename"));
+		return false;
+		}
+		if(IEPlfm.test(navigator.userAgent) && !diskprefix.test(filename)) {
+		alert(getErrorMsgByVar("gsm_msg_upg_inv_file_type"));
+		return false;
+		}
+
+	if(!confirm("Installing blocklist "+filename+" : proceed ?")) return false;
+	cf.todo.value="/usr/sbin/mv -f "+destdir+filename+" "+sddestdir+"/.Transmission/blocklists/";
+	return true;
+}
+
+//-->
+</script></head>
+<body bgcolor="#ffffff" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" onload="varInit();document.forms[0].elements[0].focus();">
+<form name="transmission" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
+<div><a class="page_title" href="javascript:gotoWiki('transmission-package/');">TRANSMISSION</a></div>
+<div class="fix_button">
+<table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
+&nbsp;
+<input class="short_common_bt" type="submit" name="resettransm" value="Reset" onClick="this.form.job.value='home';this.form.todo.value='/usr/sbin/rc_app/rc_transmission reset';if(!confirm('Transmission settings are about to be unset: proceed ?')) return false;else return true">
+&nbsp;
+<input class="short_common_bt" type="button" name="open_webserver" value="Open GUI" onClick="if(checkServEnable()) window.open('http://'+window.location.hostname+':'+this.form.transmission_rpc_port.value)">
+&nbsp;
+<input class="short_common_bt" type="button" name="show_log" value="Show Log" onClick="AncstdAction(this.form,'anc_run.htm','transmission.htm','pipe','');">
+&nbsp;
+<input class="short_common_bt" type="button" name="delete_log" value="Delete Log" onClick="AncstdAction(this.form,'transmission.htm','transmission.htm','home','/usr/sbin/rc transmission clearlog');">
+&nbsp;
+<input class="apply_bt" type="SUBMIT" name="apply" value="Apply" onClick="return checkData()">
+</td></tr></table>
+</div>
+<div id="main" class="main_top_button">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td nowrap colspan="2"><input type="checkbox" name="transmission_enable" value="@h_transmission_enable#">
+<a href="javascript:gotoWiki('transmission-package#transmission');"><b>Enable Transmission Daemon</b></a></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="transmission_nocert" value="@h_transmission_nocert#"><a href="javascript:gotoWiki('transmission-package#skip-ssl-certificate-verification');"><b>Skip SSL Certificate Verification</b></a></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap><a href="javascript:gotoWiki('transmission-package#web-server-port');"><b>Transmission Web Server Port</b></a></td>
+<td nowrap align="right"><input type="text" class="num" name="transmission_rpc_port" value="@transmission_rpc_port#" size=6 maxlength=5></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('transmission-package#edit-config-file')" tabindex="-1"><b>Modify Transmission Daemon Configuration</b></a></td></tr>
+<tr><td colspan="2" align="center">
+<input class="common_bt" type="button" value="Edit Config" onClick="this.form.edit_file.value=this.form.transmission_volumedir.value+'/.Transmission/settings.json';AncstdAction(this.form,'anc_editfile.htm','transmission.htm','edit','');">
+<input class="apply_bt" type="SUBMIT" name="reload_conf" value="Reload Conf" onClick="AncstdAction(this.form,'transmission.htm','transmission.htm','home','/usr/sbin/rc transmission reloadconf');">
+</td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td align="left"><span><a href="javascript:gotoWiki('transmission-package#select-home-dir-path');"><b>Storage Device Volume Letter Path</b></a></span></td>
+	<td align="right"><select name="transmission_volumedir" size=1>
+		<script>showVolumes()</script>
+	</select></td>
+</tr>
+<tr><td nowrap><a href="javascript:gotoWiki('transmission-package#download-dir');"><b>Download Dir</b></a>&nbsp;</td>
+<td nowrap align="right"><input type="text" name="transmission_dldir" value="@transmission_dldir#" size=48 maxlength=128></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="transmission_incdldir_enable" value="@h_transmission_incdldir_enable#"><a href="javascript:gotoWiki('transmission-package#incomplete-dir');"><b>Enable Incomplete Torrent Dir</b></a></td></tr>
+<tr><td nowrap colspan="2"><input type="checkbox" name="transmission_watchdir_enable" value="@h_transmission_watchdir_enable#"><a href="javascript:gotoWiki('transmission-package#watch-dir');"><b>Enable Watch Torrent Dir</b></a></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('transmission-package#torrent-finished-script')" tabindex="-1"><b>Torrent Finished Script</b></a></td></tr>
+<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Create/Edit Script" onClick="this.form.edit_file.value=this.form.transmission_volumedir.value+'/.Transmission/transm_done.sh';AncstdAction(this.form,'anc_editfile.htm','transmission.htm','edit','');"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
+</table>
+<input type="hidden" name="job" value="save">
+<input type="hidden" name="todo" value="/usr/sbin/rc transmission start">
+<input type="hidden" name="next_file" value="transmission.htm">
+<input type="hidden" name="old_file" value="">
+<input type="hidden" name="edit_file" value="">
+<input type="hidden" name="pipe_cmd" value="/usr/sbin/rc_app/rc_transmission showlog">
+<input type="hidden" name="h_transmission_enable" value="@h_transmission_enable#">
+<input type="hidden" name="h_transmission_nocert" value="@h_transmission_nocert#">
+<input type="hidden" name="h_transmission_volumedir" value="@h_transmission_volumedir#">
+<input type="hidden" name="h_transmission_incdldir_enable" value="@h_transmission_incdldir_enable#">
+<input type="hidden" name="h_transmission_watchdir_enable" value="@h_transmission_watchdir_enable#">
+</form>
+<form name="blocklist" method="POST" action="anc.cgi" enctype="multipart/form-data" onSubmit="buttonToDisabled(document.forms[0])">
+<table border="0" cellpadding="0" cellspacing="3" width="100%">
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('transmission-package#install-a-blocklist')" tabindex="-1"><b>Install a Blocklist</b></a></td></tr>
+<tr><td colspan="2" align="center"><input type="FILE" name="download" size="40" maxlength="128" value=""></td></tr>
+<tr><td colspan="2" align="center"><input class="apply_bt" type="submit" name="install" value="Install" onClick="return checkBlocklist();"></td></tr>
+<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr></table>
+<input type="hidden" name="job" value="home">
+<input type="hidden" name="todo" value="">
+<input type="hidden" name="next_file" value="transmission.htm">
+</form></div>
+<script>printHelp();</script>
+</body></html>

@@ -1,0 +1,60 @@
+--- work/transmission-3.00/transmission-3.00/web/index.html
++++ work/transmission-3.00/transmission-3.00/web/index.html
+@@ -443,19 +443,19 @@
+ 						<li radio-group="download-rate" id="unlimited_download_rate"><span class='ui-icon ui-icon-bullet'></span>Unlimited</li>
+ 						<li radio-group="download-rate" id="limited_download_rate">Limit (10 kB/s)</li>
+ 						<li>---</li>
+-						<li class='download-speed'>5 kB/s</li>
+-						<li class='download-speed'>10 kB/s</li>
+-						<li class='download-speed'>20 kB/s</li>
+-						<li class='download-speed'>30 kB/s</li>
+-						<li class='download-speed'>40 kB/s</li>
+-						<li class='download-speed'>50 kB/s</li>
+-						<li class='download-speed'>75 kB/s</li>
+ 						<li class='download-speed'>100 kB/s</li>
+-						<li class='download-speed'>150 kB/s</li>
+-						<li class='download-speed'>200 kB/s</li>
+ 						<li class='download-speed'>250 kB/s</li>
+ 						<li class='download-speed'>500 kB/s</li>
+-						<li class='download-speed'>750 kB/s</li>
++						<li class='download-speed'>1000 kB/s</li>
++						<li class='download-speed'>1200 kB/s</li>
++						<li class='download-speed'>1500 kB/s</li>
++						<li class='download-speed'>2500 kB/s</li>
++						<li class='download-speed'>5000 kB/s</li>
++						<li class='download-speed'>8000 kB/s</li>
++						<li class='download-speed'>10000 kB/s</li>
++						<li class='download-speed'>15000 kB/s</li>
++						<li class='download-speed'>25000 kB/s</li>
++						<li class='download-speed'>40000 kB/s</li>
+ 					</ul>
+ 				</li>
+ 				<li>Total Upload Rate
+@@ -463,19 +463,19 @@
+ 						<li radio-group="upload-rate" id="unlimited_upload_rate"><span class='ui-icon ui-icon-bullet'></span>Unlimited</li>
+ 						<li radio-group="upload-rate" id="limited_upload_rate">Limit (10 kB/s)</li>
+ 						<li>---</li>
+-						<li class='upload-speed'>5 kB/s</li>
+-						<li class='upload-speed'>10 kB/s</li>
+ 						<li class='upload-speed'>20 kB/s</li>
+-						<li class='upload-speed'>30 kB/s</li>
+ 						<li class='upload-speed'>40 kB/s</li>
+-						<li class='upload-speed'>50 kB/s</li>
+-						<li class='upload-speed'>75 kB/s</li>
++						<li class='upload-speed'>60 kB/s</li>
+ 						<li class='upload-speed'>100 kB/s</li>
+ 						<li class='upload-speed'>150 kB/s</li>
+-						<li class='upload-speed'>200 kB/s</li>
+-						<li class='upload-speed'>250 kB/s</li>
++						<li class='upload-speed'>300 kB/s</li>
+ 						<li class='upload-speed'>500 kB/s</li>
+-						<li class='upload-speed'>750 kB/s</li>
++						<li class='upload-speed'>1000 kB/s</li>
++						<li class='upload-speed'>1200 kB/s</li>
++						<li class='upload-speed'>1500 kB/s</li>
++						<li class='upload-speed'>2500 kB/s</li>
++						<li class='upload-speed'>5000 kB/s</li>
++						<li class='upload-speed'>10000 kB/s</li>
+ 					</ul>
+ 				</li>
+ 				<li>---</li>

@@ -1,0 +1,8 @@
+--- work/transmission-3.00/transmission-3.00/third-party/libb64/Makefile.am
++++ work/transmission-3.00/transmission-3.00/third-party/libb64/Makefile.am
+@@ -1,4 +1,5 @@
+ AM_CPPFLAGS = -I$(srcdir)/include
++AUTOMAKE_OPTIONS = subdir-objects
+ noinst_LIBRARIES = libb64.a
+ libb64_a_SOURCES = src/cdecode.c src/cencode.c
+ noinst_HEADERS = include/b64/cdecode.h include/b64/cencode.h include/b64/decode.h include/b64/encode.h

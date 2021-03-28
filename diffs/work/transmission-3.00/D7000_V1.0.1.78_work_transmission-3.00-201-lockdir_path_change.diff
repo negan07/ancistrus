@@ -1,0 +1,41 @@
+--- work/transmission-3.00/transmission-3.00/libtransmission/platform.h
++++ work/transmission-3.00/transmission-3.00/libtransmission/platform.h
+@@ -38,7 +38,7 @@ char const* tr_getTorrentDir(tr_session
+ char const* tr_getWebClientDir(tr_session const*);
+ 
+ /** @brief return the directory where session id lock files are stored */
+-char* tr_getSessionIdDir(void);
++//char* tr_getSessionIdDir(void);
+ 
+ /** @} */
+ 
+--- work/transmission-3.00/transmission-3.00/libtransmission/platform.c
++++ work/transmission-3.00/transmission-3.00/libtransmission/platform.c
+@@ -645,7 +645,7 @@ char const* tr_getWebClientDir(tr_sessio
+     return s;
+ }
+ 
+-char* tr_getSessionIdDir(void)
++/*char* tr_getSessionIdDir(void)
+ {
+ #ifndef _WIN32
+ 
+@@ -660,4 +660,4 @@ char* tr_getSessionIdDir(void)
+     return result;
+ 
+ #endif
+-}
++}*/
+--- work/transmission-3.00/transmission-3.00/libtransmission/session-id.c
++++ work/transmission-3.00/transmission-3.00/libtransmission/session-id.c
+@@ -56,9 +56,7 @@ static char* generate_new_session_id_val
+ 
+ static char* get_session_id_lock_file_path(char const* session_id)
+ {
+-    char* lock_file_dir = tr_getSessionIdDir();
+-    char* lock_file_path = tr_strdup_printf("%s/tr_session_id_%s", lock_file_dir, session_id);
+-    tr_free(lock_file_dir);
++    char* lock_file_path = tr_strdup_printf("/var/lock/tr_session_id_%s", session_id);
+     return lock_file_path;
+ }
+ 

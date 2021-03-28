@@ -1,0 +1,774 @@
+diff -purN work/transmission-3.00/transmission-3.00/libtransmission/bandwidth.h work/transmission-3.00/transmission-3.00/libtransmission/bandwidth.h
+--- work/transmission-3.00/transmission-3.00/libtransmission/bandwidth.h	2020-05-22 13:04:23.000000000 +0200
++++ work/transmission-3.00/transmission-3.00/libtransmission/bandwidth.h	2021-02-18 20:11:07.440711000 +0100
+@@ -126,7 +126,7 @@ void tr_bandwidthConstruct(tr_bandwidth*
+ void tr_bandwidthDestruct(tr_bandwidth* bandwidth);
+ 
+ /** @brief test to see if the pointer refers to a live bandwidth object */
+-static inline bool tr_isBandwidth(tr_bandwidth const* b)
++static __attribute__((unused)) bool tr_isBandwidth(tr_bandwidth const* b)
+ {
+     return b != NULL && b->magicNumber == BANDWIDTH_MAGIC_NUMBER;
+ }
+@@ -140,7 +140,7 @@ static inline bool tr_isBandwidth(tr_ban
+  * @see tr_bandwidthAllocate
+  * @see tr_bandwidthGetDesiredSpeed
+  */
+-static inline bool tr_bandwidthSetDesiredSpeed_Bps(tr_bandwidth* bandwidth, tr_direction dir, unsigned int desiredSpeed)
++static __attribute__((unused)) bool tr_bandwidthSetDesiredSpeed_Bps(tr_bandwidth* bandwidth, tr_direction dir, unsigned int desiredSpeed)
+ {
+     unsigned int* value = &bandwidth->band[dir].desiredSpeed_Bps;
+     bool const didChange = desiredSpeed != *value;
+@@ -152,7 +152,7 @@ static inline bool tr_bandwidthSetDesire
+  * @brief Get the desired speed for the bandwidth subtree.
+  * @see tr_bandwidthSetDesiredSpeed
+  */
+-static inline double tr_bandwidthGetDesiredSpeed_Bps(tr_bandwidth const* bandwidth, tr_direction dir)
++static __attribute__((unused)) double tr_bandwidthGetDesiredSpeed_Bps(tr_bandwidth const* bandwidth, tr_direction dir)
+ {
+     return bandwidth->band[dir].desiredSpeed_Bps;
+ }
+@@ -160,7 +160,7 @@ static inline double tr_bandwidthGetDesi
+ /**
+  * @brief Set whether or not this bandwidth should throttle its peer-io's speeds
+  */
+-static inline bool tr_bandwidthSetLimited(tr_bandwidth* bandwidth, tr_direction dir, bool isLimited)
++static __attribute__((unused)) bool tr_bandwidthSetLimited(tr_bandwidth* bandwidth, tr_direction dir, bool isLimited)
+ {
+     bool* value = &bandwidth->band[dir].isLimited;
+     bool const didChange = isLimited != *value;
+@@ -171,7 +171,7 @@ static inline bool tr_bandwidthSetLimite
+ /**
+  * @return nonzero if this bandwidth throttles its peer-ios speeds
+  */
+-static inline bool tr_bandwidthIsLimited(tr_bandwidth const* bandwidth, tr_direction dir)
++static __attribute__((unused)) bool tr_bandwidthIsLimited(tr_bandwidth const* bandwidth, tr_direction dir)
+ {
+     return bandwidth->band[dir].isLimited;
+ }
+@@ -214,7 +214,7 @@ void tr_bandwidthSetParent(tr_bandwidth*
+  * But when we set a torrent's speed mode to TR_SPEEDLIMIT_UNLIMITED, then
+  * in that particular case we want to ignore the global speed limit...
+  */
+-static inline bool tr_bandwidthHonorParentLimits(tr_bandwidth* bandwidth, tr_direction direction, bool isEnabled)
++static __attribute__((unused)) bool tr_bandwidthHonorParentLimits(tr_bandwidth* bandwidth, tr_direction direction, bool isEnabled)
+ {
+     bool* value = &bandwidth->band[direction].honorParentLimits;
+     bool const didChange = isEnabled != *value;
+@@ -222,7 +222,7 @@ static inline bool tr_bandwidthHonorPare
+     return didChange;
+ }
+ 
+-static inline bool tr_bandwidthAreParentLimitsHonored(tr_bandwidth const* bandwidth, tr_direction direction)
++static __attribute__((unused)) bool tr_bandwidthAreParentLimitsHonored(tr_bandwidth const* bandwidth, tr_direction direction)
+ {
+     TR_ASSERT(tr_isBandwidth(bandwidth));
+     TR_ASSERT(tr_isDirection(direction));
+diff -purN work/transmission-3.00/transmission-3.00/libtransmission/bitfield.h work/transmission-3.00/transmission-3.00/libtransmission/bitfield.h
+--- work/transmission-3.00/transmission-3.00/libtransmission/bitfield.h	2020-05-22 13:04:23.000000000 +0200
++++ work/transmission-3.00/transmission-3.00/libtransmission/bitfield.h	2021-02-18 20:11:07.440711000 +0100
+@@ -55,7 +55,7 @@ extern tr_bitfield const TR_BITFIELD_INI
+ 
+ void tr_bitfieldConstruct(tr_bitfield*, size_t bit_count);
+ 
+-static inline void tr_bitfieldDestruct(tr_bitfield* b)
++static __attribute__((unused)) void tr_bitfieldDestruct(tr_bitfield* b)
+ {
+     tr_bitfieldSetHasNone(b);
+ }
+@@ -80,12 +80,12 @@ size_t tr_bitfieldCountRange(tr_bitfield
+ 
+ size_t tr_bitfieldCountTrueBits(tr_bitfield const* b);
+ 
+-static inline bool tr_bitfieldHasAll(tr_bitfield const* b)
++static __attribute__((unused)) bool tr_bitfieldHasAll(tr_bitfield const* b)
+ {
+     return b->bit_count != 0 ? (b->true_count == b->bit_count) : b->have_all_hint;
+ }
+ 
+-static inline bool tr_bitfieldHasNone(tr_bitfield const* b)
++static __attribute__((unused)) bool tr_bitfieldHasNone(tr_bitfield const* b)
+ {
+     return b->bit_count != 0 ? (b->true_count == 0) : b->have_none_hint;
+ }
+diff -purN work/transmission-3.00/transmission-3.00/libtransmission/completion.h work/transmission-3.00/transmission-3.00/libtransmission/completion.h
+--- work/transmission-3.00/transmission-3.00/libtransmission/completion.h	2020-05-22 13:04:23.000000000 +0200
++++ work/transmission-3.00/transmission-3.00/libtransmission/completion.h	2021-02-18 20:11:07.440711000 +0100
+@@ -51,7 +51,7 @@ void tr_cpConstruct(tr_completion*, tr_t
+ 
+ void tr_cpBlockInit(tr_completion* cp, tr_bitfield const* blocks);
+ 
+-static inline void tr_cpDestruct(tr_completion* cp)
++static __attribute__((unused)) void tr_cpDestruct(tr_completion* cp)
+ {
+     tr_bitfieldDestruct(&cp->blockBitfield);
+ }
+@@ -74,17 +74,17 @@ uint64_t tr_cpLeftUntilDone(tr_completio
+ 
+ void tr_cpGetAmountDone(tr_completion const* completion, float* tab, int tabCount);
+ 
+-static inline uint64_t tr_cpHaveTotal(tr_completion const* cp)
++static __attribute__((unused)) uint64_t tr_cpHaveTotal(tr_completion const* cp)
+ {
+     return cp->sizeNow;
+ }
+ 
+-static inline bool tr_cpHasAll(tr_completion const* cp)
++static __attribute__((unused)) bool tr_cpHasAll(tr_completion const* cp)
+ {
+     return tr_torrentHasMetadata(cp->tor) && tr_bitfieldHasAll(&cp->blockBitfield);
+ }
+ 
+-static inline bool tr_cpHasNone(tr_completion const* cp)
++static __attribute__((unused)) bool tr_cpHasNone(tr_completion const* cp)
+ {
+     return !tr_torrentHasMetadata(cp->tor) || tr_bitfieldHasNone(&cp->blockBitfield);
+ }
+@@ -101,7 +101,7 @@ size_t tr_cpMissingBlocksInPiece(tr_comp
+ 
+ size_t tr_cpMissingBytesInPiece(tr_completion const*, tr_piece_index_t);
+ 
+-static inline bool tr_cpPieceIsComplete(tr_completion const* cp, tr_piece_index_t i)
++static __attribute__((unused)) bool tr_cpPieceIsComplete(tr_completion const* cp, tr_piece_index_t i)
+ {
+     return tr_cpMissingBlocksInPiece(cp, i) == 0;
+ }
+@@ -112,7 +112,7 @@ static inline bool tr_cpPieceIsComplete(
+ 
+ void tr_cpBlockAdd(tr_completion* cp, tr_block_index_t i);
+ 
+-static inline bool tr_cpBlockIsComplete(tr_completion const* cp, tr_block_index_t i)
++static __attribute__((unused)) bool tr_cpBlockIsComplete(tr_completion const* cp, tr_block_index_t i)
+ {
+     return tr_bitfieldHas(&cp->blockBitfield, i);
+ }
+@@ -125,7 +125,7 @@ bool tr_cpFileIsComplete(tr_completion c
+ 
+ void* tr_cpCreatePieceBitfield(tr_completion const* cp, size_t* byte_count);
+ 
+-static inline void tr_cpInvalidateDND(tr_completion* cp)
++static __attribute__((unused)) void tr_cpInvalidateDND(tr_completion* cp)
+ {
+     cp->sizeWhenDoneIsDirty = true;
+ }
+diff -purN work/transmission-3.00/transmission-3.00/libtransmission/peer-io.c work/transmission-3.00/transmission-3.00/libtransmission/peer-io.c
+--- work/transmission-3.00/transmission-3.00/libtransmission/peer-io.c	2020-05-22 13:04:23.000000000 +0200
++++ work/transmission-3.00/transmission-3.00/libtransmission/peer-io.c	2021-02-18 20:14:51.903478000 +0100
+@@ -1089,7 +1089,7 @@ void tr_peerIoSetEncryption(tr_peerIo* i
+ ***
+ **/
+ 
+-static inline void processBuffer(tr_crypto* crypto, struct evbuffer* buffer, size_t offset, size_t size, void (* callback)(
++static __attribute__((unused)) void processBuffer(tr_crypto* crypto, struct evbuffer* buffer, size_t offset, size_t size, void (* callback)(
+     tr_crypto*, size_t, void const*, void*))
+ {
+     struct evbuffer_ptr pos;
+@@ -1123,7 +1123,7 @@ static void addDatatype(tr_peerIo* io, s
+     peer_io_push_datatype(io, d);
+ }
+ 
+-static inline void maybeEncryptBuffer(tr_peerIo* io, struct evbuffer* buf, size_t offset, size_t size)
++static __attribute__((unused)) void maybeEncryptBuffer(tr_peerIo* io, struct evbuffer* buf, size_t offset, size_t size)
+ {
+     if (io->encryption_type == PEER_ENCRYPTION_RC4)
+     {
+@@ -1191,7 +1191,7 @@ void evbuffer_add_uint64(struct evbuffer
+ ****
+ ***/
+ 
+-static inline void maybeDecryptBuffer(tr_peerIo* io, struct evbuffer* buf, size_t offset, size_t size)
++static __attribute__((unused)) void maybeDecryptBuffer(tr_peerIo* io, struct evbuffer* buf, size_t offset, size_t size)
+ {
+     if (io->encryption_type == PEER_ENCRYPTION_RC4)
+     {
+diff -purN work/transmission-3.00/transmission-3.00/libtransmission/peer-io.h work/transmission-3.00/transmission-3.00/libtransmission/peer-io.h
+--- work/transmission-3.00/transmission-3.00/libtransmission/peer-io.h	2020-05-22 13:04:23.000000000 +0200
++++ work/transmission-3.00/transmission-3.00/libtransmission/peer-io.h	2021-02-18 20:11:07.440711000 +0100
+@@ -125,7 +125,7 @@ void tr_peerIoUnrefImpl(char const* file
+ 
+ #define PEER_IO_MAGIC_NUMBER 206745
+ 
+-static inline bool tr_isPeerIo(tr_peerIo const* io)
++static __attribute__((unused)) bool tr_isPeerIo(tr_peerIo const* io)
+ {
+     return io != NULL && io->magicNumber == PEER_IO_MAGIC_NUMBER && io->refCount >= 0 && tr_isBandwidth(&io->bandwidth) &&
+         tr_address_is_valid(&io->addr);
+@@ -135,37 +135,37 @@ static inline bool tr_isPeerIo(tr_peerIo
+ ***
+ **/
+ 
+-static inline void tr_peerIoEnableFEXT(tr_peerIo* io, bool flag)
++static __attribute__((unused)) void tr_peerIoEnableFEXT(tr_peerIo* io, bool flag)
+ {
+     io->fastExtensionSupported = flag;
+ }
+ 
+-static inline bool tr_peerIoSupportsFEXT(tr_peerIo const* io)
++static __attribute__((unused)) bool tr_peerIoSupportsFEXT(tr_peerIo const* io)
+ {
+     return io->fastExtensionSupported;
+ }
+ 
+-static inline void tr_peerIoEnableLTEP(tr_peerIo* io, bool flag)
++static __attribute__((unused)) void tr_peerIoEnableLTEP(tr_peerIo* io, bool flag)
+ {
+     io->extendedProtocolSupported = flag;
+ }
+ 
+-static inline bool tr_peerIoSupportsLTEP(tr_peerIo const* io)
++static __attribute__((unused)) bool tr_peerIoSupportsLTEP(tr_peerIo const* io)
+ {
+     return io->extendedProtocolSupported;
+ }
+ 
+-static inline void tr_peerIoEnableDHT(tr_peerIo* io, bool flag)
++static __attribute__((unused)) void tr_peerIoEnableDHT(tr_peerIo* io, bool flag)
+ {
+     io->dhtSupported = flag;
+ }
+ 
+-static inline bool tr_peerIoSupportsDHT(tr_peerIo const* io)
++static __attribute__((unused)) bool tr_peerIoSupportsDHT(tr_peerIo const* io)
+ {
+     return io->dhtSupported;
+ }
+ 
+-static inline bool tr_peerIoSupportsUTP(tr_peerIo const* io)
++static __attribute__((unused)) bool tr_peerIoSupportsUTP(tr_peerIo const* io)
+ {
+     return io->utpSupported;
+ }
+@@ -174,7 +174,7 @@ static inline bool tr_peerIoSupportsUTP(
+ ***
+ **/
+ 
+-static inline tr_session* tr_peerIoGetSession(tr_peerIo* io)
++static __attribute__((unused)) tr_session* tr_peerIoGetSession(tr_peerIo* io)
+ {
+     TR_ASSERT(tr_isPeerIo(io));
+     TR_ASSERT(io->session != NULL);
+@@ -196,12 +196,12 @@ void tr_peerIoSetTorrentHash(tr_peerIo*
+ 
+ int tr_peerIoReconnect(tr_peerIo* io);
+ 
+-static inline bool tr_peerIoIsIncoming(tr_peerIo const* io)
++static __attribute__((unused)) bool tr_peerIoIsIncoming(tr_peerIo const* io)
+ {
+     return io->isIncoming;
+ }
+ 
+-static inline int tr_peerIoGetAge(tr_peerIo const* io)
++static __attribute__((unused)) int tr_peerIoGetAge(tr_peerIo const* io)
+ {
+     return tr_time() - io->timeCreated;
+ }
+@@ -212,7 +212,7 @@ static inline int tr_peerIoGetAge(tr_pee
+ 
+ void tr_peerIoSetPeersId(tr_peerIo* io, uint8_t const* peer_id);
+ 
+-static inline uint8_t const* tr_peerIoGetPeersId(tr_peerIo const* io)
++static __attribute__((unused)) uint8_t const* tr_peerIoGetPeersId(tr_peerIo const* io)
+ {
+     TR_ASSERT(tr_isPeerIo(io));
+     TR_ASSERT(io->peerIdIsSet);
+@@ -240,14 +240,14 @@ void tr_peerIoWriteBuf(tr_peerIo* io, st
+ ***
+ **/
+ 
+-static inline tr_crypto* tr_peerIoGetCrypto(tr_peerIo* io)
++static __attribute__((unused)) tr_crypto* tr_peerIoGetCrypto(tr_peerIo* io)
+ {
+     return &io->crypto;
+ }
+ 
+ void tr_peerIoSetEncryption(tr_peerIo* io, tr_encryption_type encryption_type);
+ 
+-static inline bool tr_peerIoIsEncrypted(tr_peerIo const* io)
++static __attribute__((unused)) bool tr_peerIoIsEncrypted(tr_peerIo const* io)
+ {
+     return io != NULL && io->encryption_type == PEER_ENCRYPTION_RC4;
+ }
+@@ -257,17 +257,17 @@ void evbuffer_add_uint16(struct evbuffer
+ void evbuffer_add_uint32(struct evbuffer* outbuf, uint32_t hl);
+ void evbuffer_add_uint64(struct evbuffer* outbuf, uint64_t hll);
+ 
+-static inline void evbuffer_add_hton_16(struct evbuffer* buf, uint16_t val)
++static __attribute__((unused)) void evbuffer_add_hton_16(struct evbuffer* buf, uint16_t val)
+ {
+     evbuffer_add_uint16(buf, val);
+ }
+ 
+-static inline void evbuffer_add_hton_32(struct evbuffer* buf, uint32_t val)
++static __attribute__((unused)) void evbuffer_add_hton_32(struct evbuffer* buf, uint32_t val)
+ {
+     evbuffer_add_uint32(buf, val);
+ }
+ 
+-static inline void evbuffer_add_hton_64(struct evbuffer* buf, uint64_t val)
++static __attribute__((unused)) void evbuffer_add_hton_64(struct evbuffer* buf, uint64_t val)
+ {
+     evbuffer_add_uint64(buf, val);
+ }
+@@ -276,7 +276,7 @@ void tr_peerIoReadBytesToBuf(tr_peerIo*
+ 
+ void tr_peerIoReadBytes(tr_peerIo* io, struct evbuffer* inbuf, void* bytes, size_t byteCount);
+ 
+-static inline void tr_peerIoReadUint8(tr_peerIo* io, struct evbuffer* inbuf, uint8_t* setme)
++static __attribute__((unused)) void tr_peerIoReadUint8(tr_peerIo* io, struct evbuffer* inbuf, uint8_t* setme)
+ {
+     tr_peerIoReadBytes(io, inbuf, setme, sizeof(uint8_t));
+ }
+@@ -293,7 +293,7 @@ void tr_peerIoDrain(tr_peerIo* io, struc
+ 
+ size_t tr_peerIoGetWriteBufferSpace(tr_peerIo const* io, uint64_t now);
+ 
+-static inline void tr_peerIoSetParent(tr_peerIo* io, struct tr_bandwidth* parent)
++static __attribute__((unused)) void tr_peerIoSetParent(tr_peerIo* io, struct tr_bandwidth* parent)
+ {
+     TR_ASSERT(tr_isPeerIo(io));
+ 
+@@ -302,12 +302,12 @@ static inline void tr_peerIoSetParent(tr
+ 
+ void tr_peerIoBandwidthUsed(tr_peerIo* io, tr_direction direction, size_t byteCount, int isPieceData);
+ 
+-static inline bool tr_peerIoHasBandwidthLeft(tr_peerIo const* io, tr_direction dir)
++static __attribute__((unused)) bool tr_peerIoHasBandwidthLeft(tr_peerIo const* io, tr_direction dir)
+ {
+     return tr_bandwidthClamp(&io->bandwidth, dir, 1024) > 0;
+ }
+ 
+-static inline unsigned int tr_peerIoGetPieceSpeed_Bps(tr_peerIo const* io, uint64_t now, tr_direction dir)
++static __attribute__((unused)) unsigned int tr_peerIoGetPieceSpeed_Bps(tr_peerIo const* io, uint64_t now, tr_direction dir)
+ {
+     return tr_bandwidthGetPieceSpeed_Bps(&io->bandwidth, now, dir);
+ }
+@@ -326,7 +326,7 @@ int tr_peerIoFlushOutgoingProtocolMsgs(t
+ ***
+ **/
+ 
+-static inline struct evbuffer* tr_peerIoGetReadBuffer(tr_peerIo* io)
++static __attribute__((unused)) struct evbuffer* tr_peerIoGetReadBuffer(tr_peerIo* io)
+ {
+     return io->inbuf;
+ }
+diff -purN work/transmission-3.00/transmission-3.00/libtransmission/peer-msgs.c work/transmission-3.00/transmission-3.00/libtransmission/peer-msgs.c
+--- work/transmission-3.00/transmission-3.00/libtransmission/peer-msgs.c	2020-05-22 13:04:23.000000000 +0200
++++ work/transmission-3.00/transmission-3.00/libtransmission/peer-msgs.c	2021-02-18 20:16:53.578813000 +0100
+@@ -248,7 +248,7 @@ struct tr_peerMsgs
+ ***
+ **/
+ 
+-static inline tr_session* getSession(struct tr_peerMsgs* msgs)
++static __attribute__((unused)) tr_session* getSession(struct tr_peerMsgs* msgs)
+ {
+     return msgs->torrent->session;
+ }
+@@ -2300,7 +2300,7 @@ static void pexAddedCb(void* vpex, void*
+     }
+ }
+ 
+-static inline void pexDroppedCb(void* vpex, void* userData)
++static __attribute__((unused)) void pexDroppedCb(void* vpex, void* userData)
+ {
+     PexDiffs* diffs = userData;
+     tr_pex* pex = vpex;
+@@ -2311,7 +2311,7 @@ static inline void pexDroppedCb(void* vp
+     }
+ }
+ 
+-static inline void pexElementCb(void* vpex, void* userData)
++static __attribute__((unused)) void pexElementCb(void* vpex, void* userData)
+ {
+     PexDiffs* diffs = userData;
+     tr_pex* pex = vpex;
+diff -purN work/transmission-3.00/transmission-3.00/libtransmission/ptrarray.h work/transmission-3.00/transmission-3.00/libtransmission/ptrarray.h
+--- work/transmission-3.00/transmission-3.00/libtransmission/ptrarray.h	2020-05-22 13:04:23.000000000 +0200
++++ work/transmission-3.00/transmission-3.00/libtransmission/ptrarray.h	2021-02-18 20:14:51.907478000 +0100
+@@ -47,7 +47,7 @@ void tr_ptrArrayForeach(tr_ptrArray* arr
+ 
+ /** @brief Return the nth item in a tr_ptrArray
+     @return the nth item in a tr_ptrArray */
+-static inline void* tr_ptrArrayNth(tr_ptrArray* array, int i)
++static __attribute__((unused)) void* tr_ptrArrayNth(tr_ptrArray* array, int i)
+ {
+     TR_ASSERT(array != NULL);
+     TR_ASSERT(i >= 0);
+@@ -64,14 +64,14 @@ void* tr_ptrArrayPop(tr_ptrArray* array)
+ /** @brief Return the last item in a tr_ptrArray
+     @return the last item in a tr_ptrArray, or NULL if the array is empty
+     @see tr_ptrArrayPop() */
+-static inline void* tr_ptrArrayBack(tr_ptrArray* array)
++static __attribute__((unused)) void* tr_ptrArrayBack(tr_ptrArray* array)
+ {
+     return array->n_items > 0 ? tr_ptrArrayNth(array, array->n_items - 1) : NULL;
+ }
+ 
+ void tr_ptrArrayErase(tr_ptrArray* t, int begin, int end);
+ 
+-static inline void tr_ptrArrayRemove(tr_ptrArray* t, int pos)
++static __attribute__((unused)) void tr_ptrArrayRemove(tr_ptrArray* t, int pos)
+ {
+     tr_ptrArrayErase(t, pos, pos + 1);
+ }
+@@ -79,7 +79,7 @@ static inline void tr_ptrArrayRemove(tr_
+ /** @brief Peek at the array pointer and its size, for easy iteration */
+ void** tr_ptrArrayPeek(tr_ptrArray* array, int* size);
+ 
+-static inline void tr_ptrArrayClear(tr_ptrArray* a)
++static __attribute__((unused)) void tr_ptrArrayClear(tr_ptrArray* a)
+ {
+     a->n_items = 0;
+ }
+@@ -89,26 +89,26 @@ static inline void tr_ptrArrayClear(tr_p
+ int tr_ptrArrayInsert(tr_ptrArray* array, void* insertMe, int pos);
+ 
+ /** @brief Append a pointer into the array */
+-static inline int tr_ptrArrayAppend(tr_ptrArray* array, void* appendMe)
++static __attribute__((unused)) int tr_ptrArrayAppend(tr_ptrArray* array, void* appendMe)
+ {
+     return tr_ptrArrayInsert(array, appendMe, -1);
+ }
+ 
+-static inline void** tr_ptrArrayBase(tr_ptrArray const* a)
++static __attribute__((unused)) void** tr_ptrArrayBase(tr_ptrArray const* a)
+ {
+     return a->items;
+ }
+ 
+ /** @brief Return the number of items in the array
+     @return the number of items in the array */
+-static inline int tr_ptrArraySize(tr_ptrArray const* a)
++static __attribute__((unused)) int tr_ptrArraySize(tr_ptrArray const* a)
+ {
+     return a->n_items;
+ }
+ 
+ /** @brief Return True if the array has no pointers
+     @return True if the array has no pointers */
+-static inline bool tr_ptrArrayEmpty(tr_ptrArray const* a)
++static __attribute__((unused)) bool tr_ptrArrayEmpty(tr_ptrArray const* a)
+ {
+     return tr_ptrArraySize(a) == 0;
+ }
+diff -purN work/transmission-3.00/transmission-3.00/libtransmission/torrent.h work/transmission-3.00/transmission-3.00/libtransmission/torrent.h
+--- work/transmission-3.00/transmission-3.00/libtransmission/torrent.h	2020-05-22 13:04:23.000000000 +0200
++++ work/transmission-3.00/transmission-3.00/libtransmission/torrent.h	2021-02-18 20:14:51.907478000 +0100
+@@ -254,75 +254,75 @@ struct tr_torrent
+     tr_ptrArray labels;
+ };
+ 
+-static inline tr_torrent* tr_torrentNext(tr_session* session, tr_torrent* current)
++static __attribute__((unused)) tr_torrent* tr_torrentNext(tr_session* session, tr_torrent* current)
+ {
+     return current != NULL ? current->next : session->torrentList;
+ }
+ 
+ /* what piece index is this block in? */
+-static inline tr_piece_index_t tr_torBlockPiece(tr_torrent const* tor, tr_block_index_t const block)
++static __attribute__((unused)) tr_piece_index_t tr_torBlockPiece(tr_torrent const* tor, tr_block_index_t const block)
+ {
+     return block / tor->blockCountInPiece;
+ }
+ 
+ /* how many bytes are in this piece? */
+-static inline uint32_t tr_torPieceCountBytes(tr_torrent const* tor, tr_piece_index_t const piece)
++static __attribute__((unused)) uint32_t tr_torPieceCountBytes(tr_torrent const* tor, tr_piece_index_t const piece)
+ {
+     return piece + 1 == tor->info.pieceCount ? tor->lastPieceSize : tor->info.pieceSize;
+ }
+ 
+ /* how many bytes are in this block? */
+-static inline uint32_t tr_torBlockCountBytes(tr_torrent const* tor, tr_block_index_t const block)
++static __attribute__((unused)) uint32_t tr_torBlockCountBytes(tr_torrent const* tor, tr_block_index_t const block)
+ {
+     return block + 1 == tor->blockCount ? tor->lastBlockSize : tor->blockSize;
+ }
+ 
+-static inline void tr_torrentLock(tr_torrent const* tor)
++static __attribute__((unused)) void tr_torrentLock(tr_torrent const* tor)
+ {
+     tr_sessionLock(tor->session);
+ }
+ 
+-static inline bool tr_torrentIsLocked(tr_torrent const* tor)
++static __attribute__((unused)) bool tr_torrentIsLocked(tr_torrent const* tor)
+ {
+     return tr_sessionIsLocked(tor->session);
+ }
+ 
+-static inline void tr_torrentUnlock(tr_torrent const* tor)
++static __attribute__((unused)) void tr_torrentUnlock(tr_torrent const* tor)
+ {
+     tr_sessionUnlock(tor->session);
+ }
+ 
+-static inline bool tr_torrentExists(tr_session const* session, uint8_t const* torrentHash)
++static __attribute__((unused)) bool tr_torrentExists(tr_session const* session, uint8_t const* torrentHash)
+ {
+     return tr_torrentFindFromHash((tr_session*)session, torrentHash) != NULL;
+ }
+ 
+-static inline tr_completeness tr_torrentGetCompleteness(tr_torrent const* tor)
++static __attribute__((unused)) tr_completeness tr_torrentGetCompleteness(tr_torrent const* tor)
+ {
+     return tor->completeness;
+ }
+ 
+-static inline bool tr_torrentIsSeed(tr_torrent const* tor)
++static __attribute__((unused)) bool tr_torrentIsSeed(tr_torrent const* tor)
+ {
+     return tr_torrentGetCompleteness(tor) != TR_LEECH;
+ }
+ 
+-static inline bool tr_torrentIsPrivate(tr_torrent const* tor)
++static __attribute__((unused)) bool tr_torrentIsPrivate(tr_torrent const* tor)
+ {
+     return tor != NULL && tor->info.isPrivate;
+ }
+ 
+-static inline bool tr_torrentAllowsPex(tr_torrent const* tor)
++static __attribute__((unused)) bool tr_torrentAllowsPex(tr_torrent const* tor)
+ {
+     return tor != NULL && tor->session->isPexEnabled && !tr_torrentIsPrivate(tor);
+ }
+ 
+-static inline bool tr_torrentAllowsDHT(tr_torrent const* tor)
++static __attribute__((unused)) bool tr_torrentAllowsDHT(tr_torrent const* tor)
+ {
+     return tor != NULL && tr_sessionAllowsDHT(tor->session) && !tr_torrentIsPrivate(tor);
+ }
+ 
+-static inline bool tr_torrentAllowsLPD(tr_torrent const* tor)
++static __attribute__((unused)) bool tr_torrentAllowsLPD(tr_torrent const* tor)
+ {
+     return tor != NULL && tr_sessionAllowsLPD(tor->session) && !tr_torrentIsPrivate(tor);
+ }
+@@ -336,14 +336,14 @@ enum
+     TORRENT_MAGIC_NUMBER = 95549
+ };
+ 
+-static inline bool tr_isTorrent(tr_torrent const* tor)
++static __attribute__((unused)) bool tr_isTorrent(tr_torrent const* tor)
+ {
+     return tor != NULL && tor->magicNumber == TORRENT_MAGIC_NUMBER && tr_isSession(tor->session);
+ }
+ 
+ /* set a flag indicating that the torrent's .resume file
+  * needs to be saved when the torrent is closed */
+-static inline void tr_torrentSetDirty(tr_torrent* tor)
++static __attribute__((unused)) void tr_torrentSetDirty(tr_torrent* tor)
+ {
+     TR_ASSERT(tr_isTorrent(tor));
+ 
+@@ -351,7 +351,7 @@ static inline void tr_torrentSetDirty(tr
+ }
+ 
+ /* note that the torrent's tr_info just changed */
+-static inline void tr_torrentMarkEdited(tr_torrent* tor)
++static __attribute__((unused)) void tr_torrentMarkEdited(tr_torrent* tor)
+ {
+     TR_ASSERT(tr_isTorrent(tor));
+ 
+@@ -412,57 +412,57 @@ bool tr_torrentIsStalled(tr_torrent cons
+ 
+ unsigned char const* tr_torrentGetPeerId(tr_torrent* tor);
+ 
+-static inline uint64_t tr_torrentGetLeftUntilDone(tr_torrent const* tor)
++static __attribute__((unused)) uint64_t tr_torrentGetLeftUntilDone(tr_torrent const* tor)
+ {
+     return tr_cpLeftUntilDone(&tor->completion);
+ }
+ 
+-static inline bool tr_torrentHasAll(tr_torrent const* tor)
++static __attribute__((unused)) bool tr_torrentHasAll(tr_torrent const* tor)
+ {
+     return tr_cpHasAll(&tor->completion);
+ }
+ 
+-static inline bool tr_torrentHasNone(tr_torrent const* tor)
++static __attribute__((unused)) bool tr_torrentHasNone(tr_torrent const* tor)
+ {
+     return tr_cpHasNone(&tor->completion);
+ }
+ 
+-static inline bool tr_torrentPieceIsComplete(tr_torrent const* tor, tr_piece_index_t i)
++static __attribute__((unused)) bool tr_torrentPieceIsComplete(tr_torrent const* tor, tr_piece_index_t i)
+ {
+     return tr_cpPieceIsComplete(&tor->completion, i);
+ }
+ 
+-static inline bool tr_torrentBlockIsComplete(tr_torrent const* tor, tr_block_index_t i)
++static __attribute__((unused)) bool tr_torrentBlockIsComplete(tr_torrent const* tor, tr_block_index_t i)
+ {
+     return tr_cpBlockIsComplete(&tor->completion, i);
+ }
+ 
+-static inline size_t tr_torrentMissingBlocksInPiece(tr_torrent const* tor, tr_piece_index_t i)
++static __attribute__((unused)) size_t tr_torrentMissingBlocksInPiece(tr_torrent const* tor, tr_piece_index_t i)
+ {
+     return tr_cpMissingBlocksInPiece(&tor->completion, i);
+ }
+ 
+-static inline size_t tr_torrentMissingBytesInPiece(tr_torrent const* tor, tr_piece_index_t i)
++static __attribute__((unused)) size_t tr_torrentMissingBytesInPiece(tr_torrent const* tor, tr_piece_index_t i)
+ {
+     return tr_cpMissingBytesInPiece(&tor->completion, i);
+ }
+ 
+-static inline void* tr_torrentCreatePieceBitfield(tr_torrent const* tor, size_t* byte_count)
++static __attribute__((unused)) void* tr_torrentCreatePieceBitfield(tr_torrent const* tor, size_t* byte_count)
+ {
+     return tr_cpCreatePieceBitfield(&tor->completion, byte_count);
+ }
+ 
+-static inline uint64_t tr_torrentHaveTotal(tr_torrent const* tor)
++static __attribute__((unused)) uint64_t tr_torrentHaveTotal(tr_torrent const* tor)
+ {
+     return tr_cpHaveTotal(&tor->completion);
+ }
+ 
+-static inline bool tr_torrentIsQueued(tr_torrent const* tor)
++static __attribute__((unused)) bool tr_torrentIsQueued(tr_torrent const* tor)
+ {
+     return tor->isQueued;
+ }
+ 
+-static inline tr_direction tr_torrentGetQueueDirection(tr_torrent const* tor)
++static __attribute__((unused)) tr_direction tr_torrentGetQueueDirection(tr_torrent const* tor)
+ {
+     return tr_torrentIsSeed(tor) ? TR_UP : TR_DOWN;
+ }
+diff -purN work/transmission-3.00/transmission-3.00/libtransmission/transmission.h work/transmission-3.00/transmission-3.00/libtransmission/transmission.h
+--- work/transmission-3.00/transmission-3.00/libtransmission/transmission.h	2020-05-22 13:04:23.000000000 +0200
++++ work/transmission-3.00/transmission-3.00/libtransmission/transmission.h	2021-02-18 20:14:51.907478000 +0100
+@@ -1213,7 +1213,7 @@ char* tr_torrentInfoGetMagnetLink(tr_inf
+  * Returns a newly-allocated string with a magnet link of the torrent.
+  * Use tr_free() to free the string when done.
+  */
+-static inline char* tr_torrentGetMagnetLink(tr_torrent const* tor)
++static __attribute__((unused)) char* tr_torrentGetMagnetLink(tr_torrent const* tor)
+ {
+     return tr_torrentInfoGetMagnetLink(tr_torrentInfo(tor));
+ }
+@@ -1635,7 +1635,7 @@ struct tr_info
+     bool isFolder;
+ };
+ 
+-static inline bool tr_torrentHasMetadata(tr_torrent const* tor)
++static __attribute__((unused)) bool tr_torrentHasMetadata(tr_torrent const* tor)
+ {
+     return tr_torrentInfo(tor)->fileCount > 0;
+ }
+@@ -1882,7 +1882,7 @@ TR_DEPRECATED void tr_torrentSetDoneDate
+ /** @} */
+ 
+ /** @brief Sanity checker to test that the direction is TR_UP or TR_DOWN */
+-static inline bool tr_isDirection(tr_direction d)
++static __attribute__((unused)) bool tr_isDirection(tr_direction d)
+ {
+     return d == TR_UP || d == TR_DOWN;
+ }
+diff -purN work/transmission-3.00/transmission-3.00/libtransmission/variant.c work/transmission-3.00/transmission-3.00/libtransmission/variant.c
+--- work/transmission-3.00/transmission-3.00/libtransmission/variant.c	2020-05-22 13:04:23.000000000 +0200
++++ work/transmission-3.00/transmission-3.00/libtransmission/variant.c	2021-02-18 20:20:18.109574000 +0100
+@@ -218,7 +218,7 @@ static void tr_variant_string_set_string
+ ****
+ ***/
+ 
+-static inline char const* getStr(tr_variant const* v)
++static __attribute__((unused)) char const* getStr(tr_variant const* v)
+ {
+     TR_ASSERT(tr_variantIsString(v));
+ 
+diff -purN work/transmission-3.00/transmission-3.00/libtransmission/variant.h work/transmission-3.00/transmission-3.00/libtransmission/variant.h
+--- work/transmission-3.00/transmission-3.00/libtransmission/variant.h	2020-05-22 13:04:23.000000000 +0200
++++ work/transmission-3.00/transmission-3.00/libtransmission/variant.h	2021-02-18 20:16:22.386984000 +0100
+@@ -126,29 +126,29 @@ bool tr_variantFromFile(tr_variant* setm
+ int tr_variantFromBuf(tr_variant* setme, tr_variant_fmt fmt, void const* buf, size_t buflen, char const* optional_source,
+     char const** setme_end);
+ 
+-static inline int tr_variantFromBenc(tr_variant* setme, void const* buf, size_t buflen)
++static __attribute__((unused)) int tr_variantFromBenc(tr_variant* setme, void const* buf, size_t buflen)
+ {
+     return tr_variantFromBuf(setme, TR_VARIANT_FMT_BENC, buf, buflen, NULL, NULL);
+ }
+ 
+-static inline int tr_variantFromBencFull(tr_variant* setme, void const* buf, size_t buflen, char const* source,
++static __attribute__((unused)) int tr_variantFromBencFull(tr_variant* setme, void const* buf, size_t buflen, char const* source,
+     char const** setme_end)
+ {
+     return tr_variantFromBuf(setme, TR_VARIANT_FMT_BENC, buf, buflen, source, setme_end);
+ }
+ 
+-static inline int tr_variantFromJsonFull(tr_variant* setme, void const* buf, size_t buflen, char const* source,
++static __attribute__((unused)) int tr_variantFromJsonFull(tr_variant* setme, void const* buf, size_t buflen, char const* source,
+     char const** setme_end)
+ {
+     return tr_variantFromBuf(setme, TR_VARIANT_FMT_JSON, buf, buflen, source, setme_end);
+ }
+ 
+-static inline int tr_variantFromJson(tr_variant* setme, void const* buf, size_t buflen)
++static __attribute__((unused)) int tr_variantFromJson(tr_variant* setme, void const* buf, size_t buflen)
+ {
+     return tr_variantFromBuf(setme, TR_VARIANT_FMT_JSON, buf, buflen, NULL, NULL);
+ }
+ 
+-static inline bool tr_variantIsType(tr_variant const* b, int type)
++static __attribute__((unused)) bool tr_variantIsType(tr_variant const* b, int type)
+ {
+     return b != NULL && b->type == type;
+ }
+@@ -157,7 +157,7 @@ static inline bool tr_variantIsType(tr_v
+ ****  Strings
+ ***/
+ 
+-static inline bool tr_variantIsString(tr_variant const* b)
++static __attribute__((unused)) bool tr_variantIsString(tr_variant const* b)
+ {
+     return b != NULL && b->type == TR_VARIANT_TYPE_STR;
+ }
+@@ -174,7 +174,7 @@ bool tr_variantGetRaw(tr_variant const*
+ ****  Real Numbers
+ ***/
+ 
+-static inline bool tr_variantIsReal(tr_variant const* v)
++static __attribute__((unused)) bool tr_variantIsReal(tr_variant const* v)
+ {
+     return v != NULL && v->type == TR_VARIANT_TYPE_REAL;
+ }
+@@ -186,7 +186,7 @@ bool tr_variantGetReal(tr_variant const*
+ ****  Booleans
+ ***/
+ 
+-static inline bool tr_variantIsBool(tr_variant const* v)
++static __attribute__((unused)) bool tr_variantIsBool(tr_variant const* v)
+ {
+     return v != NULL && v->type == TR_VARIANT_TYPE_BOOL;
+ }
+@@ -198,7 +198,7 @@ bool tr_variantGetBool(tr_variant const*
+ ****  Ints
+ ***/
+ 
+-static inline bool tr_variantIsInt(tr_variant const* v)
++static __attribute__((unused)) bool tr_variantIsInt(tr_variant const* v)
+ {
+     return v != NULL && v->type == TR_VARIANT_TYPE_INT;
+ }
+@@ -210,7 +210,7 @@ bool tr_variantGetInt(tr_variant const*
+ ****  Lists
+ ***/
+ 
+-static inline bool tr_variantIsList(tr_variant const* v)
++static __attribute__((unused)) bool tr_variantIsList(tr_variant const* v)
+ {
+     return v != NULL && v->type == TR_VARIANT_TYPE_LIST;
+ }
+@@ -236,7 +236,7 @@ size_t tr_variantListSize(tr_variant con
+ ****  Dictionaries
+ ***/
+ 
+-static inline bool tr_variantIsDict(tr_variant const* v)
++static __attribute__((unused)) bool tr_variantIsDict(tr_variant const* v)
+ {
+     return v != NULL && v->type == TR_VARIANT_TYPE_DICT;
+ }

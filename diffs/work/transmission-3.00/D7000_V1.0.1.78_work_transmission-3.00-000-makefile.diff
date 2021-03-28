@@ -1,0 +1,78 @@
+diff -urN work/transmission-3.00/Makefile work/transmission-3.00/Makefile
+--- work/transmission-3.00/Makefile
++++ work/transmission-3.00/Makefile
+@@ -0,0 +1,74 @@
++include ../Rules.mak
++
++BINS			:= $(TRANSM)/daemon/.libs/transmission-daemon
++STARTUP			:= rc_$(TRANSM_NAME)
++INSTDIR			:= $(ROOTUSRDIR)/$(TRANSM_NAME)
++WEB			:= ../www/$(TRANSM_NAME).htm
++JSONCFG			:= settings.json
++WWWZIP			:= www.$(TRANSM_NAME).zip
++PRIOF			:= 90
++PRIOU			:= 90
++
++all: config
++	$(MAKE) -C $(TRANSM)
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(TRANSM) && ./autogen.sh && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s -Wno-psabi -ffunction-sections -fdata-sections" CXXFLAGS="$(CFLAGS) -Os -s -Wno-psabi -ffunction-sections -fdata-sections" CPPFLAGS="-I$(WORK_DIR)/$(ICONV)/$(ICONV)/include" LDFLAGS="-Wl,--gc-sections -Wl,--as-needed -L$(WORK_DIR)/$(ICONV)/$(ICONV)/lib/.libs" LIBS="-pthread -lm -liconv" ZLIB_CFLAGS="-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)" ZLIB_LIBS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) -lz" OPENSSL_CFLAGS="-I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include" OPENSSL_LIBS="-L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -lssl -lcrypto" LIBCURL_CFLAGS="-I$(WORK_DIR)/$(CURL)/$(CURL)/include" LIBCURL_LIBS="-L$(WORK_DIR)/$(CURL)/$(CURL)/lib/.libs -lcurl" LIBEVENT_CFLAGS="-I$(WORK_DIR)/$(EVENT)/$(EVENT)/include" LIBEVENT_LIBS="-L$(WORK_DIR)/$(EVENT)/$(EVENT)/.libs -levent" --disable-cli --enable-daemon --enable-largefile --enable-lightweight --disable-nls --disable-mac --without-gtk --without-kqueue --with-crypto=openssl
++
++install: control
++	$(SSTRIP) $(BINS)
++	for D in $(BINDIR) $(INSTDIR) $(APPDIR) $(FWDIR) $(USBSERVDIR) $(WWWDIR); do install -m 0755 -d $$D; done
++	cd $(TRANSM)/web; zip -qr9T $(INSTDIR)/$(WWWZIP) * -i *.ico *.png *.js *css *.html; cd ../..
++	install -m 0664 $(JSONCFG) $(INSTDIR)
++	install -m 0755 $(BINS) $(BINDIR)
++	install -m 0755 $(STARTUP) $(APPDIR)
++	install -m 0664 $(WEB) $(WWWDIR)
++	ln -sf $(USRSBINRCAPP)/$(STARTUP) $(USBSERVDIR)/U$(PRIOU)$(TRANSM_NAME)
++	ln -sf $(USRSBINRCAPP)/$(STARTUP) $(FWDIR)/F$(PRIOF)$(TRANSM_NAME)
++
++clean:
++	$(MAKE) -C $(TRANSM) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(TRANSM) distclean
++
++ifndef BUILD
++control:
++else
++PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
++PRERM			:= $(CTRL_DIR)/prerm
++
++control: preinst postinst prerm
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "if [ \"\`grep -- Version $(OPKG_INFO_STATUS_DIR)/info/$(CORE_WORK_NAME).control | awk '{printf \$$2}' | sed 's/[.]//g'\`\" -lt \"160\" ] >/dev/null 2>&1; then" >> $(PREINST)
++	@echo "echo \"$(CORE_WORK_NAME) package version >= 1.6.0 required.\"" >> $(PREINST)
++	@echo "echo \"Type: 'opkg update && opkg install $(CORE_WORK_NAME)' then install this package again.\"" >> $(PREINST)
++	@echo "exit 1" >> $(PREINST)
++	@echo "fi" >> $(PREINST)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "ln -sf $(USRSBINRCAPP)/$(STARTUP) $(TMPETC)/$(INITD)/$(RCPOST)/$(USBSERV)/U$(PRIOU)$(TRANSM_NAME)" >> $(POSTINST)
++	@echo "ln -sf $(USRSBINRCAPP)/$(STARTUP) $(TMPETC)/$(INITD)/$(RCFW)/F$(PRIOF)$(TRANSM_NAME)" >> $(POSTINST)
++	@echo "$(RC) $(TRANSM_NAME) restart" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "rm -f $(TMPETC)/$(INITD)/$(RCPOST)/$(USBSERV)/U$(PRIOU)$(TRANSM_NAME) $(TMPETC)/$(INITD)/$(RCFW)/F$(PRIOF)$(TRANSM_NAME)" >> $(PRERM)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PRERM)
++	@echo "exit 0" >> $(PRERM)
++endif
++

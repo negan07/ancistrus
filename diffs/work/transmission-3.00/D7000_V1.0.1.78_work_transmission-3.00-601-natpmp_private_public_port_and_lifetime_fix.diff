@@ -1,0 +1,144 @@
+--- work/transmission-3.00/transmission-3.00/libtransmission/natpmp.c
++++ work/transmission-3.00/transmission-3.00/libtransmission/natpmp.c
+@@ -30,33 +30,6 @@ static char const* getKey(void)
+     return _("Port Forwarding (NAT-PMP)");
+ }
+ 
+-typedef enum
+-{
+-    TR_NATPMP_IDLE,
+-    TR_NATPMP_ERR,
+-    TR_NATPMP_DISCOVER,
+-    TR_NATPMP_RECV_PUB,
+-    TR_NATPMP_SEND_MAP,
+-    TR_NATPMP_RECV_MAP,
+-    TR_NATPMP_SEND_UNMAP,
+-    TR_NATPMP_RECV_UNMAP
+-}
+-tr_natpmp_state;
+-
+-struct tr_natpmp
+-{
+-    bool has_discovered;
+-    bool is_mapped;
+-
+-    tr_port public_port;
+-    tr_port private_port;
+-
+-    time_t renew_time;
+-    time_t command_time;
+-    tr_natpmp_state state;
+-    natpmp_t natpmp;
+-};
+-
+ /**
+ ***
+ **/
+@@ -110,7 +83,8 @@ static void setCommandTime(struct tr_natpmp* nat)
+     nat->command_time = tr_time() + COMMAND_WAIT_SECS;
+ }
+ 
+-int tr_natpmpPulse(struct tr_natpmp* nat, tr_port private_port, bool is_enabled, tr_port* public_port)
++int tr_natpmpPulse(struct tr_natpmp* nat, tr_port private_port, bool is_enabled, tr_port* public_port,
++    tr_port* real_private_port)
+ {
+     int ret;
+ 
+@@ -231,6 +205,7 @@ int tr_natpmpPulse(struct tr_natpmp* nat, tr_port private_port, bool is_enabled,
+     {
+     case TR_NATPMP_IDLE:
+         *public_port = nat->public_port;
++        *real_private_port = nat->private_port;
+         return nat->is_mapped ? TR_PORT_MAPPED : TR_PORT_UNMAPPED;
+         break;
+ 
+--- work/transmission-3.00/transmission-3.00/libtransmission/natpmp_local.h
++++ work/transmission-3.00/transmission-3.00/libtransmission/natpmp_local.h
+@@ -17,12 +17,40 @@
+  * @{
+  */
+ 
++#include "natpmp.h"
+ typedef struct tr_natpmp tr_natpmp;
+ 
+ tr_natpmp* tr_natpmpInit(void);
+ 
+ void tr_natpmpClose(tr_natpmp*);
+ 
+-int tr_natpmpPulse(tr_natpmp*, tr_port port, bool isEnabled, tr_port* public_port);
++int tr_natpmpPulse(tr_natpmp*, tr_port port, bool isEnabled, tr_port* public_port, tr_port* real_private_port);
++
++typedef enum
++{
++    TR_NATPMP_IDLE,
++    TR_NATPMP_ERR,
++    TR_NATPMP_DISCOVER,
++    TR_NATPMP_RECV_PUB,
++    TR_NATPMP_SEND_MAP,
++    TR_NATPMP_RECV_MAP,
++    TR_NATPMP_SEND_UNMAP,
++    TR_NATPMP_RECV_UNMAP
++}
++tr_natpmp_state;
++
++struct tr_natpmp
++{
++    bool has_discovered;
++    bool is_mapped;
++
++    tr_port public_port;
++    tr_port private_port;
++
++    time_t renew_time;
++    time_t command_time;
++    tr_natpmp_state state;
++    natpmp_t natpmp;
++};
+ 
+ /* @} */
+--- work/transmission-3.00/transmission-3.00/libtransmission/port-forwarding.c
++++ work/transmission-3.00/transmission-3.00/libtransmission/port-forwarding.c
+@@ -75,6 +75,7 @@ static void natPulse(tr_shared* s, bool do_check)
+     int oldStatus;
+     int newStatus;
+     tr_port public_peer_port;
++    tr_port received_private_port;
+     tr_port const private_peer_port = s->session->private_peer_port;
+     bool const is_enabled = s->isEnabled && !s->isShuttingDown;
+ 
+@@ -90,11 +91,14 @@ static void natPulse(tr_shared* s, bool do_check)
+ 
+     oldStatus = tr_sharedTraversalStatus(s);
+ 
+-    s->natpmpStatus = tr_natpmpPulse(s->natpmp, private_peer_port, is_enabled, &public_peer_port);
++    s->natpmpStatus = tr_natpmpPulse(s->natpmp, private_peer_port, is_enabled, &public_peer_port, &received_private_port);
+ 
+     if (s->natpmpStatus == TR_PORT_MAPPED)
+     {
+         s->session->public_peer_port = public_peer_port;
++        s->session->private_peer_port = received_private_port;
++        tr_logAddNamedInfo(
++            getKey(), "public peer port %d (private %d) ", s->session->public_peer_port, s->session->private_peer_port);
+     }
+ 
+     s->upnpStatus = tr_upnpPulse(s->upnp, private_peer_port, is_enabled, do_check);
+@@ -120,7 +124,7 @@ static void set_evtimer_from_status(tr_shared* s)
+         /* if we're mapped, everything is fine... check back in 20 minutes
+          * to renew the port forwarding if it's expired */
+         s->doPortCheck = true;
+-        sec = 60 * 20;
++        sec = s->natpmp->renew_time - time(NULL);
+         break;
+ 
+     case TR_PORT_ERROR:
+--- work/transmission-3.00/transmission-3.00/libtransmission/session.c
++++ work/transmission-3.00/transmission-3.00/libtransmission/session.c
+@@ -1314,7 +1314,7 @@ void tr_sessionSetPeerPort(tr_session* session, tr_port port)
+ 
+ tr_port tr_sessionGetPeerPort(tr_session const* session)
+ {
+-    return tr_isSession(session) ? session->private_peer_port : 0;
++    return tr_isSession(session) ? session->public_peer_port : 0;
+ }
+ 
+ tr_port tr_sessionSetPeerPortRandom(tr_session* session)

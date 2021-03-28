@@ -1,0 +1,299 @@
+diff -urN work/transmission-3.00/rc_transmission work/transmission-3.00/rc_transmission
+--- work/transmission-3.00/rc_transmission
++++ work/transmission-3.00/rc_transmission
+@@ -0,0 +1,295 @@
++#!/bin/sh
++#
++# ancistrus
++#
++# Netgear's D7000 (V1) Nighthawk Router Experience Distributed Project
++#
++# https://github.com/negan07/ancistrus
++#
++# License: GPLv2
++#
++#
++# Rc script for transmission daemon.
++#
++# Usage: $0 < start restart startforced restartforced reloadconf stop fwup fwdown showlog clearlog reset > (<debug>)
++#
++# <debug> runs daemon in foreground mode with pedantic debug messages.
++#
++
++locking() {
++	LOCKDIR=/var/lock/`basename $0`
++	MAXNUM=10
++	NUM=0
++
++	# Acquire lockdir to avoid race conditions
++	while [ "${NUM}" -lt "${MAXNUM}" ]
++	do
++	mkdir -p -m 0755 "${LOCKDIR}" >/dev/null 2>&1 && trap 'rm -rf "${LOCKDIR}"' INT TERM QUIT HUP EXIT && return 0
++	sleep 1
++	let NUM++
++	done
++
++	echo "$0: locking failed" && exit ${MAXNUM}
++}
++
++stop() {
++	sync
++	# Kill all clients
++	for PID in `pidof ${DAEMON}`
++	do
++	set -- 10 5 30 5
++	for SIGNAL in 15 9 0 9; do [ -e /proc/${PID}/stat ] && while kill -$SIGNAL $PID >/dev/null 2>&1; do sleep $1; done; shift; done
++	done
++
++	# Revert kernel /proc params to orig values
++	sysnet_conf def
++
++	# Close inbound ports
++	portsdown
++}
++
++start() {
++	# Checking if service is enabled
++	[ "`anc nvram drget transmission_enable 0`" = "1" ] || [ ! -z "$1" ] || return 1
++
++	# Checking for /dev/sdX storage presence
++	[ ! -z "`cat /proc/mounts | grep /dev/sd`" ] || return 2
++
++	# Checking if the service is already running
++	[ ! -z "`pidof ${DAEMON}`" ] && echo "$0: ${DAEMON} already running..." && return 3
++
++	# Setting up env vars & populate dirs
++	env_vars
++	populate_dirs
++	DIR_RC=$?
++	[ $DIR_RC -ne 0 ] && echo "$0: Error $DIR_RC wrong dir path settings..." && return $DIR_RC
++
++	# Kernel /proc params tuning
++	sysnet_conf start
++
++	# Starting daemon
++	nice -n 18 ${BIN} -a 127.0.0.1,${IPADDR%.*}.* -r ${IPADDR} -p ${RPCPORT} -g ${CONFDIR} -w ${DLDIR} ${INCDLDIRSET} ${WATCHDIRSET} -e ${LOGFILE}
++
++	# Sanity check
++	BIN_RC=$?
++	[ $BIN_RC -ne 0 ] && echo "$0: Error $BIN_RC starting ${BIN}..." && sysnet_conf def && return $BIN_RC
++
++	# Open inbound ports if needed
++	sleep 3
++	portsup
++}
++
++env_vars() {
++	# Default dirs: take the first storage device mounted as default
++	DEFSTORAGEROOT="`cat /proc/mounts | grep /dev/sd | head -n 1 | cut -d ' ' -f 2`"
++	DEFDLDIR="${DEFSTORAGEROOT}/Downloads"
++
++	# Dir paths
++	CONFDIR="`anc nvram drget transmission_volumedir ${DEFSTORAGEROOT}`/.Transmission"
++	DLDIR="`anc nvram drget transmission_dldir ${DEFDLDIR}`"
++
++	# Assign other settings dirs & files
++	WEBDIR="${CONFDIR}/web"
++	INCDLDIR="${CONFDIR}/incomplete"
++	WATCHDIR="${CONFDIR}/watch"
++	TORRDIR="${CONFDIR}/torrents"
++	RESUMEDIR="${CONFDIR}/resume"
++	BLOCKLDIR="${CONFDIR}/blocklists"
++
++	# Some daemon config parameters can be overriden with special exported env vars (only)
++	export TRANSMISSION_HOME="${CONFDIR}"
++	export TRANSMISSION_WEB_HOME="${WEBDIR}"
++	[ "`anc nvram drget transmission_nocert 0`" = "0" -a -f "${CRT}" ] && export CURL_CA_BUNDLE="${CRT}" || export TR_CURL_SSL_NO_VERIFY="1"
++
++	# Conf file
++	JSONDEFCONF="${INSTDIR}/${JSONCONFNAME}"
++	JSONCONF="${CONFDIR}/${JSONCONFNAME}"
++
++	# Log file
++	[ -z "${LOGFILE}" ] && LOGFILE="${CONFDIR}/${DAEMON}.log"
++
++	# Web server archive file
++	WWWZIP="${INSTDIR}/${WWWARCNAME}"
++
++	# Generate cline settings
++	[ "`anc nvram drget transmission_incdldir_enable 0`" = "1" ] && INCDLDIRSET="--incomplete-dir ${INCDLDIR}" || INCDLDIRSET="--no-incomplete-dir"
++	[ "`anc nvram drget transmission_watchdir_enable 0`" = "1" ] && WATCHDIRSET="-c ${WATCHDIR}" || WATCHDIRSET="-C"
++
++	# Local private ip addr
++	IPADDR="$(ifconfig `anc nvram drget lan_if group1` | grep inet | awk '{printf $2}' | sed 's/addr://')"
++
++	# Web server port
++	RPCPORT="`anc nvram drget transmission_rpc_port 9091`"
++}
++
++populate_dirs() {
++	# Checking for related mounted storage device existence: if possible, create config & dl dirs if missed
++	for D in ${CONFDIR} ${DLDIR}
++	do
++		case $D in
++		"${ROOTSHDIR}"[R-U]/*)
++		# Extract '${ROOTSHDIR}/(U,T,R,S)'
++		SHDIR="`echo "${D}" | sed 's/\(\/[R-U]\/\).*/\1/g'`"
++		CHECKOK=0
++			for M in `cat /proc/mounts | grep /dev/sd | cut -d ' ' -f 2`
++			do
++				if [ "${M}" = "${SHDIR%?}" ]; then
++				CHECKOK=1
++				[ -d "${D}" ] || mkdir -p -m 0777 "${D}" >/dev/null 2>&1 || CHECKOK=0
++				break
++				fi
++			done
++		# Wrong volume dir path
++		[ $CHECKOK -eq 0 ] && return 127
++		;;
++		*)
++		# Invalid dir not starting from '${ROOTSHDIR}'
++		return 128
++		;;
++		esac
++	done
++
++	# Create dirs if not existing: error on creation failure
++	for D in "${WEBDIR}" "${INCDLDIR}" "${WATCHDIR}" "${TORRDIR}" "${RESUMEDIR}" "${BLOCKLDIR}"; do [ -d "${D}" ] || mkdir -p -m 0777 "${D}" >/dev/null 2>&1 || return 129; done
++	# Use default settings json file if not existing
++	[ -f "${JSONCONF}" ] || cp -f "${JSONDEFCONF}" "${JSONCONF}" >/dev/null 2>&1
++	# Create other files if not existing
++	for F in json benc; do [ -f "${CONFDIR}/stats.${F}" ] || touch "${CONFDIR}/stats.${F}"; done
++	# Extract www dir content: error on archive extraction failure
++	[ -f ${WEBDIR}/index.html ] || unzip -qq -o ${WWWZIP} -d ${WEBDIR} || return 130
++	return 0
++}
++
++sysnet_conf() {
++	case $1 in
++	start)
++	# Setup mandatory send/receive net buffers & syn packets size
++	echo 4194304 >/proc/sys/net/core/rmem_max
++	echo 4194304 >/proc/sys/net/core/wmem_max
++	#echo 1048576 >/proc/sys/net/core/wmem_max
++	echo 4 >/proc/sys/net/ipv4/tcp_adv_win_scale
++	# Setup some tcp time limits
++	echo 30 >/proc/sys/net/ipv4/tcp_fin_timeout
++	echo 300 >/proc/sys/net/ipv4/tcp_keepalive_time
++	# Avoid SLAB mem allocation failures causing system to crash
++	echo 16384 >/proc/sys/vm/min_free_kbytes
++	;;
++	*)
++	# Default values
++	echo 188416 >/proc/sys/net/core/rmem_max
++	echo 188416 >/proc/sys/net/core/wmem_max
++	echo 1 >/proc/sys/net/ipv4/tcp_adv_win_scale
++	echo 60 >/proc/sys/net/ipv4/tcp_fin_timeout
++	[ ! -z "`pidof xagent`" ] && echo 20 >/proc/sys/net/ipv4/tcp_keepalive_time || echo 7200 >/proc/sys/net/ipv4/tcp_keepalive_time
++	echo 1932 >/proc/sys/vm/min_free_kbytes
++	;;
++	esac
++}
++
++reload_conf() {
++	# Apply json config file modifications only
++	env_vars
++	[ ! -f "${JSONCONF}" ] && return 1
++
++	# Var dirs json settings assignement
++	set -- ${DLDIR} ${INCDLDIR} ${WATCHDIR}
++	for D in download incomplete watch; do sed -i "s|\"${D}-dir\":.*|\"${D}-dir\": \"${1}\",|" "${JSONCONF}"; shift; done
++
++	# Check dirs as insurance
++	populate_dirs
++
++	# Act only on running daemon
++	[ ! -z "`pidof ${DAEMON}`" ] && killall -1 ${DAEMON} && sleep 3 && portsup
++	return 0
++}
++
++show_log() {
++	env_vars
++	# Act only if storage is mounted
++	[ -f "${LOGFILE}" ] && cat "${LOGFILE}" 2>/dev/null
++}
++
++clear_log() {
++	env_vars
++	# Act only if storage is mounted
++	[ -f "${LOGFILE}" ] && echo -n >"${LOGFILE}"
++}
++
++reset() {
++	stop
++	env_vars
++	cp -f "${JSONDEFCONF}" "${JSONCONF}" >/dev/null 2>&1
++	for V in `anc nvram show | grep transmission_`; do anc nvram unset ${V%=*}; done
++	nvram commit
++}
++
++portsdown() {
++	env_vars
++	INPORT=`sed -ne 's!^    "peer-port": *\([0-9]*\),$!\1!p' ${JSONCONF} 2>/dev/null || anc nvram drget old_transmission_loc_port 13399`
++	anc fw router del ls TRANSMISSION tcp/udp $INPORT $INPORT
++}
++
++portsup() {
++	env_vars
++	PF=`sed -ne 's!^    "port-forwarding-enabled": *\([true false]*\),$!\1!p' ${JSONCONF} 2>/dev/null`
++	INPORT=`sed -ne 's!^    "peer-port": *\([0-9]*\),$!\1!p' ${JSONCONF} 2>/dev/null`
++	# Act only on running daemon, port forwarding setting enabled, upnp disabled, wifi ap mode disabled
++	[ -z "`pidof ${DAEMON}`" ] || [ "${PF}" = "false" ] || [ "`anc nvram drget upnp_enable 1`" = "1" ] || [ "`anc nvram drget wifi_ap_mode 0`" = "1" ] || [ -z "${INPORT}" ] || anc fw router add ls TRANSMISSION tcp/udp $INPORT $INPORT
++}
++
++# Dirs
++BINDIR=/usr/sbin
++INSTDIR=/usr/transmission
++CERTDIR=/etc
++ROOTSHDIR=/mnt/shares/
++
++# Debug purpose
++#BINDIR=/tmp
++#INSTDIR=/tmp
++
++# Names
++DAEMON=transmission-daemon
++BIN=${BINDIR}/${DAEMON}
++CRT=${CERTDIR}/ca-bundle.crt
++JSONCONFNAME=settings.json
++WWWARCNAME=www.transmission.zip
++
++# Debug running
++[ "${2}" = "debug" ] && LOGFILE=/dev/ttyp0 && BIN="${BINDIR}/${DAEMON} -f --log-debug"
++
++locking
++case $1 in
++start|restart)
++stop
++start
++;;
++startforced|restartforced)
++stop
++start $1
++;;
++reloadconf)
++reload_conf
++;;
++stop)
++stop
++;;
++fwup)
++portsdown
++portsup
++;;
++fwdown)
++portsdown
++;;
++showlog)
++show_log
++;;
++clearlog)
++clear_log
++;;
++reset)
++reset
++;;
++*)
++echo "Usage: $0 < start restart startforced restartforced reloadconf stop fwup fwdown showlog clearlog reset > (<debug>)"
++;;
++esac
