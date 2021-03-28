@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <fcntl.h>
+#include <mntent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
@@ -236,6 +237,31 @@ return 0;
 }
 
 /*
+ * GETSDLIST
+ * Write a list array var of '/dev/sdX' mount points or devices.
+ * Input: mntpoint/sd flag, dev group (e.g. '/dev/sd').
+ * Return: '0' on success, '1' on failure.
+ */
+static int getsdlist(const int sd, const char *dev) {
+char buf[256];
+int err=1;
+FILE *tab;
+struct mntent mnt;
+
+if(dev==NULL || strncmp(dev, "/dev/", 5) || ((tab=setmntent("/proc/mounts", "r"))==NULL)) return err;
+	while(getmntent_r(tab, &mnt, buf, sizeof(buf))!=NULL) {
+		if(!strncmp(mnt.mnt_fsname, dev, strlen(dev))) {
+		CGIDBG("   sd:   %s ( %s )\n", mnt.mnt_dir, mnt.mnt_fsname);
+		if(!err) TYPECH(",");
+		TYPECH("\"");(!sd ? TYPE(mnt.mnt_dir) : TYPE(mnt.mnt_fsname));TYPECH("\"");
+		err=0;
+		}
+	}
+endmntent(tab);
+return err;
+}
+
+/*
  * PARTPERC
  * Obtain partition percentage used space.
  * Input: mount path.
@@ -268,24 +294,26 @@ return 0;
  * Return: '0' on success, '1' on void/null variable.
  */
 static int getnvar(const char *nvar) {
+enum { MP=0, SD=1 };
 char *val;
-int fde;
+int fde=0;
 
 if(nvar==NULL || !*nvar) return 1;
 	if(!strncmp(nvar, "reclist_", 8) || !strncmp(nvar, "list_", 5)) {			//compound variable found
 	BOOLLISTTYPE;
 	val=NV_SGET(nvar+fde);
 	CGIDBG("     val   %s\n", val);
-	if(fde==8 && getnvreclist(val)) return 1;
-	else if(fde==5 && getnvlist(val)) return 1;
+	((fde==8) ? (fde=getnvreclist(val)) : (fde=getnvlist(val)));
 	}
 	else if(!strncmp(nvar, "part_", 5)) partperc(nvar+5);					//flash partition for % used space
+	else if(!strncmp(nvar, "mntpointlist_", 13)) getsdlist(MP, nvar+13);			//storage mount point
+	else if(!strncmp(nvar, "mntsdlist_", 10)) getsdlist(SD, nvar+10);			//storage device
 	else {											//normal variable
 	val=NV_SGET(nvar);
 	CGIDBG("     val   %s\n", val);
 	TYPE(val);
 	}
-return 0;
+return fde;
 }
 
 /*
@@ -362,6 +390,7 @@ if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *
 			if(!*job || !strcmp(job, "upload")||!strcmp(job, "home")) getnvar(nvar);//### GET METHOD || HOME/UPLOAD FILE ###
 			else if(!strcmp(job, "save") || !strcmp(job, "savesys")) {		//### POST METHOD - SAVE ###
 			if(*(val=QSGET(raw))!='@' && strncmp(nvar, "list_", 5) && strncmp(nvar, "reclist_", 8)
+			&& strncmp(nvar, "mntsdlist_", 10) && strncmp(nvar, "mntpointlist_", 13)
 			&& strncmp(nvar, "part_", 5)) NV_SET(nvar, val);			//store value
 			CGIDBG("----------------------------------------> anc nvram set %s \"%s\"\n", nvar, val);
 			getnvar(nvar);								//retrieve nvram value like GET
