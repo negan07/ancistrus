@@ -6,7 +6,7 @@ diff -urN work/curl-7.75.0/curl-7.75.0/Makefile.am work/curl-7.75.0/curl-7.75.0/
  
  SUBDIRS = lib src
 -DIST_SUBDIRS = $(SUBDIRS) tests packages scripts include docs
-+DIST_SUBDIRS = $(SUBDIRS) packages include
++DIST_SUBDIRS = $(SUBDIRS) include
  
  pkgconfigdir = $(libdir)/pkgconfig
  pkgconfig_DATA = libcurl.pc
