@@ -38,8 +38,7 @@ LOG_FILE=commit_log_${VER}
 git log --pretty='format:%<(10)%an%<(20)%ad%<(20)%s' --date=format:'%d/%m/%Y  %H:%M' | head -n $(( ${VER} - ${OLDVER} )) >${LOG_FILE}
 
 sudo chown -Rf ${USER}:${USER} build localbin scripts work *.img
-zip -jq9 ${IMG_NAME}.zip ${IMG_NAME}.img DISCLAIMER LICENSE ${LOG_FILE}
-zip -T ${IMG_NAME}.zip
+zip -j9T ${IMG_NAME}.zip ${IMG_NAME}.img DISCLAIMER LICENSE ${LOG_FILE}
 [ $? -ne 0 ] && echo "Error occurred creating archive: ${IMG_NAME}.zip" && exit 1
 
 exit 0
