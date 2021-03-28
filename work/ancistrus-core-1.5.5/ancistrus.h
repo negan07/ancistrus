@@ -84,7 +84,9 @@ exit(3);													\
 "PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/sbin/scripts:/usr/sbin/rc_app"
 
 #define SFDOPEN(fd, path, flags) if((fd=open(path, flags))<0)		/* sort of secure open() */
+#define _SFDOPEN(fd, path, flags) if((fd=open(path, flags))>=0)		/* complementary of SFDOPEN */
 #define SFDAOPEN(fd, path, flags, att) if((fd=open(path, flags, att))<0)/* same above with attribute permissions */
+#define _SFDAOPEN(fd, path, flags, att) if((fd=open(path, flags, att))>=0)/* complementary of SFDAOPEN */
 #define SFPOPEN(FP, path, flags) if((FP=(fopen(path, flags)))==NULL)	/* sort of secure fopen() */
 #define SMALLOCSTR(data, size) if((data=(char*)malloc(size))==NULL)	/* sort of safe malloc() for strings */
 #define SFREE(var) if(var) free(var)					/* sort of safe free() */

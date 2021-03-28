@@ -27,7 +27,7 @@ CFLAGS			+= -Os
 endif
 
 ifdef DEBUG
-DEFS			+= -DDEBUG=1 -DTMPETC=\"$(RECEIVE_DIR)\"
+DEFS			+= -DDEBUG=1 #-DTMPETC=\"$(RECEIVE_DIR)\"
 COREWEB			+= openssh.htm qos-sqm.htm opkg.htm opkg_select.htm
 endif
 
@@ -143,8 +143,6 @@ postinst:
 	@echo "for F in $(RCMAINCSS); do [ -f $(TMPDIR)/\$$F ] && mv -f $(TMPDIR)/\$$F $(RCWWWCSSDIR)/\$$F; done" >> $(POSTINST)
 	@echo "ln -sf $(USRSBIN)/$(PROJ_TAG) $(TMPETC)/$(CGI)" >> $(POSTINST)
 	@echo "sync" >> $(POSTINST)
-	@echo "echo \"Updating init.d...\"" >> $(POSTINST)
-	@echo "cp -rf $(USRETCINITD) $(TMPETC)/" >> $(POSTINST)
 	@echo "exit 0" >> $(POSTINST)
 
 postrm:

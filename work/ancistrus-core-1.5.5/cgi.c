@@ -324,7 +324,7 @@ return err;
  * Populate webpage.
  * Preliminarly run a system() cmd if needed before printing page, then print page, then execute some instructions if needed
  * Input: webpage file descriptor, job & todo actions.
- * Return: '0' on success, '1' on pipe()/system() error, '10' on open() error, '15' on missing raw string, '20' on malformed webpage content.
+ * Return: '0' on success, '1' on pipe()/system() error, '15' on missing raw string, '20' on malformed webpage content.
  */
 static int populatepage(const int fd, const char *job, const char *todo) {
 enum { ADD=0, DELETE=1 };
@@ -355,9 +355,10 @@ if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *
 			(!strcmp(raw, val) ? NV_SET(val+fde, "") : getnvar(nvar));		//void list on nvram (skip '(rec)list_') or GET
 			}
 			else if(!strcmp(job, "edit") && !strcmp(raw, "file_content")) {		//### EDIT FILE ###
-			SFDOPEN(fde, QSGET("edit_file"), O_RDONLY) return 10;
-			while(read(fde, &c, 1)) TYPECH(c);					//read each ch from file then stdout it
-			close(fde);
+				_SFDOPEN(fde, QSGET("edit_file"), O_RDONLY) {
+				while(read(fde, &c, 1)) TYPECH(c);				//read each ch from file then stdout it
+				close(fde);
+				}
 			}
 			else if(!strcmp(job, "pipe") && !strcmp(raw, "pipe_output") && (err=runpipe(QSGET("pipe_cmd")))) return err;//### PIPE
 			else if(!strcmp(job, "pipemp") && (err=fetchformmpvar(raw, nvar))) return err;			//### PIPEMULTIPART ###
@@ -385,9 +386,10 @@ int fd;
 
 	if(!strcmp(todo, "edit")) {								//### EDIT FILE ###
 	CGIDBG("edit file: \"%s\"\n", QSGET("edit_file"));
-	SFDAOPEN(fd, QSGET("edit_file"), O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) return -1;	//attr default: 0755
-	for(text=QSGET("text");*text;text++) if(*text!=LF_SYMBOL) write(fd, text, 1);		//update file skipping '0D' char
-	close(fd);
+		_SFDAOPEN(fd, QSGET("edit_file"), O_CREAT|O_RDWR|O_TRUNC, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) {	//attr default: 0755
+		for(text=QSGET("text");*text;text++) if(*text!=LF_SYMBOL) write(fd, text, 1);	//update file skipping '0D' char
+		close(fd);
+		}
 	}
 	else if(!strcmp(job, "savesys")) return runsyscmd(todo);				//exec save job with todo cmd system() call
 	else if(strcmp(job, "opkg") && strcmp(job, "home")) return runexecve(todo);		//exec todo cmd if not done before
