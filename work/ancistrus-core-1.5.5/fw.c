@@ -43,19 +43,19 @@ char *intfval;
  * GETSETOLDPORT
  * Obtain old local service port stored into nvram or current port num if old port num not present (GET).
  * Nvram set current port as old port for future nat rule removal (SET).
- * Input: service name, current port num, old port num (caller must take care of oldport string allocation), enum port type, set flag.
+ * Input: service name, current port num, old port num (caller must take care of oldport string allocation), port type string tag, set flag.
  */
-static void getsetoldport(const char *servname, const char *port, char* oldport, const int ptype, const int setflag) {
+static void getsetoldport(const char *servname, const char *port, char* oldport, const char *ptype, const int setflag) {
 int i;
-char nvservname[SRVNAMEMAXLENGTH+14];
+char nvservname[SRVNAMEMAXLENGTH*2];
 
-(ptype==LOCPORT ? snprintf(nvservname, sizeof(nvservname), "old_%s_loc_port", servname) : snprintf(nvservname, sizeof(nvservname), "old_%s_rem_port", servname));											//switch local or remote port
+snprintf(nvservname, sizeof(nvservname), "old_%s_%s_port", servname, ptype);					//switch local or remote port
 for(i=0;nvservname[i]!='\0';i++) if(nvservname[i]>=65 && nvservname[i]<=90) nvservname[i]+=32;			//tolower(nvservname)
-if(!setflag) {													//get old port
-strcpy(oldport, NV_SGET(nvservname));
-if(!*oldport) strcpy(oldport, port);										//old port not present
-}
-else NV_SET(nvservname, port);											//set old port
+	if(!setflag) {												//get old port
+	strcpy(oldport, NV_SGET(nvservname));
+	if(!*oldport) strcpy(oldport, port);									//old port not present
+	}
+	else NV_SET(nvservname, port);										//set old port
 }
 
 int gateway(MAINUNUSEDARGS) {
@@ -166,8 +166,8 @@ char gw[256], wan[256], *oldgw, *oldwan, oldlocport[10], oldremport[10];
 	else {									//### DEL ###
 	oldgw=getoldgatewayip();						//obtain old wan ip, gw ip and local/remote ports involved
 	oldwan=getoldwanip();
-	getoldport(argv[NAME], argv[LOCPORT], oldlocport, LOCPORT);
-	getoldport(argv[NAME], argv[REMPORT], oldremport, REMPORT);
+	getoldport(argv[NAME], argv[LOCPORT], oldlocport, "loc");
+	getoldport(argv[NAME], argv[REMPORT], oldremport, "rem");
 	DBG("Old gateway ip: %s, old wan ip: %s, old local port: %s, old remote port: %s\n", oldgw, oldwan, oldlocport, oldremport);
 	fprintf(FP,
 	IPT " -t nat -D PREROUTING -j %s_NAT\n"					//always delete rules first at any time
@@ -201,8 +201,8 @@ char gw[256], wan[256], *oldgw, *oldwan, oldlocport[10], oldremport[10];
 				fprintf(FP,					//add napt rule to /proc/cnapt_serv & nvram set port nums
 				CPM " add %s:1:%s:%s:%s-%s:%s:%s-%s\n"
 				, argv[FWTYPE], argv[PROT], gw, argv[LOCPORT], argv[LOCPORT], wan, argv[REMPORT], argv[REMPORT]);
-				setoldport(argv[NAME], argv[LOCPORT], LOCPORT);
-				setoldport(argv[NAME], argv[REMPORT], REMPORT);
+				setoldport(argv[NAME], argv[LOCPORT], "loc");
+				setoldport(argv[NAME], argv[REMPORT], "rem");
 				}
 			}
 		}
