@@ -1,0 +1,231 @@
+diff -urN work/openssh-8.5p1/rc_ssh work/openssh-8.5p1/rc_ssh
+--- work/openssh-8.5p1/rc_ssh	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-8.5p1/rc_ssh	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,227 @@
++#!/bin/sh
++#
++# ancistrus
++#
++# Netgear's D7000 (V1) Nighthawk Router Experience Distributed Project
++#
++# https://github.com/negan07/ancistrus
++#
++# License: GPLv2
++#
++#
++# Rc script for openssh daemon sshd.
++#
++# Usage: $0 < start restart startforced restartforced stop fwup remoteup fwdown remotedown regenkeys regenauth regenmoduli zipkeys > (<debug>)
++#
++# <debug> runs sshd in foreground mode with pedantic debug messages.
++#
++
++locking() {
++	LOCKDIR=/var/lock/`basename $0`
++	MAXNUM=10
++	NUM=0
++
++	# Acquire lockdir to avoid race conditions
++	while [ "${NUM}" -lt "${MAXNUM}" ]
++	do
++	mkdir -p -m 0755 "${LOCKDIR}" >/dev/null 2>&1 && trap 'rm -rf "${LOCKDIR}"' INT TERM QUIT HUP EXIT && return 0
++	sleep 1
++	let NUM++
++	done
++
++	echo "$0: locking failed" && exit ${MAXNUM}
++}
++
++stop() {
++	# Kill all clients
++	for PID in `pidof ${DAEMON}`
++	do
++	[ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
++	done
++	rm -rf ${VARDIR} ${PIDDIR}/${DAEMON}.pid ${CONFDIR}/moduli
++
++	# Stop remote service
++	remotedown
++}
++
++start() {
++	# Checking if service is enabled
++	[ "`anc nvram drget ssh_enable 0`" = "1" ] || [ ! -z "$1" ] || return 1
++
++	# Checking if the service is already running
++	[ ! -z "`pidof ${DAEMON}`" ] && echo "$0: ${DAEMON} already running..." && return 2
++
++	# Checking nvram dir
++	[ ! -d ${NVRAMDIR} ] && echo "$0: Nvram error !" && return 3
++
++	# Preliminary fs operations
++	[ ! -d ${VARDIR} ] && mkdir -p -m 0700 ${VARDIR}
++	[ -f ${CONFETCDIR}/${CONF} ] && cp -f ${CONFETCDIR}/${CONF} ${CONFDIR}/
++	[ -f ${KEYSDIR}/moduli ] && cp -f ${KEYSDIR}/moduli ${CONFDIR}/ && chmod 600 ${CONFDIR}/moduli
++
++	# Update hostname
++	hostname ${LABEL} >/dev/null 2>&1
++
++	# Renew auth login
++	echo "${USR}:`anc nvram rget http_password`" | chpasswd >/dev/null 2>&1
++
++	# Keys generation
++	genkeys
++
++	# Starting daemon
++	${BIN}
++
++	# Sanity check
++	BIN_RC=$?
++	[ $BIN_RC -ne 0 ] && echo "$0: Error $BIN_RC starting ${BIN}..." && return $BIN_RC
++
++	# Starting remote service
++	remoteup
++}
++
++remotedown() {
++	# Stopping remote service: use dummy remote old def port value as insurance
++	anc fw remote del ls SSH tcp `anc nvram drget old_ssh_rem_port 8022` 22
++}
++
++remoteup() {
++	REMPORT="`anc nvram rget ssh_remote_port`"
++	# Act only on running daemon, remote service enabled, remote port set
++	[ -z "`pidof ${DAEMON}`" ] || [ "`anc nvram drget ssh_remote_enable 0`" = "0" ] || [ -z "${REMPORT}" ] || anc fw remote add ls SSH tcp ${REMPORT} 22
++}
++
++genkeys() {
++	# Preliminary fs operations
++	[ -d ${TMPKEYSDIR} ] && rm -rf ${TMPKEYSDIR}
++	[ ! -d ${KEYSDIR} ] && chown ${USR}:${USR} / ${CONFIG} ${NVRAMDIR} && chmod 0755 ${CONFIG} ${NVRAMDIR} && mkdir -p -m 0600 ${KEYSDIR}
++	# Key check & generation if missed
++	for KTYPE in $KEYTYPES
++	do
++	KEY=${KEYSDIR}/${LABEL}.${KTYPE}
++		if [ ! -f $KEY ]; then
++		TMPKEY=${TMPKEYSDIR}/${LABEL}.${KTYPE}
++		# Creating tmp key dir
++		[ ! -d ${TMPKEYSDIR} ] && mkdir -p -m 0600 ${TMPKEYSDIR}
++		# Creating auth key file
++		${SSH_KEYGEN} -q -t ${KTYPE} -f ${TMPKEY} -N '' && chmod 600 ${TMPKEY} ${TMPKEY}.pub
++		fi
++	done
++	# Store new keys
++	[ -d ${TMPKEYSDIR} ] && mv -f ${TMPKEYSDIR}/* ${KEYSDIR} && rm -rf ${TMPKEYSDIR} && genauth
++}
++
++genauth() {
++	# Regenerate auth keys file from existents .pub
++	[ ! -d ${KEYSDIR} ] && echo "Auth key dir: '${KEYSDIR}' missed..." && exit 4
++	rm -f ${AUTHKEYS} && touch ${AUTHKEYS} && chmod 600 ${AUTHKEYS}
++	find ${KEYSDIR} -type f -name "*.pub" -exec cat '{}' >> ${AUTHKEYS} \;
++	sync
++	return 0
++}
++
++genmoduli() {
++	# Regenerate moduli file in low-priority-background mode as it takes long time
++	sync
++	# Avoid SLAB mem allocation failures causing system to crash
++	echo 16384 >/proc/sys/vm/min_free_kbytes
++	# Free all mem caches
++	echo 3 >/proc/sys/vm/drop_caches
++	nice -n 18 ssh-keygen -q -G /tmp/moduli.all -b 4096
++	nice -n 18 ssh-keygen -q -T /tmp/moduli.safe -f /tmp/moduli.all
++	chmod 600 /tmp/moduli.safe
++	rm -f /tmp/moduli.all
++	mv -f /tmp/moduli.safe ${KEYSDIR}/moduli
++	sync
++}
++
++zipkeys() {
++	# Create a zip file containing keys
++	[ -d ${KEYSDIR} ] && zip -jrq9 ${TMPKEYSDIR}.zip ${KEYSDIR} >/dev/null 2>&1
++}
++
++# Dirs
++CONFIG=/config
++NVRAMCONFIGDIR=/nvram
++NVRAMDIR=${CONFIG}/${NVRAMCONFIGDIR}
++KEYSDIR=${NVRAMDIR}/ssh
++TMPKEYSDIR=/tmp/ssh
++VARDIR=/var/ssh
++PIDDIR=/var/run
++CONFDIR=/etc
++CONFETCDIR=/usr${CONFDIR}
++BINDIR=/usr/sbin
++
++# Debug purpose
++#BINDIR=/${CONFDIR}/ancdbg
++#NVRAMDIR=${BINDIR}
++#KEYSDIR=${BINDIR}/ssh
++
++# Names
++USR=root
++LABEL=`system get dev_name`
++CONF=sshd_config
++KEYTYPES="ed25519"
++AUTHKEYSNAME=authorized_keys
++AUTHKEYS=${KEYSDIR}/${AUTHKEYSNAME}
++SSH_KEYGEN=${BINDIR}/ssh-keygen
++DAEMON=sshd
++BIN=${BINDIR}/${DAEMON}
++
++# Debug running
++[ "${2}" = "debug" ] && BIN="${BINDIR}/${DAEMON} -D -ddd -e"
++
++locking
++case $1 in
++start|restart)
++stop
++start
++;;
++startforced|restartforced)
++stop
++start $1
++;;
++stop)
++stop
++;;
++fwup|remoteup)
++remotedown
++remoteup
++;;
++fwdown|remotedown)
++remotedown
++;;
++regenkeys)
++stop
++rm -f ${KEYSDIR}/${LABEL}.* ${AUTHKEYS}
++sync
++genkeys
++start
++;;
++regenauth)
++stop
++genauth
++start
++;;
++regenmoduli)
++cat << _EOF_
++'moduli' generation will take a very long time to finish with about 50% of cpu load.
++Better to execute it while router is in an average low traffic state & usage.
++
++Alternatively, consider the possibility of generating it from an external host machine
++and then upload it on ${KEYSDIR} .
++
++Ssh server will be closed in the meanwhile.
++Running in the background in few seconds: later, this console session can exit.
++_EOF_
++sleep 2
++stop
++genmoduli &
++start
++;;
++zipkeys)
++zipkeys
++;;
++*)
++echo "Usage: $0 < start restart startforced restartforced stop fwup remoteup fwdown remotedown regenkeys regenauth regenmoduli zipkeys > (<debug>)"
++;;
++esac

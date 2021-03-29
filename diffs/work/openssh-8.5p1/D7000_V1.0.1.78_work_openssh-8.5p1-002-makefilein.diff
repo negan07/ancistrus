@@ -1,0 +1,12 @@
+diff -urN work/openssh-8.5p1/openssh-8.5p1/Makefile.in work/openssh-8.5p1/openssh-8.5p1/Makefile.in
+--- work/openssh-8.5p1/openssh-8.5p1/Makefile.in	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-8.5p1/openssh-8.5p1/Makefile.in	2018-01-05 12:00:11.000000000 +0100
+@@ -66,7 +66,7 @@
+ 
+ .SUFFIXES: .lo
+ 
+-TARGETS=ssh$(EXEEXT) sshd$(EXEEXT) ssh-add$(EXEEXT) ssh-keygen$(EXEEXT) ssh-keyscan${EXEEXT} ssh-keysign${EXEEXT} ssh-pkcs11-helper$(EXEEXT) ssh-agent$(EXEEXT) scp$(EXEEXT) sftp-server$(EXEEXT) sftp$(EXEEXT) ssh-sk-helper$(EXEEXT)
++TARGETS=sshd$(EXEEXT) ssh-keygen$(EXEEXT) scp$(EXEEXT)
+ 
+ XMSS_OBJS=\
+ 	ssh-xmss.o \
