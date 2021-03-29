@@ -1,6 +1,6 @@
-diff -urN work/sqlite-src-3340100/Makefile work/sqlite-src-3340100/Makefile
---- work/sqlite-src-3340100/Makefile	2018-10-23 23:00:46.662292000 +0200
-+++ work/sqlite-src-3340100/Makefile	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/sqlite-src-3350200/Makefile work/sqlite-src-3350200/Makefile
+--- work/sqlite-src-3350200/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/sqlite-src-3350200/Makefile	2018-10-23 23:01:08.566300143 +0200
 @@ -0,0 +1,49 @@
 +include ../Rules.mak
 +
