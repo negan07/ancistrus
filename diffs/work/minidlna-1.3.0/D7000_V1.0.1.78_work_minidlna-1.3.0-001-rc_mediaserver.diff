@@ -1,7 +1,7 @@
 diff -urN work/minidlna-1.3.0/rc_snmp work/minidlna-1.3.0/rc_mediaserver
 --- work/minidlna-1.3.0/rc_mediaserver	1970-01-01 01:00:00.000000000 +0100
 +++ work/minidlna-1.3.0/rc_mediaserver	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,163 @@
+@@ -0,0 +1,181 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -23,11 +23,28 @@ diff -urN work/minidlna-1.3.0/rc_snmp work/minidlna-1.3.0/rc_mediaserver
 +# <debug> runs daemon in foreground mode with pedantic debug messages.
 +#
 +
++locking() {
++	LOCKDIR=/var/lock/`basename $0`
++	MAXNUM=10
++	NUM=0
++
++	# Acquire lockdir to avoid race conditions
++	while [ "${NUM}" -lt "${MAXNUM}" ]
++	do
++	mkdir -p -m 0755 "${LOCKDIR}" >/dev/null 2>&1 && trap 'rm -rf "${LOCKDIR}"' INT TERM QUIT HUP EXIT && return 0
++	sleep 1
++	let NUM++
++	done
++
++	echo "$0: locking failed" && exit ${MAXNUM}
++}
++
 +stop() {
 +	# Kill all clients
 +	for PID in `pidof ${DAEMON}`
 +	do
-+	[ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
++	set -- 10 5 30 5
++	for SIGNAL in 15 9 0 9; do [ -e /proc/${PID}/stat ] && while kill -$SIGNAL $PID >/dev/null 2>&1; do sleep $1; done; shift; done
 +	done
 +}
 +
@@ -39,7 +56,7 @@ diff -urN work/minidlna-1.3.0/rc_snmp work/minidlna-1.3.0/rc_mediaserver
 +	[ ! -z "`cat /proc/mounts | grep /dev/sd`" ] || return 2
 +
 +	# Checking if the service is already running
-+	[ ! -z "`pidof ${DAEMON}`" ] && echo "${DAEMON} already running..." && exit 1
++	[ ! -z "`pidof ${DAEMON}`" ] && echo "${DAEMON} already running..." && return 3
 +
 +	# Generating conf file
 +	gen_conf
@@ -49,7 +66,7 @@ diff -urN work/minidlna-1.3.0/rc_snmp work/minidlna-1.3.0/rc_mediaserver
 +
 +	# Sanity check
 +	BIN_RC=$?
-+	[ $BIN_RC -ne 0 ] && echo "$0: Error ${BIN_RC} starting ${BIN}..." && exit $BIN_RC
++	[ $BIN_RC -ne 0 ] && echo "$0: Error ${BIN_RC} starting ${BIN}..." && return $BIN_RC
 +}
 +
 +gen_conf() {
@@ -120,6 +137,7 @@ diff -urN work/minidlna-1.3.0/rc_snmp work/minidlna-1.3.0/rc_mediaserver
 +# Debug running
 +[ "${2}" = "debug" ] && BIN="${BINDIR}/${DAEMON} -d -v"
 +
++locking
 +case $1 in
 +start|restart|dbregen)
 +stop
