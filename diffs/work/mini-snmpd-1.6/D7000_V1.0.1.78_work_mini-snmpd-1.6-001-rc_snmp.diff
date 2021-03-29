@@ -1,7 +1,7 @@
 diff -urN work/mini-snmpd-1.6/rc_snmp work/mini-snmpd-1.6/rc_snmp
 --- work/mini-snmpd-1.6/rc_snmp	1970-01-01 01:00:00.000000000 +0100
 +++ work/mini-snmpd-1.6/rc_snmp	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,128 @@
+@@ -0,0 +1,123 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -33,14 +33,10 @@ diff -urN work/mini-snmpd-1.6/rc_snmp work/mini-snmpd-1.6/rc_snmp
 +
 +start() {
 +	# Checking if service is enabled
-+	eval `nvram get minisnmpd_enable` >/dev/null 2>&1
-+	[ "${minisnmpd_enable}" = "1" ] || [ ! -z "$1" ] || return 1
++	[ "`anc nvram drget minisnmpd_enable 0`" = "1" ] || [ ! -z "$1" ] || return 1
 +
 +	# Checking if the service is already running
-+	[ ! -z "`pidof ${DAEMON}`" ] && echo "${DAEMON} already running..." && exit 1
-+
-+	# Removing no more used vars
-+	[ ! -z "`anc nvram rget minisnmpd_prot`" ] && anc nvram unset minisnmpd_prot minisnmpd_port minisnmpd_remote_prot && nvram commit
++	[ ! -z "`pidof ${DAEMON}`" ] && echo "$0: ${DAEMON} already running..." && return 2
 +
 +	# Nvram vars
 +	VARS="minisnmpd_community minisnmpd_description minisnmpd_vendor minisnmpd_location minisnmpd_contact minisnmpd_timeout minisnmpd_auth wan_ifname minisnmpd_ip6 ip6_mode"
@@ -61,7 +57,7 @@ diff -urN work/mini-snmpd-1.6/rc_snmp work/mini-snmpd-1.6/rc_snmp
 +	minisnmpd_interfaces="eth0,eth1,eth2,eth3,eth4,ip6tnl0,${wan_ifname},ptm0,wl0,wl1"
 +
 +	#The list of disk mountpoints (default is empty): '-d nnn, --disks=nnn'
-+	minisnmpd_disks="/mnt/shares"
++	minisnmpd_disks="${ROOTSHDIR}"
 +
 +	#The ipv6 protocol support (default is disable): '-4/-6'
 +	minisnmpd_ipprot="-4"
@@ -75,26 +71,26 @@ diff -urN work/mini-snmpd-1.6/rc_snmp work/mini-snmpd-1.6/rc_snmp
 +
 +	# Sanity check
 +	BIN_RC=$?
-+	[ $BIN_RC -ne 0 ] && echo "$0: Error ${BIN_RC} starting ${BIN}..." && exit $BIN_RC
++	[ $BIN_RC -ne 0 ] && echo "$0: Error $BIN_RC starting ${BIN}..." && return $BIN_RC
 +
 +	# Starting remote service
 +	remoteup
 +}
 +
 +remotedown() {
-+	# Stopping remote service
-+	eval `anc nvram get minisnmpd_remote_port` >/dev/null 2>&1
-+	[ ! -z "${minisnmpd_remote_port}" ] && ${ANC} fw remote del ls MINI-SNMPD tcp/udp ${minisnmpd_remote_port} 161
++	# Stopping remote service: use dummy remote old def port value as insurance
++	anc fw remote del ls MINISNMPD tcp/udp `anc nvram drget old_minisnmpd_rem_port 8161` 161
 +}
 +
 +remoteup() {
-+	# Checking if remote service is enabled
-+	eval `anc nvram get minisnmpd_remote_enable minisnmpd_remote_port` >/dev/null 2>&1
-+	[ ! -z "`pidof ${DAEMON}`" ] && [ "${minisnmpd_remote_enable}" = "1" ] && [ ! -z "${minisnmpd_remote_port}" ] && ${ANC} fw remote add ls MINI-SNMPD tcp/udp ${minisnmpd_remote_port} 161
++	REMPORT="`anc nvram rget minisnmpd_remote_port`"
++	# Act only on running daemon, remote service enabled, remote port set
++	[ -z "`pidof ${DAEMON}`" ] || [ "`anc nvram drget minisnmpd_remote_enable 0`" = "0" ] || [ -z "${REMPORT}" ] || anc fw remote add ls MINISNMPD tcp/udp ${REMPORT} 161
 +}
 +
 +# Dirs
 +BINDIR=/usr/sbin
++ROOTSHDIR=/mnt/shares
 +
 +# Debug purpose
 +#BINDIR=/tmp/etc/ancdbg
@@ -102,7 +98,6 @@ diff -urN work/mini-snmpd-1.6/rc_snmp work/mini-snmpd-1.6/rc_snmp
 +# Names
 +DAEMON=mini-snmpd
 +BIN=${BINDIR}/${DAEMON}
-+ANC=${BINDIR}/anc
 +
 +# Debug running
 +[ "${2}" = "debug" ] && BIN="${BINDIR}/${DAEMON} -l ${2} -n"
