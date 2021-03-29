@@ -101,7 +101,7 @@ function checkData() {
 	msg+=checkBlank(cf.media_server_name, getErrorMsgByVar("gsm_msg_invalid_mediaserver_name"));
 	if(!checkInvalidChars(cf.media_server_name.value, invalid_media_name_char)) msg+=getErrorMsgByVar("gsm_msg_invalid_mediaserver_name");
 	if(strlen_utf8(cf.media_server_name.value)>24) msg+=getErrorMsgByVar("gsm_msg_invalid_mediaserver_name");
-	if(cf.media_server_port.value!="") msg+=checkInt(cf.media_server_port, "DLNA Server Port", 1, 65534, true);
+	msg+=checkInt(cf.media_server_port, "DLNA Server Port", 1, 65534, true);
 
 	if(msg.length>1) {
 	alert(msg);
@@ -122,7 +122,7 @@ function checkData() {
 &nbsp;
 <input class="short_common_bt" type="button" name="show_status" value="Show Status" onClick="if(checkServEnable()) window.open('http://'+window.location.hostname+':'+this.form.media_server_port.value)">
 &nbsp;
-<input class="short_common_bt" type="button" name="show_log" value="Show Log" onClick="if(checkServEnable()) AncstdAction(this.form,'anc_run.htm','minidlna.htm','pipe','');">
+<input class="short_common_bt" type="button" name="show_log" value="Show Log" onClick="AncstdAction(this.form,'anc_run.htm','minidlna.htm','pipe','');">
 &nbsp;
 <input class="short_common_bt" type="button" name="delete_log" value="Delete Log" onClick="AncstdAction(this.form,'minidlna.htm','minidlna.htm','home','/usr/sbin/rc mediaserver clearlog');">
 &nbsp;
@@ -136,7 +136,7 @@ function checkData() {
 <tr><td nowrap><a href="javascript:gotoWiki('minidlna-package#media-server-name');"><b>Media Server Name</b></a>&nbsp;</td>
 <td nowrap align="right"><input type="text" name="media_server_name" value="@media_server_name#" size=32 maxlength=24>&nbsp;<span>:D7000</span></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
-<tr><td nowrap><a href="javascript:gotoWiki('minidlna-package#dlna-server-port');"><b>DLNA Server Port</b></a></td>
+<tr><td nowrap><a href="javascript:gotoWiki('minidlna-package#dlna-server-port');"><b>DLNA Web Server Port</b></a></td>
 <td nowrap align="right"><input type="text" class="num" name="media_server_port" value="@media_server_port#" size=6 maxlength=5></td></tr>
 <tr><td align="left"><span><a href="javascript:gotoWiki('minidlna-package#notify-interval');"><b>Notify Interval</b></a></span></td>
 	<td align="right"><select name="media_server_notify_int" size=1>
