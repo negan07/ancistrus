@@ -18,11 +18,10 @@
 <script language="javascript" type="text/javascript">
 <!--
 
-function gen_opts(optname) {
-	var devl="abcdefgh", txt="";
+function gen_opts() {
+	var vol_dir=[@mntsdlist_/dev/sd#], txt="";
 
-	if(optname=="dev_sel") for(var i=0;i<devl.length;i++) txt+="<option value=\"/dev/sd"+devl[i]+"\">/dev/sd"+devl[i]+"</option>";
-	else for(var i=1;i<16;i++) txt+="<option value=\""+i+"\">Partition #"+i+"</option>";
+	for(var i=0;i<vol_dir.length;i++) txt+="<option value=\""+vol_dir[i]+"\">"+vol_dir[i]+"</option>";
 	document.write(txt);
 }
 
@@ -35,20 +34,16 @@ function gen_opts(optname) {
 <table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
 <input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('AncdataToVisible(document.forms[0])',250)">
 &nbsp;
-<input class="apply_bt" type="SUBMIT" name="apply" value="Check" onclick="this.form.pipe_cmd.value='/usr/sbin/rc_app/rc_ntfsfix start '+this.form.dev_sel.value+this.form.part_sel.value;if(!confirm('Warning! Now writing a storage partition: make sure to backup partition data before attempting: proceed ?')) return false;AncstdAction(this.form,'anc_run.htm','ntfs-3g_ntfsprogs.htm','pipe','');">
+<input class="apply_bt" type="SUBMIT" name="apply" value="Check" onclick="this.form.pipe_cmd.value='/usr/sbin/rc_app/rc_ntfsfix start '+this.form.dev_part_sel.value;if(!confirm('Warning! Now writing a storage partition: make sure to backup partition data before attempting: proceed ?')) return false;AncstdAction(this.form,'anc_run.htm','ntfs-3g_ntfsprogs.htm','pipe','');">
 </td></tr></table>
 </div>
 <div id="main" class="main_top_button">
 <table border="0" cellpadding="0" cellspacing="3" width="100%">
 &nbsp; &nbsp; &nbsp; &nbsp;
-<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('ntfsprogs-package#select-device')" tabindex="-1"><b>Select the Device to Check</b></a>
-&nbsp; &nbsp; &nbsp; &nbsp;
-<select name="dev_sel" size=1><script>gen_opts('dev_sel');</script></select></td></tr>
+<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('ntfsprogs-package#select-device-partition')" tabindex="-1"><b>Select the NTFS Device Partition to Check</b></a>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<select name="dev_part_sel" size=1><script>gen_opts()</script></select></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
-<tr><td colspan="2" align="center"><a href="javascript:gotoWiki('ntfsprogs-package#select-ntfs-partition')" tabindex="-1"><b>Select the NTFS Partition to Check</b></a>
-&nbsp; &nbsp; &nbsp; &nbsp;
-<select name="part_sel" size=1><script>gen_opts('part_sel');</script></select></td></tr>
-<tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 </table>
 <input type="hidden" name="job" value="">
 <input type="hidden" name="todo" value="">
