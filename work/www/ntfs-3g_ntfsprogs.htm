@@ -22,7 +22,11 @@ function gen_opts() {
 	var vol_dir=[@mntsdlist_/dev/sd#], txt="";
 
 	for(var i=0;i<vol_dir.length;i++) txt+="<option value=\""+vol_dir[i]+"\">"+vol_dir[i]+"</option>";
-	document.write(txt);
+		if(txt.length<1) {
+		allToDisabled(document.forms[0]);
+		alert("No storage devices available: page locked !\n");
+		}
+		else document.write(txt);
 }
 
 //-->
