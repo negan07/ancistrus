@@ -32,9 +32,12 @@ function varInit() {
 }
 
 function gen_opts() {
-	var devl="abcdefgh", txt="";
+	var vol_dir=[@mntsdlist_/dev/sd#], dev, txt="";
 
-	for(var i=0;i<devl.length;i++) txt+="<option value=\"/dev/sd"+devl[i]+"\">Usb Device #"+(i+1)+" (/dev/sd"+devl[i]+")</option>";
+		for(var i=0;i<vol_dir.length;i++) {
+		dev=vol_dir[i].substring(0,8);
+		if(txt.indexOf(dev)<0) txt+="<option value=\""+dev+"\">"+dev+"</option>";
+		}
 	document.write(txt);
 }
 
@@ -90,7 +93,7 @@ function checkTimeout(hdidle) {
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#select-device')" tabindex="-1"><b>Select the Device to Analyze</b></a>
 &nbsp; &nbsp; &nbsp; &nbsp;
-<select name="dev_sel" size=1><script>gen_opts();</script></select></td></tr>
+<select name="dev_sel" size=1><script>gen_opts()</script></select></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#show-device-infos')" tabindex="-1"><b>Show Device Infos</b></a></td></tr>
 <tr><td colspan="2" align="center"><select name="infocmd" size=1>
