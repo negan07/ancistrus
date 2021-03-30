@@ -1,7 +1,7 @@
 diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontools
 --- work/smartmontools-7.3/rc_smontools	2017-11-03 21:54:56.000000000 +0100
 +++ work/smartmontools-7.3/rc_smontools	2018-04-19 22:48:31.600116512 +0200
-@@ -0,0 +1,86 @@
+@@ -0,0 +1,103 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -20,6 +20,22 @@ diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontool
 +# <debug> runs smartd in foreground mode with pedantic debug messages.
 +#
 +
++locking() {
++	LOCKDIR=/var/lock/`basename $0`
++	MAXNUM=10
++	NUM=0
++
++	# Acquire lockdir to avoid race conditions
++	while [ "${NUM}" -lt "${MAXNUM}" ]
++	do
++	mkdir -p -m 0755 "${LOCKDIR}" >/dev/null 2>&1 && trap 'rm -rf "${LOCKDIR}"' INT TERM QUIT HUP EXIT && return 0
++	sleep 1
++	let NUM++
++	done
++
++	echo "$0: locking failed" && exit ${MAXNUM}
++}
++
 +stop() {
 +	# Kill all clients
 +	for PID in `pidof smartd`
@@ -34,17 +50,17 @@ diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontool
 +	[ "${smartd_enable}" = "1" ] || [ ! -z "$1" ] || return 1
 +
 +	# Checking if the service is already running
-+	[ ! -z "`pidof smartd`" ] && echo "smartd already running..." && exit 1
++	[ ! -z "`pidof smartd`" ] && echo "smartd already running..." && return 2
 +
 +	# Checking for /dev/sdX storage presence
-+	[ ! -z "`mount | grep -o /dev/sd`" ] || [ ! -z "`cat /proc/partitions | awk '{print $4}' | grep sd | grep -v sd.[1-15]`" ] || return 2
++	[ ! -z "`mount | grep -o /dev/sd`" ] || [ ! -z "`cat /proc/partitions | awk '{print $4}' | grep sd | grep -v sd.[1-15]`" ] || return 3
 +
 +	# Starting 'smartd'
 +	$SMARTD
 +
 +	# Sanity check
 +	SMARTD_RC=$?
-+	[ $SMARTD_RC -ne 0 ] && echo "$0: Error ${SMARTD_RC} starting ${SMARTD}..." && exit $SMARTD_RC
++	[ $SMARTD_RC -ne 0 ] && echo "$0: Error ${SMARTD_RC} starting ${SMARTD}..." && return $SMARTD_RC
 +}
 +
 +updatedb() {
@@ -69,6 +85,7 @@ diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontool
 +# Debug running
 +[ "${2}" = "debug" ] && SMARTD="${SMARTD} -c ${BINDIR}/smartd.conf -n -d"
 +
++locking
 +case $1 in
 +start|restart)
 +stop
