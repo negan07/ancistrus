@@ -1,0 +1,61 @@
+diff -urN work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/Makefile.in work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/Makefile.in
+--- work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -22,20 +22,18 @@
+ LIB_SUBDIRS=lib/et lib/ss $(E2P_LIB_SUBDIR) $(UUID_LIB_SUBDIR) \
+ 	$(BLKID_LIB_SUBDIR) $(SUPPORT_LIB_SUBDIR) $(EXT2FS_LIB_SUBDIR)
+ 
+-PROG_SUBDIRS=e2fsck $(DEBUGFS_DIR) misc $(RESIZE_DIR) tests/progs po \
+-	$(E2SCRUB_DIR)
++PROG_SUBDIRS=e2fsck misc #$(RESIZE_DIR)
+ 
+-SUBDIRS=util $(LIB_SUBDIRS) $(PROG_SUBDIRS) tests
++SUBDIRS=$(LIB_SUBDIRS) $(PROG_SUBDIRS)
+ 
+ SUBS= util/subst.conf lib/config.h $(top_builddir)/lib/dirpaths.h \
+ 	lib/ext2fs/ext2_types.h lib/blkid/blkid_types.h lib/uuid/uuid_types.h
+ 
+ TAR=tar
+ 
+-all:: subs
++all::
+ 	$(MAKE) libs
+ @ALL_CMT@	$(MAKE) progs
+-@ALL_CMT@	$(MAKE) docs
+ 
+ all-static::
+ 	$(MAKE) libs
+diff -urN work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/misc/Makefile.in work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/misc/Makefile.in
+--- work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/misc/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/misc/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -12,7 +12,7 @@
+ 
+ @MCONFIG@
+ 
+-@DEFRAG_CMT@@LINUX_CMT@E4DEFRAG_PROG= e4defrag
++@DEFRAG_CMT@@LINUX_CMT@E4DEFRAG_PROG=
+ @DEFRAG_CMT@@LINUX_CMT@E4DEFRAG_MAN= e4defrag.8
+ 
+ @LINUX_CMT@E4CRYPT_PROG = e4crypt
+@@ -136,8 +136,7 @@ DEPEND_CFLAGS = -I$(top_srcdir)/e2fsck
+ 	$(Q) $(CPPCHECK_CMD) $(CPPFLAGS) $<
+ @PROFILE_CMT@	$(Q) $(CC) $(ALL_CFLAGS) -g -pg -o profiled/$*.o -c $<
+ 
+-all:: profiled $(SPROGS) $(UPROGS) $(USPROGS) $(SMANPAGES) $(UMANPAGES) \
+-	$(FMANPAGES) $(LPROGS) $(E4DEFRAG_PROG) $(E4CRYPT_PROGS) e2fuzz
++all:: blkid #mke2fs tune2fs
+ 
+ all-static:: $(E2IMAGE_STATIC) $(UUIDD_STATIC) $(BLKID_STATIC) \
+ 	dumpe2fs.static mke2fs.static tune2fs.static lsattr.static chattr.static
+diff -urN work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/resize/Makefile.in work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/resize/Makefile.in
+--- work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/resize/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.46.2/e2fsprogs-1.46.2/resize/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -41,7 +41,7 @@
+ 	$(Q) $(CHECK_CMD) $(ALL_CFLAGS) $<
+ 	$(Q) $(CPPCHECK_CMD) $(CPPFLAGS) $<
+ 
+-all:: $(PROGS) $(TEST_PROGS) $(MANPAGES) 
++all:: $(PROGS)
+ 
+ all-static:: resize2fs.static
+ 

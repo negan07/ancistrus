@@ -1,0 +1,113 @@
+diff -urN work/e2fsprogs-1.46.2/rc_e2fsck work/e2fsprogs-1.46.2/rc_e2fsck
+--- work/e2fsprogs-1.46.2/rc_e2fsck	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.46.2/rc_e2fsck	2018-10-23 23:01:08.566300143 +0200
+@@ -0,0 +1,109 @@
++#!/bin/sh
++#
++# ancistrus
++#
++# Netgear's D7000 (V1) Nighthawk Router Experience Distributed Project
++#
++# https://github.com/negan07/ancistrus
++#
++# License: GPLv2
++#
++#
++# Rc script for e2fsck.
++#
++# Usage: $0 < start restart stop > <device_part>
++#
++# <device_part> is the partition device to check (mandatory)
++#
++
++locking() {
++	LOCKDIR=/var/lock/`basename $0`
++	MAXNUM=10
++	NUM=0
++
++	# Acquire lockdir to avoid race conditions
++	while [ "${NUM}" -lt "${MAXNUM}" ]
++	do
++	mkdir -p -m 0755 "${LOCKDIR}" >/dev/null 2>&1 && trap 'rm -rf "${LOCKDIR}"' INT TERM QUIT HUP EXIT && return 0
++	sleep 1
++	let NUM++
++	done
++
++	echo "$0: locking failed" && exit ${MAXNUM}
++}
++
++stop() {
++	# Kill all pids
++	for PID in `pidof e2fsck`
++	do
++	[ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
++	done
++}
++
++start() {
++	# Checking if the service is already running
++	[ ! -z "`pidof e2fsck`" ] && echo "e2fsck already running..." && exit 127
++
++	# Checking for device partition param
++	local DEVPART=$1
++	[ -z "$DEVPART" ] && echo "Missing device partition" && exit 128
++
++	# Checking for device partition presence
++	[ -z "`cat /proc/mounts | grep $DEVPART`" ] && echo "$DEVPART device partition not present" && exit 129
++
++	# Unmounting device partition
++	rc usb_service umount "$DEVPART"
++	sleep 20
++
++	# Preliminary fs operations
++	cp -f /proc/mounts ${CONFDIR}/mtab
++
++	# Starting 'e2fsck'
++	$E2FSCK -p "${DEVPART}" 2>&1
++
++	# Sanity check
++	local E2FSCK_RC=$?
++	echo
++	case $E2FSCK_RC in
++	0|1)
++	echo "$0: Success on device partition $DEVPART"
++	;;
++	2)
++	echo "$0: Rebooting"
++	sleep 5
++	reboot
++	;;
++	4)
++	echo "$0: Error ${E2FSCK_RC} starting ${E2FSCK} on device partition $DEVPART"
++	;;
++	*)
++	echo "$0: Error ${E2FSCK_RC} starting ${E2FSCK} on device partition $DEVPART . Check not complete."
++	;;
++	esac
++
++	# Remounting & exiting
++	rc usb_service mount "$DEVPART"
++	sleep 20
++	exit $E2FSCK_RC
++}
++
++# Dirs
++CONFDIR=/etc
++BINDIR=/usr/sbin
++
++# Names
++E2FSCK=${BINDIR}/e2fsck
++
++locking
++case $1 in
++start|restart)
++stop
++start $2
++;;
++stop)
++stop
++;;
++*)
++echo "Usage: $0 < start restart stop > <device_part>"
++;;
++esac

@@ -1,12 +1,12 @@
-diff -urN work/e2fsprogs-1.45.6/Makefile work/e2fsprogs-1.45.6/Makefile
---- work/e2fsprogs-1.45.6/Makefile	2018-10-23 23:00:46.662292000 +0200
-+++ work/e2fsprogs-1.45.6/Makefile	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/e2fsprogs-1.46.2/Makefile work/e2fsprogs-1.46.2/Makefile
+--- work/e2fsprogs-1.46.2/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.46.2/Makefile	2018-10-23 23:01:08.566300143 +0200
 @@ -0,0 +1,57 @@
 +include ../Rules.mak
 +
-+BINS			:= $(E2FSPROGS)/e2fsck/e2fsck $(E2FSPROGS)/misc/blkid
++BINS			:= $(E2FSPROGS)/e2fsck/e2fsck $(E2FSPROGS)/misc/blkid #$(E2FSPROGS)/misc/mke2fs $(E2FSPROGS)/misc/tune2fs $(E2FSPROGS)/resize/resize2fs
 +STARTUP			:= rc_e2fsck
-+WEB			:= ../www/e2fsprogs.htm
++WEB			:= ../www/$(E2FSPROGS_NAME).htm
 +E2FSCK_CONF		:= e2fsck.conf
 +E2FSCK_CONF_INST_DIR	:= $(ETCDIR)
 +
