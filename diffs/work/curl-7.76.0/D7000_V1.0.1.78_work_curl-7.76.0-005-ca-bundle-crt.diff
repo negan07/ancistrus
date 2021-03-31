@@ -1,5 +1,5 @@
---- work/curl-7.75.0/curl-7.75.0/lib/ca-bundle.crt
-+++ work/curl-7.75.0/curl-7.75.0/lib/ca-bundle.crt
+--- work/curl-7.76.0/curl-7.76.0/lib/ca-bundle.crt
++++ work/curl-7.76.0/curl-7.76.0/lib/ca-bundle.crt
 @@ -0,0 +1,3228 @@
 +##
 +## Bundle of CA Root Certificates

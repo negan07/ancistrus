@@ -227,10 +227,10 @@ DIRLIST				+= $(OPENSSL)
 TARLIST				+= $(TAR_$(OPENSSL))
 # CURL
 CURL_NAME			:= curl
-VER_$(CURL_NAME)		:= 7.75.0
+VER_$(CURL_NAME)		:= 7.76.0
 CURL				:= $(CURL_NAME)-$(VER_$(CURL_NAME))
 NAME_$(CURL)			:= $(CURL_NAME)$(DBG)
-SUBVER_$(CURL)			:= -001
+SUBVER_$(CURL)			:= 
 VER_$(CURL)			:= $(VER_$(CURL_NAME))$(SUBVER_$(CURL))
 DL_$(CURL)			:= https://curl.haxx.se/download
 TAR_$(CURL)			:= $(CURL).tar.gz
