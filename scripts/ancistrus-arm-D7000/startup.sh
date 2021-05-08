@@ -54,7 +54,7 @@ LANGSDIR=${WWW}/langs
 URL=https://raw.githubusercontent.com/negan07/ancistrus/gh-pages/tools/ancistrus-arm-D7000
 [ ! -z "$1" ] && URL=$1
 
-[ "`system get dev_name 2>/dev/null`" != "D7000" ] || [ ! -x ${BINDIR}/xdslctl ] && echo "This script can be used with Netgear D7000 (V1) only" && exit 5
+[ "`ps | grep ${BINDIR}/mini_httpd | grep -v grep | awk '{printf $10}'`" != "D7000" ] || [ ! -x ${BINDIR}/xdslctl ] && echo "This script can be used with Netgear D7000 (V1) only" && exit 5
 [ -x ${BINDIR}/${BIN} ] || mount | grep ${OPKGMNTPART} >/dev/null 2>&1 && echo "${BIN} looks already installed." && exit 4
 
 cd ${ETCDIR}
