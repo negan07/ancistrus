@@ -11,19 +11,19 @@
 #
 # Prepare firmware .zip pack after compiling.
 #
-# Usage: $0 <old_build_ver>
+# Usage: $0
 #
 # This script starts working from the git root source dir.
 # Firmware image file .img must be present.
-# Old build revision version number must be passed as parameter to calculate last commit log lines.
+# Old build revision version number must be present on git remote in order to calculate last commit log lines.
 #
 
-OLDVER=$1
-[ -z "${OLDVER}" ] && echo "Old build revision version number missed" && exit 5
-
 while [ ! -d .git ] && [ "`pwd`" != "/" ]; do cd ..; done
-[ ! -d .git ] && echo "`basename ${PWD}` not a git root dir" && exit 4
+[ ! -d .git ] && echo "`basename ${PWD}` not a git root dir" && exit 5
 PROJ=$(basename -s .git `git config --get remote.origin.url`)
+
+OLDVER=$(basename `git ls-remote --tags origin | tail -n 1 | awk '{printf $2}'` 2>/dev/null)
+[ -z "${OLDVER}" ] && echo "Old build revision version number missed" && exit 4
 
 SRCDIR=`for F in *; do echo ${F} | grep _WW_src | sed "s/_WW_src//"; done | head -n 1`
 [ -z "${SRCDIR}" ] && echo "Source dir tree missed" && exit 3
