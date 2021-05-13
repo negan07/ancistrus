@@ -873,7 +873,7 @@ diff -urN D7000_V1.0.1.78_WW_src/Source/apps/bind-9.2.3/Makefile D7000_V1.0.1.78
  STD_CINCLUDES =	
  STD_CDEFINES =	
  STD_CWARNINGS =	 -W -Wall -Wmissing-prototypes -Wcast-qual -Wwrite-strings -Wformat
-@@ -275,10 +275,12 @@
+@@ -275,11 +275,13 @@
  
  install:: isc-config.sh installdirs
  	${INSTALL_SCRIPT} isc-config.sh ${DESTDIR}${bindir}
@@ -881,12 +881,14 @@ diff -urN D7000_V1.0.1.78_WW_src/Source/apps/bind-9.2.3/Makefile D7000_V1.0.1.78
 -	cp -a ${bindir}/dig ../../target/usr/sbin/ 
 -	cp -a ${libdir}/libdns* ../../target/lib/ 
 -	cp -a ${libdir}/libisc* ../../target/lib/ 
+-	rm -rf ../../target/lib/*.a
 +	$(STRIP) ${libdir}/libdns*.so
 +	$(STRIP) ${libdir}/libisc*.so
 +	$(SSTRIP) ${bindir}/dig
++	sudo chgrp -h root ${libdir}/libdns*.so* ${libdir}/libisc*.so*
++	sudo chmod 0755 ${libdir}/libdns*.so* ${libdir}/libisc*.so*
++	cp -a ${libdir}/libdns*.so* ${libdir}/libisc*.so* ../../target/lib/
 +	cp -a ${bindir}/dig ../../target/usr/sbin/
-+	cp -a ${libdir}/libdns* ../../target/lib/
-+	cp -a ${libdir}/libisc* ../../target/lib/
- 	rm -rf ../../target/lib/*.a
  	
  tags:
+ 	rm -f TAGS
