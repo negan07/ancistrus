@@ -68,14 +68,14 @@ ERR=$?
 	URL="${2}"
 	SRCFILE="${3}"
 	;;
-	*)										#too params: show usage
+	*)										#too many params: show usage
 	DSTDIR=""
 	ERR=1
 	echo "Usage: $0 <destination_dir> <remote_www_url> <(arch)filename>"
 	;;
 	esac
-	if [ ! -d $DSTDIR ]; then
-	echo "$DSTDIR not present"
+	if [ ! -d "${DSTDIR}" ]; then
+	echo "${DSTDIR} not present"
 		if [ ! -f "${SRCFILE}" ]; then						#avoid dir overwritings
 		echo "\"${SRCFILE}\" not present"
 			case $URL in
@@ -88,14 +88,14 @@ ERR=$?
 			;;
 			*)								#local copy (typically from orig sources)
 			echo "Copying local: ${URL}/\"${SRCFILE}\" ..."
-			cp -rf "${URL}/${SRCFILE}" ./${DSTDIR}
+			cp -rf "${URL}/${SRCFILE}" ./"${DSTDIR}"
 			ERR=$?								#set error flag on copy error
 			;;
 			esac
 		fi
 		case "${SRCFILE}" in							#extract archive
 		*.zip)
-		UNZIP $DSTDIR "${SRCFILE}"
+		UNZIP "${DSTDIR}" "${SRCFILE}"
 		;;
 		*.tar.gz|*.tgz)
 		UNTARGZ "${SRCFILE}"
@@ -107,13 +107,13 @@ ERR=$?
 		UNTARXZ "${SRCFILE}"
 		;;
 		*.sh)									#move script only
-		mv -f "${SRCFILE}" $DSTDIR
+		mv -f "${SRCFILE}" "${DSTDIR}"
 		ERR=$?
 		;;
 		*)
 		;;
 		esac
-	[ $ERR -ne 0 ] && echo "Unable to obtain $DSTDIR"
+	[ $ERR -ne 0 ] && echo "Unable to obtain ${DSTDIR}" || chmod -R +w "${DSTDIR}"/* #give write attributes to extracted files
 	fi
 exit $ERR
 
