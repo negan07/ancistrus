@@ -49,10 +49,10 @@ run_speedtest() {
 BINCMD=${BIN}													# command basic params
 [ ! ${HOME} ] && BINCMD="${BINCMD} --ca-certificate=${CERT} --accept-license --accept-gdpr -p no"		# non interactive params
 
-[ ! -r ${CERT} ] && cd ${CERTDIR} && curl -f -s -k -O -z ${PEMNAME} ${CERTURL} && chmod 600 ${PEM} && mv -f ${PEM} ${CERT}	# download cert
+[ ! -r ${CERT} ] && cd ${CERTDIR} && curl -f -s -k --connect-timeout ${CTOUT} -m ${TTOUT} -O -z ${PEMNAME} ${CERTURL} && chmod 600 ${PEM} && mv -f ${PEM} ${CERT}												# download cert
 [ ! -r ${CERT} ] && echo "Error: ${CERT} cert missing or unavailable !" && exit 2				# cert presence verification
 
-[ ! -x ${BIN} ] && curl -f -s -k -L ${BINURL} | tar -oxz -C ${BINDIR} ${BINNAME} && chmod 755 ${BIN}		# download & extract binary
+[ ! -x ${BIN} ] && curl -f -s -k --connect-timeout ${CTOUT} -m ${TTOUT} -L ${BINURL} | tar -oxz -C ${BINDIR} ${BINNAME} >/dev/null 2>&1 && chmod 755 ${BIN} || echo "Extract error"									# download & extract binary
 [ ! -x ${BIN} ] && echo "Error: ${BIN} binary missing or unavailable !" && exit 1				# bin presence verification
 
 export HOME=${CONFDIR}												# avoid writing confdir on root
@@ -68,6 +68,8 @@ BINARCNAME=ookla-${BINNAME}-${BINVER}-${BINARCH}-${BINOS}.tgz
 CERTNAME=ca-bundle.crt
 PEMNAME=cacert.pem
 NVARS="speedtest_net_license speedtest_net_gdpr"
+CTOUT=`anc nvram drget curl_conn_timeout 5`
+TTOUT=`anc nvram drget curl_tr_timeout 30`
 
 BINDIR=/tmp
 CONFDIR=/tmp
@@ -76,8 +78,8 @@ CERT=${CERTDIR}/${CERTNAME}
 PEM=${CERTDIR}/${PEMNAME}
 BIN=${BINDIR}/${BINNAME}
 
-BINURL=https://bintray.com/ookla/download/download_file?file_path=${BINARCNAME}
 CERTURL=https://curl.se/ca/${PEMNAME}
+BINURL=https://install.${BINNAME}.net/app/cli/${BINARCNAME}
 
 case "${1}" in
 setlics)
