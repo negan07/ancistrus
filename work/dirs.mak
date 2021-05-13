@@ -225,6 +225,23 @@ DEP_$(OPENSSL)			:=
 DESC_$(OPENSSL)			:= Cryptography and SSL/TLS Toolkit
 DIRLIST				+= $(OPENSSL)
 TARLIST				+= $(TAR_$(OPENSSL))
+# ARES
+ARES_NAME			:= c-ares
+VER_$(ARES_NAME)		:= 1.17.1
+ARES				:= $(ARES_NAME)-$(VER_$(ARES_NAME))
+NAME_$(ARES)			:= $(ARES_NAME)$(DBG)
+SUBVER_$(ARES)			:= 
+VER_$(ARES)			:= $(VER_$(ARES_NAME))$(SUBVER_$(ARES))
+DL_$(ARES)			:= https://c-ares.haxx.se/download
+TAR_$(ARES)			:= $(ARES).tar.gz
+HOME_$(ARES)			:= https://c-ares.haxx.se/
+LIC_$(ARES)			:= MIT/X
+SEC_$(ARES)			:= libs
+PRIO_$(ARES)			:= optional
+DEP_$(ARES)			:= 
+DESC_$(ARES)			:= Library for asyncronous DNS Requests (including name resolves)
+DIRLIST				+= $(ARES)
+TARLIST				+= $(TAR_$(ARES))
 # CURL
 CURL_NAME			:= curl
 VER_$(CURL_NAME)		:= 7.76.0
@@ -748,6 +765,7 @@ BUILTINLIB 			+= $(NVRAM)
 #BUILTINLIB			+= $(LZO)
 BUILTINLIB			+= $(ZLIB)
 BUILTINLIB			+= $(OPENSSL)
+BUILTINLIB			+= $(ARES)
 BUILTINLIB			+= $(CURL)
 BUILTINLIB			+= $(ICONV)
 BUILTINLIB			+= $(SQLITE)
@@ -807,5 +825,5 @@ SUBDIRS				+= $(THIRDPARTYLIB)
 SUBDIRS				+= $(BUILTIN)
 SUBDIRS				+= $(THIRDPARTY)
 # SKIP FROM IPK CREATION
-PKG_RM_LIST			:= $(NVRAM) $(ARCHIVE) $(OPKG_UTILS) $(LZO) $(IPROUTE2) $(NETPERF) $(EASYRSA) $(MEDIASERVER)
+PKG_RM_LIST			:= $(NVRAM) $(ARES) $(ARCHIVE) $(OPKG_UTILS) $(LZO) $(IPROUTE2) $(NETPERF) $(EASYRSA) $(MEDIASERVER)
 

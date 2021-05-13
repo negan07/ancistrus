@@ -1,0 +1,54 @@
+diff -urN work/c-ares-1.17.1/Makefile work/c-ares-1.17.1/Makefile
+--- work/c-ares-1.17.1/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/c-ares-1.17.1/Makefile	2018-10-23 23:01:08.566300143 +0200
+@@ -0,0 +1,50 @@
++include ../Rules.mak
++
++LIBSNAME		:= libcares.so
++LIBSMAINVER		:= 2
++LIBSVER			:= $(LIBSMAINVER).4.2
++LIBSDIRNAME		:= $(ARES)/src/lib/.libs
++LIBS			:= $(LIBSNAME).$(LIBSVER)
++
++all: config
++	$(MAKE) -C $(ARES)
++	$(STRIP) $(STRIPFLAGS) $(LIBSDIRNAME)/*.a
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(ARES) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" CXXFLAGS="$(CFLAGS) -Os -s -Wno-psabi -std=c++0x" --disable-shared --enable-static --enable-optimize=-Os --disable-maintainer-mode --disable-debug --disable-tests --disable-dependency-tracking
++
++install:
++	@echo "Nothing to install..."
++#	$(STRIP) $(LIBSDIRNAME)/$(LIBS)
++#	for D in $(TMPINSTDIR); do install -m 0755 -d $$D; done
++#	install -m 0755 $(LIBSDIRNAME)/$(LIBS) $(TMPINSTDIR)
++#	for L in $(LIBSNAME) $(LIBSNAME).$(LIBSMAINVER); do ln -sf $(LIBS) $(TMPINSTDIR)/$$L; done
++
++clean:
++	$(MAKE) -C $(ARES) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(ARES) distclean
++
++ifndef BUILD
++control:
++else
++PREINST		:= $(CTRL_DIR)/preinst
++
++control: preinst
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "echo \"Removing old lib ver & symlinks...\"" >> $(PREINST)
++	@echo "rm -f $(LDLIB)/$(LIBSNAME)*" >> $(PREINST)
++	@echo "sync" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++endif
++

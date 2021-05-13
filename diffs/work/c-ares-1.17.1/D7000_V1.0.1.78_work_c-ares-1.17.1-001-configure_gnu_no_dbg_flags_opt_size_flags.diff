@@ -1,0 +1,14 @@
+--- work/c-ares-1.17.1/c-ares-1.17.1/configure
++++ work/c-ares-1.17.1/c-ares-1.17.1/configure
+@@ -19775,9 +19775,9 @@ $as_echo "yes" >&6; }
+     flags_dbg_all="$flags_dbg_all -gdwarf-2"
+     flags_dbg_all="$flags_dbg_all -gvms"
+     flags_dbg_yes="-g"
+-    flags_dbg_off="-g0"
++    flags_dbg_off=""
+     flags_opt_all="-O -O0 -O1 -O2 -O3 -Os"
+-    flags_opt_yes="-O2"
++    flags_opt_yes="-Os"
+     flags_opt_off="-O0"
+ 
+       if test -z "$SED"; then
