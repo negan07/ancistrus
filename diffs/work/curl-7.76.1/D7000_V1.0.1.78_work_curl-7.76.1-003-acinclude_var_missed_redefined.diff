@@ -1,0 +1,88 @@
+--- work/curl-7.76.1/curl-7.76.1/acinclude.m4
++++ work/curl-7.76.1/curl-7.76.1/acinclude.m4
+@@ -1738,6 +1738,53 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_
+ ])
+ 
+ 
++dnl CURL_INCLUDES_WINSOCK2
++dnl -------------------------------------------------
++dnl Set up variable with list of headers that must be
++dnl included when winsock(2).h is to be included.
++
++AC_DEFUN([CURL_INCLUDES_WINSOCK2], [
++curl_includes_winsock2="\
++/* includes start */
++#ifdef HAVE_WINDOWS_H
++#  ifndef WIN32_LEAN_AND_MEAN
++#    define WIN32_LEAN_AND_MEAN
++#  endif
++#  include <windows.h>
++#  ifdef HAVE_WINSOCK2_H
++#    include <winsock2.h>
++#  else
++#    ifdef HAVE_WINSOCK_H
++#      include <winsock.h>
++#    endif
++#  endif
++#endif
++/* includes end */"
++  CURL_CHECK_HEADER_WINDOWS
++  CURL_CHECK_HEADER_WINSOCK
++  CURL_CHECK_HEADER_WINSOCK2
++])
++
++
++dnl CURL_INCLUDES_BSDSOCKET
++dnl -------------------------------------------------
++dnl Set up variable with list of headers that must be
++dnl included when bsdsocket.h is to be included.
++
++AC_DEFUN([CURL_INCLUDES_BSDSOCKET], [
++curl_includes_bsdsocket="\
++/* includes start */
++#ifdef HAVE_PROTO_BSDSOCKET_H
++#  include <proto/bsdsocket.h>
++  struct Library *SocketBase = NULL;
++#endif
++/* includes end */"
++  AC_CHECK_HEADERS(
++    proto/bsdsocket.h,
++    [], [], [      $curl_includes_bsdsocket])
++])
++
++
+ dnl CURL_CHECK_LIBS_CONNECT
+ dnl -------------------------------------------------
+ dnl Verify if network connect function is already available
+@@ -1805,6 +1852,31 @@ cat >>confdefs.h <<_EOF
+ _EOF
+ ])
+ 
++
++dnl CURL_INCLUDES_POLL
++dnl -------------------------------------------------
++dnl Set up variable with list of headers that must be
++dnl included when poll.h is to be included.
++
++AC_DEFUN([CURL_INCLUDES_POLL], [
++curl_includes_poll="\
++/* includes start */
++#ifdef HAVE_SYS_TYPES_H
++#  include <sys/types.h>
++#endif
++#ifdef HAVE_POLL_H
++#  include <poll.h>
++#endif
++#ifdef HAVE_SYS_POLL_H
++#  include <sys/poll.h>
++#endif
++/* includes end */"
++  AC_CHECK_HEADERS(
++    sys/types.h poll.h sys/poll.h,
++    [], [], [$curl_includes_poll])
++])
++
++
+ dnl CURL_CONFIGURE_PULL_SYS_POLL
+ dnl -------------------------------------------------
+ dnl The need for the sys/poll.h inclusion arises mainly to properly

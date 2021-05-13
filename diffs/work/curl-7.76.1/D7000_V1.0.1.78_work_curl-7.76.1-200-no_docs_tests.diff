@@ -1,0 +1,39 @@
+--- work/curl-7.76.1/curl-7.76.1/Makefile.am
++++ work/curl-7.76.1/curl-7.76.1/Makefile.am
+@@ -195,7 +195,7 @@ CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP)
+ bin_SCRIPTS = curl-config
+ 
+ SUBDIRS = lib src
+-DIST_SUBDIRS = $(SUBDIRS) tests packages scripts include docs
++DIST_SUBDIRS = $(SUBDIRS) include
+ 
+ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = libcurl.pc
+@@ -306,8 +306,6 @@ cygwinbin:
+ # We extend the standard install with a custom hook:
+ install-data-hook:
+ 	(cd include && $(MAKE) install)
+-	(cd docs && $(MAKE) install)
+-	(cd docs/libcurl && $(MAKE) install)
+ 
+ # We extend the standard uninstall with a custom hook:
+ uninstall-hook:
+--- work/curl-7.76.1/curl-7.76.1/src/Makefile.am
++++ work/curl-7.76.1/curl-7.76.1/src/Makefile.am
+@@ -43,7 +43,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
+ 
+ bin_PROGRAMS = curl
+ 
+-SUBDIRS = ../docs
++SUBDIRS =
+ 
+ if USE_CPPFLAG_CURL_STATICLIB
+ AM_CPPFLAGS += -DCURL_STATICLIB
+@@ -108,7 +108,6 @@ if USE_MANUAL
+ # Here are the stuff to create a built-in manual
+ 
+ $(MANPAGE):
+-	cd $(top_builddir)/docs && $(MAKE)
+ 
+ if HAVE_LIBZ
+ # This generates the tool_hugehelp.c file in both uncompressed and
