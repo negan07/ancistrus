@@ -20,6 +20,8 @@ var admin_open=0;
 var net_open=0;
 var storage_open=0;
 var misc_open=0;
+var guiinfo_cmd="/usr/sbin/scripts/guiinfo.sh >/dev/null";
+var upd_fail="Warning ! Repository update not available !\\n\\n";
 
 function loadvalue() {
 	//document.getElementById('topframe').contentDocument.location.reload(true);
@@ -53,11 +55,15 @@ function linksetup(name, type) {
 	if(type=='ipk') cgilink+=name;
 	else cgilink+='anc_'+name;
 	cgilink+='.htm';
-	if(name=='home') cgilink+='&job='+name+'&todo=/usr/sbin/scripts/guiinfo.sh >/dev/null';
+	if(name=='home') cgilink+='&err_msg='+upd_fail+'&job=home&todo='+guiinfo_cmd;
 
 	goto_formframe(cgilink);
 	menu_color_change(name);
 	change_menu_height();
+}
+
+function formframequery() {
+	document.write('<iframe name="formframe" id="formframe" src="anc.cgi?next_file=anc_home.htm&err_msg='+upd_fail+'&job=home&todo='+guiinfo_cmd+'" allowtransparency="true" height="100%" width="100%" scrolling="auto" frameborder="0"></iframe>');
 }
 
 function AncLinks() {
@@ -119,8 +125,7 @@ function focus_stat(obj, tf) {
 	</div>
 </div>
 <div id="formframe_div">
-		<iframe name="formframe" id="formframe" src="anc.cgi?next_file=anc_home.htm&job=home&todo=/usr/sbin/scripts/guiinfo.sh >/dev/null" allowtransparency="true" height="100%" width="100%" scrolling="auto" frameborder="0">
-		</iframe>
+	<script>formframequery()</script>
 </div>
 <div id="footer" class="footer">
 	<img class="footer_img" src="image/footer/footer.gif">

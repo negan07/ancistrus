@@ -86,7 +86,7 @@ function checkTimeout(hdidle) {
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#update-devices-database')" tabindex="-1"><b>Update Device Database List</b></a></td></tr>
 <tr><td colspan="2" align="center">
-<input class="common_bt" type="button" value="Update Database" onClick="AncstdAction(this.form,'smartmontools.htm','','','/usr/sbin/rc_app/rc_smontools updatedb');">
+<input class="common_bt" type="button" value="Update Database" onClick="AncstdAction(this.form,'smartmontools.htm','','home','/usr/sbin/rc_app/rc_smontools updatedb');">
 </td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr><tr></tr><tr></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('smartmontools-package#smartctl')" tabindex="-1"><b>S.M.A.R.T. Control and Monitor Utility (smartctl)</b></a></td></tr>
@@ -136,8 +136,9 @@ function checkTimeout(hdidle) {
 <input type="hidden" name="old_file" value="">
 <input type="hidden" name="edit_file" value="/usr/etc/smartd.conf">
 <input type="hidden" name="pipe_cmd" value="">
+<input type="hidden" name="err_msg" value="Warning ! Database update failure !\n\n">
 <input type="hidden" name="h_smartd_enable" value="@h_smartd_enable#">
 </div>
 </form>
-<script>printHelp();</script>
+<script>printHelp()</script>
 </body></html>
