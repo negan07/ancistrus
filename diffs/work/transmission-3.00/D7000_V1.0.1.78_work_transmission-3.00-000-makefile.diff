@@ -1,17 +1,19 @@
 diff -urN work/transmission-3.00/Makefile work/transmission-3.00/Makefile
 --- work/transmission-3.00/Makefile
 +++ work/transmission-3.00/Makefile
-@@ -0,0 +1,74 @@
+@@ -0,0 +1,76 @@
 +include ../Rules.mak
 +
 +BINS			:= $(TRANSM)/daemon/.libs/transmission-daemon
 +STARTUP			:= rc_$(TRANSM_NAME)
 +INSTDIR			:= $(ROOTUSRDIR)/$(TRANSM_NAME)
++PRIOF			:= 90
++PRIOU			:= 90
++FWPOSTSCR		:= F$(PRIOF)$(TRANSM_NAME)
++USBPOSTSCR		:= U$(PRIOU)$(TRANSM_NAME)
 +WEB			:= ../www/$(TRANSM_NAME).htm
 +JSONCFG			:= settings.json
 +WWWZIP			:= www.$(TRANSM_NAME).zip
-+PRIOF			:= 90
-+PRIOU			:= 90
 +
 +all: config
 +	$(MAKE) -C $(TRANSM)
@@ -33,8 +35,8 @@ diff -urN work/transmission-3.00/Makefile work/transmission-3.00/Makefile
 +	install -m 0755 $(BINS) $(BINDIR)
 +	install -m 0755 $(STARTUP) $(APPDIR)
 +	install -m 0664 $(WEB) $(WWWDIR)
-+	ln -sf $(USRSBINRCAPP)/$(STARTUP) $(USBSERVDIR)/U$(PRIOU)$(TRANSM_NAME)
-+	ln -sf $(USRSBINRCAPP)/$(STARTUP) $(FWDIR)/F$(PRIOF)$(TRANSM_NAME)
++	ln -sf $(USRSBINRCAPP)/$(STARTUP) $(USBSERVDIR)/$(USBPOSTSCR)
++	ln -sf $(USRSBINRCAPP)/$(STARTUP) $(FWDIR)/$(FWPOSTSCR)
 +
 +clean:
 +	$(MAKE) -C $(TRANSM) clean
@@ -64,14 +66,14 @@ diff -urN work/transmission-3.00/Makefile work/transmission-3.00/Makefile
 +
 +postinst:
 +	@echo "#!/bin/sh" > $(POSTINST)
-+	@echo "ln -sf $(USRSBINRCAPP)/$(STARTUP) $(TMPETC)/$(INITD)/$(RCPOST)/$(USBSERV)/U$(PRIOU)$(TRANSM_NAME)" >> $(POSTINST)
-+	@echo "ln -sf $(USRSBINRCAPP)/$(STARTUP) $(TMPETC)/$(INITD)/$(RCFW)/F$(PRIOF)$(TRANSM_NAME)" >> $(POSTINST)
++	@echo "ln -sf $(USRSBINRCAPP)/$(STARTUP) $(TMPETC)/$(INITD)/$(RCPOST)/$(USBSERV)/$(USBPOSTSCR)" >> $(POSTINST)
++	@echo "ln -sf $(USRSBINRCAPP)/$(STARTUP) $(TMPETC)/$(INITD)/$(RCFW)/$(FWPOSTSCR)" >> $(POSTINST)
 +	@echo "$(RC) $(TRANSM_NAME) restart" >> $(POSTINST)
 +	@echo "exit 0" >> $(POSTINST)
 +
 +prerm:
 +	@echo "#!/bin/sh" > $(PRERM)
-+	@echo "rm -f $(TMPETC)/$(INITD)/$(RCPOST)/$(USBSERV)/U$(PRIOU)$(TRANSM_NAME) $(TMPETC)/$(INITD)/$(RCFW)/F$(PRIOF)$(TRANSM_NAME)" >> $(PRERM)
++	@echo "rm -f $(TMPETC)/$(INITD)/$(RCPOST)/$(USBSERV)/$(USBPOSTSCR) $(TMPETC)/$(INITD)/$(RCFW)/$(FWPOSTSCR)" >> $(PRERM)
 +	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PRERM)
 +	@echo "exit 0" >> $(PRERM)
 +endif

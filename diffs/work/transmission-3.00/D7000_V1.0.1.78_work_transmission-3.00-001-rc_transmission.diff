@@ -1,7 +1,7 @@
 diff -urN work/transmission-3.00/rc_transmission work/transmission-3.00/rc_transmission
 --- work/transmission-3.00/rc_transmission
 +++ work/transmission-3.00/rc_transmission
-@@ -0,0 +1,295 @@
+@@ -0,0 +1,300 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -15,7 +15,7 @@ diff -urN work/transmission-3.00/rc_transmission work/transmission-3.00/rc_trans
 +#
 +# Rc script for transmission daemon.
 +#
-+# Usage: $0 < start restart startforced restartforced reloadconf stop fwup fwdown showlog clearlog reset > (<debug>)
++# Usage: $0 < mount remount kmount init reconfig start restart startforced restartforced reloadconf umount kumount stop info fwup fwdown showlog clearlog reset > (<debug>)
 +#
 +# <debug> runs daemon in foreground mode with pedantic debug messages.
 +#
@@ -86,6 +86,7 @@ diff -urN work/transmission-3.00/rc_transmission work/transmission-3.00/rc_trans
 +env_vars() {
 +	# Default dirs: take the first storage device mounted as default
 +	DEFSTORAGEROOT="`cat /proc/mounts | grep /dev/sd | head -n 1 | cut -d ' ' -f 2`"
++	[ ! -z "${DEFSTORAGEROOT}" ] || DEFSTORAGEROOT="${ROOTSHDIR}/U"
 +	DEFDLDIR="${DEFSTORAGEROOT}/Downloads"
 +
 +	# Dir paths
@@ -220,8 +221,6 @@ diff -urN work/transmission-3.00/rc_transmission work/transmission-3.00/rc_trans
 +}
 +
 +reset() {
-+	stop
-+	env_vars
 +	cp -f "${JSONDEFCONF}" "${JSONCONF}" >/dev/null 2>&1
 +	for V in `anc nvram show | grep transmission_`; do anc nvram unset ${V%=*}; done
 +	nvram commit
@@ -263,7 +262,7 @@ diff -urN work/transmission-3.00/rc_transmission work/transmission-3.00/rc_trans
 +
 +locking
 +case $1 in
-+start|restart)
++mount|remount|kmount|init|reconfig|start|restart)
 +stop
 +start
 +;;
@@ -274,8 +273,10 @@ diff -urN work/transmission-3.00/rc_transmission work/transmission-3.00/rc_trans
 +reloadconf)
 +reload_conf
 +;;
-+stop)
++umount|kumount|stop)
 +stop
++;;
++info)
 +;;
 +fwup)
 +portsdown
@@ -291,9 +292,13 @@ diff -urN work/transmission-3.00/rc_transmission work/transmission-3.00/rc_trans
 +clear_log
 +;;
 +reset)
++stop
 +reset
 +;;
++"")
++echo "Usage: $0 < mount remount kmount init reconfig start restart startforced restartforced reloadconf umount kumount stop info fwup fwdown showlog clearlog reset > (<debug>)"
++;;
 +*)
-+echo "Usage: $0 < start restart startforced restartforced reloadconf stop fwup fwdown showlog clearlog reset > (<debug>)"
++stop
 +;;
 +esac
