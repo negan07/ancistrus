@@ -1,7 +1,7 @@
 diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontools
 --- work/smartmontools-7.3/rc_smontools	2017-11-03 21:54:56.000000000 +0100
 +++ work/smartmontools-7.3/rc_smontools	2018-04-19 22:48:31.600116512 +0200
-@@ -0,0 +1,103 @@
+@@ -0,0 +1,154 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -15,7 +15,7 @@ diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontool
 +#
 +# Rc script for smartmontools daemon smartd.
 +#
-+# Usage: $0 < start restart startforced restartforced stop updatedb > (<debug>)
++# Usage: $0 < start restart startforced restartforced umount kumount stop mount remount kmount init reconfig info updatedb > (<debug>)
 +#
 +# <debug> runs smartd in foreground mode with pedantic debug messages.
 +#
@@ -46,8 +46,7 @@ diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontool
 +
 +start() {
 +	# Checking if service is enabled
-+	eval `nvram get smartd_enable` > /dev/null 2>&1
-+	[ "${smartd_enable}" = "1" ] || [ ! -z "$1" ] || return 1
++	[ "`anc nvram drget smartd_enable 0`" = "1" ] || [ ! -z "$1" ] || return 1
 +
 +	# Checking if the service is already running
 +	[ ! -z "`pidof smartd`" ] && echo "smartd already running..." && return 2
@@ -63,24 +62,66 @@ diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontool
 +	[ $SMARTD_RC -ne 0 ] && echo "$0: Error ${SMARTD_RC} starting ${SMARTD}..." && return $SMARTD_RC
 +}
 +
++run_hd_idle() {
++	# Restart hd-idle daemon
++	killall -9 hd-idle >/dev/null 2>&1
++	TOUT=$(( `anc nvram drget hdidle_timeout 30` * 60 ))
++	[ "${TOUT}" -gt 0 >/dev/null 2>&1 ] && \
++	for D in `cat /proc/partitions | awk '{print $4}' | grep sd | grep -v sd.[0-9]`; do HDIDLEOPT="${HDIDLEOPT} -a $D -i ${TOUT}"; done
++	[ ! -z "${HDIDLEOPT}" ] && hd-idle${HDIDLEOPT}
++}
++
 +updatedb() {
-+	curl -f -s -k -o /tmp/${LOCDB} -O https://raw.githubusercontent.com/smartmontools/smartmontools/master/smartmontools/${DB}
-+	${BINDIR}/smartctl -B /tmp/${LOCDB} -P showall >/dev/null 2>&1
-+	[ $? -eq 0 ] && mv -f /tmp/${LOCDB} ${CONFETCDIR}/ && sync && stop && start
++	# Names
++	DB=drivedb.h
++	LOCDB=smart_${DB}
++	CTOUT=`anc nvram drget curl_conn_timeout 5`
++	TTOUT=`anc nvram drget curl_tr_timeout 30`
++	UPDURLS=\
++"https://www.smartmontools.org/export/HEAD/trunk/smartmontools \
++https://svn.code.sf.net/p/smartmontools/code/trunk/smartmontools \
++http://svn.code.sf.net/p/smartmontools/code/trunk/smartmontools \
++https://raw.githubusercontent.com/smartmontools/smartmontools/master/smartmontools"
++
++	cd /etc
++	[ -r ${CONFDIR}/${LOCDB} ] && cp -af ${CONFDIR}/${LOCDB} ${DB} >/dev/null 2>&1 && OLDTST=`date -r ${DB}`
++	for U in $UPDURLS
++	do
++	curl -f -s -k --connect-timeout ${CTOUT} -m ${TTOUT} -O -z ${DB} ${U}/${DB}
++	ERR=$?
++		if [ $ERR -eq 0 ]; then
++			if [ -r ${DB} -a "`sed -n '2p;3q;' ${DB}`" >/dev/null 2>&1 = " * drivedb.h - smartmontools drive database file" ]; then
++				if [ "`date -r ${DB}`" != "${OLDTST}" ]; then
++				${BINDIR}/smartctl -B ${DB} -P showall >/dev/null 2>&1
++				ERR=$?
++					if [ $ERR -eq 0 ]; then
++					cp -af ${DB} ${LOCDB}
++					mv -f ${DB} ${CONFDIR}/${LOCDB}
++					sync
++					stop
++					start
++					fi
++				fi
++			break
++			else
++			ERR=127
++			fi
++		fi
++	done
++	[ -r ${DB} ] && rm -f ${DB}
++	return $ERR
 +}
 +
 +# Dirs
-+CONFETCDIR=/usr/etc
++CONFDIR=/usr/etc
 +BINDIR=/usr/sbin
 +
 +# Debug purpose
-+#CONFETCDIR=/tmp/etc/ancdbg
++#CONFDIR=/tmp/etc/ancdbg
 +#BINDIR=/tmp/etc/ancdbg
 +
 +# Names
 +SMARTD=${BINDIR}/smartd
-+DB=drivedb.h
-+LOCDB=smart_${DB}
 +
 +# Debug running
 +[ "${2}" = "debug" ] && SMARTD="${SMARTD} -c ${BINDIR}/smartd.conf -n -d"
@@ -95,13 +136,23 @@ diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontool
 +stop
 +start $1
 +;;
-+stop)
++umount|kumount|stop)
 +stop
++;;
++mount|remount|kmount|init|reconfig)
++run_hd_idle
++stop
++start
++;;
++info)
 +;;
 +updatedb)
 +updatedb
 +;;
++"")
++echo "Usage: $0 < start restart startforced restartforced umount kumount stop mount remount kmount init reconfig info updatedb > (<debug>)"
++;;
 +*)
-+echo "Usage: $0 < start restart startforced restartforced stop updatedb > (<debug>)"
++stop
 +;;
 +esac
