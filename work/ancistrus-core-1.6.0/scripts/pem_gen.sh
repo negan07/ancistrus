@@ -20,7 +20,7 @@ CONF=openssl.cnf
 PEMDIR=/etc
 CONFDIR=/usr${PEMDIR}
 SSLCONF=${CONFDIR}/${CONF}
-SUBJ="/C=US/ST=California/L=San Jose/O=NETGEAR/OU=Home Consumer Products/CN=www.routerlogin.net"
+SUBJ="/C=US/ST=California/L=San Jose/O=NETGEAR/OU=Home Consumer Products/CN=www.routerlogin.net/subjectAltName=www.routerlogin.net,www.routerlogin.com,routerlogin.net,routerlogin.com,D7000"
 
 [ ! -f $SSLCONF ] && echo "Openssl config file .cnf missing: job aborted !" && exit 3
 
