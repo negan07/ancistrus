@@ -1,7 +1,7 @@
 diff -urN work/utelnetd-0.1.11/rc_debug_mode work/utelnetd-0.1.11/rc_debug_mode
 --- work/utelnetd-0.1.11/rc_debug_mode	1970-01-01 01:00:00.000000000 +0100
 +++ work/utelnetd-0.1.11/rc_debug_mode	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,79 @@
+@@ -0,0 +1,80 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -42,7 +42,8 @@ diff -urN work/utelnetd-0.1.11/rc_debug_mode work/utelnetd-0.1.11/rc_debug_mode
 +
 +authhostrenew() {
 +	# Update hostname
-+	hostname D7000 >/dev/null 2>&1
++	eval `nvram get device_name` >/dev/null 2>&1
++	[ ! -z "${device_name}" ] && hostname ${device_name} >/dev/null 2>&1 || hostname D7000 >/dev/null 2>&1
 +
 +	# Renew auth login
 +	# rc_debug_mode is run every time password is changed from the web gui so renew /etc/passwd too
