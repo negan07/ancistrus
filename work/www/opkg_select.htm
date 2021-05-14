@@ -22,11 +22,6 @@
 function loadPackageList(file) {
 	var pkg="Package: ", desc="Description: ", size="Size: ", instsize="Installed-Size: ", ver="Version: ";
 	var xmlhttp=readFileTags(file);
-
-	if(xmlhttp.readyState==4 && xmlhttp.status==200) {
-	var str=xmlhttp.responseText;
-	var line=str.split('\n');
-	var linelen=line.length;
 	var txt=
 	"<tr><td colspan='2' align='center'><a href='javascript:gotoWiki(\"opkg-package#@opkg_help#\");' tabindex='-1'><b>Select a Package to @opkg_job# then click Apply</b></a></td></tr>"+
 	"<tr><td colspan='2'><table class='tables' border='1' cellpadding='2' cellspacing='0' width='60%' text-align='left' align='center'>"+
@@ -36,6 +31,10 @@ function loadPackageList(file) {
 	"<td nowrap width='50%' align='left'><span class='thead'><b>Description</b></span></td>"+
 	"<td nowrap width='10%' align='left'><span class='thead'><b>Size (bytes)</b></span></td>"+
 	"<td nowrap width='20%' align='left'><span class='thead'><b>Version</b></span></td></tr>";
+	if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+	var str=xmlhttp.responseText;
+	var line=str.split('\n');
+	var linelen=line.length;
 		for(var i=0;i<linelen;i++) {
 			if(line[i].length>1 && (line[i].indexOf(pkg)>-1 || file=="opkglistupgr")) {
 				if(line[i].indexOf(pkg)>-1) {
@@ -66,9 +65,9 @@ function loadPackageList(file) {
 			"<td nowrap width='20%' align='left'><span class='thead' value='"+vernum+"'><b>"+vernum+"</b></span></td></tr>";
 			}
 		}
+	}
 	txt+="</table></td></tr>";
 	document.write(txt);
-	}
 }
 
 function runOpkgCmd() {
@@ -107,11 +106,12 @@ function runOpkgCmd() {
 <input type="hidden" name="job" value="">
 <input type="hidden" name="todo" value="">
 <input type="hidden" name="pipe_cmd" value="">
+<input type="hidden" name="pkg_select" value="">
 <input type="hidden" name="opkg_job" value="@opkg_job#">
 <input type="hidden" name="opkg_help" value="@opkg_help#">
 <input type="hidden" name="next_file" value="@next_file#">
 <input type="hidden" name="old_file" value="@old_file#">
 </div>
 </form>
-<script>printHelp();</script>
+<script>printHelp()</script>
 </body></html>
