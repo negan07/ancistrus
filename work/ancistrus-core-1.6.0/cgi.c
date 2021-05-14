@@ -88,9 +88,9 @@ const char *s;
 char c;
 unsigned int i=0;
 
-	CGIDBG("var: %s\n", var);
-	if(var==NULL || !*var) return 2;
-	else if(strlen(var)>=2*VARBUF) return 3;
+CGIDBG("var: %s\n", var);
+if(var==NULL || !*var) return 2;
+else if(strlen(var)>=2*VARBUF) return 3;
 	for(s=var;READCH(c);) {									//find var data begin tag
 	if(c==*s) s++;
 	else s=var;										//tag not found: reset counter
@@ -123,7 +123,7 @@ CGIDBG("boundary: %s\n", bounds);
 if((err=qrawstdinget(MP_CONTENTDISP "download\"; filename=\"", &filename[i]))) return err;	//fetch filename:'file' name must be 'download'
 CGIDBG("filename: %s\n", filename);
 if((err=qrawstdinget(EOV, NULL))) return err;							//fetch file data begin tag 'LFCRLFCR'
-SFDAOPEN(fd, filename, O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) return 1;//open/create file with attr default: 0755
+SFDAOPEN(fd, filename, O_CREAT|O_RDWR|O_TRUNC, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) return 1;//open/create file with attr default: 0755
 	for(i=0;READCH(c);) {									//write file data
 	CGIQDBG("%c", c);
 		if(c==bounds[i]) bounde[i++]=c;							//search for boundary (file end)
@@ -185,15 +185,43 @@ return 0;
 }
 
 /*
- * ADDJS
- * Write a javascript on stdout.
- * Input: variable content (usually a filename).
- * Return: '0' on success, '1' on void/null variable.
+ * USITOA
+ * Unsigned Short Int To ASCII (radix base 10 only).
+ * Simplified workaround procedure for missing _itoa() .
+ * Write converted string num on success, 'undefined' on out of range.
+ * Input: number to convert.
  */
-static int addjs(const char *var) {
-if(var==NULL || !*var) return 1;
-TYPE("<script>location.href='");TYPE(var);TYPE("';AncdataToVisible(document.forms[0]);</script>");
-return 0;
+static void usitoa(int num) {
+char buf[33], strnum[]="UND", *p;
+int i=0;
+
+CGIDBG("      num   %d\n", num);
+	if(num>=0 && num<=255) {
+		for(p=buf+32;num;num/=10) {
+		*p--='0'+(num%10);
+		i++;
+		}
+	memcpy(strnum, ++p, sizeof(strnum));
+	strnum[i]='\0';
+	}
+TYPE(strnum);
+CGIDBG("      str   %s\n", strnum);
+}
+
+/*
+ * ADDJS
+ * Write a javascript advice msg or href link on stdout.
+ * Input: error exit code, query warning message, query var content (usually a filename).
+ * Return: error exit code.
+ */
+static int addjs(const int errcmd, const char *warn, const char *var) {
+
+	if(errcmd) {
+	if(warn!=NULL && *warn)
+	{TYPE("<script>alert('");TYPE(warn);TYPE("Error code: ");usitoa(errcmd);TYPE("');AncdataToVisible(document.forms[0]);</script>");}
+	}
+	else if(var!=NULL && *var) {TYPE("<script>location.href='");TYPE(var);TYPE("';AncdataToVisible(document.forms[0]);</script>");}
+return errcmd;
 }
 
 /*
@@ -268,22 +296,10 @@ return err;
  * Return: '0' on success, '1' on failure.
  */
 static int partperc(const char *path) {
-char perc[4], buf[32], *p;
-long long int percnum;
-int i=0;
 struct statvfs vfs;
 
 if(path==NULL || *path!='/' || statvfs(path, &vfs) || !vfs.f_blocks) return 1;
-percnum=((vfs.f_blocks-vfs.f_bfree)*100ULL+vfs.f_blocks/2)/(vfs.f_blocks);
-CGIDBG("    percnum  %lld%%\n", percnum);
-	for(p=buf+31;percnum;percnum/=10) {
-	*p--='0'+(percnum%10);
-	i++;
-	}
-memcpy(perc, ++p, sizeof(perc));
-perc[i]='\0';
-CGIDBG("    perc     %s%%\n", perc);
-TYPE(perc);TYPECH("%");
+usitoa(((vfs.f_blocks-vfs.f_bfree)*100ULL+vfs.f_blocks/2)/(vfs.f_blocks));TYPECH("%");
 return 0;
 }
 
@@ -298,8 +314,8 @@ enum { MP=0, SD=1 };
 char *val;
 int fde=0;
 
-if(nvar==NULL || !*nvar) return 1;
-	if(!strncmp(nvar, "reclist_", 8) || !strncmp(nvar, "list_", 5)) {			//compound variable found
+	if(nvar==NULL || !*nvar) fde=1;
+	else if(!strncmp(nvar, "reclist_", 8) || !strncmp(nvar, "list_", 5)) {			//compound variable found
 	BOOLLISTTYPE;
 	val=NV_SGET(nvar+fde);
 	CGIDBG("     val   %s\n", val);
@@ -319,10 +335,10 @@ return fde;
 /*
  * FETCHFORMVAR
  * Fetch set of variables from a web form page: raw (without @# delimiters), nvram var without delimiters and tags.
- * Input: raw var (mandatory), nvram var data buffers (caller must take care of buffer allocations), webpage fd.
+ * Input: webpage fd, raw var (mandatory), nvram var data buffers (caller must take care of buffer allocations).
  * Return: '0' on success, '15' on missing raw string, '20' on malformed webpage content.
  */
-static int fetchformvar(char *raw, char *nvar, const int fd) {
+static int fetchformvar(const int fd, char *raw, char *nvar) {
 int i;
 
 if(raw==NULL) return 15;									//raw array cannot be null
@@ -355,18 +371,16 @@ return 0;
  */
 static int fetchformmpvar(const char *raw, const char *nvar) {
 char buf[2*VARBUF];
-int err=0;
+int err;
 
-if(raw==NULL) return 15;									//raw array cannot be null
-	if(!strcmp(raw, "pipe_cmd")) {								//retrieve pipe_cmd to show refresh gui button
-	if((err=qrawstdinget(MP_CONTENTDISP "pipe_cmd\"" EOV, buf))) return err;
-	TYPE(buf);
+	if(raw==NULL) err=15;									//raw array cannot be null
+	else if(!strcmp(raw, "pipe_cmd")) {							//retrieve pipe_cmd to show refresh gui button
+	if(!(err=qrawstdinget(MP_CONTENTDISP "pipe_cmd\"" EOV, buf))) TYPE(buf);
 	}
 	else if(!strcmp(raw, "pipe_output")) {							//execute pipe command
-	if((err=qrawstdinget(MP_CONTENTDISP "pipe_output\"" EOV, buf))) return err;
-	if((err=runpipe(buf))) return err;
+	if(!(err=qrawstdinget(MP_CONTENTDISP "pipe_output\"" EOV, buf))) err=runpipe(buf);
 	}
-	else getnvar(nvar);
+	else err=getnvar(nvar);
 return err;
 }
 
@@ -381,12 +395,12 @@ static int populatepage(const int fd, const char *job, const char *todo) {
 enum { ADD=0, DELETE=1 };
 const char *val;
 char c, raw[VARBUF], nvar[VARBUF];
-int fde, err;
+int fde, errcmd=0, err=0;
 
-if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *todo && (err=runsyscmd(todo))) return err;//run todo then print
+if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *todo) errcmd=runsyscmd(todo);	//run todo then print
 	while(read(fd, &c, 1)) {								//read each page char
 		if(c=='@') {									//search for raw var initalizer ('@')
-		if((err=fetchformvar(raw, nvar, fd))) return err;				//fetch vars & check if webpage is malformed
+		if((err=fetchformvar(fd, raw, nvar))) return err;				//fetch vars & check if webpage is malformed
 			if(!*job || !strcmp(job, "upload")||!strcmp(job, "home")) getnvar(nvar);//### GET METHOD || HOME/UPLOAD FILE ###
 			else if(!strcmp(job, "save") || !strcmp(job, "savesys")) {		//### POST METHOD - SAVE ###
 			if(*(val=QSGET(raw))!='@' && strncmp(nvar, "list_", 5) && strncmp(nvar, "reclist_", 8)
@@ -423,8 +437,9 @@ if((!strcmp(job, "upload") || !strcmp(job, "home") || !strcmp(job, "opkg")) && *
 		else TYPECH(c);									//write normal char
 	}
 if(!strcmp(job, "save") || !strcmp(job, "add") || !strcmp(job, "del") || !strcmp(job, "clear") || !strcmp(job, "nvram")) nvram_commit();
-else if(!strcmp(job, "upload") && (err=addjs(QSGET("gen_file")))) return err;			//append javascript to page on upload job
-return 0;
+else if(!strcmp(job, "upload")) err=addjs(errcmd, QSGET("err_msg"), QSGET("gen_file"));		//append javascript href link on upload job
+else if(!strcmp(job, "home") || !strcmp(job, "opkg")) err=addjs(errcmd, QSGET("err_msg"), NULL);//append javascript err msg on home/opkg job
+return err;
 }
 
 /*
