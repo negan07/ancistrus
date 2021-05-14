@@ -17,7 +17,7 @@ diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/rc_ntfsfix work/ntfs-3g_ntfsprogs-201
 +#
 +# Usage: $0 < start restart stop > <device_part>
 +#
-+# <device_part> is the partition device to check (mandatory)
++# <device_part> is the partition device absolute name to check (mandatory, e.g. '/dev/sda1' )
 +#
 +
 +locking() {
@@ -56,7 +56,7 @@ diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/rc_ntfsfix work/ntfs-3g_ntfsprogs-201
 +	[ -z "`cat /proc/mounts | grep $DEVPART`" ] && echo "$DEVPART device partition not present" && exit 129
 +
 +	# Unmounting device partition
-+	rc usb_service umount "$DEVPART"
++	rc usb_service umount `basename $DEVPART`
 +	sleep 20
 +
 +	# Preliminary fs operations
@@ -78,7 +78,7 @@ diff -urN work/ntfs-3g_ntfsprogs-2017.3.23/rc_ntfsfix work/ntfs-3g_ntfsprogs-201
 +	esac
 +
 +	# Remounting & exiting
-+	rc usb_service mount "$DEVPART"
++	rc usb_service mount `basename $DEVPART`
 +	sleep 20
 +	exit $NTFSFIX_RC
 +}
