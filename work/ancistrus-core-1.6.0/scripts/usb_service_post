@@ -1,20 +1,6 @@
 #!/bin/sh
-# rc_usb_service [mount|umount|remount|kmount|init|reconfig|stop]
+# rc_usb_service [mount|umount|remount|kmount|kumount|init|reconfig|stop|info]
 
-run_usb_postserv() {
-[ -z "$1" ] && set -- "stop"
-for I in /etc/init.d/rc.post/usb_service/U[0-9][0-9]*; do [ -f $I ] && $I $1; done
-}
-
-case $1 in
-stop)
-run_usb_postserv stop
-;;
-"")
-;;
-*)
-run_usb_postserv start
-;;
-esac
+[ ! -z "$1" ] && for I in /etc/init.d/rc.post/usb_service/U[0-9][0-9]*; do [ -f $I ] && $I $1; done
 
 exit 0
