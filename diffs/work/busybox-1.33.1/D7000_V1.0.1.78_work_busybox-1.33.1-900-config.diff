@@ -1,6 +1,6 @@
-diff -urN work/busybox-1.33.0/.config work/busybox-1.33.0/.config
---- work/busybox-1.33.0/.config	1970-01-01 01:00:00.000000000 +0100
-+++ work/busybox-1.33.0/.config	2018-11-01 21:50:01.107744900 +0100
+diff -urN work/busybox-1.33.1/.config work/busybox-1.33.1/.config
+--- work/busybox-1.33.1/.config	1970-01-01 01:00:00.000000000 +0100
++++ work/busybox-1.33.1/.config	2018-11-01 21:50:01.107744900 +0100
 @@ -0,0 +1,1189 @@
 +#
 +# Automatically generated make config: don't edit

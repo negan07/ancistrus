@@ -34,7 +34,7 @@ DEP_$(CORE_WORK)		:=
 DESC_$(CORE_WORK)		:= Main work tool & enhanced nvram lib
 # BUSYBOX
 BUSYBOX_NAME			:= busybox
-VER_$(BUSYBOX_NAME)		:= 1.33.0
+VER_$(BUSYBOX_NAME)		:= 1.33.1
 BUSYBOX				:= $(BUSYBOX_NAME)-$(VER_$(BUSYBOX_NAME))
 NAME_$(BUSYBOX)			:= $(BUSYBOX_NAME)$(DBG)
 SUBVER_$(BUSYBOX)		:= 

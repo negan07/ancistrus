@@ -1,6 +1,6 @@
-diff -urN work/busybox-1.33.0/miscutils/flash_eraseall.c work/busybox-1.33.0/miscutils/flash_eraseall.c
---- work/busybox-1.33.0/miscutils/flash_eraseall.c	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.33.0/miscutils/flash_eraseall.c	2018-11-01 21:16:26.148477636 +0100
+diff -urN work/busybox-1.33.1/miscutils/flash_eraseall.c work/busybox-1.33.1/miscutils/flash_eraseall.c
+--- work/busybox-1.33.1/miscutils/flash_eraseall.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.33.1/miscutils/flash_eraseall.c	2018-11-01 21:16:26.148477636 +0100
 @@ -11,10 +11,10 @@
   * Licensed under GPLv2 or later, see file LICENSE in this source tree.
   */

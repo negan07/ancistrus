@@ -1,6 +1,6 @@
-diff -urN work/busybox-1.33.0/include/usage.src.h work/busybox-1.33.0/include/usage.src.h
---- work/busybox-1.33.0/include/usage.src.h	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.33.0/include/usage.src.h	2018-10-31 21:56:14.837218353 +0100
+diff -urN work/busybox-1.33.1/include/usage.src.h work/busybox-1.33.1/include/usage.src.h
+--- work/busybox-1.33.1/include/usage.src.h	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.33.1/include/usage.src.h	2018-10-31 21:56:14.837218353 +0100
 @@ -37,3 +37,12 @@
         "Hello world!\n"
  
@@ -14,9 +14,9 @@ diff -urN work/busybox-1.33.0/include/usage.src.h work/busybox-1.33.0/include/us
 +     "\n	-s DEVNAME	src device name." \
 +     "\n	-d DEVNAME	dst device name." \
 +
-diff -urN work/busybox-1.33.0/configs/TEST_nommu_defconfig work/busybox-1.33.0/configs/TEST_nommu_defconfig
---- work/busybox-1.33.0/configs/TEST_nommu_defconfig	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.33.0/configs/TEST_nommu_defconfig	2018-10-31 22:38:20.156001102 +0100
+diff -urN work/busybox-1.33.1/configs/TEST_nommu_defconfig work/busybox-1.33.1/configs/TEST_nommu_defconfig
+--- work/busybox-1.33.1/configs/TEST_nommu_defconfig	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.33.1/configs/TEST_nommu_defconfig	2018-10-31 22:38:20.156001102 +0100
 @@ -651,6 +651,7 @@
  CONFIG_VERBOSE_RESOLUTION_ERRORS=y
  CONFIG_ARP=y
@@ -25,9 +25,9 @@ diff -urN work/busybox-1.33.0/configs/TEST_nommu_defconfig work/busybox-1.33.0/c
  CONFIG_BRCTL=y
  CONFIG_FEATURE_BRCTL_FANCY=y
  CONFIG_FEATURE_BRCTL_SHOW=y
-diff -urN work/busybox-1.33.0/configs/TEST_noprintf_defconfig work/busybox-1.33.0/configs/TEST_noprintf_defconfig
---- work/busybox-1.33.0/configs/TEST_noprintf_defconfig	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.33.0/configs/TEST_noprintf_defconfig	2018-10-31 22:38:18.740005913 +0100
+diff -urN work/busybox-1.33.1/configs/TEST_noprintf_defconfig work/busybox-1.33.1/configs/TEST_noprintf_defconfig
+--- work/busybox-1.33.1/configs/TEST_noprintf_defconfig	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.33.1/configs/TEST_noprintf_defconfig	2018-10-31 22:38:18.740005913 +0100
 @@ -659,6 +659,7 @@
  # CONFIG_VERBOSE_RESOLUTION_ERRORS is not set
  # CONFIG_ARP is not set
@@ -36,9 +36,9 @@ diff -urN work/busybox-1.33.0/configs/TEST_noprintf_defconfig work/busybox-1.33.
  # CONFIG_BRCTL is not set
  # CONFIG_FEATURE_BRCTL_FANCY is not set
  # CONFIG_FEATURE_BRCTL_SHOW is not set
-diff -urN work/busybox-1.33.0/configs/TEST_rh9_defconfig work/busybox-1.33.0/configs/TEST_rh9_defconfig
---- work/busybox-1.33.0/configs/TEST_rh9_defconfig	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.33.0/configs/TEST_rh9_defconfig	2018-10-31 22:38:17.612009746 +0100
+diff -urN work/busybox-1.33.1/configs/TEST_rh9_defconfig work/busybox-1.33.1/configs/TEST_rh9_defconfig
+--- work/busybox-1.33.1/configs/TEST_rh9_defconfig	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.33.1/configs/TEST_rh9_defconfig	2018-10-31 22:38:17.612009746 +0100
 @@ -668,6 +668,7 @@
  # CONFIG_VERBOSE_RESOLUTION_ERRORS is not set
  CONFIG_ARP=y
@@ -47,9 +47,9 @@ diff -urN work/busybox-1.33.0/configs/TEST_rh9_defconfig work/busybox-1.33.0/con
  CONFIG_BRCTL=y
  CONFIG_FEATURE_BRCTL_FANCY=y
  CONFIG_FEATURE_BRCTL_SHOW=y
-diff -urN work/busybox-1.33.0/networking/sendarp.c work/busybox-1.33.0/networking/sendarp.c
---- work/busybox-1.33.0/networking/sendarp.c	2018-07-02 13:23:06.000000000 +0200
-+++ work/busybox-1.33.0/networking/sendarp.c	2018-11-01 21:16:26.148477636 +0100
+diff -urN work/busybox-1.33.1/networking/sendarp.c work/busybox-1.33.1/networking/sendarp.c
+--- work/busybox-1.33.1/networking/sendarp.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.33.1/networking/sendarp.c	2018-11-01 21:16:26.148477636 +0100
 @@ -0,0 +1,181 @@
 +//config:config SENDARP
 +//config:	bool "sendarp"
