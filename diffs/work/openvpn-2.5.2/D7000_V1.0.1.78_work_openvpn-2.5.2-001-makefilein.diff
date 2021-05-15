@@ -1,6 +1,6 @@
-diff -urN work/openvpn-2.5.1/openvpn-2.5.1/Makefile.in work/openvpn-2.5.1/openvpn-2.5.1/Makefile.in
---- work/openvpn-2.5.1/openvpn-2.5.1/Makefile.in	2017-09-26 11:27:50.000000000 +0200
-+++ work/openvpn-2.5.1/openvpn-2.5.1/Makefile.in	2017-11-28 22:53:11.029489996 +0100
+diff -urN work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in
+--- work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in	2017-09-26 11:27:50.000000000 +0200
++++ work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in	2017-11-28 22:53:11.029489996 +0100
 @@ -470,7 +470,7 @@
  @GIT_CHECKOUT_TRUE@BUILT_SOURCES = \
  @GIT_CHECKOUT_TRUE@	config-version.h
@@ -68,9 +68,9 @@ diff -urN work/openvpn-2.5.1/openvpn-2.5.1/Makefile.in work/openvpn-2.5.1/openvp
  install-exec: install-exec-recursive
  install-data: install-data-recursive
  uninstall: uninstall-recursive
-diff -urN work/openvpn-2.5.1/openvpn-2.5.1/src/Makefile.in work/openvpn-2.5.1/openvpn-2.5.1/src/Makefile.in
---- work/openvpn-2.5.1/openvpn-2.5.1/src/Makefile.in	2017-09-26 11:27:50.000000000 +0200
-+++ work/openvpn-2.5.1/openvpn-2.5.1/src/Makefile.in	2017-11-28 22:53:11.029489996 +0100
+diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/Makefile.in work/openvpn-2.5.2/openvpn-2.5.2/src/Makefile.in
+--- work/openvpn-2.5.2/openvpn-2.5.2/src/Makefile.in	2017-09-26 11:27:50.000000000 +0200
++++ work/openvpn-2.5.2/openvpn-2.5.2/src/Makefile.in	2017-11-28 22:53:11.029489996 +0100
 @@ -381,7 +381,7 @@
  MAINTAINERCLEANFILES = \
  	$(srcdir)/Makefile.in

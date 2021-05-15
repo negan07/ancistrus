@@ -1,6 +1,6 @@
-diff -urN work/openvpn-2.5.1/openvpn-2.5.1/configure.ac work/openvpn-2.5.1/openvpn-2.5.1/configure.ac
---- work/openvpn-2.5.1/openvpn-2.5.1/configure.ac
-+++ work/openvpn-2.5.1/openvpn-2.5.1/configure.ac
+diff -urN work/openvpn-2.5.2/openvpn-2.5.2/configure.ac work/openvpn-2.5.2/openvpn-2.5.2/configure.ac
+--- work/openvpn-2.5.2/openvpn-2.5.2/configure.ac
++++ work/openvpn-2.5.2/openvpn-2.5.2/configure.ac
 @@ -1077,68 +1077,15 @@
  AC_ARG_VAR([LZ4_CFLAGS], [C compiler flags for lz4])
  AC_ARG_VAR([LZ4_LIBS], [linker flags for lz4])
