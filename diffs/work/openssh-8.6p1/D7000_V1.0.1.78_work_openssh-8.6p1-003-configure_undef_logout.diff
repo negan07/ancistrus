@@ -1,6 +1,6 @@
-diff -urN work/openssh-8.5p1/openssh-8.5p1/configure work/openssh-8.5p1/openssh-8.5p1/configure
---- work/openssh-8.5p1/openssh-8.5p1/configure	2018-01-26 14:13:08.324425774 +0100
-+++ work/openssh-8.5p1/openssh-8.5p1/configure	2018-01-26 14:13:08.324425774 +0100
+diff -urN work/openssh-8.6p1/openssh-8.6p1/configure work/openssh-8.6p1/openssh-8.6p1/configure
+--- work/openssh-8.6p1/openssh-8.6p1/configure	2018-01-26 14:13:08.324425774 +0100
++++ work/openssh-8.6p1/openssh-8.6p1/configure	2018-01-26 14:13:08.324425774 +0100
 @@ -10089,7 +10089,7 @@
  
  fi

@@ -1,6 +1,6 @@
-diff -urN work/openssh-8.5p1/Makefile work/openssh-8.5p1/Makefile
---- work/openssh-8.5p1/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/openssh-8.5p1/Makefile	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/openssh-8.6p1/Makefile work/openssh-8.6p1/Makefile
+--- work/openssh-8.6p1/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-8.6p1/Makefile	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,197 @@
 +include ../Rules.mak
 +
