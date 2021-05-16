@@ -1,0 +1,20 @@
+--- work/opkg-utils-0.4.3/CONTRIBUTING
++++ work/opkg-utils-0.4.3/CONTRIBUTING
+@@ -46,7 +46,7 @@ changed to fix multiple bugs, that should be multiple patches.
+ 
+ Opkg-utils is primarily used by the OpenEmbedded build system but may also be
+ used by other embedded Linux projects. For now, please submit all patches to
+-both the Yocto Project mailing list (yocto@yoctoproject.org) and the opkg mailing
++both the Yocto Project mailing list (yocto@lists.yoctoproject.org) and the opkg mailing
+ list (opkg-devel@googlegroups.com), adding a subject prefix of "opkg-utils PATCH"
+ (this prefix is necessary as the Yocto Project mailing list receives patches for
+ many projects). Also make sure that you use the -M option on the command line or
+@@ -57,7 +57,7 @@ opkg-utils directory it will all be done automatically when you use
+ `git format-patch` or `git send-email`:
+ 
+ 	git config format.to "opkg-devel@googlegroups.com"
+-	git config --add format.to "yocto@yoctoproject.org"
++	git config --add format.to "yocto@lists.yoctoproject.org"
+ 	git config format.subjectprefix "opkg-utils PATCH"
+ 	git config diff.renames copy
+ 

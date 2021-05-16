@@ -1,0 +1,11 @@
+--- work/opkg-utils-0.4.3/opkg-build
++++ work/opkg-utils-0.4.3/opkg-build
+@@ -265,6 +265,8 @@ case $# in
+ 	dest_dir=$2
+ 	if [ "$dest_dir" = "." -o "$dest_dir" = "./" ] ; then
+ 	    dest_dir=$PWD
++	else
++		mkdir -p "$dest_dir"
+ 	fi
+ 	;;
+ *)
