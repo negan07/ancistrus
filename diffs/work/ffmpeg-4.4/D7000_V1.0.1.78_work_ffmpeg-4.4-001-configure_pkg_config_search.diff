@@ -1,7 +1,7 @@
-diff -urN work/ffmpeg-4.3.2/ffmpeg-4.3.2/configure work/ffmpeg-4.3.2/ffmpeg-4.3.2/configure
---- work/ffmpeg-4.3.2/ffmpeg-4.3.2/configure
-+++ work/ffmpeg-4.3.2/ffmpeg-4.3.2/configure
-@@ -4326,8 +4326,12 @@
+diff -urN work/ffmpeg-4.4/ffmpeg-4.4/configure work/ffmpeg-4.4/ffmpeg-4.4/configure
+--- work/ffmpeg-4.4/ffmpeg-4.4/configure
++++ work/ffmpeg-4.4/ffmpeg-4.4/configure
+@@ -4365,8 +4365,12 @@
  
  pkg_config_fail_message=""
  if ! $pkg_config --version >/dev/null 2>&1; then
