@@ -52,7 +52,9 @@ BINCMD=${BIN}													# command basic params
 [ ! -r ${CERT} ] && cd ${CERTDIR} && curl -f -s -k --connect-timeout ${CTOUT} -m ${TTOUT} -O -z ${PEMNAME} ${CERTURL} && chmod 600 ${PEM} && mv -f ${PEM} ${CERT}												# download cert
 [ ! -r ${CERT} ] && echo "Error: ${CERT} cert missing or unavailable !" && exit 2				# cert presence verification
 
-[ ! -x ${BIN} ] && curl -f -s -k --connect-timeout ${CTOUT} -m ${TTOUT} -L ${BINURL} | tar -oxz -C ${BINDIR} ${BINNAME} >/dev/null 2>&1 && chmod 755 ${BIN} || echo "Extract error"									# download & extract binary
+if [ ! -x ${BIN} ]; then
+curl -f -s -k --connect-timeout ${CTOUT} -m ${TTOUT} -L ${BINURL} | tar -oxz -C ${BINDIR} ${BINNAME} >/dev/null 2>&1 && chmod 755 ${BIN} || echo "Extract error"												# download & extract binary
+fi
 [ ! -x ${BIN} ] && echo "Error: ${BIN} binary missing or unavailable !" && exit 1				# bin presence verification
 
 export HOME=${CONFDIR}												# avoid writing confdir on root
