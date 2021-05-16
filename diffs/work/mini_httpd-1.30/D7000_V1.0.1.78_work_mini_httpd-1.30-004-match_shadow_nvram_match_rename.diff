@@ -1,0 +1,95 @@
+--- work/mini_httpd-1.30/mini_httpd.c
++++ work/mini_httpd-1.30/mini_httpd.c
+@@ -2596,7 +2596,7 @@ do_file( void )
+     check_referrer();
+ 
+     /* Is it CGI? */
+-    if ( cgi_pattern != (char*) 0 && match( cgi_pattern, file ) 
++    if ( cgi_pattern != (char*) 0 && patt_match( cgi_pattern, file ) 
+ #ifdef USB
+ 	&& is_usb_session == 0 /* never do cgi for usb session, */
+ #endif
+@@ -3516,7 +3516,7 @@ auth_check( char* dirname )
+     /* Does this request contain authorization info? */
+     if ( authorization == (char*) 0 ){
+ 	/* when browser send login information not contain authorization info auth_fail_times +1 */
+-	if ( !match( "**MSIE**", useragent ) ){
++	if ( !patt_match( "**MSIE**", useragent ) ){
+ 		nvram_bcm_set("auth_fail_times","1");
+ 	}
+         not_auth=NO_AUTH;
+@@ -3624,7 +3624,7 @@ auth_check( char* dirname )
+         remoteuser = line;
+         SAVETIME;
+ 	/* when browser login success to router auth_fail_times will be empty */
+-	if ( !match( "**MSIE**", useragent ) ){
++	if ( !patt_match( "**MSIE**", useragent ) ){
+ 		nvram_bcm_set("auth_fail_times", "0");
+ 	}
+         goto _out;
+@@ -3634,7 +3634,7 @@ auth_check( char* dirname )
+         /* No. */
+         SC_CFPRINTF("Login Failed - IP: %s\n", remote_ip);
+         not_auth=AUTH_FAIL;
+-	if ( !match( "**MSIE**", useragent ) ){
++	if ( !patt_match( "**MSIE**", useragent ) ){
+ 		agent_check = (nvram_bcm_get("user_agent") != NULL) ? nvram_bcm_get("user_agent") : "0";
+ 		if(strcmp(agent_check, useragent) != 0){
+ 			nvram_bcm_set("auth_fail_times", "1");
+@@ -3660,7 +3660,7 @@ auth_check( char* dirname )
+ #endif
+ 	SC_CFPRINTF("Login Failed - IP:%s\n", remote_ip);
+     not_auth=AUTH_FAIL;
+-	if ( !match( "**MSIE**", useragent ) ){
++	if ( !patt_match( "**MSIE**", useragent ) ){
+ 		agent_check = (nvram_bcm_get("user_agent") != NULL) ? nvram_bcm_get("user_agent") : "0";
+ 		if(strcmp(agent_check, useragent) != 0){
+ 			nvram_bcm_set("auth_fail_times", "1");
+@@ -3852,7 +3852,7 @@ send_error_tail( void )
+     {
+     char buf[500];
+ 
+-    if ( match( "**MSIE**", useragent ) )
++    if ( patt_match( "**MSIE**", useragent ) )
+ 	{
+ 	int n;
+ 	(void) snprintf( buf, sizeof(buf), "<!--\n" );
+@@ -4335,7 +4335,7 @@ really_check_referrer( void )
+ 	 ( cp1 = strstr( referrer, "//" ) ) == (char*) 0 )
+ 	{
+ 	/* Disallow if we require a referrer and the url matches. */
+-	if ( no_empty_referrers && match( url_pattern, path ) )
++	if ( no_empty_referrers && patt_match( url_pattern, path ) )
+ 	    return 0;
+ 	/* Otherwise ok. */
+ 	return 1;
+@@ -4384,7 +4384,7 @@ really_check_referrer( void )
+     /* If the referrer host doesn't match the local host pattern, and
+     ** the URL does match the url pattern, it's an illegal reference.
+     */
+-    if ( ! match( lp, refhost ) && match( url_pattern, path ) )
++    if ( ! patt_match( lp, refhost ) && patt_match( url_pattern, path ) )
+ 	return 0;
+     /* Otherwise ok. */
+     return 1;
+--- work/mini_httpd-1.30/match.h
++++ work/mini_httpd-1.30/match.h
+@@ -31,6 +31,6 @@
+ /* Simple shell-style filename pattern matcher.  Only does ? * and **, and
+ ** multiple patterns separated by |.  Returns 1 or 0.
+ */
+-int match( const char* pattern, const char* string );
++int patt_match( const char* pattern, const char* string );
+ 
+ #endif /* _MATCH_H_ */
+--- work/mini_httpd-1.30/match.c
++++ work/mini_httpd-1.30/match.c
+@@ -35,7 +35,7 @@
+ static int match_one( const char* pattern, int patternlen, const char* string );
+ 
+ int
+-match( const char* pattern, const char* string )
++patt_match( const char* pattern, const char* string )
+     {
+     const char* or;
+ 

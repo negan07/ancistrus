@@ -1,7 +1,51 @@
-diff -urN work/mini_httpd-1.17beta1/sc_sessionid_upd.c work/mini_httpd-1.17beta1/sc_sessionid_upd.c
---- work/mini_httpd-1.17beta1/sc_sessionid_upd.c	2020-03-30 05:16:27.000000000 +0200
-+++ work/mini_httpd-1.17beta1/sc_sessionid_upd.c	2021-01-27 20:11:03.281674145 +0100
-@@ -0,0 +1,317 @@
+--- work/mini_httpd-1.30/mini_httpd.c
++++ work/mini_httpd-1.30/mini_httpd.c
+@@ -82,6 +82,15 @@ extern char *strcasestr(char *haystack,
+ #endif /* USE_SSL */
+ 
+ 
++#include "sc_sessionid.h"
++#ifndef SC_CFPRINTF
++#define SC_CFPRINTF SC_CFPRINTF_SESSIONID
++#endif
++
++#ifndef SET_COOKIE
++#define SET_COOKIE snprintf(buf, sizeof(buf), "Set-Cookie: %s=%s;SameSite=Lax;\015\012", SESSIONID_MAGICWORD, sessionid_new_sessionid);
++#endif
++
+ #ifdef HTTPD_IPV6_SUPPORT
+ #define USE_IPV6
+ #endif
+@@ -3152,7 +3161,7 @@ cgi_interpose_output( int rfd, int parse
+ 			if (sessionid_new_sessionid[0])
+ 			{
+ 				SC_CFPRINTF_SESSIONID("!!!update client session id:%s\n", sessionid_new_sessionid);
+-				(void) snprintf(buf, sizeof(buf), "Set-Cookie: %s=%s\015\012", SESSIONID_MAGICWORD, sessionid_new_sessionid);
++				(void) SET_COOKIE
+ 				(void) my_write( buf, strlen(buf) );
+ 			}
+ 		}		
+@@ -3245,7 +3254,7 @@ cgi_interpose_output( int rfd, int parse
+ 			if (sessionid_new_sessionid[0])
+ 			{
+ 				SC_CFPRINTF_SESSIONID("!!!update client session id:%s\n", sessionid_new_sessionid);
+-				(void) snprintf(buf, sizeof(buf), "Set-Cookie: %s=%s\015\012", SESSIONID_MAGICWORD, sessionid_new_sessionid);
++				(void) SET_COOKIE
+ 				(void) my_write( buf, strlen(buf) );
+ 			}
+ 		}
+@@ -3881,7 +3890,7 @@ add_headers( int s, char* title, char* e
+ 		if (sessionid_new_sessionid[0])
+ 		{
+ 			SC_CFPRINTF_SESSIONID("!!!update client session id:%s\n", sessionid_new_sessionid);
+-			(void) snprintf(buf, sizeof(buf), "Set-Cookie: %s=%s\015\012", SESSIONID_MAGICWORD, sessionid_new_sessionid);
++			(void) SET_COOKIE
+ 			add_to_response( buf );
+ 		}
+ 	}
+--- work/mini_httpd-1.30/sc_sessionid.c
++++ work/mini_httpd-1.30/sc_sessionid.c
+@@ -0,0 +1,307 @@
 +#include <unistd.h>
 +#include <stdlib.h>
 +#include <stdarg.h>
@@ -30,7 +74,7 @@ diff -urN work/mini_httpd-1.17beta1/sc_sessionid_upd.c work/mini_httpd-1.17beta1
 +#include <grp.h>
 +#include <net/if.h>
 +#include <sys/ioctl.h>
-+#include "sc_sessionid_upd.h"
++#include "sc_sessionid.h"
 +
 +/* A multi-family sockaddr. */
 +typedef union {
@@ -52,7 +96,7 @@ diff -urN work/mini_httpd-1.17beta1/sc_sessionid_upd.c work/mini_httpd-1.17beta1
 +//every ip have one session id.
 +
 +int fd = -1;
-+static int try_lock()
++static int try_lock(void)
 +{
 +	char *appname = "httpdsessionid";
 +	char lock_path[PATH_MAX];
@@ -79,7 +123,7 @@ diff -urN work/mini_httpd-1.17beta1/sc_sessionid_upd.c work/mini_httpd-1.17beta1
 +	}
 +	return fd;
 +}
-+static void try_unlock()
++static void try_unlock(void)
 +{
 +	if (fd >= 0) {
 +		lockf(fd,F_ULOCK,0);
@@ -138,7 +182,7 @@ diff -urN work/mini_httpd-1.17beta1/sc_sessionid_upd.c work/mini_httpd-1.17beta1
 +	return verify_ok;
 +}
 +
-+int sessionid_valid_local_sessionid()
++int sessionid_valid_local_sessionid(void)
 +{
 +	int valid = 0;
 +	char sessionid_in_local[100] = "";
@@ -181,15 +225,6 @@ diff -urN work/mini_httpd-1.17beta1/sc_sessionid_upd.c work/mini_httpd-1.17beta1
 +	return valid;
 +}
 +
-+void mess_string(char *string)
-+{
-+	char *p = string;
-+	if (p)
-+	{
-+			
-+	}
-+}
-+
 +/* only just auth OK, then set session cookie also update the session cookie. */
 +int sessionid_update_device_sessionid(char *new_sessionid)
 +{
@@ -214,7 +249,6 @@ diff -urN work/mini_httpd-1.17beta1/sc_sessionid_upd.c work/mini_httpd-1.17beta1
 +		memset(generated_sessionid, 'x', sizeof(generated_sessionid));
 +		srand(getpid());
 +		snprintf(generated_sessionid, sizeof(generated_sessionid), "sid%dxxx%sxxx%d", getpid(), uptime, rand());
-+		mess_string(&generated_sessionid[strlen("sid")]);
 +		{
 +			int i;
 +			for(i=0; i<sizeof(generated_sessionid); i++)
@@ -319,9 +353,8 @@ diff -urN work/mini_httpd-1.17beta1/sc_sessionid_upd.c work/mini_httpd-1.17beta1
 +	try_unlock();
 +	return 0;
 +}
-diff -urN work/mini_httpd-1.17beta1/sc_sessionid_upd.h work/mini_httpd-1.17beta1/sc_sessionid_upd.h
---- work/mini_httpd-1.17beta1/sc_sessionid_upd.h	2020-03-30 05:16:27.000000000 +0200
-+++ work/mini_httpd-1.17beta1/sc_sessionid_upd.h	2021-01-28 19:04:30.939917004 +0100
+--- work/mini_httpd-1.30/sc_sessionid.h
++++ work/mini_httpd-1.30/sc_sessionid.h
 @@ -0,0 +1,31 @@
 +#ifndef __SC_SESSIONID_H__
 +#define __SC_SESSIONID_H__
@@ -330,11 +363,11 @@ diff -urN work/mini_httpd-1.17beta1/sc_sessionid_upd.h work/mini_httpd-1.17beta1
 +#define SESSIONID_LEN 30
 +#ifdef DEBUG
 +#define SC_CFPRINTF_SESSIONID(fmt, args...)	do { \
-+						FILE *fp; \
-+						if((fp=(fopen("/dev/ttyp0", "w")))) { \
-+						fprintf(fp, "[%s::%s():%d] ", __FILE__, __FUNCTION__, __LINE__); \
-+						fprintf(fp, fmt, ##args); \
-+						fclose(fp); \
++						FILE *fpdbg; \
++						if((fpdbg=(fopen("/dev/ttyp0", "w")))) { \
++						fprintf(fpdbg, "[%s::%s():%d] ", __FILE__, __FUNCTION__, __LINE__); \
++						fprintf(fpdbg, fmt, ##args); \
++						fclose(fpdbg); \
 +						} \
 +						} while(0)
 +#else
@@ -349,7 +382,7 @@ diff -urN work/mini_httpd-1.17beta1/sc_sessionid_upd.h work/mini_httpd-1.17beta1
 +
 +char *sessionid_get_sessionid_from_cookie(char *cookie);
 +
-+int sessionid_valid_local_sessionid();
++int sessionid_valid_local_sessionid(void);
 +
 +int sessionid_delete_local_sessionid(const char *whichfunction);
 +

@@ -1,0 +1,3636 @@
+--- work/mini_httpd-1.30/mini_httpd.c
++++ work/mini_httpd-1.30/mini_httpd.c
+@@ -52,10 +52,16 @@
+ #include <arpa/inet.h>
+ #include <netdb.h>
+ #include <dirent.h>
+-
++#include <sys/sysinfo.h>
++#include <grp.h>
+ #include "port.h"
+ #include "match.h"
+ #include "tdate_parse.h"
++#include "misc.h"
++#include "nvram.h"
++#include "sname_def.h"
++#include "filenames.h"
++extern char *strcasestr(char *haystack, char *needle);
+ 
+ #ifdef HAVE_SENDFILE
+ # ifdef HAVE_LINUX_SENDFILE
+@@ -76,7 +82,7 @@
+ #endif /* USE_SSL */
+ 
+ 
+-#if defined(AF_INET6) && defined(IN6_IS_ADDR_V4MAPPED)
++#ifdef HTTPD_IPV6_SUPPORT
+ #define USE_IPV6
+ #endif
+ 
+@@ -117,7 +123,7 @@ typedef long long int64_t;
+ #define ol_strcpy(dst,src) memmove(dst,src,strlen(src)+1)
+ 
+ #ifndef ERR_DIR
+-#define ERR_DIR "errors"
++#define ERR_DIR "."
+ #endif /* ERR_DIR */
+ #ifndef DEFAULT_HTTP_PORT
+ #define DEFAULT_HTTP_PORT 80
+@@ -131,16 +137,16 @@ typedef long long int64_t;
+ #endif /* DEFAULT_CERTFILE */
+ #endif /* USE_SSL */
+ #ifndef DEFAULT_USER
+-#define DEFAULT_USER "nobody"
++#define DEFAULT_USER "root"
+ #endif /* DEFAULT_USER */
+ #ifndef CGI_NICE
+ #define CGI_NICE 10
+ #endif /* CGI_NICE */
+ #ifndef CGI_PATH
+-#define CGI_PATH "/usr/local/bin:/usr/ucb:/bin:/usr/bin"
++#define CGI_PATH "./"
+ #endif /* CGI_PATH */
+ #ifndef CGI_LD_LIBRARY_PATH
+-#define CGI_LD_LIBRARY_PATH "/usr/local/lib:/usr/lib"
++#define CGI_LD_LIBRARY_PATH "/lib:/usr/local/lib:/usr/lib"
+ #endif /* CGI_LD_LIBRARY_PATH */
+ #ifndef AUTH_FILE
+ #define AUTH_FILE ".htpasswd"
+@@ -168,6 +174,8 @@ typedef long long int64_t;
+ #define METHOD_TRACE 6
+ 
+ 
++#define HTTPD_TIMEOUT_FLAG "/tmp/httpd_timeout"
++
+ /* A multi-family sockaddr. */
+ typedef union {
+     struct sockaddr sa;
+@@ -178,6 +186,11 @@ typedef union {
+ #endif /* USE_IPV6 */
+     } usockaddr;
+ 
++enum {
++        AUTH_OK,
++        AUTH_FAIL,
++        NO_AUTH
++};/*distinguish "auth fail" and "no auth"*/
+ 
+ static char* argv0;
+ static int debug;
+@@ -209,17 +222,283 @@ static SSL_CTX* ssl_ctx;
+ static char cwd[MAXPATHLEN];
+ static int got_hup;
+ 
++/* Ron */
++#define LOGOUT handle_logout(0)
++#define SAVETIME handle_web_time(0)
++static char *default_page=NULL; /* Default page */
++static char *http_realm=NULL; /* Auth title */
++static int web_timeout=5*60; /* timeout */
++static time_t last_access_time=0; /* last access web GUI time*/
++static int someone_in_use=0;  /*1=someone in use, 0=nobody*/
++#ifdef HTTPD_IPV6_SUPPORT
++static char remote_ip[48]=""; /* current user's ip */
++static char last_remote_ip[48]=""; /* lastest access web GUI user's ip*/
++static char login_ip[48] = ""; /*login user's ip*/
++#else
++static char remote_ip[16]=""; /* current user's ip */
++static char last_remote_ip[16]=""; /* lastest access web GUI user's ip*/
++static char login_ip[16] = ""; /*login user's ip*/
++#endif
++static char *rondir;
++static int not_auth=AUTH_OK;
++static int need_auth = 1;
++#ifdef SUPPORT_SETUPWIZARD
++static int for_setupwizard=0;
++#endif
++
++static int have_cookie = 0;
++
++#ifdef USB
++#define MAX_USB_USER 15
++#define USB_AUTH_NONE 0
++#define USB_AUTH_FAIL 1
++#define USB_AUTH_PASS 2
++#define USB_NO_AUTH 3
++#define USB_AUTH_GUEST	4
++struct usb_user_t {
++	char remote_ip[16];
++	time_t timestamp;
++	int auth;
++};
++static struct usb_user_t all_usb_user[MAX_USB_USER];
++static int usb_user_count = 0;
++static int is_usb_session = 0;
++static int usb_session_check(void);
++static void usb_auth_check( char* dirname );
++static int check_valid_request(void);
++static int is_readable(const char *dirfile, const char *name);
++static struct usb_user_t * usb_user_lookup(const char *ip);
++#include <sys/file.h>
++static int sc_lockf(int fd, int shared, int lwait)
++{
++    int ret;
++    int op;
++
++    if (fd < 0) {
++        return 0;
++    }
++
++    if (shared)
++        op = LOCK_SH;
++    else
++        op = LOCK_EX;
++    if (!lwait)
++        op |= LOCK_NB;
++
++    ret = flock(fd, op);
++
++    return ret;
++}
++#endif /* USB*/
++
++/*compare ignore case*/
++static const char* strstri(const char *str, const char *substr)
++{
++	int len = strlen(substr);
++	if (len == 0)
++	{
++		return NULL;
++	}
++	while (*str)
++	{
++		if (strncasecmp(str, substr, len) == 0)
++		{
++			return str;
++		}
++		++str;
++	}
++	return NULL;
++}
++
++static inline void remove_timeout_flag(void)
++{
++    unlink(HTTPD_TIMEOUT_FLAG);
++}
++
++static inline void raise_timeout_flag(void)
++{
++    FILE *fp;
++    /* enter timeout stat. raise a global flag for all httpd process. */
++    fp = fopen(HTTPD_TIMEOUT_FLAG, "w");
++    if (fp)
++        fclose(fp);
++}
++
++static inline int check_timeout_flag(void)
++{
++    return (access(HTTPD_TIMEOUT_FLAG, F_OK) == 0);
++}
++
++static int check_lan_guest(void)
++{
++    // if access from lan, no ssl is needed! 
++    // fix the bug: someone may access lan without NAT, which source ip is in different subnet.
++
++    return (do_ssl == 0);
++}
++
++static int lock_fd = -1;
++static void lock_enter(void)
++{
++	if (( lock_fd = open("/var/lock/httpd.lock", O_RDWR|O_CREAT, 0644) ) < 0) {
++		return ;
++	}
++	if ( lockf(lock_fd, F_LOCK, 0) < 0 ) { 
++		close(lock_fd);
++	}
++	return;
++}
++
++static void lock_leave(void)
++{
++	if (lock_fd >= 0) {
++		lockf(lock_fd, F_ULOCK, 0);
++		close(lock_fd);
++		lock_fd = -1;
++	}
++}
++
++static void __restore_manager(void)
++{
++    FILE *fp;
++
++    fp = fopen("/var/httpd.cache", "rb");
++    if (fp) {
++        fread(&login_ip, sizeof(login_ip), 1, fp);
++        fread(&last_remote_ip, sizeof(last_remote_ip), 1, fp);
++        fread(&last_access_time, sizeof(last_access_time), 1, fp);
++        fclose(fp);
++        SC_CFPRINTF("login_ip = <%s> last_remote_ip = <%s> last_access_time = <%d> \n", login_ip, last_remote_ip, (int)last_access_time);
++    }
++}
++
++static void __save_manager(void)
++{
++    FILE *fp;
++
++    fp = fopen("/var/httpd.cache", "wb");
++    if (fp) {
++        fwrite(&login_ip, sizeof(login_ip), 1, fp);
++        fwrite(&last_remote_ip, sizeof(last_remote_ip), 1, fp);
++        fwrite(&last_access_time, sizeof(last_access_time), 1, fp);
++        fclose(fp);
++        SC_CFPRINTF("login_ip = <%s> last_remote_ip = <%s> last_access_time = <%d> \n", login_ip, last_remote_ip, (int)last_access_time);
++    }
++}
++
++static inline void restore_manager(void)
++{
++    lock_enter();
++    __restore_manager();
++    lock_leave();
++}
++
++static inline void save_manager(void)
++{
++    lock_enter();
++    __save_manager();
++    lock_leave();
++}
++
++static void handle_chdir( int sig )
++{
++    chdir(rondir?:"/www");
++    (void) getcwd( cwd, sizeof(cwd) - 1 );
++    if ( cwd[strlen( cwd ) - 1] != '/' )
++    (void) strcat( cwd, "/" );
++}
++
++static void handle_logout( int sig )
++{
++    usleep(1);
++    last_access_time=0;
++	strcpy(login_ip, "");
++	/* record last remote user. */
++	strcpy(last_remote_ip, remote_ip);
++	__save_manager();
++	/* remove config file cache when timeout */
++	system("rm -rf /tmp/NETGEAR*.cfg ");
++    nvram_set("start_in_blankstate","0");
++}
++static void handle_multi_login(int sig)
++{
++	usleep(1);
++	last_access_time = 0;
++	strcpy(login_ip, "");
++	__save_manager();
++	remove_timeout_flag();
++	nvram_set("start_in_blankstate", "0");
++}
++static void handle_web_time( int sig )
++{
++    struct sysinfo info;
++    sysinfo(&info);
++    usleep(1);
++    last_access_time=info.uptime;
++	strcpy(login_ip, remote_ip);
++	__save_manager();
++}
++static int check_timeout(void)
++{
++    struct sysinfo info;
++    sysinfo(&info);
++
++    if(check_timeout_flag()){
++        usleep(1);
++        return 1;
++    }
++
++    if(last_access_time==0){
++        usleep(1);
++        return 0;
++    }
++    else if(((info.uptime-last_access_time)>web_timeout) && web_timeout!=0){
++        usleep(1);
++        return 1;
++    }
++    return 0;
++
++}
++static void handle_timeout_stat(int sig)
++{
++	 sessionid_delete_local_sessionid(__FUNCTION__);
++
++     /* enter timeout stat. raise a global flag for all httpd processes. */
++     raise_timeout_flag();
++	 nvram_set("start_in_blankstate", "0");
++ 	 /* remove config file cache when user click logout  */
++     system("rm -rf /tmp/NETGEAR*.cfg ");
++     SC_CFPRINTF("logout\n");
++ }
++
++/* Ron */
+ 
+ /* Request variables. */
++static char *no_check_passwd_paths[]={"currentsetting.htm", "update_setting.htm", "debuginfo.htm",
++    "important_update.htm","MNU_top.htm",  "warning_pg.htm",
++    "multi_login.html", "401_recovery.htm", "401_access_denied.htm", "BRS_top.html",
++    "BRS_Windows_app_download.html","BRS_applySettings_app.html",
++    "BRS_swisscom_access.html",
++    "BRS_Mac_app_download.html",
++    "BRS_genie_and_ReadyShare_downloading.html",
++    "BRS_ver_fw_found.html", "BRS_ver_fw_not_found.html",
++    "BRS_netgear_success.html",
++    "BRS_success.html",
++    "NETGEAR_Genie.png",
++    "todo=wizard_upg_detfw",
++    "todo=get_next_page",
++    NULL};
+ static int conn_fd;
+ #ifdef USE_SSL
+ static SSL* ssl;
+ #endif /* USE_SSL */
+-static usockaddr client_addr;
++usockaddr client_addr;
+ static char* request;
+ static size_t request_size, request_len, request_idx;
+ static int method;
+ static char* path;
++static char fakepath[512]="";
++static char firstdir[512]="";  //david
+ static char* file;
+ static char* pathinfo;
+ struct stat sb;
+@@ -228,6 +507,13 @@ static char* protocol;
+ static int status;
+ static off_t bytes;
+ static char* req_hostname;
++static char soapServiceName[128]="";
++static char soap_token[17] = "";
++static char* auth_check_count= "";
++static char* agent_check= "";
++
++extern char sessionid_new_sessionid[];
++extern char sessionid_local_file[];
+ 
+ static char* authorization;
+ static size_t content_length;
+@@ -237,12 +523,11 @@ static char* host;
+ static time_t if_modified_since;
+ static char* referrer;
+ static char* useragent;
++static char* accept_language;
+ 
+ static char* remoteuser;
+ 
+-
+ /* Forwards. */
+-static void usage( void );
+ static void read_config( char* filename );
+ static void value_required( char* name, char* value );
+ static void no_value_required( char* name, char* value );
+@@ -267,6 +552,7 @@ static char* build_env( char* fmt, char*
+ static void auth_check( char* dirname );
+ static void send_authenticate( char* realm );
+ static char* virtual_file( char* f );
++static void send_direct_page( int pagestatus, char* str, char* header, char* text  );/* after auth fail three times page should direct recover page or access denied page */
+ static void send_error( int s, char* title, char* extra_header, char* text );
+ static void send_error_body( int s, char* title, char* text );
+ static int send_error_file( char* filename );
+@@ -279,10 +565,10 @@ static void start_response( void );
+ static void add_to_response( char* str );
+ static void send_response( void );
+ static void send_via_write( int fd, off_t size );
+-static void send_via_sendfile( int fd, int s, off_t size );
+ static ssize_t my_read( char* buf, size_t size );
+ static ssize_t my_write( void* buf, size_t size );
+ #ifdef HAVE_SENDFILE
++static void send_via_sendfile( int fd, int s, off_t size );
+ static ssize_t my_sendfile( int fd, int s, off_t offset, size_t nbytes );
+ #endif /* HAVE_SENDFILE */
+ static void add_str( char** bufP, size_t* bufsizeP, size_t* buflenP, char* str );
+@@ -294,13 +580,12 @@ static char* get_method_str( int m );
+ static void init_mime( void );
+ static const char* figure_mime( char* name, char* me, size_t me_size );
+ static void handle_sigterm( int sig );
+-static void handle_sighup( int sig );
+ static void handle_sigchld( int sig );
+ static void re_open_logfile( void );
+ static void handle_read_timeout( int sig );
+ static void handle_write_timeout( int sig );
+ static void lookup_hostname( usockaddr* usa4P, size_t sa4_len, int* gotv4P, usockaddr* usa6P, size_t sa6_len, int* gotv6P );
+-static char* ntoa( usockaddr* usaP );
++char* ntoa( usockaddr* usaP );
+ static int sockaddr_check( usockaddr* usaP );
+ static size_t sockaddr_len( usockaddr* usaP );
+ static void strdecode( char* to, char* from );
+@@ -333,6 +618,7 @@ main( int argc, char** argv )
+     int r;
+     char* cp;
+ 
++    int waitstatus;
+     /* Parse args. */
+     argv0 = argv[0];
+     debug = 0;
+@@ -361,12 +647,7 @@ main( int argc, char** argv )
+     argn = 1;
+     while ( argn < argc && argv[argn][0] == '-' )
+ 	{
+-	if ( strcmp( argv[argn], "-V" ) == 0 )
+-	    {
+-	    (void) printf( "%s\n", SERVER_SOFTWARE );
+-	    exit( 0 );
+-	    }
+-	else if ( strcmp( argv[argn], "-C" ) == 0 && argn + 1 < argc )
++	if ( strcmp( argv[argn], "-C" ) == 0 && argn + 1 < argc )
+ 	    {
+ 	    ++argn;
+ 	    read_config( argv[argn] );
+@@ -396,6 +677,7 @@ main( int argc, char** argv )
+ 	    {
+ 	    ++argn;
+ 	    dir = argv[argn];
++	    rondir = strdup(argv[argn]);
+ 	    }
+ 	else if ( strcmp( argv[argn], "-dd" ) == 0 && argn + 1 < argc )
+ 	    {
+@@ -418,7 +700,11 @@ main( int argc, char** argv )
+ 	    hostname = argv[argn];
+ 	    }
+ 	else if ( strcmp( argv[argn], "-r" ) == 0 )
+-	    do_chroot = 1;
++	    {
++	    ++argn;
++	    if(argv[argn]!=NULL)
++	    	http_realm=argv[argn];
++	    }
+ 	else if ( strcmp( argv[argn], "-v" ) == 0 )
+ 	    vhost = 1;
+ 	else if ( strcmp( argv[argn], "-l" ) == 0 && argn + 1 < argc )
+@@ -436,6 +722,11 @@ main( int argc, char** argv )
+ 	    ++argn;
+ 	    charset = argv[argn];
+ 	    }
++	else if ( strcmp( argv[argn], "-t" ) == 0 && argn + 1 < argc )
++	    {
++	    ++argn;
++	    web_timeout = atoi(argv[argn]);
++	    }
+ 	else if ( strcmp( argv[argn], "-P" ) == 0 && argn + 1 < argc )
+ 	    {
+ 	    ++argn;
+@@ -446,19 +737,25 @@ main( int argc, char** argv )
+ 	    ++argn;
+ 	    max_age = atoi( argv[argn] );
+ 	    }
++	/* Ron add for CA */
++	else if (strcmp ( argv[argn], "-f" ) == 0 && argn + 1 < argc )
++	    {
++	    ++argn;
++	    default_page = argv[argn];
++	    }
+ 	else
+-	    usage();
++	    exit(1);
+ 	++argn;
+ 	}
+     if ( argn != argc )
+-	usage();
++	exit(1);
+ 
+     cp = strrchr( argv0, '/' );
+     if ( cp != (char*) 0 )
+ 	++cp;
+     else
+ 	cp = argv0;
+-    openlog( cp, LOG_NDELAY|LOG_PID, LOG_DAEMON );
++    openlog( "auth", 0 , LOG_AUTH );
+ 
+     if ( port == 0 )
+ 	{
+@@ -471,6 +768,10 @@ main( int argc, char** argv )
+ 	port = DEFAULT_HTTP_PORT;
+ #endif /* USE_SSL */
+ 	}
++	{
++		char *p = strrchr(argv[0], '/');
++		sprintf(sessionid_local_file, "/tmp/sessionid_%s",  p?(p+1):argv[0]);
++	}
+ 
+     /* If we're root and we're going to become another user, get the uid/gid
+     ** now.
+@@ -480,8 +781,10 @@ main( int argc, char** argv )
+ 	pwd = getpwnam( user );
+ 	if ( pwd == (struct passwd*) 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "unknown user - '%s'", user );
+-	    (void) fprintf( stderr, "%s: unknown user - '%s'\n", argv0, user );
++#endif
++	    SC_CFPRINTF("unknown user - '%s'\n", user);
+ 	    exit( 1 );
+ 	    }
+ 	uid = pwd->pw_uid;
+@@ -494,15 +797,16 @@ main( int argc, char** argv )
+ 	logfp = fopen( logfile, "a" );
+ 	if ( logfp == (FILE*) 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "%s - %m", logfile );
+ 	    perror( logfile );
++#endif
+ 	    exit( 1 );
+ 	    }
++#ifdef SYSLOG
+ 	if ( logfile[0] != '/' )
+-	    {
+ 	    syslog( LOG_WARNING, "logfile is not an absolute path, you may not be able to re-open it" );
+-	    (void) fprintf( stderr, "%s: logfile is not an absolute path, you may not be able to re-open it\n", argv0 );
+-	    }
++#endif
+ 	if ( getuid() == 0 )
+ 	    {
+ 	    /* If we are root then we chown the log file to the user we'll
+@@ -510,8 +814,10 @@ main( int argc, char** argv )
+ 	    */
+ 	    if ( fchown( fileno( logfp ), uid, gid ) < 0 )
+ 		{
++#ifdef SYSLOG
+ 		syslog( LOG_WARNING, "fchown logfile - %m" );
+ 		perror( "fchown logfile" );
++#endif
+ 		}
+ 	    }
+ 	}
+@@ -527,8 +833,10 @@ main( int argc, char** argv )
+ 	}
+     if ( ! ( gotv4 || gotv6 ) )
+ 	{
++#ifdef SYSLOG
+ 	syslog( LOG_CRIT, "can't find any valid address" );
+-	(void) fprintf( stderr, "%s: can't find any valid address\n", argv0 );
++#endif
++	SC_CFPRINTF("can't find any valid address\n");
+ 	exit( 1 );
+ 	}
+ 
+@@ -547,8 +855,10 @@ main( int argc, char** argv )
+     /* If we didn't get any valid sockets, fail. */
+     if ( listen4_fd == -1 && listen6_fd == -1 )
+ 	{
++#ifdef SYSLOG
+ 	syslog( LOG_CRIT, "can't bind to any address" );
+-	(void) fprintf( stderr, "%s: can't bind to any address\n", argv0 );
++#endif
++	SC_CFPRINTF("can't bind to any address\n");
+ 	exit( 1 );
+ 	}
+ 
+@@ -557,8 +867,18 @@ main( int argc, char** argv )
+ 	{
+ 	SSL_load_error_strings();
+ 	SSLeay_add_ssl_algorithms();
+-	ssl_ctx = SSL_CTX_new( SSLv23_server_method() );
+-	SSL_CTX_set_options( ssl_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3 );
++		if (cipher != (char *)0)
++		{
++			ssl_ctx = SSL_CTX_new(TLSv1_2_server_method());
++		} else
++		{
++			ssl_ctx = SSL_CTX_new(SSLv23_server_method());
++		}
++		SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
++		if (cipher != (char *)0)
++		{
++			SSL_CTX_set_ecdh_auto(ssl_ctx, 1);
++		}
+ 	if ( certfile[0] != '\0' )
+ 	    if ( SSL_CTX_use_certificate_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 ||
+ 		 SSL_CTX_use_certificate_chain_file( ssl_ctx, certfile ) == 0 ||
+@@ -585,8 +905,10 @@ main( int argc, char** argv )
+ #ifdef HAVE_DAEMON
+ 	if ( daemon( 1, 1 ) < 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "daemon - %m" );
+ 	    perror( "daemon" );
++#endif
+ 	    exit( 1 );
+ 	    }
+ #else
+@@ -595,8 +917,10 @@ main( int argc, char** argv )
+ 	    case 0:
+ 	    break;
+ 	    case -1:
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "fork - %m" );
+ 	    perror( "fork" );
++#endif
+ 	    exit( 1 );
+ 	    default:
+ 	    exit( 0 );
+@@ -622,8 +946,10 @@ main( int argc, char** argv )
+ 	FILE* pidfp = fopen( pidfile, "w" );
+         if ( pidfp == (FILE*) 0 )
+             {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "%s - %m", pidfile );
+ 	    perror( pidfile );
++#endif
+             exit( 1 );
+             }
+         (void) fprintf( pidfp, "%d\n", (int) getpid() );
+@@ -639,22 +965,28 @@ main( int argc, char** argv )
+ 	/* Set aux groups to null. */
+ 	if ( setgroups( 0, (gid_t*) 0 ) < 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "setgroups - %m" );
+ 	    perror( "setgroups" );
++#endif
+ 	    exit( 1 );
+ 	    }
+ 	/* Set primary group. */
+ 	if ( setgid( gid ) < 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "setgid - %m" );
+ 	    perror( "setgid" );
++#endif
+ 	    exit( 1 );
+ 	    }
+ 	/* Try setting aux groups correctly - not critical if this fails. */
+ 	if ( initgroups( user, gid ) < 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_ERR, "initgroups - %m" );
+ 	    perror( "initgroups" );
++#endif
+ 	    }
+ #ifdef HAVE_SETLOGIN
+ 	/* Set login name. */
+@@ -667,8 +999,10 @@ main( int argc, char** argv )
+ 	{
+ 	if ( chdir( dir ) < 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "chdir - %m" );
+ 	    perror( "chdir" );
++#endif
+ 	    exit( 1 );
+ 	    }
+ 	}
+@@ -683,8 +1017,10 @@ main( int argc, char** argv )
+ 	{
+ 	if ( chroot( cwd ) < 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "chroot - %m" );
+ 	    perror( "chroot" );
++#endif
+ 	    exit( 1 );
+ 	    }
+ 	/* If we're logging and the logfile's pathname begins with the
+@@ -702,18 +1038,19 @@ main( int argc, char** argv )
+ 		** the chroot tree.)
+ 		*/
+ 		}
++#ifdef SYSLOG
+ 	    else
+-		{
+ 		syslog( LOG_WARNING, "logfile is not within the chroot tree, you will not be able to re-open it" );
+-		(void) fprintf( stderr, "%s: logfile is not within the chroot tree, you will not be able to re-open it\n", argv0 );
+-		}
++#endif
+ 	    }
+ 	(void) strcpy( cwd, "/" );
+ 	/* Always chdir to / after a chroot. */
+ 	if ( chdir( cwd ) < 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "chroot chdir - %m" );
+ 	    perror( "chroot chdir" );
++#endif
+ 	    exit( 1 );
+ 	    }
+ 
+@@ -724,8 +1061,10 @@ main( int argc, char** argv )
+ 	{
+ 	if ( chdir( data_dir ) < 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "data_dir chdir - %m" );
+ 	    perror( "data_dir chdir" );
++#endif
+ 	    exit( 1 );
+ 	    }
+ 	}
+@@ -736,52 +1075,72 @@ main( int argc, char** argv )
+ 	/* Set uid. */
+ 	if ( setuid( uid ) < 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "setuid - %m" );
+ 	    perror( "setuid" );
++#endif
+ 	    exit( 1 );
+ 	    }
+ 	/* Check for unnecessary security exposure. */
+ 	if ( ! do_chroot )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_WARNING,
+ 		"started as root without requesting chroot(), warning only" );
+-	    (void) fprintf( stderr,
+-		"%s: started as root without requesting chroot(), warning only\n", argv0 );
++#endif
++	    SC_CFPRINTF("started as root without requesting chroot(), warning only\n");
+ 	    }
+ 	}
+ 
+     /* Catch various signals. */
+ #ifdef HAVE_SIGSET
+     (void) sigset( SIGTERM, handle_sigterm );
+-    (void) sigset( SIGINT, handle_sigterm );
+-    (void) sigset( SIGUSR1, handle_sigterm );
+-    (void) sigset( SIGHUP, handle_sighup );
+     (void) sigset( SIGCHLD, handle_sigchld );
+     (void) sigset( SIGPIPE, SIG_IGN );
+ #else /* HAVE_SIGSET */
+     (void) signal( SIGTERM, handle_sigterm );
+-    (void) signal( SIGINT, handle_sigterm );
+-    (void) signal( SIGUSR1, handle_sigterm );
+-    (void) signal( SIGHUP, handle_sighup );
+     (void) signal( SIGCHLD, handle_sigchld );
+     (void) signal( SIGPIPE, SIG_IGN );
+ #endif /* HAVE_SIGSET */
+     got_hup = 0;
+ 
++/* Ron */
++    /* change www dir */
++    (void) signal( SIGUSR1, handle_chdir);
++    /* record last access */
++    (void)signal(SIGUSR2, handle_multi_login);
++    /* logout */
++    (void) signal( SIGINT, handle_timeout_stat);
++/* Ron */
++
+     init_mime();
+ 
+     if ( hostname == (char*) 0 )
+-	syslog(
+-	    LOG_NOTICE, "%.80s starting on port %d", SERVER_SOFTWARE,
+-	    (int) port );
++	{
++#ifdef SYSLOG
++	syslog(LOG_NOTICE, "%.80s starting on port %d", SERVER_SOFTWARE, (int) port );
++#endif
++	SC_CFPRINTF("starting on port %d\n", port);
++	}
+     else
+-	syslog(
+-	    LOG_NOTICE, "%.80s starting on %.80s, port %d", SERVER_SOFTWARE,
+-	    hostname, (int) port );
++	{
++#ifdef SYSLOG
++	syslog(LOG_NOTICE, "%.80s starting on %.80s, port %d", SERVER_SOFTWARE, hostname, (int) port );
++#endif
++	SC_CFPRINTF("starting on %.80s port %d\n", hostname, port);
++	}
+ 
+     /* Main loop. */
+     for (;;)
+ 	{
++        /*
++         * If we are upgrading FLASH, do not service HTTP request
++         * Checking upgrade_flash.h for /tmp/upgrading
++         */
++        if(!access("/tmp/upgrading", F_OK)) {
++            sleep(1);
++            continue;
++        }
+ 	/* Do we need to re-open the log file? */
+ 	if ( got_hup )
+ 	    {
+@@ -816,21 +1175,25 @@ main( int argc, char** argv )
+ 	    {
+ 	    if ( errno == EINTR || errno == EAGAIN )
+ 		continue;	/* try again */
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "select - %m" );
+ 	    perror( "select" );
++#endif
+ 	    exit( 1 );
+ 	    }
+ 
+ 	/* Accept the new connection. */
+ 	sz = sizeof(usa);
+ 	if ( listen4_fd != -1 && FD_ISSET( listen4_fd, &lfdset ) )
+-	    conn_fd = accept( listen4_fd, &usa.sa, &sz );
++	    conn_fd = accept( listen4_fd, &usa.sa, (socklen_t *)&sz );
+ 	else if ( listen6_fd != -1 && FD_ISSET( listen6_fd, &lfdset ) )
+-	    conn_fd = accept( listen6_fd, &usa.sa, &sz );
++	    conn_fd = accept( listen6_fd, &usa.sa, (socklen_t *)&sz );
+ 	else
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "select failure" );
+-	    (void) fprintf( stderr, "%s: select failure\n", argv0 );
++#endif
++	    SC_CFPRINTF("select failure\n");
+ 	    exit( 1 );
+ 	    }
+ 	if ( conn_fd < 0 )
+@@ -841,20 +1204,55 @@ main( int argc, char** argv )
+ 	    if ( errno == EPROTO )
+ 		continue;	/* try again */
+ #endif /* EPROTO */
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "accept - %m" );
+ 	    perror( "accept" );
++#endif
+ 	    exit( 1 );
+ 	    }
+ 
+ 	/* Fork a sub-process to handle the connection. */
++		/* if does not the same user and per user not timeout*/
++		if (check_timeout_flag())
++		{
++		    remove_timeout_flag();
++		    strcpy(login_ip, "");
++		    strcpy(last_remote_ip, "");
++		    last_access_time = 0;
++		    /* reload web timeout here. we'd better not do it in signal function because nvram get function has lock. */
++		    web_timeout =  atoi(nvram_safe_get("http_timeout"))*60;
++		    nvram_set("start_in_blankstate","0");
++		    save_manager();
++		}
++		else
++		{
++		    restore_manager();
++		}
++
++		strcpy(remote_ip, ntoa(&usa));
++		if (*login_ip == '\0')
++		{
++			someone_in_use = 0;
++		}
++		else if (strcmp(login_ip, remote_ip) != 0 && !check_timeout() && last_access_time != 0)
++		{
++			someone_in_use = 1;
++		}
++		else
++		{
++			someone_in_use = 0;
++		}
++
+ 	r = fork();
+ 	if ( r < 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "fork - %m" );
+ 	    perror( "fork" );
++#endif
+ 	    exit( 1 );
+ 	    }
+-	if ( r == 0 )
++	else if ( r == 0 )
+ 	    {
+ 	    /* Child process. */
+ 	    client_addr = usa;
+@@ -864,24 +1262,14 @@ main( int argc, char** argv )
+ 		(void) close( listen6_fd );
+ 	    handle_request();
+ 	    }
++    if (access("/tmp/dnshj.out",F_OK)==0)
++        waitpid(r,&waitstatus,0);
+ 	(void) close( conn_fd );
+ 	}
+     }
+ 
+ 
+ static void
+-usage( void )
+-    {
+-#ifdef USE_SSL
+-    (void) fprintf( stderr, "usage:  %s [-C configfile] [-D] [-S] [-E certfile] [-Y cipher] [-p port] [-d dir] [-dd data_dir] [-c cgipat] [-u user] [-h hostname] [-r] [-v] [-l logfile] [-i pidfile] [-T charset] [-P P3P] [-M maxage]\n", argv0 );
+-#else /* USE_SSL */
+-    (void) fprintf( stderr, "usage:  %s [-C configfile] [-D] [-p port] [-d dir] [-dd data_dir] [-c cgipat] [-u user] [-h hostname] [-r] [-v] [-l logfile] [-i pidfile] [-T charset] [-P P3P] [-M maxage]\n", argv0 );
+-#endif /* USE_SSL */
+-    exit( 1 );
+-    }
+-
+-
+-static void
+ read_config( char* filename )
+     {
+     FILE* fp;
+@@ -894,8 +1282,10 @@ read_config( char* filename )
+     fp = fopen( filename, "r" );
+     if ( fp == (FILE*) 0 )
+ 	{
++#ifdef SYSLOG
+ 	syslog( LOG_CRIT, "%s - %m", filename );
+ 	perror( filename );
++#endif
+ 	exit( 1 );
+ 	}
+ 
+@@ -937,6 +1327,7 @@ read_config( char* filename )
+ 		{
+ 		value_required( name, value );
+ 		dir = e_strdup( value );
++		rondir = e_strdup( value );
+ 		}
+ 	    else if ( strcasecmp( name, "data_dir" ) == 0 )
+ 		{
+@@ -945,8 +1336,8 @@ read_config( char* filename )
+ 		}
+ 	    else if ( strcasecmp( name, "chroot" ) == 0 )
+ 		{
+-		no_value_required( name, value );
+-		do_chroot = 1;
++		value_required( name, value );
++		http_realm = e_strdup( value );
+ 		}
+ 	    else if ( strcasecmp( name, "nochroot" ) == 0 )
+ 		{
+@@ -999,6 +1390,11 @@ read_config( char* filename )
+ 		value_required( name, value );
+ 		pidfile = e_strdup( value );
+ 		}
++	    else if ( strcasecmp( name, "web_timeout" ) == 0 )
++		{
++		value_required( name, value );
++		web_timeout = atoi( value );
++		}
+ 	    else if ( strcasecmp( name, "charset" ) == 0 )
+ 		{
+ 		value_required( name, value );
+@@ -1014,6 +1410,11 @@ read_config( char* filename )
+ 		value_required( name, value );
+ 		max_age = atoi( value );
+ 		}
++	    else if ( strcasecmp( name, "default_page" ) == 0 )
++		{
++		value_required( name, value );
++		default_page = e_strdup( value );
++		}
+ #ifdef USE_SSL
+ 	    else if ( strcasecmp( name, "ssl" ) == 0 )
+ 		{
+@@ -1033,8 +1434,7 @@ read_config( char* filename )
+ #endif /* USE_SSL */
+ 	    else
+ 		{
+-		(void) fprintf(
+-		    stderr, "%s: unknown config option '%s'\n", argv0, name );
++		SC_CFPRINTF("unknown config option '%s'\n", name );
+ 		exit( 1 );
+ 		}
+ 
+@@ -1053,8 +1453,7 @@ value_required( char* name, char* value
+     {
+     if ( value == (char*) 0 )
+ 	{
+-	(void) fprintf(
+-	    stderr, "%s: value required for %s option\n", argv0, name );
++	SC_CFPRINTF("value required for %s option\n", name );
+ 	exit( 1 );
+ 	}
+     }
+@@ -1065,9 +1464,7 @@ no_value_required( char* name, char* val
+     {
+     if ( value != (char*) 0 )
+ 	{
+-	(void) fprintf(
+-	    stderr, "%s: no value required for %s option\n",
+-	    argv0, name );
++	SC_CFPRINTF("no value required for %s option\n", name );
+ 	exit( 1 );
+ 	}
+     }
+@@ -1082,20 +1479,22 @@ initialize_listen_socket( usockaddr* usa
+     /* Check sockaddr. */
+     if ( ! sockaddr_check( usaP ) )
+ 	{
++#ifdef SYSLOG
+ 	syslog(
+ 	    LOG_ERR, "unknown sockaddr family on listen socket - %d",
+ 	    usaP->sa.sa_family );
+-	(void) fprintf(
+-	    stderr, "%s: unknown sockaddr family on listen socket - %d\n",
+-	    argv0, usaP->sa.sa_family );
++#endif
++	SC_CFPRINTF("unknown sockaddr family on listen socket - %d\n", usaP->sa.sa_family);
+ 	return -1;
+ 	}
+ 
+     listen_fd = socket( usaP->sa.sa_family, SOCK_STREAM, 0 );
+     if ( listen_fd < 0 )
+ 	{
++#ifdef SYSLOG
+ 	syslog( LOG_CRIT, "socket %.80s - %m", ntoa( usaP ) );
+ 	perror( "socket" );
++#endif
+ 	return -1;
+ 	}
+ 
+@@ -1104,22 +1503,28 @@ initialize_listen_socket( usockaddr* usa
+     i = 1;
+     if ( setsockopt( listen_fd, SOL_SOCKET, SO_REUSEADDR, (void*) &i, sizeof(i) ) < 0 )
+ 	{
++#ifdef SYSLOG
+ 	syslog( LOG_CRIT, "setsockopt SO_REUSEADDR - %m" );
+ 	perror( "setsockopt SO_REUSEADDR" );
++#endif
+ 	return -1;
+ 	}
+ 
+     if ( bind( listen_fd, &usaP->sa, sockaddr_len( usaP ) ) < 0 )
+ 	{
++#ifdef SYSLOG
+ 	syslog( LOG_CRIT, "bind %.80s - %m", ntoa( usaP ) );
+ 	perror( "bind" );
++#endif
+ 	return -1;
+ 	}
+ 
+     if ( listen( listen_fd, 1024 ) < 0 )
+ 	{
++#ifdef SYSLOG
+ 	syslog( LOG_CRIT, "listen - %m" );
+ 	perror( "listen" );
++#endif
+ 	return -1;
+ 	}
+ 
+@@ -1135,6 +1540,143 @@ initialize_listen_socket( usockaddr* usa
+     return listen_fd;
+     }
+ 
++/*
++ * Check if @path exist in @paths[].
++ * Return 1 ==> Yes, path exist in paths
++ *        0 ==> No. Can not find path in paths
++ *
++ * NOTE: paths[] end with NULL
++ */
++/*
++ * Check if @path exist in @paths[].
++ * Return 1 ==> Yes, path exist in paths
++ *        0 ==> No. Can not find path in paths
++ *
++ * NOTE: paths[] end with NULL
++ */
++static int path_exist(char *paths[], char *method_str)
++{
++	int i;
++
++	for (i = 0; paths[i]; i++)
++	{
++		if (strstr(path, paths[i]))
++		{
++			SC_CFPRINTF("not need auth since %s is part of %s\n", paths[i], path);
++			return 1;
++		}
++	}
++	
++	SC_CFPRINTF("method_str: %s\n", method_str);
++	if (method_str && *method_str == 'G')
++	{
++		/* For these .gif or .css of .js or .xml or .jpg  file, it will be used by other .htm file, and it's no need to request auth for these files.  */
++		if (
++				((strstr(path, ".gif") != NULL) || (strstr(path, ".css") != NULL) || (strstr(path, ".js") != NULL) || (strstr(path, ".xml") != NULL) || (strstr(path, ".png") != NULL) || (strstr(path, ".jpg") != NULL))
++				&&
++				((strstr(path,".htm") == NULL) && (strstr(path,"html") ==NULL) && (strstr(path,".asp")==NULL) && (strstr(path, "todo=") == NULL))
++		   )
++		{
++			if(strstr(path, "todo"))
++			{
++				SC_CFPRINTF("Fix security issue, command has todo command\n");
++				return 0;
++			}	
++			else
++				SC_CFPRINTF("path:%s\n", path);
++			
++			// if not auth in http, does this an attack?
++			if (*nvram_safe_get("config_state") != 'b')
++			{
++				char path_tmp[1024];
++				memset(path_tmp, 0, sizeof(path_tmp));
++				strncpy(path_tmp, path, sizeof(path_tmp)-1);
++				
++				if (!strncmp(path_tmp, "/setup.cgi?", strlen("/setup.cgi?")))
++				{
++					char *p = strstr(path_tmp, "next_file=");
++					if (p)
++					{
++						char *p1 = strchr(p, '&');
++						if (p1)
++						{
++							*p1 = 0;
++							
++							SC_CFPRINTF("want get %s\n", p);
++							if ((strstr(p, ".gif") != NULL) || (strstr(p, ".css") != NULL) || (strstr(p, ".js") != NULL) || (strstr(p, ".xml") != NULL) || (strstr(p, ".png") != NULL) || (strstr(p, ".jpg") != NULL))
++							{
++								SC_CFPRINTF("gif/css/js/xml/png/jpg, pass auth_check\n");
++							} else
++							{
++								SC_CFPRINTF("real want get not gif/css/js/xml/png/jpg, still need auth\n");
++								return 0;
++							}
++						}
++					}
++				} else
++				{
++					char *p = strchr(path_tmp, '&');
++					if (p)
++					{
++						*p = 0;
++						
++						SC_CFPRINTF("want get %s\n", path_tmp);
++						if ((strstr(path_tmp, ".gif") != NULL) || (strstr(path_tmp, ".css") != NULL) || (strstr(path_tmp, ".js") != NULL) || (strstr(path_tmp, ".xml") != NULL) || (strstr(path_tmp, ".png") != NULL) || (strstr(path_tmp, ".jpg") != NULL))
++						{
++							SC_CFPRINTF("gif/css/js/xml/png/jpg, pass auth_check\n");
++						} else
++						{
++							SC_CFPRINTF("real want get not gif/css/js/xml/png/jpg, still need auth\n");
++							return 0;	
++						}
++					}
++				}
++			}
++
++			if (strstr(path, "%00"))
++			{
++				if (access("/tmp/httpd_null_byte_attack_debug", F_OK) == 0)
++				{
++					SC_CFPRINTF("null-byte attack debug\n");
++				} else
++				{
++					SC_CFPRINTF("null-byte attack? need auth anyway before the strdecode and cgi-lib unescape_url\n");
++					return 0;
++				}
++			}
++
++			return 1;
++		}
++	} else
++	{
++		SC_CFPRINTF("not check on post\n");
++	}
++	
++	return 0;
++}
++
++
++#ifdef IP_ASSIGN_CHK
++/* read timestamp from file, value unit is in second */
++static unsigned long long get_uptime(char *time_file)
++{
++    FILE *fp;
++    unsigned long long uptime = 0;
++
++    if ((fp = fopen(time_file, "r")) != NULL) {
++        fscanf(fp, "%llu[^.]", &uptime);
++        fclose(fp);
++    }
++    return uptime;
++}
++#endif
++#ifdef SUPPORT_SETUPWIZARD
++static void check_soap_from_wan(void)
++{
++	if ( (for_setupwizard == 1) && (check_lan_guest() == 0) ) exit(0);
++}
++#endif
++
+ 
+ /* This runs in a child process, and exits when done, so cleanup is
+ ** not needed.
+@@ -1145,10 +1687,9 @@ handle_request( void )
+     char* method_str;
+     char* line;
+     char* cp;
+-    int r, file_len, i;
++    int r, file_len, i=0;
+     const char* index_names[] = {
+-	"index.html", "index.htm", "index.xhtml", "index.xht", "Default.htm",
+-	"index.cgi" };
++	"setup.cgi","index.html", "index.htm", "index.xhtml", "index.xht", "Default.htm" };
+ 
+     /* Set up the timeout for reading. */
+ #ifdef HAVE_SIGSET
+@@ -1179,6 +1720,8 @@ handle_request( void )
+     referrer = "";
+     useragent = "";
+ 
++    accept_language = "";
++    need_auth = 1; /* all of files need auth check by default */
+ #ifdef TCP_NOPUSH
+     if ( ! do_ssl )
+ 	{
+@@ -1205,7 +1748,6 @@ handle_request( void )
+ 	    }
+ 	}
+ #endif /* USE_SSL */
+-
+     /* Read in the request. */
+     start_request();
+     for (;;)
+@@ -1231,17 +1773,6 @@ handle_request( void )
+     if ( path == (char*) 0 )
+ 	send_error( 400, "Bad Request", "", "Can't parse request." );
+     *path++ = '\0';
+-    path += strspn( path, " \t\012\015" );
+-    protocol = strpbrk( path, " \t\012\015" );
+-    if ( protocol == (char*) 0 )
+-	send_error( 400, "Bad Request", "", "Can't parse request." );
+-    *protocol++ = '\0';
+-    protocol += strspn( protocol, " \t\012\015" );
+-    query = strchr( path, '?' );
+-    if ( query == (char*) 0 )
+-	query = "";
+-    else
+-	*query++ = '\0';
+ 
+     /* Parse the rest of the request headers. */
+     while ( ( line = get_request_line() ) != (char*) 0 )
+@@ -1271,6 +1802,7 @@ handle_request( void )
+ 	    cp = &line[7];
+ 	    cp += strspn( cp, " \t" );
+ 	    cookie = cp;
++	    have_cookie = 1;
+ 	    }
+ 	else if ( strncasecmp( line, "Host:", 5 ) == 0 )
+ 	    {
+@@ -1305,7 +1837,365 @@ handle_request( void )
+ 	    cp += strspn( cp, " \t" );
+ 	    useragent = cp;
+ 	    }
++	else if ( strncasecmp( line, "Accept-Language:", 16 ) == 0 )
++	    {
++	    cp = &line[16];
++	    cp += strspn( cp, " \t" );
++	    accept_language = cp;
++	    }
++#ifdef SUPPORT_SETUPWIZARD
++        else if ( strncasecmp( line, "SOAPAction:", 11 ) == 0 )
++            {
++	    char *pTemp=NULL;
++            cp = &line[11];
++            cp += strspn( cp, " \t" );
++	    pTemp=strcasestr(cp,"urn:NETGEAR-ROUTER:service:");
++            if(pTemp != NULL){
++		pTemp += strlen("urn:NETGEAR-ROUTER:service:");	
++	    	while(*pTemp !=':'){
++			soapServiceName[i++]=*pTemp;
++			pTemp++;
++			if(i >= 128)
++			{
++				send_error(404, "Not Found", "", "No such file.");
++			}
++		}
++		soapServiceName[i]='\0';
++		for_setupwizard = 1;
++		}
++            }
++#endif
++	}
++
++    SC_CFPRINTF("path is <%s>\n", path);
++    SC_CFPRINTF("host : <%s> \n", host);
++    
++    /* For Now ios remote-genie have no host value in request packet so we now add it for temp-solution. */
++#ifdef SUPPORT_SETUPWIZARD
++	if(host==NULL && for_setupwizard == 1)
++		host="www.routerlogin.com";
++#endif
++
++#ifdef USB
++	is_usb_session = usb_session_check();
++	if (is_usb_session) {
++	    someone_in_use = 0;
++	    SC_CFPRINTF("is_usb_session\n");
++	}
++	if (!check_valid_request())
++	{
++        /* reset someone_in_use, so that the following error message can be show. */
++        someone_in_use = 0;
++		send_error( 403, "Forbidden", "", "URL is illegal." );
+ 	}
++#endif
++
++#ifdef SUPPORT_SETUPWIZARD
++    if(strstr(path,"setupwizard.cgi"))
++    {
++        for_setupwizard=1;
++    }
++
++    /* Discard SOAP requests from WAN side. */
++    check_soap_from_wan();
++
++    if(for_setupwizard==1)
++    {
++        system("/bin/echo it is for setupwizard! >> /tmp/sw.log");
++        sprintf(fakepath, "/setupwizard.cgi HTTP/1.1\r\n");
++        path = fakepath;
++
++		if((have_cookie == 1))
++		{
++			char *p1;
++			memset(soap_token, 0, sizeof(soap_token));
++			if( (p1 = strstr(cookie,"=")) != NULL)
++			{
++				SC_CFPRINTF("p1 %s\n",p1);
++				strncpy(soap_token,p1 + 1, sizeof(soap_token)-1);
++				SC_CFPRINTF("soap_token %s\n",soap_token);
++			}
++		}
++    }
++    else {
++#endif
++
++    /* JIM add for dns hijact */
++    if(access("/tmp/dnshj.out",F_OK)==0
++    && (!strstr(host,"routerlogin") || (strstr(host,"routerlogin") && strncmp(path,"/ ",2)==0))){
++        sprintf(fakepath, "/ca/setup.cgi?next_file=%s HTTP/1.1\r\n", default_page?:"indexdnshj.htm");
++        path = fakepath;
++    }
++
++    /*
++     * SJ add for avoid POST methon,and help UI to trigger tm warning page
++     */
++    if(access("/tmp/blank_state.out",F_OK) !=0 ) {
++    	if(access("/tmp/tm_already_warning",F_OK) ==0 ) {
++    		unlink("/tmp/tm_already_warning");
++    	}
++    }
++    else if (strcasecmp( method_str, get_method_str( METHOD_GET ) ) == 0
++        && (strstr(path, ".htm") || strncmp(path, "/ HTTP", 6) == 0)
++    ) {
++        /* get htm,or get uri */
++        int host_is_dut;
++        int page_is_st_tm = 0;
++        int block_internet;
++        int page_is_help = 0;
++        int pass_dut_gui = 0;
++
++        host_is_dut = (strcmp(host, nvram_get("lan_ipaddr")) == 0 || strstr(host, "routerlogin"));
++        block_internet = strcmp(nvram_get("tm_action_internet")?:"", "1");
++        if(strstr(path, "traffic_status.htm")) {
++            page_is_st_tm = 1;
++        }
++        if(host_is_dut) {
++            /* is help page in dut */
++            if(strstr(path , "_h.htm"))
++            	page_is_help = 1;
++            /* should not block dut gui if already warnninged*/
++            if(access("/tmp/tm_already_warning",F_OK) ==0 )
++            	pass_dut_gui = 1;
++        }
++		SC_CFPRINTF("page_is_help = %d,pass_dut_gui =%d\n", page_is_help, pass_dut_gui);
++        if(!page_is_help && !pass_dut_gui) {
++            FILE *fp;
++            FILE *fp1;
++            char fbuf[100];
++            char *fptr;
++
++            sprintf(fakepath, "/ HTTP/1.1\r\n");
++            if (!page_is_st_tm) {
++                fp = fopen("/tmp/blank_state.out", "r");
++                if (fp) {
++                    if (fgets(fbuf, 99, fp) && (fptr = strstr(fbuf, "htm"))) {
++                        *(fptr + 3) = '\0';
++                        sprintf(fakepath, "/setup.cgi?next_file=%s HTTP/1.1\r\n", fbuf);
++                        /*if internet is block by TM,dnshj should always work
++                          first time,block all
++                          next time, not block dut UI
++                         */
++                        if (access("/tmp/tm_block_internet", F_OK) != 0)
++                        {
++                        	system("/usr/sbin/rc dnshj stop");
++                        }
++                        else
++                        {
++                        	if(access("/tmp/tm_already_warning",F_OK) !=0 )
++                        	{
++                        		fp1 = fopen("/tmp/tm_already_warning", "w+");
++                        		if(fp1)
++                					fclose(fp1);
++                        	}
++                        }
++                        path = fakepath;
++                        need_auth = 0;
++                 }
++
++#ifdef IP_ASSIGN_CHK
++                    /* this index is for LAN/WAN conflict check */
++                     else if (!strstr(fbuf, "lan_wan_conflict")) {
++#else
++                     else {
++#endif
++                        if (!host_is_dut) {
++                            sprintf(fakepath, "/setup.cgi?next_file=%s HTTP/1.1\r\n","alert.htm");
++                            path = fakepath;
++                        }
++                    }
++                    fclose(fp);
++                    someone_in_use = 0; // in child process,
++                }
++            }
++        }
++        
++    }//tm
++#ifdef SUPPORT_SETUPWIZARD
++    }
++#endif
++
++#ifdef IP_ASSIGN_CHK
++    /*
++     * when have WAN/LAN conflict, should pop up the warning page first, needn't auth
++     * make sure get htm,or get uri, ".aspx" is netgear's request, also hi-jack this
++     */
++    do {
++    if (access("/tmp/lan_ip_auto_changed", F_OK) == 0) {
++        /* if it's CD's get, skip it */
++        if (strstr(useragent, "Genie") || strstr(useragent, "LANWizard") || strstr(path, "BRS_"))
++            break;
++        if (strcasecmp(method_str, get_method_str(METHOD_GET)) == 0
++        && (strstr(path, ".htm") || strncmp(path, "/ HTTP", 6) == 0 || strstr(path, ".aspx"))) {
++            if (access("/tmp/conflict_warning", F_OK) != 0) { /* first come here */
++                strcpy(fakepath, "/setup.cgi?next_file=warning_pg.htm HTTP/1.1\r\n");
++                path = fakepath;
++                system("/bin/cp /proc/uptime /tmp/conflict_warning");
++            }
++        }
++        need_auth = 0;
++    }
++    if (access("/tmp/conflict_warning", F_OK) == 0 && strstr(path, "settings.jpg") != NULL) {
++        system("/bin/touch /tmp/stop_conflict_warning");
++        unlink("/tmp/conflict_warning");
++    }
++    /* add time out to protect router, set timeout 3s */
++    if (access("/tmp/conflict_warning", F_OK) == 0) {
++        unsigned long long start_warning_time = get_uptime("/tmp/conflict_warning");
++        unsigned long long now_time = get_uptime("/proc/uptime");
++
++        if (now_time - start_warning_time >= 3) {
++            unlink("/tmp/conflict_warning");
++            unlink("/tmp/lan_ip_auto_changed");
++            unlink("/tmp/stop_conflict_warning");
++            system("/usr/sbin/rc dnshj stop");
++        }
++    }
++    } while(0);
++#endif
++
++#ifdef SUPPORT_SETUPWIZARD
++    if(strstr(path,"currentsetting.htm") != NULL)
++    {
++        for_setupwizard = 1;
++    }
++#endif
++
++    SC_CFPRINTF("Genie: method_str %s, path %s, someone_in_use %d, host %s, need_auth %d\n"
++                ,method_str , path, someone_in_use, host, need_auth);
++        /*Genie Wizard*/
++    if(access("/tmp/brs_hijack.out",F_OK) ==0 ) 
++    {
++        int host_is_dut;
++		char *lan_ip = nv_get(CAT_HTTP, HTTP_LAN_IP, 1)?:"255.255.255.255";
++        SC_CFPRINTF("Genie: GUI accessed in blankstate\n");
++       
++        host_is_dut = (strcmp(host, lan_ip) == 0 || strstr(host, "routerlogin")
++                || (atoi(nvram_safe_get("wifi_ap_mode")) && strstri(host, nvram_safe_get("wifi_ap_name"))));
++
++        if (strcasecmp( method_str, get_method_str( METHOD_GET ) ) == 0
++        && (strstr(path, ".htm") || strstr(path, "/ HTTP") || !host_is_dut/*by hijack*/)
++        && strstr(path,"BRS_") == NULL
++#ifdef SUPPORT_SETUPWIZARD
++        && for_setupwizard == 0 // fix genie can not login after restore default.
++#endif
++        )
++        {
++            /*Configured State*/
++            if(access("/tmp/brs_gui_hijack",F_OK) == 0)
++            {
++                /*do not hijack in this case: LANIP, configured state */
++                if(!host_is_dut)
++                {
++			/*fix bug when remote management enable, configured state, remote pc can not access GUI*/
++			char *fw_remote = nvram_safe_get("fw_remote");
++			if(*fw_remote == '1')
++			{
++				char request_str[256];
++				char *fw_remote_port = nvram_safe_get("fw_remote_port");
++				char *wan_ip = nv_get(CAT_WAN, WAN_IP_OLD, 1);
++				sprintf(request_str, "%s:%s", wan_ip, fw_remote_port);
++				if(strcmp(host, request_str) != 0)
++				{
++					char *ddns_host_name = nvram_safe_get("ddns_host_name");
++					sprintf(request_str, "%s:%s", ddns_host_name, fw_remote_port);
++					if(strcmp(host, request_str) != 0)
++					{
++						char *NGR_DDNSHost = nvram_safe_get("NGR_DDNSHost");
++						sprintf(request_str, "%s.mynetgear.com:%s", NGR_DDNSHost, fw_remote_port);
++						if(strcmp(host, request_str) != 0)
++						{
++							need_auth = 0;
++        						sprintf(fakepath, "/setup.cgi?next_file=%s HTTP/1.1",BRS_HIJACK_SUCCESS_PG);
++        						path = fakepath;
++						}
++					}
++				}
++			}
++			else
++			{
++            			need_auth = 0;
++        			sprintf(fakepath, "/setup.cgi?next_file=%s HTTP/1.1",BRS_HIJACK_SUCCESS_PG);
++        			path = fakepath;
++			}
++        	}
++        		    
++            }
++            else /*Blank State*/
++            {
++                if(!host_is_dut)
++		{
++            		    need_auth = 0;
++        		    sprintf(fakepath, "/setup.cgi?next_file=%s HTTP/1.1",BRS_HIJACK_INDEX_PG);
++		}
++        		else
++        		    sprintf(fakepath, "/setup.cgi?next_file=%s HTTP/1.1",BRS_INDEX_PG);
++                path = fakepath;
++            }
++        }
++        SC_CFPRINTF("Genie done: method_str %s, path %s, someone_in_use %d, host %s, need_auth %d\n"
++                ,method_str , path, someone_in_use, host, need_auth);
++    }
++    /*No login required*/
++    if(*nvram_safe_get("config_state") == 'b' /*blank state*/
++        /*reboot after restore, stay in NEEDNOTAUTH state, but after timeout, require login*/
++        || (*nvram_safe_get("need_not_login") == '1')
++      )
++    {
++        SC_CFPRINTF("Genie Wizard, set start_in_blankstate = 1\n");
++        nvram_set("need_not_login","0");
++        nvram_set("start_in_blankstate","1");/*do not reset this value until timeout or log out*/
++    }
++    if(*nvram_safe_get("start_in_blankstate") == '1' && *nvram_safe_get("config_state") == 'b')
++        someone_in_use = 0;
++    SC_CFPRINTF("path is <%s>\n", path);
++    if(path_exist(no_check_passwd_paths,method_str) || \
++		    /* for "htpwd_recovery.cgi", POST should not auth, GET need auth */
++		    (strstr(path, "htpwd_recovery.cgi") && strcasecmp(method_str, get_method_str(METHOD_POST)) == 0) 
++		    ) {
++        need_auth = 0;
++        /* for hi-jack page, should allow 2 user access at same time. */
++        someone_in_use = 0;
++    }
++
++#ifdef PNPX
++    if (strcasecmp(method_str, get_method_str(METHOD_GET)) == 0 && 
++        strstr(path, "todo=PNPX_GetShareFolderList"))
++    {
++        need_auth = 0;
++    }
++#endif
++
++    /* Ron add for auto add setup.cgi?next_file*/
++    if(strstr(path,".cgi")==NULL && strstr(path,".htm") && strstr(path,"shares")==NULL ){
++        char *pt;
++	 	if (strlen(path) > (sizeof(fakepath)-30-1))
++		{
++			/* for now, device not have file/resource that more than 128 in query string (uri). 30 mean we need add setup.cgi?next_file= in the path. */
++			send_error(404, "Not Found", "", "No such file.");
++		} else
++		{
++			strncpy(fakepath, path, strlen(path) - 8);
++		}
++        pt=strrchr(fakepath,'/' );
++        strncpy(firstdir,fakepath,pt-fakepath);
++
++        if(*path=='/') path += strlen(firstdir)+1;
++        sprintf(fakepath,"%s/setup.cgi?next_file=%s",firstdir,path);
++        path=fakepath;
++    }
++
++    path += strspn( path, " \t\012\015" );
++    protocol = strpbrk( path, " \t\012\015" );
++    if ( protocol == (char*) 0 )
++	send_error( 400, "Bad Request", "", "Can't parse request." );
++    *protocol++ = '\0';
++    protocol += strspn( protocol, " \t\012\015" );
++    query = strchr( path, '?' );
++    if ( query == (char*) 0 )
++	query = "";
++    else
++	*query++ = '\0';
+ 
+     if ( strcasecmp( method_str, get_method_str( METHOD_GET ) ) == 0 )
+ 	method = METHOD_GET;
+@@ -1322,9 +2212,39 @@ handle_request( void )
+     else
+ 	send_error( 501, "Not Implemented", "", "That method is not implemented." );
+ 
++	SC_CFPRINTF("path:%s\n", path);
++	if (strstr(path, "%00"))
++	{
++		send_error(400, "Bad Request", "", "Bad filename.");
++	}
+     strdecode( path, path );
++	SC_CFPRINTF("path after decode:%s\n", path);
+     if ( path[0] != '/' )
+ 	send_error( 400, "Bad Request", "", "Bad filename." );
++
++#ifndef SMART_LOGOUT
++ /*Ron*/
++#ifdef SUPPORT_SETUPWIZARD
++    if ( for_setupwizard == 0 && someone_in_use == 1 && access("/tmp/dnshj.out",F_OK)!=0) {
++#else
++    if ( someone_in_use == 1 && access("/tmp/dnshj.out",F_OK)!=0) {
++#endif
++    /* 2005.07.27 add by Joel for TMSS */
++    if(strncmp(path, "/trend/", 7) \
++    && strncmp(path, "/html/", 6)   \
++    && strncmp(path, "/images/", 8) \
++    && strncmp(path, "/javascripts/", 13) \
++    && strncmp(path, "/css/", 5)) {
++        char msg[128];
++        strcpy(msg, "");
++        send_error( 401, "Unauthorized", "", msg);
++    }
++    } else if(!strncmp(path, "/trend/", 7) || !strncmp(path, "/html/", 6)){
++        strcpy(last_remote_ip,"");
++	}
++ /*Ron*/
++#endif /* SMART_LOGOUT */
++
+     file = &(path[1]);
+     de_dotdot( file );
+     if ( file[0] == '\0' )
+@@ -1349,6 +2269,20 @@ handle_request( void )
+ 	r = get_pathinfo();
+     if ( r < 0 )
+ 	send_error( 404, "Not Found", "", "File not found." );
++    else
++	{
++	    if((referrer == (char *)0 || referrer[0] == '\0') && file)
++	    {
++	        char file_name[24] ={0};
++	        
++	        sprintf(file_name,"NETGEAR_%s.cfg", nvram_safe_get("product_name"));
++	        if(strcmp(file, file_name) == 0)
++	        { 
++	            send_error(403, "Forbidden", "", "HTML is illegal.");
++	        }
++	    }
++	}
++
+     file_len = strlen( file );
+     if ( ! S_ISDIR( sb.st_mode ) )
+ 	{
+@@ -1378,28 +2312,47 @@ handle_request( void )
+ 	    send_error( 302, "Found", location, "Directories must end with a slash." );
+ 	    }
+ 
++#ifdef USB
++    // never do index file for usb session.
++    if ( !is_usb_session ) {
++#endif
+ 	/* Check for an index file. */
+ 	for ( i = 0; i < sizeof(index_names) / sizeof(char*); ++i )
+ 	    {
+-	    (void) snprintf( idx, sizeof(idx), "%s%s", file, index_names[i] );
+-	    if ( stat( idx, &sb ) >= 0 )
+-		{
+-		file = idx;
+-		do_file();
+-		goto got_one;
++	    if( !strcmp(file, "./") )
++		(void) snprintf( idx, sizeof(idx), "%s", index_names[i] );
++	    else
++		(void) snprintf( idx, sizeof(idx), "%s%s", file, index_names[i] );
++		if ( !stat( idx, &sb ) )
++		    {
++		    SC_CFPRINTF("Found index file = <%s> \n", idx);
++		    file = idx;
++		    do_file();
++		    i=-1;
++		    break;
++		    }
+ 		}
+-	    }
++#ifdef USB
++        }
++#endif
+ 
+ 	/* Nope, no index file, so it's an actual directory request. */
+-	do_dir();
+-
+-	got_one: ;
++	if( i >= 0 ) do_dir();
+ 	}
+ 
+ #ifdef USE_SSL
+     SSL_free( ssl );
+ #endif /* USE_SSL */
+ 
++#ifdef IP_ASSIGN_CHK
++    /* after get the last file of warning_pg.htm, we can stop dnshj */
++    if (access("/tmp/stop_conflict_warning", F_OK) == 0) {
++        unlink("/tmp/lan_ip_auto_changed");
++        unlink("/tmp/stop_conflict_warning");
++        system("/usr/sbin/rc dnshj stop");
++    }
++#endif
++
+     finish_request( 0 );
+     }
+ 
+@@ -1513,30 +2466,52 @@ get_pathinfo( void )
+ 
+     pathinfo = &file[strlen(file)];
+     for (;;)
++    {
++    do
++        {
++        --pathinfo;
++        if ( pathinfo <= file )
++        {
++        pathinfo = (char*) 0;
++        return -1;
++        }
++        }
++    while ( *pathinfo != '/' );
++    *pathinfo = '\0';
++    r = stat( file, &sb );
++    if ( r >= 0 )
++        {
++        ++pathinfo;
++        return r;
++        }
++    else
++        *pathinfo = '/';
++    }
++    }
++
++static int is_guest_management_session(void)
++{
++	int is_guest = 0;
++#ifdef GUEST_MANAGEMENT
++	if (*nvram_safe_get("guest_mode") == '1')
+ 	{
+-	do
+-	    {
+-	    --pathinfo;
+-	    if ( pathinfo <= file )
++		struct guest_user_t *user;
++		struct sysinfo info;
++		
++		sysinfo(&info);
++		guest_user_load();
++		user = guest_user_lookup(ntoa(&client_addr));
++		if (user != NULL && (info.uptime - user->guest_access_time) <= web_timeout)
+ 		{
+-		pathinfo = (char*) 0;
+-		return -1;
++			is_guest = 1;
+ 		}
+-	    }
+-	while ( *pathinfo != '/' );
+-	*pathinfo = '\0';
+-	r = stat( file, &sb );
+-	if ( r >= 0 )
+-	    {
+-	    ++pathinfo;
+-	    return r;
+-	    }
+-	else
+-	    *pathinfo = '/';
+ 	}
+-    }
+-
+-
++#endif
++	return is_guest;
++}
++/*
++ * need_auth means should we do auth check for this file? 1 -- Yes. 0 -- No.
++ */
+ static void
+ do_file( void )
+     {
+@@ -1547,6 +2522,7 @@ do_file( void )
+     char* cp;
+     int fd;
+ 
++    SC_CFPRINTF("need_auth is <%d> for_setupwizard is <%d>, file:%s\n", need_auth, for_setupwizard, file);
+     /* Check authorization for this directory. */
+     (void) strncpy( buf, file, sizeof(buf) );
+     cp = strrchr( buf, '/' );
+@@ -1554,16 +2530,56 @@ do_file( void )
+ 	(void) strcpy( buf, "." );
+     else
+ 	*cp = '\0';
+-    auth_check( buf );
++    
++#ifdef USB
++	if (is_usb_session)
++	    usb_auth_check(buf);
++	else
++#endif   
++	if (need_auth)
++	    auth_check( buf );
++
++	{
++		SC_CFPRINTF_SESSIONID("try verify sessionid. path:%s\n", path);
++		if (is_guest_management_session() == 0)
++		{
++			if (need_auth && (for_setupwizard == 0) && (*nvram_safe_get("start_in_blankstate") == '0') && authorization && authorization[0])
++			{
++				int verify_ok = 0;
++				if (have_cookie && cookie && cookie[0] && sessionid_valid_local_sessionid())
++				{
++					verify_ok = sessionid_verify_sessionid_ok(sessionid_get_sessionid_from_cookie(cookie));
++				} else
++				{
++					SC_CFPRINTF_SESSIONID("client no cookie or local cookie invalid\n");
++				}
++				
++				if (verify_ok == 0)
++				{
++					SC_CFPRINTF_SESSIONID("verify not ok, need update sessionid\n");
++					sessionid_update_device_sessionid(sessionid_new_sessionid);
++					send_authenticate("");
++				}
++			} else
++			{
++				SC_CFPRINTF_SESSIONID("no need verify for no auth or soap\n");
++			}
++		} else
++		{
++			SC_CFPRINTF_SESSIONID("not do sessionid for guest\n");	
++		}
++	}
+ 
+     /* Check if the filename is the AUTH_FILE itself - that's verboten. */
+     if ( strcmp( file, AUTH_FILE ) == 0 ||
+ 	 ( strcmp( &(file[strlen(file) - sizeof(AUTH_FILE) + 1]), AUTH_FILE ) == 0 &&
+ 	   file[strlen(file) - sizeof(AUTH_FILE)] == '/' ) )
+ 	{
++#ifdef SYSLOG
+ 	syslog(
+ 	    LOG_NOTICE, "%.80s URL \"%.80s\" tried to retrieve an auth file",
+ 	    ntoa( &client_addr ), path );
++#endif
+ 	send_error( 403, "Forbidden", "", "File is protected." );
+ 	}
+ 
+@@ -1571,7 +2587,11 @@ do_file( void )
+     check_referrer();
+ 
+     /* Is it CGI? */
+-    if ( cgi_pattern != (char*) 0 && match( cgi_pattern, file ) )
++    if ( cgi_pattern != (char*) 0 && match( cgi_pattern, file ) 
++#ifdef USB
++	&& is_usb_session == 0 /* never do cgi for usb session, */
++#endif
++    )
+ 	{
+ 	do_cgi();
+ 	return;
+@@ -1582,20 +2602,31 @@ do_file( void )
+     if ( method != METHOD_GET && method != METHOD_HEAD )
+ 	send_error( 501, "Not Implemented", "", "That method is not implemented." );
+ 
++#ifdef USB
++    SC_CFPRINTF("file = %s\n", file);
++    if(is_usb_session && is_readable(file, "") == 0)
++    {
++    	send_error( 403, "Forbidden", "", "File is protected." );
++    }
++#endif
+     fd = open( file, O_RDONLY );
+     if ( fd < 0 )
+ 	{
++#ifdef SYSLOG
+ 	syslog(
+ 	    LOG_INFO, "%.80s File \"%.80s\" is protected",
+ 	    ntoa( &client_addr ), path );
++#endif
+ 	send_error( 403, "Forbidden", "", "File is protected." );
+ 	}
+     mime_type = figure_mime( file, mime_encodings, sizeof(mime_encodings) );
+     (void) snprintf(
+ 	fixed_mime_type, sizeof(fixed_mime_type), mime_type, charset );
+     if ( if_modified_since != (time_t) -1 &&
+-	 if_modified_since >= sb.st_mtime )
++	 if_modified_since >= sb.st_mtime
++	 && (strstr(path, "ui.xml") || strstr(path, "msg.xml") || strstr(path, "hlp.js")))
+ 	{
++	SC_CFPRINTF("send 304 not modified for '%s' \n", path);
+ 	add_headers(
+ 	    304, "Not Modified", "", mime_encodings, fixed_mime_type,
+ 	    (off_t) -1, sb.st_mtime );
+@@ -1609,6 +2640,13 @@ do_file( void )
+     if ( method == METHOD_HEAD )
+ 	return;
+ 
++#ifdef USB
++    if (is_usb_session)
++	{
++	    sc_lockf(fd, 1, 1);
++	}
++#endif
++
+     if ( sb.st_size > 0 )	/* ignore zero-length files */
+ 	{
+ #ifdef HAVE_SENDFILE
+@@ -1620,6 +2658,7 @@ do_file( void )
+ 	    send_via_write( fd, sb.st_size );
+ 	else
+ 	    send_via_sendfile( fd, conn_fd, sb.st_size );
++
+ #endif /* USE_SSL */
+ 
+ #else /* HAVE_SENDFILE */
+@@ -1648,22 +2687,45 @@ do_dir( void )
+     FILE* fp;
+ #endif /* HAVE_SCANDIR */
+ 
++#ifdef USB
++	{
++		if(access("/tmp/http_disable_lan", F_OK) == 0 )
++		{
++			if( check_lan_guest() == 1 )
++			{
++				send_error( 503, "The Share is not available", "", "" );
++			}
++		}
++	}
++#endif
+     if ( pathinfo != (char*) 0 )
+ 	send_error( 404, "Not Found", "", "File not found." );
+ 
+     /* Check authorization for this directory. */
++
++#ifdef USB
++	if (is_usb_session)
++		usb_auth_check(file);
++	else
++#endif   
+     auth_check( file );
+ 
+     /* Referrer check. */
+     check_referrer();
+ 
++    if(is_usb_session && is_readable(file, "") == 0)
++    {
++    	send_error( 403, "Forbidden", "", "Directory is protected." );
++    }
+ #ifdef HAVE_SCANDIR
+     n = scandir( file, &dl, NULL, alphasort );
+     if ( n < 0 )
+ 	{
++#ifdef HAVE_SYSLOG
+ 	syslog(
+ 	    LOG_INFO, "%.80s Directory \"%.80s\" is protected",
+ 	    ntoa( &client_addr ), path );
++#endif
+ 	send_error( 403, "Forbidden", "", "Directory is protected." );
+ 	}
+ #endif /* HAVE_SCANDIR */
+@@ -1686,10 +2748,19 @@ do_dir( void )
+     add_str( &contents, &contents_size, &contents_len, buf );
+ 
+ #ifdef HAVE_SCANDIR
++    /* if there is no "..", create one */
++    if (n < 2 || strcmp(dl[1]->d_name, "..") != 0) {
++        name_info = file_details( file, ".." );
++        add_str( &contents, &contents_size, &contents_len, name_info );
++    }
+ 
+     for ( i = 0; i < n; ++i )
+ 	{
++	/* skip "." */
++	if (strcmp(dl[i]->d_name, ".") == 0)
++	    continue;
+ 	name_info = file_details( file, dl[i]->d_name );
++	SC_CFPRINTF("name_info=<%s>\n", name_info);
+ 	add_str( &contents, &contents_size, &contents_len, name_info );
+ 	}
+ 
+@@ -1744,18 +2815,35 @@ static char*
+ file_details( const char* d, const char* name )
+     {
+     struct stat sb2;
+-    char timestr[16];
++    char timestr[256];
+     static char encname[1000];
+     static char buf[2000];
+ 
+     (void) snprintf( buf, sizeof(buf), "%s/%s", d, name );
++    SC_CFPRINTF("dir=%s, name=%s\n", dir, name);
++#ifdef USB
++    if(is_usb_session && is_readable(dir, name) == 0)
++    {
++    	memset(buf, 0, sizeof(buf));
++    	SC_CFPRINTF("xxxxx  buf=<%s>\n", buf);
++    	return buf;
++    }
++#endif
++    	
+     if ( lstat( buf, &sb2 ) < 0 )
+-	return "???";
+-    (void) strftime( timestr, sizeof(timestr), "%d%b%Y %H:%M", localtime( &sb2.st_mtime ) );
++	return ""; /* don't show  "???" to end user. --billGuo */
++
++	/* Do not show symlink file or directory in USB directory */
++	if(is_usb_session && S_ISLNK(sb.st_mode))
++	{
++		if( strlen(name) && strstr(dir, "shares/") )
++			return "";
++	}
++    (void) strftime( timestr, sizeof(timestr), "%A, %B %d, %Y  %l:%M %p", localtime( &sb2.st_mtime ) );
+     strencode( encname, sizeof(encname), name );
+     (void) snprintf(
+-	buf, sizeof( buf ), "<a href=\"%s\">%-32.32s</a>    %15s %14lld\n",
+-	encname, name, timestr, (long long) sb2.st_size );
++	buf, sizeof( buf ), "%-40s %14lld     <A HREF=\"%s\">%s</A>\n",
++	timestr, (long long) sb2.st_size , encname, name);
+     return buf;
+     }
+ 
+@@ -2059,6 +3147,15 @@ cgi_interpose_output( int rfd, int parse
+ 	*/
+ 	char http_head[] = "HTTP/1.0 200 OK\015\012";
+ 	(void) my_write( http_head, sizeof(http_head) );
++
++		{
++			if (sessionid_new_sessionid[0])
++			{
++				SC_CFPRINTF_SESSIONID("!!!update client session id:%s\n", sessionid_new_sessionid);
++				(void) snprintf(buf, sizeof(buf), "Set-Cookie: %s=%s\015\012", SESSIONID_MAGICWORD, sessionid_new_sessionid);
++				(void) my_write( buf, strlen(buf) );
++			}
++		}		
+ 	}
+     else
+ 	{
+@@ -2109,9 +3206,10 @@ cgi_interpose_output( int rfd, int parse
+ 	     cp < br &&
+ 	     ( cp == headers || *(cp-1) == '\012' ) )
+ 	    s = 302;
+-	if ( ( cp = strstr( headers, "Status:" ) ) != (char*) 0 &&
+-	     cp < br &&
+-	     ( cp == headers || *(cp-1) == '\012' ) )
++	if ( ( cp = strstr( headers, "Status:" ) ) != (char*) 0 
++	//&& cp < br //remove this incorrect condition. Bollen 
++	&&( cp == headers || *(cp-1) == '\012' ) 
++	)
+ 	    {
+ 	    cp += 7;
+ 	    cp += strspn( cp, " \t" );
+@@ -2139,6 +3237,18 @@ cgi_interpose_output( int rfd, int parse
+ 	    buf, sizeof(buf), "HTTP/1.0 %d %s\015\012", s, title );
+ 	(void) my_write( buf, strlen( buf ) );
+ 
++	if (accept_language != (char *)0 && accept_language[0] != '\0') {
++		snprintf(buf, sizeof(buf), "Content-Language: %s\r\n", accept_language);
++    	(void) my_write( buf, strlen( buf ) );
++	}
++		{
++			if (sessionid_new_sessionid[0])
++			{
++				SC_CFPRINTF_SESSIONID("!!!update client session id:%s\n", sessionid_new_sessionid);
++				(void) snprintf(buf, sizeof(buf), "Set-Cookie: %s=%s\015\012", SESSIONID_MAGICWORD, sessionid_new_sessionid);
++				(void) my_write( buf, strlen(buf) );
++			}
++		}
+ 	/* Write the saved headers. */
+ 	(void) my_write( headers, headers_len );
+ 	}
+@@ -2236,7 +3346,7 @@ make_envp( void )
+     {
+     static char* envp[50];
+     int envn;
+-    char* cp;
++    char* cp = "UNKNOWN";
+     char buf[256];
+ 
+     envn = 0;
+@@ -2245,10 +3355,10 @@ make_envp( void )
+     envp[envn++] = build_env( "SERVER_SOFTWARE=%s", SERVER_SOFTWARE );
+     if ( vhost && req_hostname != (char*) 0 && req_hostname[0] != '\0' )
+ 	cp = req_hostname;	/* already computed by virtual_file() */
+-    else if ( host != (char*) 0 && host[0] != '\0' )
+-	cp = host;
+-    else
++    else if ( hostname != (char*) 0 && hostname[0] != '\0' )
+ 	cp = hostname;
++    else if ( host != (char*) 0 && host[0] != '\0' )
++	cp = host;	
+     if ( cp != (char*) 0 )
+ 	envp[envn++] = build_env( "SERVER_NAME=%s", cp );
+     envp[envn++] = "GATEWAY_INTERFACE=CGI/1.1";
+@@ -2264,6 +3374,10 @@ make_envp( void )
+ 	(void) snprintf( buf, sizeof(buf), "%s%s", cwd, pathinfo );
+ 	envp[envn++] = build_env( "PATH_TRANSLATED=%s", buf );
+ 	}
++    if(soapServiceName[0] != '\0')
++	envp[envn++] = build_env( "SOAP_SERVICE_NAME=%s", soapServiceName );
++	if (soap_token[0] != '\0')
++		envp[envn++] = build_env("SOAP_LOGIN_TOKEN=%s", soap_token);
+     if ( query[0] != '\0' )
+ 	envp[envn++] = build_env( "QUERY_STRING=%s", query );
+     envp[envn++] = build_env( "REMOTE_ADDR=%s", ntoa( &client_addr ) );
+@@ -2293,6 +3407,11 @@ make_envp( void )
+     if ( getenv( "TZ" ) != (char*) 0 )
+ 	envp[envn++] = build_env( "TZ=%s", getenv( "TZ" ) );
+ 
++    envp[envn++] = build_env( "HTTP_ACCEPT_LANGUAGE=%s", accept_language);
++    envp[envn++] = build_env( "HOST=%s", host);
++    envp[envn++] = build_env( "LOGIN_IP=%s", login_ip);
++    sprintf(buf, "%d", need_auth);
++    envp[envn++] = build_env( "NEED_AUTH=%s", buf);
+     envp[envn] = (char*) 0;
+     return envp;
+     }
+@@ -2325,99 +3444,231 @@ build_env( char* fmt, char* arg )
+     return cp;
+     }
+ 
++enum {
++    LOGIN_FAIL,
++    LOGIN_SUCCESS
++};
++/*
++ * Follow Netgear Spec V1.9 to send log
++ */
++static void send_log(int login_success) {
++	int from_lan = check_lan_guest();
++    int event_base=10;  /* See 7.3.2   Events to be logged of spec 1.9 event NO.10,11,12,13 */
++    if(!from_lan) {
++        event_base+=2;
++    }
++    if(login_success != LOGIN_SUCCESS) {
++        event_base++;
++    }
++#ifdef ACCESSCNTL
++	else nvram_bcm_set("lan_login_ip", remote_ip); //get login ip for access control
++#endif
++    NETGEAR_SYSLOG("%02d 00[%s login%s] from source %s", event_base, from_lan?"admin":"remote", login_success==LOGIN_SUCCESS?"":" failure", remote_ip);
++    return;
++}
+ 
+ static void
+ auth_check( char* dirname )
+     {
+-    char authpath[10000];
+-    struct stat sb2;
+     char authinfo[500];
+     char* authpass;
+-    char* colon;
+     static char line[10000];
+     int l;
+-    FILE* fp;
+-    char* cryp;
++    char *authname;
+ 
+-    /* Construct auth filename. */
+-    if ( dirname[strlen(dirname) - 1] == '/' )
+-	(void) snprintf( authpath, sizeof(authpath), "%s%s", dirname, AUTH_FILE );
+-    else
+-	(void) snprintf( authpath, sizeof(authpath), "%s/%s", dirname, AUTH_FILE );
++    SC_CFPRINTF("dirname is <%s>\n", dirname);
+ 
++#ifdef SUPPORT_SETUPWIZARD
++	if (for_setupwizard == 1) return;		/*Do nothing */
++#endif
++    /* lock it for login session. */
++    lock_enter();
++    __restore_manager();
++	
+     /* Does this directory have an auth file? */
+-    if ( stat( authpath, &sb2 ) < 0 )
+-	/* Nope, let the request go through. */
+-	return;
++    if ( *nvram_safe_get("start_in_blankstate") == '1' || strlen(nvram_safe_get("http_password")) == 0){
++		if (strcmp(login_ip, remote_ip) != 0)
++		{
++#ifdef SYSLOG
++            syslog( LOG_INFO, "Administrator login successful - IP:%s", remote_ip );
++#endif
++            SC_CFPRINTF("Administrator login successful - IP:%s\n", remote_ip);
++			SAVETIME;
++		}
++		else if (check_timeout())
++			LOGOUT;
++		else
++			SAVETIME;
++        /* Nope, let the request go through. */
++        goto _out;
++    }
+ 
++    not_auth=AUTH_OK;
+     /* Does this request contain authorization info? */
+-    if ( authorization == (char*) 0 )
+-	/* Nope, return a 401 Unauthorized. */
+-	send_authenticate( dirname );
++    if ( authorization == (char*) 0 ){
++	/* when browser send login information not contain authorization info auth_fail_times +1 */
++	if ( !match( "**MSIE**", useragent ) ){
++		nvram_bcm_set("auth_fail_times","1");
++	}
++        not_auth=NO_AUTH;
++	if (someone_in_use == 1)
++		nvram_set("multi_login_flag", "1");
++        /* Nope, return a 401 Unauthorized. */
++
++		{
++			if (is_guest_management_session() == 0)
++			{
++				SC_CFPRINTF_SESSIONID("client not take valid auth, need update the sessionid\n");
++				sessionid_update_device_sessionid(sessionid_new_sessionid);
++			} else
++			{
++				SC_CFPRINTF_SESSIONID("no sessionid for guest\n");
++			}
++		}
+ 
++        send_authenticate( dirname );
++    }
+     /* Basic authorization info? */
+-    if ( strncmp( authorization, "Basic ", 6 ) != 0 )
+-	send_authenticate( dirname );
+-
++    if ( strncmp( authorization, "Basic ", 6 ) != 0 ){
++	if (someone_in_use == 1)
++		nvram_set("multi_login_flag", "1");
++    send_authenticate( dirname );
++    }
+     /* Decode it. */
+     l = b64_decode(
+ 	&(authorization[6]), (unsigned char*) authinfo, sizeof(authinfo) - 1 );
+     authinfo[l] = '\0';
+     /* Split into user and password. */
+     authpass = strchr( authinfo, ':' );
++
++    authname = authinfo;
++
+     if ( authpass == (char*) 0 )
++	{
++	  if (someone_in_use == 1)
++		nvram_set("multi_login_flag", "1");
+ 	/* No colon?  Bogus auth info. */
+ 	send_authenticate( dirname );
++	}
+     *authpass++ = '\0';
+-    /* If there are more fields, cut them off. */
+-    colon = strchr( authpass, ':' );
+-    if ( colon != (char*) 0 )
+-	*colon = '\0';
++	{
++	/* Is this the right user? */
++    if (strcmp(authinfo,nvram_safe_get("http_username")) == 0)
++        {
++            struct sysinfo info;
++            sysinfo(&info);
++    /* OK !*/
++    if (strcmp(authpass,nvram_safe_get("http_password")) == 0){
+ 
+-    /* Open the password file. */
+-    fp = fopen( authpath, "r" );
+-    if ( fp == (FILE*) 0 )
++        remoteuser = line;
++	if (someone_in_use == 1 && *nvram_safe_get("multi_login_flag") != '1')
+ 	{
+-	/* The file exists but we can't open it?  Disallow access. */
+-	syslog(
+-	    LOG_ERR, "%.80s auth file %.80s could not be opened - %m",
+-	    ntoa( &client_addr ), authpath );
+-	send_error( 403, "Forbidden", "", "File is protected." );
+-	}
++		nvram_set("multi_login_flag", "1");
++		send_authenticate(dirname);
+ 
+-    /* Read it. */
+-    while ( fgets( line, sizeof(line), fp ) != (char*) 0 )
++	} else if (someone_in_use == 1 && *nvram_safe_get("multi_login_flag") == '1')
+ 	{
+-	/* Nuke newline. */
+-	l = strlen( line );
+-	if ( line[l - 1] == '\n' )
+-	    line[l - 1] = '\0';
+-	/* Split into user and encrypted password. */
+-	cryp = strchr( line, ':' );
+-	if ( cryp == (char*) 0 )
+-	    continue;
+-	*cryp++ = '\0';
+-	/* Is this the right user? */
+-	if ( strcmp( line, authinfo ) == 0 )
+-	    {
+-	    /* Yes. */
+-	    (void) fclose( fp );
+-	    /* So is the password right? */
+-	    if ( strcmp( crypt( authpass, cryp ), cryp ) == 0 )
+-		{
+-		/* Ok! */
+-		remoteuser = line;
++		nvram_set("multi_login_flag", "0");
+ 		return;
++	} else
++		nvram_set("multi_login_flag", "0");
++        
++        if (login_ip[0] && strcmp(login_ip, remote_ip) != 0)
++        {
++          
++			
++						{
++							if (is_guest_management_session() == 0)
++							{
++								SC_CFPRINTF_SESSIONID("!!!new user, need update the sessionid\n");
++								sessionid_update_device_sessionid(sessionid_new_sessionid);
++							} else
++							{
++								SC_CFPRINTF_SESSIONID("no sessionid for guest\n");
++							}
++						}
++        	    /* if different user must authentication in frist time */
++        	    send_authenticate(dirname);
++            }
++            else if (last_access_time == 0 && check_timeout_flag() == 0)
++            {
++        	    send_log(LOGIN_SUCCESS);
++        	    /*Time out */
++            }
++        else if (check_timeout())
++        {
++
++			{
++				if (is_guest_management_session() == 0)
++				{
++					SC_CFPRINTF_SESSIONID("timeout, need update the sessionid\n");
++					sessionid_update_device_sessionid(sessionid_new_sessionid);
++				} else
++				{
++					SC_CFPRINTF_SESSIONID("no sessionid for guest\n");
++				}
++			}
++
++        	send_authenticate(dirname);
++        }
++
++        remoteuser = line;
++        SAVETIME;
++	/* when browser login success to router auth_fail_times will be empty */
++	if ( !match( "**MSIE**", useragent ) ){
++		nvram_bcm_set("auth_fail_times", "0");
++	}
++        goto _out;
++    }else{
++	if (someone_in_use == 1)
++		nvram_set("multi_login_flag", "1");
++        /* No. */
++        SC_CFPRINTF("Login Failed - IP: %s\n", remote_ip);
++        not_auth=AUTH_FAIL;
++	if ( !match( "**MSIE**", useragent ) ){
++		agent_check = (nvram_bcm_get("user_agent") != NULL) ? nvram_bcm_get("user_agent") : "0";
++		if(strcmp(agent_check, useragent) != 0){
++			nvram_bcm_set("auth_fail_times", "1");
++			nvram_bcm_set("user_agent", useragent);	
++		}else{
++			auth_check_count = (nvram_bcm_get("auth_fail_times") != NULL) ? nvram_bcm_get("auth_fail_times") : "0";
++			sprintf(auth_check_count, "%d", atoi(auth_check_count) + 1);
++			nvram_bcm_set("auth_fail_times", auth_check_count);
+ 		}
+-	    else
+-		/* No. */
+-		send_authenticate( dirname );
+-	    }
+ 	}
++#ifdef SYSLOG
++        syslog( LOG_INFO, "Login Failed - IP:%s", remote_ip );
++#endif
++        SC_CFPRINTF("Login Failed - IP:%s\n", remote_ip);
++        send_authenticate( dirname );
++    }
++        }
++    }
+ 
+     /* Didn't find that user.  Access denied. */
+-    (void) fclose( fp );
++#ifdef SYSLOG
++	syslog( LOG_INFO,"Login Failed - IP:%s", remote_ip );
++#endif
++	SC_CFPRINTF("Login Failed - IP:%s\n", remote_ip);
++    not_auth=AUTH_FAIL;
++	if ( !match( "**MSIE**", useragent ) ){
++		agent_check = (nvram_bcm_get("user_agent") != NULL) ? nvram_bcm_get("user_agent") : "0";
++		if(strcmp(agent_check, useragent) != 0){
++			nvram_bcm_set("auth_fail_times", "1");
++			nvram_bcm_set("user_agent", useragent);	
++		}else{
++			auth_check_count = (nvram_bcm_get("auth_fail_times") != NULL) ? nvram_bcm_get("auth_fail_times") : "0";
++			sprintf(auth_check_count, "%d", atoi(auth_check_count) + 1);
++			nvram_bcm_set("auth_fail_times", auth_check_count);
++		}
++	}
++	if (someone_in_use == 1)
++		nvram_set("multi_login_flag", "1");
+     send_authenticate( dirname );
++    
++_out:
++    lock_leave();
++    return;
+     }
+ 
+ 
+@@ -2425,10 +3676,22 @@ static void
+ send_authenticate( char* realm )
+     {
+     char header[10000];
+-
+-    (void) snprintf(
+-	header, sizeof(header), "WWW-Authenticate: Basic realm=\"%s\"", realm );
+-    send_error( 401, "Unauthorized", header, "Authorization required." );
++/* Ron */
++    if(http_realm==NULL)
++    http_realm=realm;
++#ifdef USB
++    if (!is_usb_session)
++#endif
++	if ((someone_in_use == 0 || *nvram_safe_get("multi_login_flag") != '1')) LOGOUT;
++/* Ron */
++	(void) snprintf(header, sizeof(header), "WWW-Authenticate: Basic realm=\"%s\"", http_realm );
++	if(atoi(auth_check_count) == 4){
++	/* when browser login fail three times DUT should be directed to password recovery page */
++		nvram_bcm_set("auth_fail_times", "0");
++		send_direct_page(200, "OK", header, "");
++	}else{
++		send_error( 401, "Unauthorized", header, "Authorization required." );
++	}
+     }
+ 
+ 
+@@ -2445,11 +3708,11 @@ virtual_file( char* f )
+ 	{
+ 	usockaddr usa;
+ 	socklen_t sz = sizeof(usa);
+-	if ( getsockname( conn_fd, &usa.sa, &sz ) < 0 )
++	if ( getsockname( conn_fd, &usa.sa, (socklen_t *)&sz ) < 0 )
+ 	    req_hostname = "UNKNOWN_HOST";
+ 	else
+ 	    req_hostname = ntoa( &usa );
+-	}
++    }
+     /* Pound it to lower case. */
+     for ( cp = req_hostname; *cp != '\0'; ++cp )
+ 	if ( isupper( *cp ) )
+@@ -2458,6 +3721,10 @@ virtual_file( char* f )
+     return vfile;
+     }
+ 
++static void send_direct_page( int pagestatus, char* str, char* header, char* text  )
++    {
++    send_error( pagestatus, str, header, text);
++    }
+ 
+ static void
+ send_error( int s, char* title, char* extra_header, char* text )
+@@ -2481,6 +3748,7 @@ send_error( int s, char* title, char* ex
+ static void
+ send_error_body( int s, char* title, char* text )
+     {
++    char *enable = nvram_safe_get("htpwd_recovery_enable");
+     char filename[1000];
+     char buf[10000];
+ 
+@@ -2494,15 +3762,39 @@ send_error_body( int s, char* title, cha
+ 	    return;
+ 	}
+ 
+-    /* Try server-wide custom error page. */
+-    (void) snprintf(
+-	filename, sizeof(filename), "%s/err%d.html", ERR_DIR, s );
+-    if ( send_error_file( filename ) )
++	if(not_auth != AUTH_OK) {
++    	/*we shouldn't send log if no auth,since each time open new brower, it will
++          send one un-auth packet before we login,so send log if auth fail */
++          if(not_auth == AUTH_FAIL) {
++          	send_log(LOGIN_FAIL);
++          }
++        (void) snprintf(filename, sizeof(filename), "%s/err%d.htm", ERR_DIR, s );
++    }else
++        (void) snprintf(filename, sizeof(filename), "%s/err%d.html", ERR_DIR, s );
++
++    if ( send_error_file( filename ) ) {
++        if(someone_in_use==1) {
++            	(void) snprintf(
++                buf, sizeof(buf), "(%s) <font size=\"3\" face=\"Arial,Helvetica,Geneva,Swiss,SunSans-Regular,sans-serif\" languageCode = \"846\">is managing this device.</font><script language=\"javascript\" type=\"text/javascript\" src=\"langs.js\"></script></p></body></html></font></p></body></html>", login_ip);
++            	add_to_response( buf );
++        }
+ 	return;
++    }
+ 
+     /* Send built-in error page. */
+-    (void) snprintf(
+-	buf, sizeof(buf), "\
++	if(s == 200){
++		if(*enable == '1'){
++			(void) snprintf(
++			buf, sizeof(buf), "<html><head><meta http-equiv=\'Pragma\' content=\'no-cache\'><meta http-equiv=\'Cache-Control\' content=\'no-cache\'><title>%d %s</title>\
++<script language=\"javascript\" type=\"text/javascript\">\n top.location.href=\"401_recovery.htm\"\n</script>\n</head></html>", s, title);
++			}else{
++			(void) snprintf(
++			buf, sizeof(buf), "<html><head><meta http-equiv=\'Pragma\' content=\'no-cache\'><meta http-equiv=\'Cache-Control\' content=\'no-cache\'><title>%d %s</title>\
++<script language=\"javascript\" type=\"text/javascript\">\n top.location.href=\"401_access_denied.htm\"\n</script>\n</head></html>", s, title);
++			}
++		}else{
++    			(void) snprintf(
++    			buf, sizeof(buf), "\
+ <!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n\
+ \n\
+ <html>\n\
+@@ -2516,6 +3808,7 @@ send_error_body( int s, char* title, cha
+ \n\
+     <h4>%d %s</h4>\n",
+ 	s, title, s, title );
++		  }
+     add_to_response( buf );
+     (void) snprintf( buf, sizeof(buf), "%s\n", text );
+     add_to_response( buf );
+@@ -2563,16 +3856,7 @@ send_error_tail( void )
+ 	(void) snprintf( buf, sizeof(buf), "-->\n" );
+ 	add_to_response( buf );
+ 	}
+-
+-    (void) snprintf( buf, sizeof(buf), "\
+-    <hr>\n\
+-\n\
+-    <address><a href=\"%s\">%s</a></address>\n\
+-\n\
+-  </body>\n\
+-\n\
+-</html>\n",
+-	SERVER_URL, SERVER_SOFTWARE );
++    (void) snprintf( buf, sizeof(buf), "</BODY>\n</HTML>\n");
+     add_to_response( buf );
+     }
+ 
+@@ -2590,8 +3874,18 @@ add_headers( int s, char* title, char* e
+     bytes = b;
+     make_log_entry();
+     start_response();
+-    (void) snprintf( buf, sizeof(buf), "%s %d %s\015\012", protocol, status, title );
++    (void) snprintf( buf, sizeof(buf), "%s %d %s\015\012", protocol?:"HTTP/1.1", status, title );
+     add_to_response( buf );
++
++	{
++		if (sessionid_new_sessionid[0])
++		{
++			SC_CFPRINTF_SESSIONID("!!!update client session id:%s\n", sessionid_new_sessionid);
++			(void) snprintf(buf, sizeof(buf), "Set-Cookie: %s=%s\015\012", SESSIONID_MAGICWORD, sessionid_new_sessionid);
++			add_to_response( buf );
++		}
++	}
++
+     (void) snprintf( buf, sizeof(buf), "Server: %s\015\012", SERVER_SOFTWARE );
+     add_to_response( buf );
+     now = time( (time_t*) 0 );
+@@ -2619,6 +3913,11 @@ add_headers( int s, char* title, char* e
+ 	(void) snprintf( buf, sizeof(buf), "Content-Type: %s\015\012", mt );
+ 	add_to_response( buf );
+ 	}
++    if ( accept_language != (char *)0 && accept_language[0] != '\0' )
++	{
++	(void) snprintf( buf, sizeof(buf), "Content-Language: %s\015\012", accept_language );
++	add_to_response( buf );
++	}
+     if ( bytes >= 0 )
+ 	{
+ 	(void) snprintf(
+@@ -2646,6 +3945,12 @@ add_headers( int s, char* title, char* e
+ 	(void) snprintf( buf, sizeof(buf), "Last-Modified: %s\015\012", timebuf );
+ 	add_to_response( buf );
+ 	}
++    (void) snprintf( buf, sizeof(buf), "X-Frame-Options: SAMEORIGIN\015\012");
++    add_to_response( buf );
++    (void) snprintf( buf, sizeof(buf), "X-XSS-Protection: 1;mode=block\015\012");
++    add_to_response( buf );
++    (void) snprintf( buf, sizeof(buf), "X-Content-Type-Options: nosniff\015\012");
++    add_to_response( buf );
+     (void) snprintf( buf, sizeof(buf), "Connection: close\015\012\015\012" );
+     add_to_response( buf );
+     }
+@@ -2719,97 +4024,21 @@ send_via_write( int fd, off_t size )
+     ** 32 bits.  The mmap() system call takes a size_t as the length argument,
+     ** so we can only use mmap() if the size will fit into a size_t.
+     */
+-    if ( size <= SIZE_T_MAX )
+-	{
+-	size_t size_size = (size_t) size;
+-	unsigned char* ptr = mmap( 0, size_size, PROT_READ, MAP_PRIVATE, fd, 0 );
+-	if ( ptr != (unsigned char*) -1 )
+-	    {
+-	    unsigned char* p = ptr;
+-	    size_t remaining_size = size_size;
+-#ifdef MADV_SEQUENTIAL
+-	    /* If we have madvise, might as well call it.  Although sequential
+-	    ** access is probably already the default.
+-	    */
+-	    (void) madvise( ptr, size_size, MADV_SEQUENTIAL );
+-#endif /* MADV_SEQUENTIAL */
+-	    /* We could send the whole file in a single write, but if
+-	    ** it's huge then we run the risk of hitting the timeout.
+-	    ** So we do a loop writing large segments, and reseting the
+-	    ** timeout each time through.
+-	    */
+-	    while ( remaining_size > 0 )
+-		{
+-		size_t buf_size = MIN( remaining_size, MAX_SEND_BUFFER_SIZE );
+-		ssize_t r = my_write( p, buf_size );
+-		if ( r < 0 && ( errno == EINTR || errno == EAGAIN ) )
+-		    {
+-		    sleep( 1 );
+-		    continue;
+-		    }
+-		if ( r != buf_size )
+-		    return;
+-		remaining_size -= r;
+-		p += r;
+-		(void) alarm( WRITE_TIMEOUT );
+-		}
+-	    (void) munmap( ptr, size_size );
+-	    }
+-	}
+-    else
+-	{
+-	/* The file is too big for mmap, so we'll send it via read & write
+-	** instead.  This would be less efficient for small files because
+-	** it bypasses the buffer cache, but with a file this huge the
+-	** cache will get blown anyway.
+-	*/
+-	char buf[30000];
+-
+-	for (;;)
+-	    {
+-	    ssize_t r = read( fd, buf, sizeof(buf) );
+-	    if ( r < 0 && ( errno == EINTR || errno == EAGAIN ) )
+-		{
+-		sleep( 1 );
+-		continue;
+-		}
+-	    if ( r <= 0 )
+-		return;
+-	    for (;;)
+-		{
+-		ssize_t r2 = my_write( buf, r );
+-		if ( r2 < 0 && ( errno == EINTR || errno == EAGAIN ) )
+-		    {
+-		    sleep( 1 );
+-		    continue;
+-		    }
+-		if ( r2 != r )
+-		    return;
+-		break;
+-		}
+-	    (void) alarm( WRITE_TIMEOUT );
+-	    }
+-	}
+-    }
+-
+-
+-static void
+-send_via_sendfile( int fd, int s, off_t size )
+-    {
+-    /* We could send the whole file in a single sendfile, but if
++    size_t size_size = (size_t) size;
++    unsigned char* ptr;
++    if ( size <= SIZE_T_MAX && (ptr = mmap( 0, size_size, PROT_READ, MAP_PRIVATE, fd, 0 )) != (unsigned char*) -1 )
++    {
++    unsigned char* p = ptr;
++    size_t remaining_size = size_size;
++    /* We could send the whole file in a single write, but if
+     ** it's huge then we run the risk of hitting the timeout.
+     ** So we do a loop writing large segments, and reseting the
+     ** timeout each time through.
+-    **
+-    ** This also avoids the problem of using sendfile on a file larger
+-    ** than 2GB, since each segment size will now fit into a size_t.
+     */
+-    off_t remaining_size = size;
+-    off_t off = 0;
+     while ( remaining_size > 0 )
+ 	{
+ 	size_t buf_size = MIN( remaining_size, MAX_SEND_BUFFER_SIZE );
+-	ssize_t r = my_sendfile( fd, s, off, buf_size );
++	ssize_t r = my_write( p, buf_size );
+ 	if ( r < 0 && ( errno == EINTR || errno == EAGAIN ) )
+ 	    {
+ 	    sleep( 1 );
+@@ -2818,9 +4047,44 @@ send_via_sendfile( int fd, int s, off_t
+ 	if ( r != buf_size )
+ 	    return;
+ 	remaining_size -= r;
+-	off += r;
++	p += r;
+ 	(void) alarm( WRITE_TIMEOUT );
+ 	}
++    (void) munmap( ptr, size_size );
++    }
++    else
++    {
++    /* The file is too big for mmap, so we'll send it via read & write
++    ** instead.  This would be less efficient for small files because
++    ** it bypasses the buffer cache, but with a file this huge the
++    ** cache will get blown anyway.
++    */
++    char buf[30000];
++    for (;;)
++        {
++    ssize_t r = read( fd, buf, sizeof(buf) );
++    if ( r < 0 && ( errno == EINTR || errno == EAGAIN ) )
++	{
++	sleep( 1 );
++	continue;
++	}
++        if ( r <= 0 )
++	return;
++    for (;;)
++	{
++	ssize_t r2 = my_write( buf, r );
++	if ( r2 < 0 && ( errno == EINTR || errno == EAGAIN ) )
++	    {
++	    sleep( 1 );
++	    continue;
++	    }
++	if ( r2 != r )
++	    return;
++        break;
++	}
++    (void) alarm( WRITE_TIMEOUT );
++        }
++    }
+     }
+ 
+ 
+@@ -2868,6 +4132,38 @@ my_sendfile( int fd, int s, off_t offset
+ 	return r;
+ #endif /* HAVE_LINUX_SENDFILE */
+     }
++
++
++static void
++send_via_sendfile( int fd, int s, off_t size )
++    {
++    /* We could send the whole file in a single sendfile, but if
++    ** it's huge then we run the risk of hitting the timeout.
++    ** So we do a loop writing large segments, and reseting the
++    ** timeout each time through.
++    **
++    ** This also avoids the problem of using sendfile on a file larger
++    ** than 2GB, since each segment size will now fit into a size_t.
++    */
++    off_t remaining_size = size;
++    off_t off = 0;
++    while ( remaining_size > 0 )
++	{
++	size_t buf_size = MIN( remaining_size, MAX_SEND_BUFFER_SIZE );
++	ssize_t r = my_sendfile( fd, s, off, buf_size );
++	    if ( r < 0 && ( errno == EINTR || errno == EAGAIN ) )
++            {
++            send_via_write( fd, buf_size );
++            sleep( 1 );
++            continue;
++            }
++	if ( r != buf_size )
++            return;
++	remaining_size -= r;
++	off += r;
++	(void) alarm( WRITE_TIMEOUT );
++ 	}
++     }
+ #endif /* HAVE_SENDFILE */
+ 
+ 
+@@ -3006,9 +4302,11 @@ check_referrer( void )
+ 	cp = hostname;
+     if ( cp == (char*) 0 )
+ 	cp = "";
++#ifdef SYSLOG
+     syslog(
+ 	LOG_INFO, "%.80s non-local referrer \"%.80s%.80s\" \"%.80s\"",
+ 	ntoa( &client_addr ), cp, path, referrer );
++#endif
+     send_error( 403, "Forbidden", "", "You must supply a local referrer." );
+     }
+ 
+@@ -3254,33 +4552,15 @@ static void
+ handle_sigterm( int sig )
+     {
+     /* Don't need to set up the handler again, since it's a one-shot. */
+-
++#ifdef SYSLOG
+     syslog( LOG_NOTICE, "exiting due to signal %d", sig );
+-    (void) fprintf( stderr, "%s: exiting due to signal %d\n", argv0, sig );
++#endif
++    SC_CFPRINTF("exiting due to signal %d\n", sig);
+     closelog();
+     exit( 1 );
+     }
+ 
+ 
+-/* SIGHUP says to re-open the log file. */
+-static void
+-handle_sighup( int sig )
+-    {
+-    const int oerrno = errno;
+-
+-#ifndef HAVE_SIGSET
+-    /* Set up handler again. */
+-    (void) signal( SIGHUP, handle_sighup );
+-#endif /* ! HAVE_SIGSET */
+-
+-    /* Just set a flag that we got the signal. */
+-    got_hup = 1;
+-	
+-    /* Restore previous errno. */
+-    errno = oerrno;
+-    }
+-
+-
+ static void
+ handle_sigchld( int sig )
+     {
+@@ -3312,8 +4592,10 @@ handle_sigchld( int sig )
+ 	    */
+ 	    if ( errno != ECHILD )
+ 		{
++#ifdef SYSLOG
+ 		syslog( LOG_ERR, "child wait - %m" );
+ 		perror( "child wait" );
++#endif
+ 		}
+ 	    break;
+ 	    }
+@@ -3334,12 +4616,16 @@ re_open_logfile( void )
+ 	}
+     if ( logfile != (char*) 0 )
+ 	{
++#ifdef SYSLOG
+ 	syslog( LOG_NOTICE, "re-opening logfile" );
++#endif
+ 	logfp = fopen( logfile, "a" );
+ 	if ( logfp == (FILE*) 0 )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog( LOG_CRIT, "%s - %m", logfile );
+ 	    perror( logfile );
++#endif
+ 	    exit( 1 );
+ 	    }
+ 	}
+@@ -3349,7 +4635,9 @@ re_open_logfile( void )
+ static void
+ handle_read_timeout( int sig )
+     {
++#ifdef SYSLOG
+     syslog( LOG_INFO, "%.80s connection timed out reading", ntoa( &client_addr ) );
++#endif
+     send_error(
+ 	408, "Request Timeout", "",
+ 	"No request appeared within a reasonable time period." );
+@@ -3359,12 +4647,14 @@ handle_read_timeout( int sig )
+ static void
+ handle_write_timeout( int sig )
+     {
++#ifdef SYSLOG
+     syslog( LOG_INFO, "%.80s connection timed out writing", ntoa( &client_addr ) );
++#endif
++    SC_CFPRINTF("%.80s connection timed out writing\n", ntoa(&client_addr));
+     finish_request( 1 );
+     }
+ 
+ 
+-
+ static void
+ lookup_hostname( usockaddr* usa4P, size_t sa4_len, int* gotv4P, usockaddr* usa6P, size_t sa6_len, int* gotv6P )
+     {
+@@ -3385,12 +4675,12 @@ lookup_hostname( usockaddr* usa4P, size_
+     (void) snprintf( portstr, sizeof(portstr), "%d", (int) port );
+     if ( (gaierr = getaddrinfo( hostname, portstr, &hints, &ai )) != 0 )
+ 	{
++#ifdef SYSLOG
+ 	syslog(
+ 	    LOG_CRIT, "getaddrinfo %.80s - %s", hostname,
+ 	    gai_strerror( gaierr ) );
+-	(void) fprintf(
+-	    stderr, "%s: getaddrinfo %.80s - %s\n", argv0, hostname,
+-	    gai_strerror( gaierr ) );
++#endif
++	SC_CFPRINTF("getaddrinfo %.80s - %s\n", hostname, gai_strerror(gaierr));
+ 	exit( 1 );
+ 	}
+ 
+@@ -3418,14 +4708,13 @@ lookup_hostname( usockaddr* usa4P, size_
+ 	{
+ 	if ( sa6_len < aiv6->ai_addrlen )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog(
+ 		LOG_CRIT, "%.80s - sockaddr too small (%lu < %lu)",
+ 		hostname, (unsigned long) sa6_len,
+ 		(unsigned long) aiv6->ai_addrlen );
+-	    (void) fprintf(
+-		stderr, "%s: %.80s - sockaddr too small (%lu < %lu)\n",
+-		argv0, hostname, (unsigned long) sa6_len,
+-		(unsigned long) aiv6->ai_addrlen );
++#endif
++	    SC_CFPRINTF("%.80s - sockaddr too small (%lu < %lu)\n", hostname, (unsigned long) sa6_len, (unsigned long) aiv6->ai_addrlen);
+ 	    exit( 1 );
+ 	    }
+ 	(void) memset( usa6P, 0, sa6_len );
+@@ -3439,14 +4728,13 @@ lookup_hostname( usockaddr* usa4P, size_
+ 	{
+ 	if ( sa4_len < aiv4->ai_addrlen )
+ 	    {
++#ifdef SYSLOG
+ 	    syslog(
+ 		LOG_CRIT, "%.80s - sockaddr too small (%lu < %lu)",
+ 		hostname, (unsigned long) sa4_len,
+ 		(unsigned long) aiv4->ai_addrlen );
+-	    (void) fprintf(
+-		stderr, "%s: %.80s - sockaddr too small (%lu < %lu)\n",
+-		argv0, hostname, (unsigned long) sa4_len,
+-		(unsigned long) aiv4->ai_addrlen );
++#endif
++	    SC_CFPRINTF("%.80s - sockaddr too small (%lu < %lu)\n", hostname, (unsigned long) sa4_len, (unsigned long) aiv4->ai_addrlen);
+ 	    exit( 1 );
+ 	    }
+ 	(void) memset( usa4P, 0, sa4_len );
+@@ -3475,26 +4763,25 @@ lookup_hostname( usockaddr* usa4P, size_
+ 	    if ( he == (struct hostent*) 0 )
+ 		{
+ #ifdef HAVE_HSTRERROR
++#ifdef SYSLOG
+ 		syslog(
+ 		    LOG_CRIT, "gethostbyname %.80s - %s", hostname,
+ 		    hstrerror( h_errno ) );
+-		(void) fprintf(
+-		    stderr, "%s: gethostbyname %.80s - %s\n", argv0, hostname,
+-		    hstrerror( h_errno ) );
++#endif
+ #else /* HAVE_HSTRERROR */
++#ifdef SYSLOG
+ 		syslog( LOG_CRIT, "gethostbyname %.80s failed", hostname );
+-		(void) fprintf(
+-		    stderr, "%s: gethostbyname %.80s failed\n", argv0,
+-		    hostname );
++#endif
+ #endif /* HAVE_HSTRERROR */
++		SC_CFPRINTF("gethostbyname %.80s failed\n", hostname);
+ 		exit( 1 );
+ 		}
+ 	    if ( he->h_addrtype != AF_INET )
+ 		{
++#ifdef SYSLOG
+ 		syslog( LOG_CRIT, "%.80s - non-IP network address", hostname );
+-		(void) fprintf(
+-		    stderr, "%s: %.80s - non-IP network address\n", argv0,
+-		    hostname );
++#endif
++		SC_CFPRINTF("%.80s - non-IP network address\n", hostname);
+ 		exit( 1 );
+ 		}
+ 	    (void) memmove(
+@@ -3508,7 +4795,7 @@ lookup_hostname( usockaddr* usa4P, size_
+     }
+ 
+ 
+-static char*
++char*
+ ntoa( usockaddr* usaP )
+     {
+ #ifdef USE_IPV6
+@@ -3717,8 +5004,10 @@ e_malloc( size_t size )
+     ptr = malloc( size );
+     if ( ptr == (void*) 0 )
+ 	{
++#ifdef SYSLOG
+ 	syslog( LOG_CRIT, "out of memory" );
+-	(void) fprintf( stderr, "%s: out of memory\n", argv0 );
++#endif
++	SC_CFPRINTF("out of memory\n");
+ 	exit( 1 );
+ 	}
+     return ptr;
+@@ -3733,8 +5022,10 @@ e_realloc( void* optr, size_t size )
+     ptr = realloc( optr, size );
+     if ( ptr == (void*) 0 )
+ 	{
++#ifdef SYSLOG
+ 	syslog( LOG_CRIT, "out of memory" );
+-	(void) fprintf( stderr, "%s: out of memory\n", argv0 );
++#endif
++	SC_CFPRINTF("out of memory\n");
+ 	exit( 1 );
+ 	}
+     return ptr;
+@@ -3749,8 +5040,10 @@ e_strdup( char* ostr )
+     str = strdup( ostr );
+     if ( str == (char*) 0 )
+ 	{
++#ifdef SYSLOG
+ 	syslog( LOG_CRIT, "out of memory copying a string" );
+-	(void) fprintf( stderr, "%s: out of memory copying a string\n", argv0 );
++#endif
++	SC_CFPRINTF("out of memory copying a string\n");
+ 	exit( 1 );
+ 	}
+     return str;
+@@ -3774,3 +5067,540 @@ snprintf( char* str, size_t size, const
+     return r;
+     }
+ #endif /* NO_SNPRINTF */
++
++#ifdef USB
++static char * delete_end(char *buf)
++{
++	if(buf == NULL)
++		return NULL;
++	else{
++		if( *(buf + strlen(buf)-1) == '/')
++			*(buf+strlen(buf) -1) = '\0';
++		return buf;
++	}
++}
++
++static char * add_end(char * buf)
++{
++	if(*(buf + strlen(buf) -1) != '/')
++		strcat(buf,"/");
++	return buf;
++}
++
++/*
++ * function : link symbol get real file path 
++ * input paramater:
++ * 	1:link symbol
++ * 	2:storage for real path
++ * 	3:length of storage for real path
++ * output parem:real path pointer
++ * return value:
++ *  0:get real file path success
++ *  1:get real file path fail
++ */
++static int get_real_path(char *link_symbol,char * real_path,int length){
++		int real_path_length;
++		char temp[2048];
++		memset(real_path,0,length);
++		if((real_path_length = readlink(link_symbol,temp,sizeof(temp)-1)) != -1)   //readlink success
++		{
++			temp[real_path_length] = '\0';
++		}
++		else
++		{
++			return 1;
++		}
++		SC_CFPRINTF("####DEBUG temp=<%s>\n",temp);
++		if(temp[0]=='/')
++			strcpy(real_path,temp);
++		else{
++			strcpy(real_path,"shares/");
++			strcat(real_path,temp);
++		}
++		add_end(real_path);
++		return 0;
++}
++
++
++static int http_admin_pwd_protect_enable(void)
++{
++    /* Check if @remote_ip from LAN or WAN */
++    unsigned long int lan_tmp = inet_network(nvram_safe_get("lan_ipaddr"));
++    unsigned long int mask_tmp = inet_network(nvram_safe_get("lan_netmask"));
++    unsigned long int remote_tmp = inet_network(remote_ip);
++    int from_wan;
++    
++    if( (remote_tmp & mask_tmp) != (lan_tmp & mask_tmp) ) {
++        from_wan = 1;
++    }
++    else 
++    {
++        from_wan = 0;
++    }
++    
++    /* Need check local and remote http whether */
++	if((*nvram_safe_get("http_server_pwd_enable") == '1' && from_wan == 0)
++	    || (*nvram_safe_get("http_server_wan_pwd_enable") == '1' && from_wan == 1))
++	    return 1;
++	else
++	    return 0;
++}
++
++static int is_usb_subdir_file(const char *dirfile)
++{
++    if(dirfile && *dirfile)
++    {
++    	if( strstr(dirfile, "shares/USB_Storage")
++            && (strlen(dirfile) > strlen("shares/USB_Storage/")))
++            return 1;
++        if((strstr(dirfile, "shares/") && strstr(dirfile, "_Drive"))
++            && (strlen(dirfile) > strlen("shares/T_Drive/"))) 
++            return 1;
++    }
++    return 0;
++}
++
++static int is_symlink(char *buf)
++{
++	struct stat sb2;
++	
++	if(lstat(buf, &sb2) < 0)
++	    return 0;
++	    
++	if(S_ISLNK(sb2.st_mode))
++	    return 1;
++	else
++	    return 0;  
++}
++
++static int usb_subdir_is_symlink(char *buf)
++{
++    char *p = buf;
++    int i = 0;
++
++    while(*p)
++    {
++        p = strchr(p, '/');
++        
++        if(p == NULL)
++            return 0;
++        /* shares/USB_Storage/ or shares/x_Drive/xxx/ ,so skip two */
++        if( i > 1)
++        {
++            /* begin process 3nd, 4th ...  */
++            *p = '\0';
++            if(is_symlink(buf))
++                return  1;
++            else
++                *p = '/';
++        }
++        i++;
++        p++;
++    }
++    return 0;
++}
++
++static int is_readable(const char *dirfile, const char *name)
++{
++	FILE *fp = NULL;
++	char dir_a[2048]={0,}, auth[64];
++	static char buf[2048]={0};
++	struct usb_user_t *username;
++	char tmp[2048],real_path[2056];
++	struct stat stat_mine;
++
++	if(is_usb_subdir_file(dirfile))
++	{
++        /* If it is link, we will think it is  not read*/
++        if(strlen(dirfile) > sizeof(buf))
++            strncpy(buf, dirfile, sizeof(buf)-1);
++        else
++            strcpy(buf, dirfile);
++        if(buf[strlen(buf)-1] == '/')
++        {
++            buf[strlen(buf)-1]='\0';
++        }
++        if(is_symlink(buf))
++        {
++            return 0;
++        }
++        else
++        {
++            /* fully path is not symlink, but the path directory will be symlink
++               such as shares/USB_Storage/tmp/ntp_start is a real file but shares/USB_Storage/tmp
++               is symlink, so we need check the directory path whether own symlink
++            */
++            if(usb_subdir_is_symlink(buf))
++            {
++                return 0;
++            }
++        }
++    }
++    memset(buf, 0, sizeof(buf));
++
++	username = usb_user_lookup(remote_ip);
++	SC_CFPRINTF("####DEBUG dir=<%s>, name=<%s>\n",dirfile,name);
++	if(*(dirfile+strlen(dirfile)-1) != '/')
++		snprintf(buf, sizeof(buf), "%s/%s", dirfile, name);
++	else
++		snprintf(buf, sizeof(buf), "%s%s", dirfile, name);
++	delete_end(buf);
++	if( lstat(buf,&stat_mine) == 0 && S_ISLNK(stat_mine.st_mode))
++	{
++		if(get_real_path(buf,real_path,sizeof(real_path)) == 1)
++			return 0;      //get real_path failed
++	
++		SC_CFPRINTF("####DEBUG real_path=<%s>\n",real_path);
++	}
++	else
++	{
++		if(*(buf+strlen(buf)-1) != '/')
++			strcat(buf,"/");
++		strcpy(real_path,buf);
++	}
++	if ((fp=fopen("/etc/usb_httpd.conf", "r"))!=NULL) {
++		while(fgets(tmp,2048,fp) != NULL)
++		{
++
++			sscanf(tmp,"%s\t%s", dir_a, auth);
++	    	SC_CFPRINTF("dir_a=<%s>(strlen(dir_a)=%d), auth=<%s>(strlen(auth)=%d)\n", dir_a, strlen(dir_a), auth, strlen(auth));
++	    	SC_CFPRINTF("real_path=<%s>(strlen(real_path)=%d)\n", real_path, strlen(real_path));
++	    	SC_CFPRINTF("username->auth=<%d>, admin=<admin>\n", username->auth);
++
++			if((strlen(real_path) >= strlen(dir_a) && strncmp(real_path, dir_a, strlen(dir_a)) == 0) 
++				&& strcmp(auth, "admin")==0
++				&& username->auth == USB_AUTH_GUEST) {
++				fclose(fp);
++	    		SC_CFPRINTF("<hit it! hahahahhaha>\n");
++				return 0;
++			}
++		}
++		fclose(fp);
++	}
++	
++	return 1;
++	
++}
++
++static int check_valid_request(void)
++{
++    int valid_port;
++    int remote_port = 0;
++    char *p;
++
++    if (check_lan_guest()) {
++        return 1;
++    }
++
++    p = strchr(host, ':');
++    if (p)
++        remote_port = atoi(p+1);
++
++    if (remote_port == 0)
++        remote_port = 443;
++
++    if (is_usb_session)
++        valid_port = nv_get_int(CAT_HTTP, HTTP_USB_REMOTE_PORT, 0);
++    else
++        valid_port = nv_get_int(CAT_HTTP, HTTP_REMOTEMG_PORT, 0);
++
++    if (remote_port != valid_port) {
++        SC_CFPRINTF("invalid request: remote_port = %d, valid_port = %d\n", remote_port, valid_port);
++        return 0;
++    }
++
++    return 1;
++}
++
++static int usb_session_check(void)
++{
++	char *pt;
++	
++	//we only allow format like "<ip/domain>/shares/xxx" as a usb session
++	if(strncmp(path,"/shares",7) != 0)
++	{
++		SC_CFPRINTF("not a usb session!\n");
++		return 0;
++	}
++	
++	pt = strstr(path, "/shares");
++	if (pt != NULL && (pt[7] == '/' || pt[7] == ' ' ||
++		pt[7] == '\t' || pt[7] == '\r' || pt[7] == '\n'))
++		return 1;
++	else
++		return 0;
++}
++
++static void usb_user_load(void)
++{
++	FILE *fp;
++
++	fp = fopen("/var/usb_http_user.cache", "rb");
++	if (fp) {
++		usb_user_count = fread(&all_usb_user, sizeof(all_usb_user[0]), MAX_USB_USER, fp);
++		fclose(fp);
++		SC_CFPRINTF("usb_user_count = %d \n", usb_user_count);
++	}
++}
++
++static void usb_user_save(void)
++{
++	FILE *fp;
++
++	fp = fopen("/var/usb_http_user.cache", "wb");
++	if (fp) {
++		fwrite(&all_usb_user, sizeof(all_usb_user[0]), usb_user_count, fp);
++		fclose(fp);
++	}
++}
++
++static struct usb_user_t * usb_user_lookup(const char *ip)
++{
++	int i;
++
++	SC_CFPRINTF("lookup for <%s>\n", ip);
++	for (i = 0; i < MAX_USB_USER; i++) {
++		if (strcmp(all_usb_user[i].remote_ip, ip) == 0) {
++			SC_CFPRINTF("find usb user %s@%d \n", ip, i);
++			return &all_usb_user[i];
++		}
++	}
++	return NULL;
++}
++
++static struct usb_user_t * usb_user_add(const char *ip)
++{
++	int i;
++	struct sysinfo info;
++	struct usb_user_t *username = NULL;
++
++	sysinfo(&info);
++
++	/* TODO: add lock. */
++	for (i = 0; i < MAX_USB_USER; i++) {
++		/* pick up an empty entry or a timeout entry. */
++		if (all_usb_user[i].remote_ip[0] == 0 || (info.uptime - all_usb_user[i].timestamp) > web_timeout) {
++			SC_CFPRINTF("add usb user %s@%d \n", ip, i);
++			username = &all_usb_user[i];
++			break;
++		}
++	}
++	if (username != NULL) {
++		strcpy(username->remote_ip, ip);
++		username->timestamp = info.uptime;
++		username->auth = USB_AUTH_NONE;
++		if (i == usb_user_count)
++		    usb_user_count++;
++		usb_user_save();
++	}
++	return username;
++}
++
++static void usb_auth_check( char* dirname )
++{
++	struct usb_user_t *username;
++	struct sysinfo info;
++	char* authpath = AUTH_FILE;
++	FILE *fp;
++	char buf[1024];
++	char *pt, *savep;
++	char authinfo[500];
++	char *authpass;
++	static char line[10000];
++	int auth_flag = 0;
++	char* cryp;
++	char *authname,*name;
++	int l, auth_res;
++	struct stat stat_mine;
++	char real_dir[2056];
++
++	sysinfo(&info);
++
++	SC_CFPRINTF("dirname is <%s>\n", dirname);
++
++    /* enter a critical session. */
++    lock_enter();
++
++	usb_user_load();
++	username = usb_user_lookup(remote_ip);
++	if (username == NULL && (username = usb_user_add(remote_ip)) == NULL) {
++	    send_error( 403, "Forbidden", "", "The number of user has reached maximum value." );
++	}
++
++	/* check if this session need authentication or not. */
++	delete_end(dirname);
++	SC_CFPRINTF("dirname=<%s>\n",dirname);
++	if( lstat(dirname,&stat_mine) == 0 && S_ISLNK(stat_mine.st_mode))
++	{
++		get_real_path(dirname,real_dir,sizeof(real_dir));
++
++		SC_CFPRINTF("real_dir=<%s>\n",real_dir);
++		
++		if(strcmp(real_dir,"/mnt/shares/") != 0 ){
++			fp = fopen("/etc/usb_httpd.conf", "r");
++			if (fp) {
++				while (fgets(buf, sizeof(buf), fp) != NULL) {
++					pt = strtok_r(buf, " \t", &savep);
++					if ( strlen(real_dir) >= strlen(pt) && strncmp(real_dir,pt,strlen(pt)) == 0 ){
++						pt = strtok_r(NULL, " \t", &savep);
++						if (strcmp(pt, "admin") == 0) {
++							auth_flag = 1;
++							break;
++						}
++					}
++				}
++				fclose(fp);
++			} else {
++				auth_flag = 0;
++			}
++		}
++	}
++	else{
++		if (strcmp(dirname, "shares/") != 0) {
++			fp = fopen("/etc/usb_httpd.conf", "r");
++			if (fp) {
++				while (fgets(buf, sizeof(buf), fp) != NULL) {
++					pt = strtok_r(buf, " \t", &savep);
++					if (strstr(pt, dirname) != NULL ||
++						strstr(dirname, pt) != NULL) {
++						pt = strtok_r(NULL, " \t", &savep);
++						if (strcmp(pt, "admin") == 0) {
++							auth_flag = 1;
++							break;
++						}
++					}
++				}
++				fclose(fp);
++			} else {
++				auth_flag = 0;
++			}
++		}
++	}
++	if(http_admin_pwd_protect_enable())
++	    auth_flag = 1;
++	    
++	if (auth_flag == 0) {
++	    if (username->auth == USB_AUTH_NONE) {
++	        username->auth = USB_NO_AUTH;
++	        if (check_lan_guest() == 0)
++                NETGEAR_SYSLOG( "25 00[USB remote access] from %s through HTTP", remote_ip );
++	    }
++	    username->timestamp = info.uptime;
++	    usb_user_save();
++		goto _out;
++	}
++
++	auth_res=AUTH_OK;
++	/* Does this request contain authorization info? */
++	if ( authorization == (char*) 0 ){
++		auth_res=NO_AUTH;
++		/* Nope, return a 401 Unauthorized. */
++		goto _auth;
++	}
++	/* Basic authorization info? */
++	if ( strncmp( authorization, "Basic ", 6 ) != 0 ){
++	    auth_res=NO_AUTH;
++		goto _auth;
++	}
++
++	/* Decode it. */
++	l = b64_decode(
++	&(authorization[6]), (unsigned char*) authinfo, sizeof(authinfo) - 1 );
++	authinfo[l] = '\0';
++	/* Split into user and password. */
++	authpass = strchr( authinfo, ':' );
++	authname = authinfo;
++
++	if ( authpass == (char*) 0 ) {
++		/* No colon?  Bogus auth info. */
++		goto _auth;
++	}
++	*authpass++ = '\0';
++
++	/* Open the password file. */
++	fp = fopen( authpath, "r" );
++	if ( fp == (FILE*) 0 )
++	{
++	/* The file exists but we can't open it?  Disallow access. */
++#ifdef SYSLOG
++    	syslog( LOG_ERR, "%.80s auth file %.80s could not be opened - %m", ntoa( &client_addr ), authpath );
++#endif
++		send_error( 403, "Forbidden", "", "File is protected." );
++	}
++
++	/* Read it. */
++	while ( fgets( line, sizeof(line), fp ) != (char*) 0 )
++	{
++		/* Nuke newline. */
++		l = strlen( line );
++		if ( line[l - 1] == '\n' )
++			line[l - 1] = '\0';
++		/* Split into user and encrypted password. */
++		cryp = strchr( line, ':' );
++		if ( cryp == (char*) 0 )
++			continue;
++		*cryp++ = '\0';
++		name = line;
++		/* Is this the right user? */
++		if ( strcmp( line, authinfo ) == 0 )
++		{
++	    	/* Yes. */
++	    	(void) fclose( fp );
++	    	/* So is the password right? */
++			/* OK !*/
++			if ( strcmp(authpass, cryp ) == 0) {
++				if (username->auth == USB_AUTH_NONE || username->auth == USB_NO_AUTH || (username->auth == USB_AUTH_PASS 
++				       && (info.uptime - username->timestamp) > web_timeout))
++			    {
++					goto _auth;
++				}
++				if (username->auth == USB_AUTH_FAIL) {
++				    username->auth = USB_AUTH_PASS;
++				    if (check_lan_guest() == 0)
++				        NETGEAR_SYSLOG( "25 00[USB remote access] from %s through HTTP", remote_ip );
++				}
++    		}else{
++    		    /* No. */
++    		    SC_CFPRINTF("Login Failed - IP: %s\n", remote_ip);
++    		    auth_res=AUTH_FAIL;
++    		    goto _auth;
++    		}
++    		username->timestamp = info.uptime;
++            usb_user_save();
++    		goto _out;
++		}
++	}
++
++	/* Didn't find that user.  Access denied. */
++	auth_res=AUTH_FAIL;
++	if(http_admin_pwd_protect_enable())
++		goto _auth;
++	/* if come here, we consider this user is guest */
++	if (username->auth == USB_AUTH_NONE) {
++		username->auth = USB_AUTH_FAIL;
++    	usb_user_save();
++		send_authenticate( dirname );
++    	goto _out;
++	}
++	else {
++		if(username->auth == USB_AUTH_GUEST 
++		    && (info.uptime - username->timestamp) > web_timeout)
++		    goto _auth;
++		username->auth = USB_AUTH_GUEST;
++    	username->timestamp = info.uptime;
++    	usb_user_save();
++    	goto _out;
++	}
++
++_auth:
++    if (auth_res == AUTH_FAIL && check_lan_guest() == 0) {
++        NETGEAR_SYSLOG( "26 00[USB remote access rejected] from %s through HTTP", remote_ip );
++    }
++    username->auth = USB_AUTH_FAIL;
++    usb_user_save();
++	send_authenticate( dirname );
++_out:
++    lock_leave();
++}
++
++#endif /* USB */
+--- work/mini_httpd-1.30/mime_types.txt
++++ work/mini_httpd-1.30/mime_types.txt
+@@ -20,6 +20,7 @@ bcpio	application/x-bcpio
+ bin	application/octet-stream
+ bmp	image/bmp
+ cdf	application/x-netcdf
++cfg	application/
+ class	application/x-java-vm
+ cpio	application/x-cpio
+ cpt	application/mac-compactpro
+--- work/mini_httpd-1.30/port.h
++++ work/mini_httpd-1.30/port.h
+@@ -33,7 +33,6 @@
+ # define HAVE_SETLOGIN
+ # define HAVE_WAITPID
+ # define HAVE_HSTRERROR
+-# define HAVE_TM_GMTOFF
+ # define HAVE_SENDFILE
+ # define HAVE_SCANDIR
+ # define HAVE_INT64T
+@@ -74,7 +73,6 @@
+ # define HAVE_DAEMON
+ # define HAVE_SETSID
+ # define HAVE_WAITPID
+-# define HAVE_TM_GMTOFF
+ # define HAVE_SENDFILE
+ # define HAVE_LINUX_SENDFILE
+ # define HAVE_SCANDIR
+--- work/mini_httpd-1.30/version.h
++++ work/mini_httpd-1.30/version.h
+@@ -3,7 +3,7 @@
+ #ifndef _VERSION_H_
+ #define _VERSION_H_
+ 
+-#define SERVER_SOFTWARE "mini_httpd/1.30 26Oct2018"
+-#define SERVER_URL "http://www.acme.com/software/mini_httpd/"
++#define SERVER_SOFTWARE ""
++#define SERVER_URL ""
+ 
+ #endif /* _VERSION_H_ */

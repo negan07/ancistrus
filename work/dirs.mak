@@ -431,20 +431,21 @@ DIRLIST				+= $(ICONV)
 TARLIST				+= $(TAR_$(ICONV))
 # MINIHTTPD
 MINIHTTPD_NAME			:= mini_httpd
-VER_$(MINIHTTPD_NAME)		:= 1.17beta1
+VER_$(MINIHTTPD_NAME)		:= 1.30
 MINIHTTPD			:= $(MINIHTTPD_NAME)-$(VER_$(MINIHTTPD_NAME))
 NAME_$(MINIHTTPD)		:= $(MINIHTTPD_NAME)$(DBG)
-SUBVER_$(MINIHTTPD)		:= -178
+SUBVER_$(MINIHTTPD)		:= 
 VER_$(MINIHTTPD)		:= $(VER_$(MINIHTTPD_NAME))$(SUBVER_$(MINIHTTPD))
-DL_$(MINIHTTPD)			:= $(SRC_APPS_REL_DIR)
-TAR_$(MINIHTTPD)		:= $(MINIHTTPD)
-HOME_$(MINIHTTPD)		:= https://acme.com/software/mini_httpd/
-LIC_$(MINIHTTPD)		:= GPLv2
+DL_$(MINIHTTPD)			:= https://acme.com/software/mini_httpd
+TAR_$(MINIHTTPD)		:= $(MINIHTTPD).tar.gz
+HOME_$(MINIHTTPD)		:= https://acme.com/software/mini_httpd
+LIC_$(MINIHTTPD)		:= BSD-2-Clause
 SEC_$(MINIHTTPD)		:= base
 PRIO_$(MINIHTTPD)		:= required
 DEP_$(MINIHTTPD)		:= 
 DESC_$(MINIHTTPD)		:= Small HTTP(S) server
 DIRLIST				+= $(MINIHTTPD)
+TARLIST				+= $(TAR_$(MINIHTTPD))
 # OPENSSH
 OPEN_SSH_NAME			:= openssh
 VER_$(OPEN_SSH_NAME)		:= 8.6p1
