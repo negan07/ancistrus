@@ -1,0 +1,21 @@
+--- work/bftpd/bftpd/commands.c	2021-01-07 17:05:36.000000000 +0100
++++ work/bftpd/bftpd/commands.c	2021-05-24 21:41:10.283254780 +0200
+@@ -1002,7 +1002,9 @@ void command_mget(char *filenames)
+ void command_retr(char *filename)
+ {
+         int num_clients = 1;
++#if ( ( defined(WANT_TAR) && defined(WANT_GZIP) ) || ( defined(WANT_GZIP) ) || ( defined(HAVE_ZLIB_H) ) )
+         int new_num_clients;      /* number of connections to the server */
++#endif
+         int my_buffer_size;       /* size of the transfer buffer to use */
+ 	char *mapped = NULL;
+ 	char *buffer;
+@@ -1410,7 +1410,7 @@ void command_retr(char *filename)
+               
+                                 if (change_buffer_size)
+                                 {
+-                                  new_num_clients = bftpdutmp_usercount("*");
++                                  bftpdutmp_usercount("*");
+                                   my_buffer_size = get_buffer_size(num_clients);
+                                 }
+ 

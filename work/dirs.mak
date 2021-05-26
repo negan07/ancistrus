@@ -565,6 +565,23 @@ DEP_$(SAMBA)			:= $(NAME_$(ZLIB)),$(NAME_$(ICONV))
 DESC_$(SAMBA)			:= SMB/CIFS protocol for UNIX systems
 DIRLIST				+= $(SAMBA)
 TARLIST				+= $(TAR_$(SAMBA))
+# BFTPD
+BFTPD_NAME			:= bftpd
+VER_$(BFTPD_NAME)		:= 5.7
+BFTPD				:= $(BFTPD_NAME)
+NAME_$(BFTPD)			:= $(BFTPD_NAME)$(DBG)
+SUBVER_$(BFTPD)			:=
+VER_$(BFTPD)			:= $(VER_$(BFTPD_NAME))$(SUBVER_$(BFTPD))
+DL_$(BFTPD)			:= https://sourceforge.net/projects/bftpd/files
+TAR_$(BFTPD)			:= $(BFTPD)-$(VER_$(BFTPD_NAME)).tar.gz
+HOME_$(BFTPD)			:= http://bftpd.sourceforge.net/
+LIC_$(BFTPD)			:= GPLv2
+SEC_$(BFTPD)			:= base
+PRIO_$(BFTPD)			:= standard
+DEP_$(BFTPD)			:= 
+DESC_$(BFTPD)			:= Small, easy-to-configure FTP server
+DIRLIST				+= $(BFTPD)
+TARLIST				+= $(TAR_$(BFTPD))
 # FFMPEG
 FFMPEG_NAME			:= ffmpeg
 VER_$(FFMPEG_NAME)		:= 4.4
@@ -788,6 +805,7 @@ THIRDPARTY			+= $(QOS_SQM)
 # USBSTORAGE
 ifdef USBSTORAGE
 BUILTIN				+= $(SAMBA)
+BUILTIN				+= $(BFTPD)
 BUILTIN				+= $(HDPARM)
 BUILTIN				+= $(HDIDLE)
 THIRDPARTY			+= $(SMONTOOLS)
