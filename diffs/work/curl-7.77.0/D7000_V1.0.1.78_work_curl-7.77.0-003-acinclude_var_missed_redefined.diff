@@ -1,5 +1,5 @@
---- work/curl-7.76.1/curl-7.76.1/acinclude.m4
-+++ work/curl-7.76.1/curl-7.76.1/acinclude.m4
+--- work/curl-7.77.0/curl-7.77.0/acinclude.m4
++++ work/curl-7.77.0/curl-7.77.0/acinclude.m4
 @@ -1738,6 +1738,53 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_
  ])
  
