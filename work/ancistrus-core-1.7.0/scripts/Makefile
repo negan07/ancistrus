@@ -13,7 +13,7 @@ FSCRIPTS		:=
 CSCRIPTS		:= 
 USCRIPTS		:= 
 DISPRE			:= rc_disable$(PRETAG)
-PRESERVS		:= check_conn check_fw dnrd dnshj apple iserver ntp ftpd potcounter printk schedule show_mem_log syslogd xCloud led_ctrl
+PRESERVS		:= check_conn check_fw dnrd dnshj apple iserver ntp potcounter printk schedule show_mem_log syslogd xCloud led_ctrl
 
 all:
 	@echo "Nothing to do: run 'make install' to install."

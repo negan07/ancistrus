@@ -1,0 +1,21 @@
+#!/bin/sh
+#rc_ftpd [start|stop|restart|create|event]
+
+stop() {
+	# Service daemon stop if no usb device mounted or nothing enabled
+	anc redir rc_ftpd stop
+	exit 127
+}
+
+case "$1" in
+start|restart|create|event)
+# Checking for /dev/sdX storage presence
+[ -z "`cat /proc/mounts | grep /dev/sd`" ] && stop
+# Checking for local/remote enable flags
+eval `nvram get ftp_server_enable` >/dev/null 2>&1
+eval `nvram get ftp_server_wan_enable` >/dev/null 2>&1
+[ "${ftp_server_enable}" != "1" ] && [ "${ftp_server_wan_enable}" != "1" ] && stop
+;;
+esac
+
+exit 0
