@@ -16,6 +16,9 @@ dist_clean: dist_clean_sources dist_clean_work
 prepare_host:
 	@[ ! -x $(SCRIPTS_DIR)/hostprepare.sh ] || ./$(SCRIPTS_DIR)/hostprepare.sh
 
+pack_fw:
+	@[ ! -x $(SCRIPTS_DIR)/pack_fw.sh ] || ./$(SCRIPTS_DIR)/pack_fw.sh
+
 toolchain: prepare_toolchain
 	@[ -d $(TCHAIN_DIR) ] || sudo $(MAKE) -C $(TCHAIN_SRC_DIR)
 
@@ -111,6 +114,7 @@ help: info
 	@echo "make clean		- cleanup toolchain sources, kernel & app sources (included work-thirdparty apps), target, img"
 	@echo "make dist_clean		- delete toolchain source dir, delete source dir, cleanup work & delete previously downloaded dirs"
 	@echo "make prepare_host	- tune-up host & install packets needed to make & develop (optional)"
+	@echo "make pack_fw		- prepare firmware .zip pack after compiling"
 	@echo "make toolchain		- download sources, extract, patch & compile the toolchain"
 	@echo "make prepare_toolchain	- download sources, extract & patch the toolchain without compiling"
 	@echo "make sources		- download sources, patch and compile kernel, apps, work-thirdparty apps, drivers, target, create img"
