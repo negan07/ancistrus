@@ -39,6 +39,7 @@ RCDSLDRV		?= adsl_phy.bin
 RCDSLSO			?= libbcm_crc.so libseltctl.so libbcm_flashutil.so libxdslctl.so
 RCDSLBINS		?= $(RCDSLCMDBIN)
 RCMAINWEB		?= top.js linux.js top.html index.htm adv_index.htm GPL_rev1.htm logout.htm
+RCHTTPDWEB		?= currentsetting.htm BRS_success.html BRS_swisscom_success.html
 RCMAINCSS		?= top.css
 RCTMPDIR		?= /tmp
 RCLDLIB			?= /lib

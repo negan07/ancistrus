@@ -1,7 +1,7 @@
 diff -urN work/mini_httpd-1.30/Makefile work/mini_httpd-1.30/Makefile
 --- work/mini_httpd-1.30/Makefile
 +++ work/mini_httpd-1.30/Makefile
-@@ -1,37 +1,81 @@
+@@ -1,37 +1,83 @@
 -# Makefile for mini_httpd
 +include ../Rules.mak
  
@@ -36,6 +36,7 @@ diff -urN work/mini_httpd-1.30/Makefile work/mini_httpd-1.30/Makefile
 +CERTS	:= $(BINS).pem
 +STARTUP	:= httpd
 +CUR_SET	:= currentsetting.htm
++BRS	:= BRS_success.html BRS_swisscom_success.html
 +HTMDIR	:= ../www
 +
 +HTTPS=1
@@ -111,6 +112,7 @@ diff -urN work/mini_httpd-1.30/Makefile work/mini_httpd-1.30/Makefile
 +endif
 +	install -m 0755 $(BINS) $(TMPINSTDIR)
 +	install -m 0755 $(HTMDIR)/$(CUR_SET) $(TMPINSTDIR)
++	cd $(HTMDIR); install -m 0644 $(BRS) $(TMPINSTDIR); cd ..
  
  mini_httpd.o:	mini_httpd.c version.h port.h match.h tdate_parse.h mime_encodings.h mime_types.h
  	$(CC) $(CFLAGS) -c mini_httpd.c
@@ -193,7 +195,7 @@ diff -urN work/mini_httpd-1.30/Makefile work/mini_httpd-1.30/Makefile
 +
 +preinst:
 +	@echo "#!/bin/sh" > $(PREINST)
-+	@echo "for F in $(BINS) $(CERTS) $(CUR_SET); do [ -e $(TMPDIR)/\$$F ] && rm -f $(TMPDIR)/\$$F; done" >> $(PREINST)
++	@echo "for F in $(BINS) $(CERTS) $(CUR_SET) $(BRS); do [ -e $(TMPDIR)/\$$F ] && rm -f $(TMPDIR)/\$$F; done" >> $(PREINST)
 +	@echo "exit 0" >> $(PREINST)
 +
 +postinst:
@@ -202,7 +204,7 @@ diff -urN work/mini_httpd-1.30/Makefile work/mini_httpd-1.30/Makefile
 +	@echo "echo \"Updating $(BINS) ...\"" >> $(POSTINST)
 +	@echo "[ -f $(TMPDIR)/$(CERTS) ] && cp -f $(TMPDIR)/$(CERTS) $(USRETC)/ && mv -f $(TMPDIR)/$(CERTS) $(TMPETC)/" >> $(POSTINST)
 +	@echo "mv -f $(TMPDIR)/$(BINS) $(USRSBIN)/" >> $(POSTINST)
-+	@echo "[ -f $(TMPDIR)/$(CUR_SET) ] && mv -f $(TMPDIR)/$(CUR_SET) $(WWW)/" >> $(POSTINST)
++	@echo "for F in $(CUR_SET) $(BRS); do [ -f $(TMPDIR)/\$$F ] && mv -f $(TMPDIR)/\$$F $(WWW)/; done" >> $(POSTINST)
 +	@echo "sync" >> $(POSTINST)
 +	@echo "echo \"Restarting web daemon service...\"" >> $(POSTINST)
 +	@echo "$(RC) $(STARTUP) restart" >> $(POSTINST)

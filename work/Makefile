@@ -168,7 +168,7 @@ post_inst:
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mmini_httpd \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/mini_httpd.pem $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/mini_httpd $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
-	mv $(BUILD_TARGET)$(RCTMPDIR)/currentsetting.htm $(BUILD_TARGET)$(RCWWWDIR)/ || exit 1; \
+	$(foreach F, $(RCHTTPDWEB), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWDIR)/$(F) || exit 1;) \
 	fi
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep utelnetd`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mutelnetd \\e[0m"; \
