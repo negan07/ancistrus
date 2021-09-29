@@ -1,0 +1,12 @@
+diff -urN D7000_V1.0.1.80_WW_src/Source/apps/mediaserver/library/jpeg-6b/Makefile D7000_V1.0.1.80_WW_src/Source/apps/mediaserver/library/jpeg-6b/Makefile
+--- D7000_V1.0.1.80_WW_src/Source/apps/mediaserver/library/jpeg-6b/Makefile	2016-10-13 17:51:19.000000000 +0200
++++ D7000_V1.0.1.80_WW_src/Source/apps/mediaserver/library/jpeg-6b/Makefile	2017-05-05 14:57:20.115087727 +0200
+@@ -32,7 +32,7 @@
+ #CC= gcc
+ 
+ # You may need to adjust these cc options:
+-CFLAGS= -Os -s  -I$(srcdir)
++CFLAGS +=  -Os -s  -I$(srcdir)
+ # Generally, we recommend defining any configuration symbols in jconfig.h,
+ # NOT via -D switches here.
+ # However, any special defines for ansi2knr.c may be included here:

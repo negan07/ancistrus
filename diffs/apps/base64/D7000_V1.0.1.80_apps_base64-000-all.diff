@@ -1,0 +1,25 @@
+diff -urN D7000_V1.0.1.80_WW_src/Source/apps/base64/Makefile D7000_V1.0.1.80_WW_src/Source/apps/base64/Makefile
+--- D7000_V1.0.1.80_WW_src/Source/apps/base64/Makefile	2016-10-11 17:57:10.000000000 +0200
++++ D7000_V1.0.1.80_WW_src/Source/apps/base64/Makefile	2017-04-29 18:47:59.076498753 +0200
+@@ -1,18 +1,16 @@
+ CC = $(CROSS)gcc
+ 
+-CFLAGS  = -Os -s -Wall -Werror -fPIC -g -c
+-
+ DESTLIB = ../../target/lib
+-#DESTBIN = ../../target/usr/sbin
+ 
+ all: libb64.so
+ 	@echo $@ done
+ 
+ libb64.so : base64.o
+-	$(CC) -Os -s -shared -Wl,-soname,libb64.so -o libb64.so base64.o
++	$(CC) $(CFLAGS) -Os -s -shared -Wl,-soname,libb64.so -o libb64.so base64.o
++	$(STRIP) libb64.so
+ 
+ base64.o : base64.c
+-	$(CC) $(CFLAGS) -o $@ $^
++	$(CC) $(CFLAGS) -Os -s -Wall -Werror -fPIC -c -o $@ $^
+ 
+ install :
+ 	cp -f libb64.so $(DESTLIB)

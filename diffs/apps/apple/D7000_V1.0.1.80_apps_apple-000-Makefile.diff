@@ -1,0 +1,173 @@
+diff -urN D7000_V1.0.1.80_WW_src/Source/apps/apple/Makefile D7000_V1.0.1.80_WW_src/Source/apps/apple/Makefile
+--- D7000_V1.0.1.80_WW_src/Source/apps/apple/Makefile	2016-10-11 17:54:20.000000000 +0200
++++ D7000_V1.0.1.80_WW_src/Source/apps/apple/Makefile	2017-05-05 14:57:10.394917511 +0200
+@@ -7,13 +7,14 @@
+ DIRS_BASIC=
+ FFMPEG_DIR=../mediaserver/library/ffmpeg-0.11.2/
+ AVAHI_DIR=
++NETATALK_DIR=netatalk-2.2.5
+ ifeq ($(ITUNES_SERVER), 1)
+ AVAHI_DIR=avahi-0.6.25
+-DIRS += sqlite-3.6.16 alsa-lib-1.0.26 libxml2-2.9.1 libplist-1.11 libantlr3c-3.2 confuse-2.6 libevent-2.0.22-stable libunistring-0.9.5 db-4.7.25.NC libgpg-error-1.10 libgcrypt-1.5.0 netatalk-2.2.5 expat-2.0.1 dbus-1.8.0 gdbm-1.8.3 libdaemon-0.14 $(AVAHI_DIR) forked-daapd-23.1
++DIRS += sqlite-3.6.16 alsa-lib-1.0.26 libxml2-2.9.1 libplist-1.11 libantlr3c-3.2 confuse-2.6 libevent-2.0.22-stable libunistring-0.9.5 db-4.7.25.NC libgpg-error-1.10 libgcrypt-1.5.0 $(NETATALK_DIR) expat-2.0.1 dbus-1.8.0 gdbm-1.8.3 libdaemon-0.14 $(AVAHI_DIR) forked-daapd-23.1
+ DIRS_BASIC += mxml-2.8 avl-0.3.5 $(FFMPEG_DIR)
+ else
+ AVAHI_DIR=avahi-0.6.25
+-DIRS += db-4.7.25.NC libgpg-error-1.10 libgcrypt-1.5.0 netatalk-2.2.5 expat-2.0.1 gdbm-1.8.3 libdaemon-0.14 $(AVAHI_DIR)
++DIRS += db-4.7.25.NC libgpg-error-1.10 libgcrypt-1.5.0 $(NETATALK_DIR) expat-2.0.1 gdbm-1.8.3 libdaemon-0.14 $(AVAHI_DIR)
+ endif
+ 
+ STAGING_DIR :=$(shell pwd)/target
+@@ -56,7 +57,7 @@
+ $(1)/build_sc/config.status:
+ 	@echo "-----------sc-----"$1"-----------------------"
+ 	if [ ! -e $(1)/build_sc ]; then mkdir $(1)/build_sc;fi
+-	cd $(1);sh build.sh
++	cd $(1);sh build.sh "$(CFLAGS) -Os -s"
+ 
+ $(1)/.build: $(1)/build_sc/config.status
+ 	@echo "-----------build-----"$1"-----------------------"
+@@ -73,38 +74,38 @@
+ 	@for i in $(DIRS_BASIC) ; do echo -e "\\e[35mapps: clean \\e[36m$$i \\e[0m"; $(MAKE) -C $$i clean  || exit 1; done
+ 	rm -rf $(STAGING_DIR) $(BUILD_DIR) $(DIR_BUILD)
+ 	#echo "dir=$(DIR_BUILD) $(BUILD_DIR) $(STAGING_DIR) itunes-server=$(ITUNES_SERVER)"
+-	-rm $(TARGET)/usr/sbin/afpd
+-	-rm $(TARGET)/usr/sbin/afppasswd 
+-	-rm $(TARGET)/usr/sbin/avahi-autoipd
+-	-rm $(TARGET_LIBDIR)/libdb*.so
+-	-rm $(TARGET_LIBDIR)/libgpg-error.so.*
+-	-rm $(TARGET_LIBDIR)/libgcrypt.so.*
+-	-rm $(TARGET_LIBDIR)/libexpat.so*
+-	-rm $(TARGET_LIBDIR)/libgdbm.so.*
+-	-rm $(TARGET_LIBDIR)/libdaemon.so.*
+-	-rm $(TARGET_LIBDIR)/libavahi-{common,core}.so.*
+-	-rm $(TARGET)/usr/sbin/avahi-daemon 
+-	-rm $(TARGET)/usr/sbin/avahi-dnsconfd
+-	-rm $(TARGET_LIBDIR)/uams_*.so
+-	-rm $(TARGET)/bin/cnid_dbd
+-	-rm $(TARGET)/bin/cnid_metad
+-	-rm $(TARGET_LIBDIR)/libantlr3c.so	
+-	-rm $(TARGET_LIBDIR)/libasound.so*	
+-	-rm $(TARGET_LIBDIR)/libconfuse.so*	
+-	-rm $(TARGET_LIBDIR)/libdbus-1.so*	
+-	-rm $(TARGET_LIBDIR)/libevent*.so*	
+-	-rm $(TARGET_LIBDIR)/libplist.so*	
+-	-rm $(TARGET_LIBDIR)/libunistring.so*
+-	-rm $(TARGET_LIBDIR)/libxml2.so*	
+-	-rm $(TARGET_LIBDIR)/libsqlite3.so* 
+-	-rm $(TARGET_LIBDIR)/libavahi-client.so.* 
+-	-rm $(TARGET_LIBDIR)/forked-daapd-sqlext.so 
+-	-rm $(TARGET_LIBDIR)/libswscale.so*
+-	-rm $(TARGET_LIBDIR)/libavutil.so.* 
+-	-rm $(TARGET_LIBDIR)/libavformat.so.*
+-	-rm $(TARGET_LIBDIR)/libavcodec.so.*
+-	-rm $(TARGET)/usr/sbin/forked-daapd 
+-	-rm $(TARGET)/bin/dbus-daemon 
++	-rm -f $(TARGET)/usr/sbin/afpd
++	-rm -f $(TARGET)/usr/sbin/afppasswd 
++	-rm -f $(TARGET)/usr/sbin/avahi-autoipd
++	-rm -f $(TARGET_LIBDIR)/libdb*.so
++	-rm -f $(TARGET_LIBDIR)/libgpg-error.so.*
++	-rm -f $(TARGET_LIBDIR)/libgcrypt.so.*
++	-rm -f $(TARGET_LIBDIR)/libexpat.so*
++	-rm -f $(TARGET_LIBDIR)/libgdbm.so.*
++	-rm -f $(TARGET_LIBDIR)/libdaemon.so.*
++	-rm -f $(TARGET_LIBDIR)/libavahi-{common,core}.so.*
++	-rm -f $(TARGET)/usr/sbin/avahi-daemon 
++	-rm -f $(TARGET)/usr/sbin/avahi-dnsconfd
++	-rm -f $(TARGET_LIBDIR)/uams_*.so
++	-rm -f $(TARGET)/bin/cnid_dbd
++	-rm -f $(TARGET)/bin/cnid_metad
++	-rm -f $(TARGET_LIBDIR)/libantlr3c.so	
++	-rm -f $(TARGET_LIBDIR)/libasound.so*	
++	-rm -f $(TARGET_LIBDIR)/libconfuse.so*	
++	-rm -f $(TARGET_LIBDIR)/libdbus-1.so*	
++	-rm -f $(TARGET_LIBDIR)/libevent*.so*	
++	-rm -f $(TARGET_LIBDIR)/libplist.so*	
++	-rm -f $(TARGET_LIBDIR)/libunistring.so*
++	-rm -f $(TARGET_LIBDIR)/libxml2.so*	
++	-rm -f $(TARGET_LIBDIR)/libsqlite3.so* 
++	-rm -f $(TARGET_LIBDIR)/libavahi-client.so.* 
++	-rm -f $(TARGET_LIBDIR)/forked-daapd-sqlext.so 
++	-rm -f $(TARGET_LIBDIR)/libswscale.so*
++	-rm -f $(TARGET_LIBDIR)/libavutil.so.* 
++	-rm -f $(TARGET_LIBDIR)/libavformat.so.*
++	-rm -f $(TARGET_LIBDIR)/libavcodec.so.*
++	-rm -f $(TARGET)/usr/sbin/forked-daapd 
++	-rm -f $(TARGET)/bin/dbus-daemon 
+ 
+ .PHONY: clean install
+ 
+@@ -118,23 +119,17 @@
+ 	$(STRIP) $(STAGING_DIR)/usr/lib/libdb*.so
+ 	$(STRIP) $(STAGING_DIR)/usr/lib/libgpg-error.so.*
+ 	$(STRIP) $(STAGING_DIR)/usr/lib/libgcrypt.so.*
+-	$(STRIP) $(STAGING_DIR)/usr/sbin/arm-linux-afpd
+-	$(STRIP) $(STAGING_DIR)/usr/sbin/arm-linux-afpd \
+-		netatalk-2.2.5/build_sc/bin/afppasswd/afppasswd \
+-		$(STAGING_DIR)/usr/sbin/arm-linux-cnid_dbd \
+-		$(STAGING_DIR)/usr/sbin/arm-linux-cnid_metad \
+-		$(STAGING_DIR)/etc/netatalk/uams/*.so
+-
++	$(SSTRIP) $(STAGING_DIR)/usr/sbin/arm-linux-afpd $(NETATALK_DIR)/build_sc/bin/afppasswd/afppasswd $(STAGING_DIR)/usr/sbin/arm-linux-cnid_dbd $(STAGING_DIR)/usr/sbin/arm-linux-cnid_metad
++#	$(STRIP) $(STAGING_DIR)/etc/netatalk/uams/*.so
++	$(STRIP) $(NETATALK_DIR)/build_sc/etc/uams/.libs/*.so
+ 	$(STRIP) $(STAGING_DIR)/usr/local/lib/libexpat.so*
+ 	$(STRIP) $(STAGING_DIR)/usr/local/lib/libgdbm.so*
+ 	$(STRIP) $(STAGING_DIR)/usr/local/lib/libdaemon.so*
+ 	$(STRIP) $(STAGING_DIR)/usr/lib/libavahi-{common,core}.so*
+-	$(STRIP) $(STAGING_DIR)/usr/sbin/avahi-autoipd \
+-		$(STAGING_DIR)/usr/sbin/avahi-daemon \
+-		$(STAGING_DIR)/usr/sbin/avahi-dnsconfd
++	$(SSTRIP) $(STAGING_DIR)/usr/sbin/avahi-autoipd $(STAGING_DIR)/usr/sbin/avahi-daemon $(STAGING_DIR)/usr/sbin/avahi-dnsconfd
+ 
+ ifeq ($(ITUNES_SERVER),1)
+-	@for i in $(DIRS_BASIC) ; do echo -e "\\e[35mapps: install\\e[36m$$i \\e[0m";  $(MAKE) -C $$i install  || exit 1; done
++	@for i in $(DIRS_BASIC) ; do echo -e "\\e[35mapps: install \\e[36m$$i \\e[0m";  $(MAKE) -C $$i install  || exit 1; done
+ 	$(STRIP) $(STAGING_DIR)/lib/libantlr3c.so
+ 	$(STRIP) $(STAGING_DIR)/lib/libasound.so*
+ 	$(STRIP) $(STAGING_DIR)/lib/libconfuse.so*
+@@ -147,8 +142,9 @@
+ 	$(STRIP) $(STAGING_DIR)/usr/lib/libavahi-client.so*
+ 	$(STRIP) $(STAGING_DIR)/usr/lib/forked-daapd/forked-daapd-sqlext.so 
+ 	$(STRIP) $(FFMPEG_DIR)/libswscale/libswscale.so* $(FFMPEG_DIR)/libavutil/libavutil.so* $(FFMPEG_DIR)/libavformat/libavformat.so* $(FFMPEG_DIR)/libavcodec/libavcodec.so.*
+-	$(STRIP) $(STAGING_DIR)/usr/sbin/forked-daapd
+-	$(STRIP) $(STAGING_DIR)/bin/dbus-daemon
++	$(SSTRIP) $(STAGING_DIR)/usr/sbin/forked-daapd
++	$(SSTRIP) $(STAGING_DIR)/bin/dbus-daemon
++	$(SSTRIP) $(STAGING_DIR)/usr/sbin/arm-linux-afpd
+ 
+ 	cp -a $(STAGING_DIR)/lib/libantlr3c.so	$(TARGET_LIBDIR)
+ 	cp -a $(STAGING_DIR)/lib/libasound.so*	$(TARGET_LIBDIR)
+@@ -168,7 +164,6 @@
+ 	cp -a $(STAGING_DIR)/usr/sbin/forked-daapd $(TARGET)/usr/sbin/
+ 	cp -a $(STAGING_DIR)/bin/dbus-daemon $(TARGET)/usr/sbin/
+ endif
+-
+ 	cp -a $(STAGING_DIR)/usr/local/lib/libexpat.so* $(TARGET_LIBDIR)
+ 	cp -a $(STAGING_DIR)/usr/local/lib/libgdbm.so.* $(TARGET_LIBDIR)
+ 	cp -a $(STAGING_DIR)/usr/local/lib/libdaemon.so.* $(TARGET_LIBDIR)
+@@ -178,15 +173,17 @@
+ 	cp -a $(STAGING_DIR)/usr/lib/libavahi-{common,core}.so.* $(TARGET_LIBDIR)
+ 
+ 	cp -a $(STAGING_DIR)/usr/sbin/arm-linux-afpd $(TARGET)/usr/sbin/afpd
+-	cp -a netatalk-2.2.5/build_sc/bin/afppasswd/afppasswd  $(TARGET)/usr/sbin/afppasswd
++	cp -a $(NETATALK_DIR)/build_sc/bin/afppasswd/afppasswd  $(TARGET)/usr/sbin/afppasswd
++	cp -af $(NETATALK_DIR)/build_sc/etc/uams/.libs/*.so $(STAGING_DIR)/usr/lib/netatalk/
+ 	cp -a $(STAGING_DIR)/usr/sbin/arm-linux-cnid_dbd $(TARGET)/usr/sbin/cnid_dbd
+ 	cp -a $(STAGING_DIR)/usr/sbin/arm-linux-cnid_metad $(TARGET)/usr/sbin/cnid_metad 
+-	cp -a $(STAGING_DIR)/etc/netatalk/uams/*.so $(TARGET)/lib
++#	cp -a $(STAGING_DIR)/etc/netatalk/uams/*.so $(TARGET)/lib
++	cp -a $(STAGING_DIR)/usr/lib/netatalk/*.so $(TARGET)/lib
+ 	#ln -s uams_dhx2_passwd.so $(TARGET)/lib/uams_dhx2.so
+-	cp netatalk-2.2.5/AppleVolumes.default $(TARGET)/usr/etc/netatalk/
+-	cp netatalk-2.2.5/AppleVolumes.system $(TARGET)/usr/etc/netatalk/
+-	cp netatalk-2.2.5/afpd.conf $(TARGET)/usr/etc/netatalk/
+-	cp netatalk-2.2.5/afppasswd $(TARGET)/usr/etc/netatalk/
++	cp $(NETATALK_DIR)/AppleVolumes.default $(TARGET)/usr/etc/netatalk/
++	cp $(NETATALK_DIR)/AppleVolumes.system $(TARGET)/usr/etc/netatalk/
++	cp $(NETATALK_DIR)/afpd.conf $(TARGET)/usr/etc/netatalk/
++	cp $(NETATALK_DIR)/afppasswd $(TARGET)/usr/etc/netatalk/
+ 	chmod 644 $(TARGET)/usr/etc/netatalk/AppleVolumes.default $(TARGET)/usr/etc/netatalk/AppleVolumes.system
+ 
+ 	cp -a $(STAGING_DIR)/etc/avahi/avahi-autoipd.action $(TARGET)/usr/etc/avahi/

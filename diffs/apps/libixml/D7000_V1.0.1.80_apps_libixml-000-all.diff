@@ -1,0 +1,13 @@
+diff -urN D7000_V1.0.1.80_WW_src/Source/apps/libixml/src/Makefile D7000_V1.0.1.80_WW_src/Source/apps/libixml/src/Makefile
+--- D7000_V1.0.1.80_WW_src/Source/apps/libixml/src/Makefile	2016-10-11 17:56:25.000000000 +0200
++++ D7000_V1.0.1.80_WW_src/Source/apps/libixml/src/Makefile	2017-04-29 21:40:01.696595996 +0200
+@@ -29,8 +29,7 @@
+ ##
+ ###########################################################################
+ 
+-CFLAGS	= -g
+-CFLAGS += -Wall -Werror -Wno-unused-but-set-variable -I./inc -I../inc -fPIC
++CFLAGS += -Os -s -Wall -Werror -Wno-unused-but-set-variable -I./inc -I../inc -fPIC
+ LDFLAGS	= -shared
+ 
+ OBJS = ixml.o node.o ixmlparser.o ixmlmembuf.o nodeList.o element.o \

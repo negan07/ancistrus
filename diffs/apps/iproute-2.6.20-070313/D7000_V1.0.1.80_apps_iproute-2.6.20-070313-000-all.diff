@@ -1,0 +1,26 @@
+diff -urN D7000_V1.0.1.80_WW_src/Source/apps/iproute-2.6.20-070313/Makefile D7000_V1.0.1.80_WW_src/Source/apps/iproute-2.6.20-070313/Makefile
+--- D7000_V1.0.1.80_WW_src/Source/apps/iproute-2.6.20-070313/Makefile	2016-10-11 17:56:32.000000000 +0200
++++ D7000_V1.0.1.80_WW_src/Source/apps/iproute-2.6.20-070313/Makefile	2017-05-04 00:08:42.734613500 +0200
+@@ -31,8 +31,8 @@
+ include ../../Rules.mak
+ CC = $(CROSS)gcc
+ #CC = mips-uclibc-gcc
+-CCOPTS = -D_GNU_SOURCE -O2 -Wstrict-prototypes -Wall -Wno-strict-aliasing #-Werror
+-CFLAGS = $(CCOPTS) -I../include $(DEFINES) -D_SC_BUILD_
++CCOPTS = -D_GNU_SOURCE -Os -Wstrict-prototypes -Wall -Wno-strict-aliasing #-Werror
++CFLAGS += -fcommon $(CCOPTS) -I../include $(DEFINES) -D_SC_BUILD_
+ 
+ KERNEL_INCLUDE = $(KERNEL_INC)
+ #LIBC_INCLUDE= $(ROOT)tools/mips-linux-uclibc/include/
+@@ -66,9 +66,9 @@
+ 
+ 
+ install:
+-	$(STRIP) tc/tc
++	$(SSTRIP) tc/tc
+ 	cp tc/tc ../../target/usr/sbin
+-	$(STRIP) ip/ip
++	$(SSTRIP) ip/ip
+ 	cp ip/ip ../../target/usr/sbin
+ 	if [ -e ../../target/usr/etc/iproute2 ]; then \
+ 	rm -rf ../../target/usr/etc/iproute2;\

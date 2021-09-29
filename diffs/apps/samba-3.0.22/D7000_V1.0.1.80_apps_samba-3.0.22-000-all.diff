@@ -1,0 +1,91 @@
+diff -urN D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/Makefile D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/Makefile
+--- D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/Makefile	2016-10-11 17:56:30.000000000 +0200
++++ D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/Makefile	2017-04-29 23:33:46.370034371 +0200
+@@ -19,47 +19,22 @@
+ 	ln -sf libntpass.so.0 libntpass.so
+ 	mv libntpass.so.0 ../../target/lib/
+ 	mv libntpass.so ../../target/lib/
+-
++	rm -f ../../target/usr/etc/samba.conf/*
+ 	cp -rf etc/samba ../../target/usr/etc/
+-	cp -rf etc/samba.conf ../../target/usr/etc/
++	cp -f etc/samba.conf/smb.conf etc/samba.conf/smbpasswd ../../target/usr/etc/samba.conf/
+ 	cp source/bin/nmbd $(TARDIR)/usr/sbin/
+-	$(STRIP) $(TARDIR)/usr/sbin/nmbd
++	$(SSTRIP) $(TARDIR)/usr/sbin/nmbd
+ 	cp -f $(TARDIR)/usr/sbin/nmbd ../../target/usr/sbin/nmbd
+-
+-	#cp source/bin/smbmnt $(TARDIR)/usr/sbin/
+-	#$(STRIP) $(TARDIR)/usr/sbin/smbmnt
+-	#cp -f $(TARDIR)/usr/sbin/smbmnt ../../target/usr/sbin/smbmnt
+-
+ 	cp source/bin/smbpasswd $(TARDIR)/usr/sbin/
+-	$(STRIP) $(TARDIR)/usr/sbin/smbpasswd
++	$(SSTRIP) $(TARDIR)/usr/sbin/smbpasswd
+ 	cp -f $(TARDIR)/usr/sbin/smbpasswd ../../target/usr/sbin/smbpasswd
+-
+ 	cp source/bin/smbd $(TARDIR)/usr/sbin/
+-	$(STRIP) $(TARDIR)/usr/sbin/smbd
++	$(SSTRIP) $(TARDIR)/usr/sbin/smbd
+ 	cp -f $(TARDIR)/usr/sbin/smbd ../../target/usr/sbin/smbd
+-
+-	#cp source/bin/smbmount $(TARDIR)/usr/sbin/
+-	#$(STRIP) $(TARDIR)/usr/sbin/smbmount
+-	#cp -f $(TARDIR)/usr/sbin/smbmount ../../target/usr/sbin/smbmount
+-
+-	cp source/bin/smbstatus $(TARDIR)/usr/sbin/
+-	$(STRIP) $(TARDIR)/usr/sbin/smbstatus
+-	cp -f $(TARDIR)/usr/sbin/smbstatus ../../target/usr/sbin/
+-
+ 	rm -rf  $(TARDIR)
+-	
++
+ clean:
+ 	rm -f *.[oa] *~ core
+ 	for i in $(SUB) ; do ${MAKE} -C $$i clean || exit 1; done
+-	rm -f ../../target/lib/libntpass.so*
+-	rm -f ../../target/usr/sbin/nmbd
+-	#rm -f ../../target/usr/sbin/smbmnt
+-	rm -f ../../target/usr/sbin/smbpasswd
+-	rm -f ../../target/usr/sbin/smbd
+-	#rm -f ../../target/usr/sbin/smbmount
+-	rm -f ../../target/usr/sbin/smbstatus
++	rm -f ../../target/lib/libntpass.so* ../../target/usr/sbin/nmbd ../../target/usr/sbin/smbpasswd ../../target/usr/sbin/smbd
+ 
+-#prepare:
+-#	ln -nsf $(shell pwd)/lib_samba.c  $(TOP_DIR)/sercomm/user/rc_new/libapp
+-#	ln -nsf $(shell pwd)/lib_samba.h  $(TOP_DIR)/sercomm/user/rc_new/include
+-	
+diff -urN D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/source/Makefile D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/source/Makefile
+--- D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/source/Makefile	2016-10-11 17:56:30.000000000 +0200
++++ D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/source/Makefile	2017-05-01 21:34:00.400524045 +0200
+@@ -18,16 +18,13 @@
+ mandir=${prefix}/man
+ 
+ TARGET_FS=$(INSTALLDIR)
+-#TARGET_FS=../../../tools/nfs
+ 
+ LIBS+= -lnsl -lcrypt -lresolv  -ldl -liconv # -lattr
+-#CC=../../../tools/mipsel-linux-uclibc/bin/mips-uclibc-gcc
++CFLAGS += -Os -rdynamic -fPIC
+ SHLD=${CC} ${CFLAGS}
+-CFLAGS += -O2 -rdynamic -fPIC
+ CFLAGS += -DSC_BUILD
+ CPPFLAGS= -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE #-I/usr/kerberos/include
+ EXEEXT=
+-#LDFLAGS=  -L../../libiconv-1.8/lib $(LIBS)
+ LDFLAGS=  -L$(ROOT)/apps/libiconv.1.8/lib $(LIBS)
+ LDSHFLAGS=-shared -Wl,-Bsymbolic  #-L../../library/lib
+ WINBIND_NSS_LDSHFLAGS=-shared   #-L../../library/lib
+diff -urN D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/source/tdb/Makefile D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/source/tdb/Makefile
+--- D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/source/tdb/Makefile	2016-10-11 17:56:28.000000000 +0200
++++ D7000_V1.0.1.80_WW_src/Source/apps/samba-3.0.22/source/tdb/Makefile	2017-05-01 21:49:32.193798601 +0200
+@@ -2,7 +2,7 @@
+ # Makefile for tdb directory
+ #
+ 
+-CFLAGS = -DSTANDALONE -DTDB_DEBUG -g -DHAVE_MMAP=1
++CFLAGS += -Os -DSTANDALONE -DHAVE_MMAP=1
+ CC = gcc
+ 
+ ADMINPROGS = tdbdump tdbbackup
