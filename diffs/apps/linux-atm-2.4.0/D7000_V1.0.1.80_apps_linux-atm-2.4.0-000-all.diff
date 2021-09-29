@@ -10,7 +10,7 @@ diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/arpd/Makefile D
  AUTOHEADER = autoheader
  
  INSTALL = /usr/bin/install -c
-@@ -100,8 +100,8 @@
+@@ -101,8 +101,8 @@
  PROGRAMS =  $(sbin_PROGRAMS)
  
  
@@ -30,27 +30,6 @@ diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/arpd/Makefile D
  COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
  LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
  CCLD = $(CC)
-@@ -128,7 +129,7 @@
- 
- DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
- 
--TAR = tar
-+TAR = gtar
- GZIP_ENV = --best
- SOURCES = $(atmarp_SOURCES) $(atmarpd_SOURCES)
- OBJECTS = $(atmarp_OBJECTS) $(atmarpd_OBJECTS)
-diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/arpd/Makefile.in /D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/arpd/Makefile.in
---- D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/arpd/Makefile.in	2020-03-30 05:16:28.000000000 +0200
-+++ D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/arpd/Makefile.in	2019-05-20 05:31:18.000000000 +0200
-@@ -128,7 +129,7 @@
- 
- DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
- 
--TAR = tar
-+TAR = gtar
- GZIP_ENV = --best
- SOURCES = $(atmarp_SOURCES) $(atmarpd_SOURCES)
- OBJECTS = $(atmarp_OBJECTS) $(atmarpd_OBJECTS)
 diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile
 --- D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile	2016-10-11 18:49:15.000000000 +0200
 +++ D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile	2017-05-01 23:52:22.886109498 +0200
@@ -63,7 +42,7 @@ diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile D7
  AUTOHEADER = autoheader
  
  INSTALL = /usr/bin/install -c
-@@ -99,14 +99,14 @@
+@@ -105,14 +105,14 @@
  LTLIBRARIES =  $(lib_LTLIBRARIES)
  
  
@@ -81,27 +60,6 @@ diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile D7
  COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
  LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
  CCLD = $(CC)
-@@ -116,7 +122,7 @@
- 
- DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
- 
--TAR = tar
-+TAR = gtar
- GZIP_ENV = --best
- SOURCES = $(libatm_la_SOURCES)
- OBJECTS = $(libatm_la_OBJECTS)
-diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile.in D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile.in
---- D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile.in	2020-03-30 05:16:29.000000000 +0200
-+++ D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/lib/Makefile.in	2019-05-20 05:31:12.000000000 +0200
-@@ -116,7 +122,7 @@
- 
- DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
- 
--TAR = tar
-+TAR = gtar
- GZIP_ENV = --best
- SOURCES = $(libatm_la_SOURCES)
- OBJECTS = $(libatm_la_OBJECTS)
 diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/Makefile D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/Makefile
 --- D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/Makefile	2016-10-11 17:54:34.000000000 +0200
 +++ D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/Makefile	2017-05-01 23:50:09.824663824 +0200
@@ -146,7 +104,7 @@ diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/Makefile
  AUTOHEADER = autoheader
  
  INSTALL = /usr/bin/install -c
-@@ -100,8 +100,8 @@
+@@ -102,8 +102,8 @@
  LIBRARIES =  $(noinst_LIBRARIES)
  
  
@@ -157,7 +115,7 @@ diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/Makefile
  LDFLAGS = 
  LIBS = 
  libsw_a_LIBADD = 
-@@ -114,7 +114,7 @@
+@@ -116,7 +116,7 @@
  swc_LDFLAGS = 
  LEX_OUTPUT_ROOT = lex.yy
  LEXLIB = -lfl
@@ -166,72 +124,3 @@ diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/Makefile
  COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
  LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
  CCLD = $(CC)
-@@ -124,7 +126,7 @@
- 
- DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
- 
--TAR = tar
-+TAR = gtar
- GZIP_ENV = --best
- SOURCES = $(libsw_a_SOURCES) $(swc_SOURCES)
- OBJECTS = $(libsw_a_OBJECTS) $(swc_OBJECTS)
-diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/Makefile.in D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/Makefile.in
---- D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/Makefile.in	2020-03-30 05:16:29.000000000 +0200
-+++ D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/Makefile.in	2019-05-20 05:31:16.000000000 +0200
-@@ -124,7 +126,7 @@
- 
- DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
- 
--TAR = tar
-+TAR = gtar
- GZIP_ENV = --best
- SOURCES = $(libsw_a_SOURCES) $(swc_SOURCES)
- OBJECTS = $(libsw_a_OBJECTS) $(swc_OBJECTS)
-diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/debug/Makefile D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/debug/Makefile
---- D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/debug/Makefile	2020-03-30 05:16:29.000000000 +0200
-+++ D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/debug/Makefile	2019-05-21 10:23:24.000000000 +0200
-@@ -115,7 +116,7 @@
- 
- DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
- 
--TAR = tar
-+TAR = gtar
- GZIP_ENV = --best
- SOURCES = $(sw_debug_SOURCES)
- OBJECTS = $(sw_debug_OBJECTS)
-diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/debug/Makefile.in /D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/debug/Makefile.in
---- D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/debug/Makefile.in	2020-03-30 05:16:29.000000000 +0200
-+++ D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/debug/Makefile.in	2019-05-21 10:23:24.000000000 +0200
-@@ -115,7 +116,7 @@
- 
- DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
- 
--TAR = tar
-+TAR = gtar
- GZIP_ENV = --best
- SOURCES = $(sw_debug_SOURCES)
- OBJECTS = $(sw_debug_OBJECTS)
-diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/tcp/Makefile D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/tcp/Makefile
---- D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/tcp/Makefile	2020-03-30 05:16:29.000000000 +0200
-+++ D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/tcp/Makefile	2019-05-21 10:23:24.000000000 +0200
-@@ -114,7 +115,7 @@
- 
- DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
- 
--TAR = tar
-+TAR = gtar
- GZIP_ENV = --best
- SOURCES = $(sw_tcp_SOURCES)
- OBJECTS = $(sw_tcp_OBJECTS)
-diff -urN D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/tcp/Makefile.in D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/tcp/Makefile.in
---- D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/tcp/Makefile.in	2020-03-30 05:16:29.000000000 +0200
-+++ D7000_V1.0.1.80_WW_src/Source/apps/linux-atm-2.4.0/src/switch/tcp/Makefile.in	2019-05-21 10:23:24.000000000 +0200
-@@ -114,7 +115,7 @@
- 
- DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
- 
--TAR = tar
-+TAR = gtar
- GZIP_ENV = --best
- SOURCES = $(sw_tcp_SOURCES)
- OBJECTS = $(sw_tcp_OBJECTS)
