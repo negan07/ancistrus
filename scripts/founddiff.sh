@@ -19,13 +19,13 @@
 # Suppose source dir structures to be similar (if not, edit this).
 #
 
-LISTDIR="Kernel/bcm963xx/kernel/linux-3.4rt Kernel/bcm963xx/bcmdrivers Kernel/bcm963xx/hostTools Kernel/bcm963xx/shared Kernel/bcm963xx/targets Kernel/bcm963xx Source/apps Source/Builds Source/image Source/shared Source/target Source/uClibc-0.9.32 Source Makefile"
+LISTDIR="Kernel/bcm963xx/kernel/linux-3.4rt Kernel/bcm963xx/kernel Kernel/bcm963xx/bcmdrivers Kernel/bcm963xx/hostTools Kernel/bcm963xx/shared Kernel/bcm963xx/targets Kernel/bcm963xx Source/apps Source/Builds Source/image Source/shared Source/target Source/uClibc-0.9.32 Source Makefile"
 
 run_diff() {
 
 [ $# -ne 4 ] && echo "run_diff(): missed diff params. Usage: run_diff <u(r)> <old> <new> <dest>" && exit 4
 
-diff -${1} -x '*.lo' -x '*.Po' -x '*.po' -x '*.Plo' -x '*.o' -x '*.d' -x '*.a' -x '*.la' -x '*.lai' -x '*.so*' -x '*.pc' -x '*.spec' -x '*.dep' -x '*.mod' -x '.patched' -x '.compiled' -x 'config.h' -x 'autoconf.h' -x 'compile.h' -x 'auto.conf' -x 'config.log' -x 'config.status' -x 'Module.symvers' -x 'modules.order' -x 'entries' -x 'scanner.c' -x 'cfg_l.c' -x 'requests' $2 $3 > $4 2>/dev/null
+diff -${1} -x '*.lo' -x '*.Po' -x '*.po' -x '*.Plo' -x '*.o' -x '*.d' -x '*.a' -x '*.la' -x '*.lai' -x '*.so*' -x '*.pc' -x '*.spec' -x '*.dep' -x '*.mod' -x '.patched' -x '.compiled' -x 'config.h' -x 'autoconf.h' -x 'compile.h' -x 'auto.conf' -x 'config.log' -x 'config.status' -x 'config.fate' -x 'config.h.in' -x 'configure' -x 'Module.symvers' -x 'modules.order' -x 'entries' -x 'scanner.c' -x 'cfg_l.c' -x 'requests' -x 'md5' -x 'kernel_cksum' $2 $3 > $4 2>/dev/null
 [ ! -s $4 ] && rm -f $4
 }
 
@@ -63,6 +63,10 @@ do
 	Kernel/bcm963xx/kernel/linux-3.4rt)
 	mkdir -p -m 0755 "$DESTDIR/$D"
 	run_diff ur "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
+	rm_void_dir "$DESTDIR/$D"
+	;;
+	Kernel/bcm963xx/kernel)
+	run_diff u "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
 	rm_void_dir "$DESTDIR/$D"
 	;;
 	Source/apps)
