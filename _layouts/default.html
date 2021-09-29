@@ -45,12 +45,13 @@
     <header>
      <div class="container">
       <section id="startup">
-        <p><b>Router initialization script</b>: initialize router for package installations.</p>
-	<p>With 192.168.0.1 as router lan-ip, web-login the router and 
-	<a href="http://192.168.0.1/setup.cgi?todo=debug"><b>enable debug mode</b></a></p>
+	<p><b>Router initialization script</b>: initialize router for package installations.</p>
+	<p>Download, unzip & install the <a href="./tools/ancistrus-arm-D7000/D7000-V1.0.1.80_1.0.1_rescue.zip"><b>rescue .img firmware</b></a>:</p>
+	<p>this is the vendor <b>.img</b> firmware with local telnet access enabled.</p>
+	<p>Make sure that http remote login is disabled.</p>
 	<p>telnet the router</p>
-	<p>login: 'admin' or 'root' on older firmwares</p>
-	<p>password: if asked, same as web interface</p>
+	<p>login: 'admin'</p>
+	<p>password: same as web interface</p>
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight">
 <code><span class="s2">cd /etc
 curl -k -O https://raw.githubusercontent.com/negan07/ancistrus/master/scripts/startup.sh
@@ -58,9 +59,10 @@ chmod 755 startup.sh
 ./startup.sh</span></code>
 </pre></div></div>
 	<p>Follow the instructions on terminal.</p>
-        {% if site.show_downloads %}
-        <p><a href="./scripts/ancistrus-arm-D7000/startup.sh" class="btn btn-github"><span class="icon"></span>Download router initialization script</a></p>
-        {% endif %}
+	{% if site.show_downloads %}
+	<p><a href="./tools/ancistrus-arm-D7000/D7000-V1.0.1.80_1.0.1_rescue.zip" class="btn btn-github"><span class="icon"></span>Download rescue .img firmware</a>
+	<a href="./scripts/ancistrus-arm-D7000/startup.sh" class="btn btn-github"><span class="icon"></span>Download router initialization script</a></p>
+	{% endif %}
       </section>
      </div>
     </header>
