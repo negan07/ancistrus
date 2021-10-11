@@ -1,6 +1,6 @@
-diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/options.c work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/options.c
---- work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/options.c
-+++ work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/options.c
+diff -urN work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/options.c work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/options.c
+--- work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/options.c
++++ work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/options.c
 @@ -61,7 +61,7 @@
  #include "ssl_verify.h"
  #include "platform.h"

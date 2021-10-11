@@ -1,7 +1,7 @@
-diff -urN work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in
---- work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in	2017-09-26 11:27:50.000000000 +0200
-+++ work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in	2017-11-28 22:53:11.029489996 +0100
-@@ -470,7 +470,7 @@
+diff -urN work/openvpn-2.5.4/openvpn-2.5.4/Makefile.in work/openvpn-2.5.4/openvpn-2.5.4/Makefile.in
+--- work/openvpn-2.5.4/openvpn-2.5.4/Makefile.in	2017-09-26 11:27:50.000000000 +0200
++++ work/openvpn-2.5.4/openvpn-2.5.4/Makefile.in	2017-11-28 22:53:11.029489996 +0100
+@@ -471,7 +471,7 @@
  @GIT_CHECKOUT_TRUE@BUILT_SOURCES = \
  @GIT_CHECKOUT_TRUE@	config-version.h
  
@@ -10,7 +10,7 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in work/openvpn-2.5.2/openvp
  dist_doc_DATA = \
  	README \
  	README.IPv6 \
-@@ -494,8 +494,8 @@
+@@ -495,8 +495,8 @@
  	config-msvc.h \
  	config-msvc-version.h.in
  
@@ -21,7 +21,7 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in work/openvpn-2.5.2/openvp
  all: $(BUILT_SOURCES) config.h
  	$(MAKE) $(AM_MAKEFLAGS) all-recursive
  
-@@ -515,15 +515,15 @@
+@@ -516,15 +516,15 @@
  	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile'; \
  	$(am__cd) $(top_srcdir) && \
  	  $(AUTOMAKE) --foreign Makefile
@@ -46,7 +46,7 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in work/openvpn-2.5.2/openvp
  
  $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
  	$(SHELL) ./config.status --recheck
-@@ -534,9 +534,9 @@
+@@ -535,9 +535,9 @@
  	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
  $(am__aclocal_m4_deps):
  
@@ -59,7 +59,7 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in work/openvpn-2.5.2/openvp
  
  stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
  	@rm -f stamp-h1
-@@ -909,7 +909,7 @@
+@@ -916,7 +916,7 @@
  	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
  	done
  install: $(BUILT_SOURCES)
@@ -68,10 +68,10 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/Makefile.in work/openvpn-2.5.2/openvp
  install-exec: install-exec-recursive
  install-data: install-data-recursive
  uninstall: uninstall-recursive
-diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/Makefile.in work/openvpn-2.5.2/openvpn-2.5.2/src/Makefile.in
---- work/openvpn-2.5.2/openvpn-2.5.2/src/Makefile.in	2017-09-26 11:27:50.000000000 +0200
-+++ work/openvpn-2.5.2/openvpn-2.5.2/src/Makefile.in	2017-11-28 22:53:11.029489996 +0100
-@@ -381,7 +381,7 @@
+diff -urN work/openvpn-2.5.4/openvpn-2.5.4/src/Makefile.in work/openvpn-2.5.4/openvpn-2.5.4/src/Makefile.in
+--- work/openvpn-2.5.4/openvpn-2.5.4/src/Makefile.in	2017-09-26 11:27:50.000000000 +0200
++++ work/openvpn-2.5.4/openvpn-2.5.4/src/Makefile.in	2017-11-28 22:53:11.029489996 +0100
+@@ -382,7 +382,7 @@
  MAINTAINERCLEANFILES = \
  	$(srcdir)/Makefile.in
  

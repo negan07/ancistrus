@@ -1,6 +1,6 @@
-diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/forward.c work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/forward.c
---- work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/forward.c	2017-09-26 11:27:35.000000000 +0200
-+++ work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/forward.c	2017-11-28 17:45:53.442033301 +0100
+diff -urN work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/forward.c work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/forward.c
+--- work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/forward.c	2017-09-26 11:27:35.000000000 +0200
++++ work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/forward.c	2017-11-28 17:45:53.442033301 +0100
 @@ -46,10 +46,111 @@
  #include "memdbg.h"
  
@@ -155,9 +155,9 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/forward.c work/openvpn-2.
              return;
          }
          if (event_timeout_trigger(&c->c2.scheduled_exit, &c->c2.timeval, ETT_DEFAULT))
-diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/init.c work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/init.c
---- work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/init.c	2017-09-26 11:27:37.000000000 +0200
-+++ work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/init.c	2017-11-28 17:33:17.499217703 +0100
+diff -urN work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/init.c work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/init.c
+--- work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/init.c	2017-09-26 11:27:37.000000000 +0200
++++ work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/init.c	2017-11-28 17:33:17.499217703 +0100
 @@ -57,6 +57,8 @@ 
  #include "memdbg.h"
  
@@ -167,7 +167,7 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/init.c work/openvpn-2.5.2
  static struct context *static_context; /* GLOBAL */
  static const char *saved_pid_file_name; /* GLOBAL */
  
-@@ -3632,6 +3634,11 @@
+@@ -3635,6 +3637,11 @@
  static void
  do_close_link_socket(struct context *c)
  {
@@ -179,9 +179,9 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/init.c work/openvpn-2.5.2
      if (c->c2.link_socket && c->c2.link_socket_owned)
      {
          link_socket_close(c->c2.link_socket);
-diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/socket.c work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/socket.c
---- work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/socket.c	2017-09-26 11:27:35.000000000 +0200
-+++ work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/socket.c	2017-11-28 17:24:06.732229909 +0100
+diff -urN work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/socket.c work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/socket.c
+--- work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/socket.c	2017-09-26 11:27:35.000000000 +0200
++++ work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/socket.c	2017-11-28 17:24:06.732229909 +0100
 @@ -2926,6 +2926,39 @@
  #ifndef IF_NAMESIZE
  #define IF_NAMESIZE 16
@@ -222,9 +222,9 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/socket.c work/openvpn-2.5
  
  const char *
  print_link_socket_actual_ex(const struct link_socket_actual *act,
-diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/socket.h work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/socket.h
---- work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/socket.h	2017-09-26 11:27:35.000000000 +0200
-+++ work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/socket.h	2017-11-28 17:07:52.484306253 +0100
+diff -urN work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/socket.h work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/socket.h
+--- work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/socket.h	2017-09-26 11:27:35.000000000 +0200
++++ work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/socket.h	2017-11-28 17:07:52.484306253 +0100
 @@ -392,6 +392,8 @@
  
  const char *print_link_socket_actual(const struct link_socket_actual *act,
@@ -234,9 +234,9 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/socket.h work/openvpn-2.5
  
  
  #define IA_EMPTY_IF_UNDEF (1<<0)
-diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/ssl.c work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/ssl.c
---- work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/ssl.c	2017-09-26 11:27:37.000000000 +0200
-+++ work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/ssl.c	2017-11-28 17:15:48.900273424 +0100
+diff -urN work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/ssl.c work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/ssl.c
+--- work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/ssl.c	2017-09-26 11:27:37.000000000 +0200
++++ work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/ssl.c	2017-11-28 17:15:48.900273424 +0100
 @@ -64,6 +64,8 @@
  
  #include "memdbg.h"
@@ -246,7 +246,7 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/ssl.c work/openvpn-2.5.2/
  #ifdef MEASURE_TLS_HANDSHAKE_STATS
  
  static int tls_handshake_success; /* GLOBAL */
-@@ -2558,6 +2558,20 @@
+@@ -2564,6 +2564,20 @@
          verify_final_auth_checks(multi, session);
      }
  
@@ -267,7 +267,7 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/ssl.c work/openvpn-2.5.2/
      /* check options consistency */
      if (!session->opt->disable_occ
          && !options_cmp_equal(options, session->opt->remote_options))
-@@ -2654,6 +2654,7 @@
+@@ -2660,6 +2660,7 @@
      bool active = false;
      struct key_state *ks = &session->key[KS_PRIMARY];      /* primary key */
      struct key_state *ks_lame = &session->key[KS_LAME_DUCK]; /* retiring key */
@@ -275,7 +275,7 @@ diff -urN work/openvpn-2.5.2/openvpn-2.5.2/src/openvpn/ssl.c work/openvpn-2.5.2/
  
      /* Make sure we were initialized and that we're not in an error state */
      ASSERT(ks->state != S_UNDEF);
-@@ -2999,6 +2999,9 @@
+@@ -3005,6 +3005,9 @@
  error:
      tls_clear_error();
      ks->state = S_ERROR;
