@@ -1,0 +1,51 @@
+--- work/c-ares-1.17.2/c-ares-1.17.2/configure
++++ work/c-ares-1.17.2/c-ares-1.17.2/configure
+@@ -1068,7 +1068,7 @@ CXXFLAGS
+ CCC
+ LT_SYS_LIBRARY_PATH
+ CXXCPP'
+-ac_subdirs_all='test'
++ac_subdirs_all=''
+ 
+ # Initialize some variables set by options.
+ ac_init_help=
+@@ -31909,16 +31909,7 @@ fi
+ $as_echo "$build_tests" >&6; }
+ 
+ 
+-BUILD_SUBDIRS="include src docs"
+-if test "x$build_tests" = "xyes" ; then
+-
+-
+-subdirs="$subdirs test"
+-
+-  BUILD_SUBDIRS="${BUILD_SUBDIRS} test"
+-fi
+-
+-
++BUILD_SUBDIRS="include src"
+ 
+ ac_config_files="$ac_config_files Makefile include/Makefile src/Makefile src/lib/Makefile src/tools/Makefile docs/Makefile libcares.pc"
+ 
+--- work/c-ares-1.17.2/c-ares-1.17.2/Makefile.in
++++ work/c-ares-1.17.2/c-ares-1.17.2/Makefile.in
+@@ -403,7 +403,7 @@ EXTRA_DIST = AUTHORS CHANGES README.care
+ 
+ CLEANFILES = $(PDFPAGES) $(HTMLPAGES)
+ DISTCLEANFILES = include/ares_build.h
+-DIST_SUBDIRS = include src test docs
++DIST_SUBDIRS = include src
+ SUBDIRS = @BUILD_SUBDIRS@
+ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = libcares.pc
+--- work/c-ares-1.17.2/c-ares-1.17.2/src/Makefile.in
++++ work/c-ares-1.17.2/c-ares-1.17.2/src/Makefile.in
+@@ -337,7 +337,7 @@ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ EXTRA_DIST = CMakeLists.txt
+-SUBDIRS = lib tools
++SUBDIRS = lib
+ all: all-recursive
+ 
+ .SUFFIXES:

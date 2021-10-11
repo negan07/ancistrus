@@ -227,7 +227,7 @@ DIRLIST				+= $(OPENSSL)
 TARLIST				+= $(TAR_$(OPENSSL))
 # ARES
 ARES_NAME			:= c-ares
-VER_$(ARES_NAME)		:= 1.17.1
+VER_$(ARES_NAME)		:= 1.17.2
 ARES				:= $(ARES_NAME)-$(VER_$(ARES_NAME))
 NAME_$(ARES)			:= $(ARES_NAME)$(DBG)
 SUBVER_$(ARES)			:= 
