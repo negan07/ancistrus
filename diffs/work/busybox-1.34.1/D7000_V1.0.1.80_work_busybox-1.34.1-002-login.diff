@@ -1,0 +1,96 @@
+diff -urN work/busybox-1.34.1/loginutils/getty.c work/busybox-1.34.1/loginutils/getty.c
+--- work/busybox-1.34.1/loginutils/getty.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.34.1/loginutils/getty.c	2018-10-31 22:04:11.047427933 +0100
+@@ -76,7 +76,7 @@
+  * and for line editing at the same time.
+  */
+ #undef  _PATH_LOGIN
+-#define _PATH_LOGIN "/bin/login"
++#define _PATH_LOGIN "/bin/sc_cli"
+ 
+ /* Displayed before the login prompt.
+  * If ISSUE is not defined, getty will never display the contents of the
+diff -urN work/busybox-1.34.1/loginutils/login.c work/busybox-1.34.1/loginutils/login.c
+--- work/busybox-1.34.1/loginutils/login.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.34.1/loginutils/login.c	2018-10-31 22:08:27.742497258 +0100
+@@ -487,6 +487,44 @@
+ 		login_pam_end(pamh);
+ 		safe_strncpy(username, "UNKNOWN", sizeof(username));
+ #else /* not PAM */
++#define SC_HACK
++#ifdef SC_HACK
++        {
++            FILE *fp;
++            char name[32], pass[32], buffer[128]="";
++            struct passwd pw_copy;
++            
++            pw=&pw_copy;
++            memset(pw, 0, sizeof(struct passwd));
++            pw->pw_uid              =0;
++            pw->pw_gid              =0;
++            pw->pw_dir              =(char*)"/";
++                    // password is not set
++                    if(access("/etc/htpasswd",F_OK)!=0) {
++					system("/usr/sbin/nvram get http_username > /tmp/tmp_htpasswd"); 
++					system("/usr/sbin/nvram get http_password >> /tmp/tmp_htpasswd");
++    	    				if((fp=fopen("/tmp/tmp_htpasswd","r")) == NULL) return 0;
++						while(fgets(buffer,sizeof(buffer), fp)!=NULL && feof(fp)!=EOF) {
++						if(strstr(buffer, "http_username=")) sscanf(buffer,"http_username= %s", name);
++						if(strstr(buffer, "http_password=")) sscanf(buffer,"http_password= %s", pass);
++						}
++					fclose(fp);
++					unlink("/tmp/tmp_htpasswd");	
++					pw->pw_name     = name;
++					pw->pw_passwd   = pass;
++                    }
++		     else {
++                    			fp=fopen("/etc/htpasswd","r");
++                    			fread(buffer,1,128,fp);
++                    			sscanf(buffer,"%[^:]:%s",name, pass);
++                    			fclose(fp);
++		     }
++            pw->pw_name         =name;
++            pw->pw_passwd       =pass;
++            /*  check username      */
++            if(strcmp(username,name)!=0) goto auth_failed;
++        }
++#else
+ 		pw = getpwnam(username);
+ 		if (!pw) {
+ 			strcpy(username, "UNKNOWN");
+@@ -506,6 +544,7 @@
+ 		if (!pw->pw_passwd[0])
+ 			break;
+  fake_it:
++#endif /*SC_HACK*/
+ 		/* Password reading and authorization takes place here.
+ 		 * Note that reads (in no-echo mode) trash tty attributes.
+ 		 * If we get interrupted by SIGALRM, we need to restore attrs.
+diff -urN work/busybox-1.34.1/libbb/correct_password.c work/busybox-1.34.1/libbb/correct_password.c
+--- work/busybox-1.34.1/libbb/correct_password.c	2018-07-02 13:23:06.000000000 +0200
++++ work/busybox-1.34.1/libbb/correct_password.c	2018-10-31 22:02:29.027780771 +0100
+@@ -70,7 +70,10 @@
+ int FAST_FUNC check_password(const struct passwd *pw, const char *plaintext)
+ {
+ 	IF_FEATURE_SHADOWPASSWDS(char buffer[SHADOW_BUFSIZE];)
++#define SC_HACK
++#ifndef SC_HACK
+ 	char *encrypted;
++#endif
+ 	const char *pw_pass;
+ 	int r;
+ 
+@@ -79,9 +82,13 @@
+ 		return CHECKPASS_PW_HAS_EMPTY_PASSWORD;
+ 	}
+ 
++#ifndef SC_HACK
+ 	encrypted = pw_encrypt(plaintext, /*salt:*/ pw_pass, 1);
+ 	r = (strcmp(encrypted, pw_pass) == 0);
+ 	free(encrypted);
++#else
++    r = (strcmp(plaintext, pw_pass) == 0);
++#endif
+ 	return r;
+ }
+ 
