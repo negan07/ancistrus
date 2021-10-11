@@ -1,6 +1,6 @@
-diff -urN work/openssh-8.6p1/openssh-8.6p1/log.c work/openssh-8.6p1/openssh-8.6p1/log.c
---- work/openssh-8.6p1/openssh-8.6p1/log.c	1970-01-01 01:00:00.000000000 +0100
-+++ work/openssh-8.6p1/openssh-8.6p1/log.c	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/openssh-8.8p1/openssh-8.8p1/log.c work/openssh-8.8p1/openssh-8.8p1/log.c
+--- work/openssh-8.8p1/openssh-8.8p1/log.c	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-8.8p1/openssh-8.8p1/log.c	2018-01-05 12:00:11.000000000 +0100
 @@ -53,6 +53,8 @@
  #include "log.h"
  #include "match.h"
@@ -18,8 +18,8 @@ diff -urN work/openssh-8.6p1/openssh-8.6p1/log.c work/openssh-8.6p1/openssh-8.6p
 +	/* int pri = LOG_INFO; */
  	int saved_errno = errno;
  	log_handler_fn *tmp_handler;
- 
-@@ -354,34 +356,34 @@
+ 	const char *progname = argv0 != NULL ? argv0 : __progname;
+@@ -355,34 +357,34 @@
  	case SYSLOG_LEVEL_FATAL:
  		if (!log_on_stderr)
  			txt = "fatal";
@@ -62,15 +62,15 @@ diff -urN work/openssh-8.6p1/openssh-8.6p1/log.c work/openssh-8.6p1/openssh-8.6p
  		break;
  	}
  	if (txt != NULL && log_handler == NULL) {
-@@ -409,11 +411,11 @@
+@@ -412,11 +414,11 @@
  	} else {
  #if defined(HAVE_OPENLOG_R) && defined(SYSLOG_DATA_INIT)
- 		openlog_r(argv0 ? argv0 : __progname, LOG_PID, log_facility, &sdata);
+ 		openlog_r(progname, LOG_PID, log_facility, &sdata);
 -		syslog_r(pri, &sdata, "%.500s", fmtbuf);
 +		syslog_r(LOG_INFO, &sdata, "%.500s", fmtbuf);
  		closelog_r(&sdata);
  #else
- 		openlog(argv0 ? argv0 : __progname, LOG_PID, log_facility);
+ 		openlog(progname, LOG_PID, log_facility);
 -		syslog(pri, "%.500s", fmtbuf);
 +		NETGEAR_SYSLOG("10 00[SSHD] %.500s", fmtbuf);
  		closelog();

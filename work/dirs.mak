@@ -448,12 +448,12 @@ DIRLIST				+= $(MINIHTTPD)
 TARLIST				+= $(TAR_$(MINIHTTPD))
 # OPENSSH
 OPEN_SSH_NAME			:= openssh
-VER_$(OPEN_SSH_NAME)		:= 8.6p1
+VER_$(OPEN_SSH_NAME)		:= 8.8p1
 OPEN_SSH			:= $(OPEN_SSH_NAME)-$(VER_$(OPEN_SSH_NAME))
 NAME_$(OPEN_SSH)		:= $(OPEN_SSH_NAME)$(DBG)
 SUBVER_$(OPEN_SSH)		:= 
 VER_$(OPEN_SSH)			:= $(VER_$(OPEN_SSH_NAME))$(SUBVER_$(OPEN_SSH))
-DL_$(OPEN_SSH)			:= https://cloudflare.cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable
+DL_$(OPEN_SSH)			:= https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable
 TAR_$(OPEN_SSH)			:= $(OPEN_SSH).tar.gz
 HOME_$(OPEN_SSH)		:= https://www.openssh.com/
 LIC_$(OPEN_SSH)			:= BSD, ISC

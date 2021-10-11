@@ -1,7 +1,7 @@
-diff -urN work/openssh-8.6p1/rc_ssh work/openssh-8.6p1/rc_ssh
---- work/openssh-8.6p1/rc_ssh	1970-01-01 01:00:00.000000000 +0100
-+++ work/openssh-8.6p1/rc_ssh	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,228 @@
+diff -urN work/openssh-8.8p1/rc_ssh work/openssh-8.8p1/rc_ssh
+--- work/openssh-8.8p1/rc_ssh	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-8.8p1/rc_ssh	2018-01-05 12:00:11.000000000 +0100
+@@ -0,0 +1,227 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -136,7 +136,6 @@ diff -urN work/openssh-8.6p1/rc_ssh work/openssh-8.6p1/rc_ssh
 +	rm -f /tmp/moduli.all
 +	mv -f /tmp/moduli.safe ${KEYSDIR}/moduli
 +	sync
-+	echo 1932 >/proc/sys/vm/min_free_kbytes
 +}
 +
 +zipkeys() {
