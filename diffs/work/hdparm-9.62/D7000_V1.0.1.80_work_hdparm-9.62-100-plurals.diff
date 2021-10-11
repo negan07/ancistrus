@@ -1,0 +1,19 @@
+--- work/hdparm-9.62/hdparm.c	2020-11-21 16:07:19.000000000 +0100
++++ work/hdparm-9.62/hdparm.c	2021-08-19 01:32:44.000000000 +0200
+@@ -625,14 +625,14 @@
+ 				unsigned int secs = standby * 5;
+ 				unsigned int mins = secs / 60;
+ 				secs %= 60;
+-				if (mins)	  printf("%u minutes", mins);
++				if (mins)	  printf("%u minute%s", mins, mins==1 ? "" : "s");
+ 				if (mins && secs) printf(" + ");
+ 				if (secs)	  printf("%u seconds", secs);
+ 			} else if (standby <= 251) {
+ 				unsigned int mins = (standby - 240) * 30;
+ 				unsigned int hrs  = mins / 60;
+ 				mins %= 60;
+-				if (hrs)	  printf("%u hours", hrs);
++				if (hrs)	  printf("%u hour%s", hrs, hrs==1 ? "" : "s");
+ 				if (hrs && mins)  printf(" + ");
+ 				if (mins)	  printf("%u minutes", mins);
+ 			} else {
