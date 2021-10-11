@@ -1,0 +1,62 @@
+diff -urN work/bftpd/Makefile work/bftpd/Makefile
+--- work/bftpd/Makefile
++++ work/bftpd/Makefile
+@@ -0,0 +1,58 @@
++include ../Rules.mak
++
++BINS			:= $(BFTPD)/bftpd
++STARTUP			:= rc_ftpd
++BFTPD_CONF		:= bftpd.conf.sample
++
++all: config
++	$(MAKE) -C $(BFTPD)
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(BFTPD) && CFLAGS="$(CFLAGS) -Os -fcommon" && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --without-libz --without-pam --without-pax --without-debug
++
++install: control
++	$(SSTRIP) $(BINS)
++	for D in $(ETCDIR) $(BINDIR); do install -m 0755 -d $$D; done
++	install -m 0644 $(BFTPD)/$(BFTPD_CONF) $(ETCDIR)
++	install -m 0755 $(BINS) $(BINDIR)
++
++clean:
++	$(MAKE) -C $(BFTPD) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(BFTPD) distclean
++
++ifndef BUILD
++control:
++else
++PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
++PRERM			:= $(CTRL_DIR)/prerm
++
++control: preinst postinst prerm
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "cp -f $(USRETC)/$(BFTPD_CONF) $(TMPETC)/" >> $(POSTINST)
++	@echo "$(RC) ftpd restart" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++
++prerm:
++	@echo "#!/bin/sh" > $(PRERM)
++	@echo "$(USRSBINRCAPP)/$(STARTUP) stop >/dev/null 2>&1" >> $(PRERM)
++	@echo "rm -f $(TMPETC)/bftpd.conf* $(TMPETC)/ftpdpassword" >> $(PRERM)
++	@echo "exit 0" >> $(PRERM)
++endif
++
