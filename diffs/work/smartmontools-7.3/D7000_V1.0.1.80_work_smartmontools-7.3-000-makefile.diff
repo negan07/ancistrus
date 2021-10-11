@@ -41,8 +41,8 @@ diff -urN work/smartmontools-7.3/Makefile work/smartmontools-7.3/Makefile
 +	$(MAKE) -C $(SMONTOOLS) distclean
 +
 +smartd_conf:
-+	@echo "DEVICESCAN -a -d removable -n standby,q -o off -C 1 -U 1 -W 0,0,50" > $(SMARTD_CONF)
-+	@for L in $$(echo {a..h}); do echo "#/dev/sd$$L -a -d removable -n standby,q -o off -C 1 -U 1 -W 0,0,50" >> $(SMARTD_CONF); done
++	@echo "DEVICESCAN -a -d removable -n standby,q -o off -C 1 -U 1 -W 0,0,55" > $(SMARTD_CONF)
++	@for L in $$(echo {a..h}); do echo "#/dev/sd$$L -a -d removable -n standby,q -o off -C 1 -U 1 -W 0,0,55" >> $(SMARTD_CONF); done
 +
 +ifndef BUILD
 +control:
