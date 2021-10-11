@@ -1,5 +1,5 @@
---- work/curl-7.77.0/curl-7.77.0/Makefile.am
-+++ work/curl-7.77.0/curl-7.77.0/Makefile.am
+--- work/curl-7.79.1/curl-7.79.1/Makefile.am
++++ work/curl-7.79.1/curl-7.79.1/Makefile.am
 @@ -195,7 +195,7 @@ CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP)
  bin_SCRIPTS = curl-config
  
@@ -18,8 +18,8 @@
  
  # We extend the standard uninstall with a custom hook:
  uninstall-hook:
---- work/curl-7.77.0/curl-7.77.0/src/Makefile.am
-+++ work/curl-7.77.0/curl-7.77.0/src/Makefile.am
+--- work/curl-7.79.1/curl-7.79.1/src/Makefile.am
++++ work/curl-7.79.1/curl-7.79.1/src/Makefile.am
 @@ -43,7 +43,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
  
  bin_PROGRAMS = curl
@@ -29,7 +29,7 @@
  
  if USE_CPPFLAG_CURL_STATICLIB
  AM_CPPFLAGS += -DCURL_STATICLIB
-@@ -108,7 +108,6 @@ if USE_MANUAL
+@@ -105,7 +105,6 @@ if USE_MANUAL
  # Here are the stuff to create a built-in manual
  
  $(MANPAGE):
