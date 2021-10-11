@@ -10,3 +10,15 @@
    }
  
    const char * name = argv[argc-1];
+--- work/smartmontools-7.3/smartmontools-7.3/nvmeprint.cpp	2021-06-04 17:46:36.000000000 +0200
++++ work/smartmontools-7.3/smartmontools-7.3/nvmeprint.cpp	2021-10-11 23:15:23.932919017 +0200
+@@ -202,7 +202,8 @@
+   }
+ 
+   // SMART/Health Information is mandatory
+-  jglb["smart_support"] += { {"available", true}, {"enabled", true} };
++  jglb["smart_support"]["available"] = true;
++  jglb["smart_support"]["enabled"] = true;
+ 
+   jout_startup_datetime("Local Time is:                      ");
+ }

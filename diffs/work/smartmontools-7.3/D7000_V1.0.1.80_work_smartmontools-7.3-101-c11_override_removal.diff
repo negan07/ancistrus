@@ -795,7 +795,7 @@
  
  private:
    //Device Host number
-@@ -3529,9 +3529,9 @@ public:
+@@ -3532,9 +3532,9 @@ public:
    win_nvme_device(smart_interface * intf, const char * dev_name,
      const char * req_type, unsigned nsid);
  
@@ -807,7 +807,7 @@
  
    bool open_scsi(int n);
  
-@@ -3726,9 +3726,9 @@ public:
+@@ -3729,9 +3729,9 @@ public:
    win10_nvme_device(smart_interface * intf, const char * dev_name,
      const char * req_type, unsigned nsid);
  
@@ -819,7 +819,7 @@
  
  private:
    bool open(int phydrive, int logdrive);
-@@ -3900,31 +3900,31 @@ class win_smart_interface
+@@ -3903,27 +3903,27 @@ class win_smart_interface
  : public /*implements*/ smart_interface
  {
  public:
@@ -828,11 +828,6 @@
  
 -  virtual std::string get_app_examples(const char * appname) override;
 +  virtual std::string get_app_examples(const char * appname);
- 
- #ifndef __CYGWIN__
--  virtual int64_t get_timer_usec() override;
-+  virtual int64_t get_timer_usec();
- #endif
  
 -  virtual bool disable_system_auto_standby(bool disable) override;
 +  virtual bool disable_system_auto_standby(bool disable);
