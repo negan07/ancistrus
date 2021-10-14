@@ -635,12 +635,12 @@ DIRLIST				+= $(ID3TAG)
 TARLIST				+= $(TAR_$(ID3TAG))
 # EXIF
 EXIF_NAME			:= libexif
-VER_$(EXIF_NAME)		:= 0.6.22
+VER_$(EXIF_NAME)		:= 0.6.23
 EXIF				:= $(EXIF_NAME)-$(VER_$(EXIF_NAME))
 NAME_$(EXIF)			:= $(EXIF_NAME)$(DBG)
 SUBVER_$(EXIF)			:= 
 VER_$(EXIF)			:= $(VER_$(EXIF_NAME))$(SUBVER_$(EXIF))
-DL_$(EXIF)			:= https://github.com/libexif/libexif/releases/download/libexif-0_6_22-release
+DL_$(EXIF)			:= https://github.com/libexif/libexif/releases/download/v$(VER_$(EXIF_NAME))
 TAR_$(EXIF)			:= $(EXIF).tar.gz
 HOME_$(EXIF)			:= https://github.com/libexif/libexif/
 LIC_$(EXIF)			:= LGPLv2.1
