@@ -1,0 +1,91 @@
+diff -urN D7000_V1.0.1.82_WW_src/Source/apps/radvd-1.1/Makefile D7000_V1.0.1.82_WW_src/Source/apps/radvd-1.1/Makefile
+--- D7000_V1.0.1.82_WW_src/Source/apps/radvd-1.1/Makefile	2016-10-11 17:54:35.000000000 +0200
++++ D7000_V1.0.1.82_WW_src/Source/apps/radvd-1.1/Makefile	2017-05-01 21:49:32.193798601 +0200
+@@ -112,25 +112,23 @@
+ GZIP_ENV = --best
+ distuninstallcheck_listfiles = find . -type f -print
+ distcleancheck_listfiles = find . -type f -print
+-ACLOCAL = ${SHELL} /work/Platform/DG834GV_26/code/projects/DG834_V4/Neutral2/Source/apps/radvd-1.1/missing --run aclocal-1.9
++ACLOCAL = ${SHELL} ./missing --run aclocal-1.9
+ AMDEP_FALSE = #
+ AMDEP_TRUE = 
+-AMTAR = ${SHELL} /work/Platform/DG834GV_26/code/projects/DG834_V4/Neutral2/Source/apps/radvd-1.1/missing --run tar
+-AUTOCONF = ${SHELL} /work/Platform/DG834GV_26/code/projects/DG834_V4/Neutral2/Source/apps/radvd-1.1/missing --run autoconf
+-AUTOHEADER = ${SHELL} /work/Platform/DG834GV_26/code/projects/DG834_V4/Neutral2/Source/apps/radvd-1.1/missing --run autoheader
+-AUTOMAKE = ${SHELL} /work/Platform/DG834GV_26/code/projects/DG834_V4/Neutral2/Source/apps/radvd-1.1/missing --run automake-1.9
++AMTAR = ${SHELL} ./missing --run tar
++AUTOCONF = ${SHELL} ./missing --run autoconf
++AUTOHEADER = ${SHELL} ./missing --run autoheader
++AUTOMAKE = ${SHELL} ./missing --run automake-1.9
+ AWK = gawk
+-#CC = /work/Platform/DG834GV_26/code/projects/DG834_V4/Neutral2/Source/tools/mips-linux-uclibc/bin/mips-uclibc-gcc
+ CC = $(CROSS)gcc
+ CCDEPMODE = depmode=gcc3
+-CFLAGS = -g -O2 -Wall -Wpointer-arith  -Wcast-qual -Wcast-align -Wconversion \
+-	-Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations
++CFLAGS += -Os -Wall
+ ifeq ($(IP6_6RD_CE),1)
+ CFLAGS+= -DIP6_6RD_CE
+ CFLAGS += -I../nvram -L../nvram -lscnvram 
+ endif 
+ 
+-CPP = /work/Platform/DG834GV_26/code/projects/DG834_V4/Neutral2/Source/tools/mips-linux-uclibc/bin/mips-uclibc-gcc -E
++CPP = /opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-unknown-linux-uclibcgnueabi-gcc -E
+ CPPFLAGS = 
+ CYGPATH_W = echo
+ DEFS = -DPATH_RADVD_CONF=\"$(PATH_RADVD_CONF)\" \
+@@ -158,7 +156,7 @@
+ LN = /bin/ln
+ LOG_FACILITY = LOG_DAEMON
+ LTLIBOBJS = 
+-MAKEINFO = ${SHELL} /work/Platform/DG834GV_26/code/projects/DG834_V4/Neutral2/Source/apps/radvd-1.1/missing --run makeinfo
++MAKEINFO = ${SHELL} ./missing --run makeinfo
+ OBJEXT = o
+ PACKAGE = radvd
+ PACKAGE_BUGREPORT = 
+@@ -202,7 +200,7 @@
+ host_vendor = unknown
+ includedir = ${prefix}/include
+ infodir = ${prefix}/info
+-install_sh = /work/Platform/DG834GV_26/code/projects/DG834_V4/Neutral2/Source/apps/radvd-1.1/install-sh
++install_sh = ./install-sh
+ libdir = ${exec_prefix}/lib
+ libexecdir = ${exec_prefix}/libexec
+ localstatedir = ${prefix}/var
+diff -urN D7000_V1.0.1.82_WW_src/Source/apps/radvd-1.1/log.c D7000_V1.0.1.82_WW_src/Source/apps/radvd-1.1/log.c
+--- D7000_V1.0.1.82_WW_src/Source/apps/radvd-1.1/log.c	2020-11-17 22:21:46.817892000 +0100
++++ D7000_V1.0.1.82_WW_src/Source/apps/radvd-1.1/log.c	2020-11-17 22:22:11.307266390 +0100
+@@ -113,29 +113,23 @@
+ dlog(int prio, int level, char *format, ...)
+ {
+ 	va_list ap;
+-	int res;
+ 
+ 	if (debug_level < level)
+ 		return;
+ 	
+ 	va_start(ap, format);
+-	res = vlog(prio, format, ap);
+-	va_end(ap);		
+-
+-	/* XXX: should we do something if res < 0.. */
++	vlog(prio, format, ap);
++	va_end(ap);
+ }
+ 
+ void
+ flog(int prio, char *format, ...)
+ {
+ 	va_list ap;
+-	int res;
+ 
+ 	va_start(ap, format);
+-	res = vlog(prio, format, ap);
+-	va_end(ap);		
+-
+-	/* XXX: should we do something if res < 0.. */
++	vlog(prio, format, ap);
++	va_end(ap);
+ }
+ 
+ int

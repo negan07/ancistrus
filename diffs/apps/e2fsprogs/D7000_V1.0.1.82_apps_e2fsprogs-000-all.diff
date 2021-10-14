@@ -1,0 +1,26 @@
+diff -urN D7000_V1.0.1.82_WW_src/Source/apps/e2fsprogs/Makefile D7000_V1.0.1.82_WW_src/Source/apps/e2fsprogs/Makefile
+--- D7000_V1.0.1.82_WW_src/Source/apps/e2fsprogs/Makefile	2016-10-11 17:54:27.000000000 +0200
++++ D7000_V1.0.1.82_WW_src/Source/apps/e2fsprogs/Makefile	2017-05-02 12:50:07.347555226 +0200
+@@ -1,7 +1,6 @@
+ include ../../Rules.mak
+ DESTLIB = $(ROOT)/target/lib
+ DESTBIN = $(ROOT)/target/usr/sbin
+-#SOURCELIB = $(ROOT)/rtl819x/toolchain/rsdk-1.3.6-5281-EB-2.6.30-0.9.30/lib
+ all: config
+ 	cd e2fsprogs-1.41.3 && make	
+ config:
+@@ -13,12 +12,9 @@
+ 		touch h_config; \
+ 	fi)
+ configure:
+-	cd e2fsprogs-1.41.3 && ./configure --disable-resizer --disable-imager --disable-testio-debug --with-libiconv-prefix=$(APPS_DIR)/libiconv.1.8 --host=arm-linux CC=$(CROSS)gcc
++	cd e2fsprogs-1.41.3 && ./configure --disable-resizer --disable-imager --disable-testio-debug --with-libiconv-prefix=$(APPS_DIR)/libiconv.1.8 --host=arm-linux CC=$(CROSS)gcc CFLAGS="$(CFLAGS) -Os"
+ install:
+-	#ln -f ./e2fsprogs-1.41.3/misc/tune2fs ./e2fsprogs-1.41.3/misc/e2label
+-	#$(STRIP) ./e2fsprogs-1.41.3/misc/e2label
+-	#cp -a ./e2fsprogs-1.41.3/misc/e2label $(DESTBIN)/e2label
+-	$(STRIP) ./e2fsprogs-1.41.3/misc/blkid
++	$(SSTRIP) ./e2fsprogs-1.41.3/misc/blkid
+ 	cp -a ./e2fsprogs-1.41.3/misc/blkid $(DESTBIN)/blkid
+ clean:
+ 	cd e2fsprogs-1.41.3 && make clean

@@ -24,7 +24,7 @@ PROJECT_HOMEPAGE	?= https://$(PROJECT_FOUNDER).github.io/$(PROJECT_NAME)
 PROJECT_REP_ROOT	?= https://raw.githubusercontent.com/$(PROJECT_FOUNDER)/$(PROJECT_NAME)/gh-pages
 LOCAL_REP_ROOT		?= https://192.168.0.7
 
-FWVER			?= V1.0.1.80
+FWVER			?= V1.0.1.82
 CPU_ARCH_NAME		?= ARM
 PROJ_TAG		?= $(shell echo $(PROJECT_NAME) | head -c 3)
 RCBOOT_NAME		?= rcS
@@ -39,7 +39,7 @@ RCDSLDRV		?= adsl_phy.bin
 RCDSLSO			?= libbcm_crc.so libseltctl.so libbcm_flashutil.so libxdslctl.so
 RCDSLBINS		?= $(RCDSLCMDBIN)
 RCMAINWEB		?= top.js linux.js top.html index.htm adv_index.htm GPL_rev1.htm logout.htm
-RCHTTPDWEB		?= currentsetting.htm BRS_success.html BRS_swisscom_success.html
+RCHTTPDWEB		?= currentsetting.htm
 RCMAINCSS		?= top.css
 RCTMPDIR		?= /tmp
 RCLDLIB			?= /lib
@@ -86,7 +86,7 @@ SRC_SHARED_DIR		?= $(SRC_DIR)/$(SRC_SHARED_REL_DIR)
 SRC_TARGET_DIR		?= $(SRC_DIR)/$(SRC_TARGET_REL_DIR)
 
 SRC_URL			?= https://www.downloads.netgear.com/files/GPL
-SRC_FILE		?= $(PROJECT_TARGET)_$(FWVER)_1.0.1_gpl.tgz
+SRC_FILE		?= "$(PROJECT_TARGET) _$(FWVER)_1.0.1_gpl.tgz"
 
 TCHAIN_SRC_DIR		?= crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources
 TCHAIN_TAR		?= $(SRC_DIR)/Source/$(TCHAIN_SRC_DIR).tar.bz2

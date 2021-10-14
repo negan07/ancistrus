@@ -1,0 +1,9 @@
+diff -urN D7000_V1.0.1.82_WW_src/Source/apps/apple/libdaemon-0.14/build.sh D7000_V1.0.1.82_WW_src/Source/apps/apple/libdaemon-0.14/build.sh
+--- D7000_V1.0.1.82_WW_src/Source/apps/apple/libdaemon-0.14/build.sh	2016-10-11 17:54:08.000000000 +0200
++++ D7000_V1.0.1.82_WW_src/Source/apps/apple/libdaemon-0.14/build.sh	2017-05-04 20:53:03.771753087 +0200
+@@ -1,4 +1,4 @@
+ #!/bin/bash
+ build_dir=build_sc
+ cd $build_dir
+-CC=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-gcc ../configure ac_cv_func_setpgrp_void=yes --target=arm-linux --host=arm-unknown-linux-gnu --build=i686-pc-linux-gnu  
++CFLAGS="${1}" CC=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-gcc ../configure ac_cv_func_setpgrp_void=yes --target=arm-linux --host=arm-unknown-linux-gnu --build=i686-pc-linux-gnu  

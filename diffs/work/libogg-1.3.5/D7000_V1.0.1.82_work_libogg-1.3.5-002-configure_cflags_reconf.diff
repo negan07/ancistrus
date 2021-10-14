@@ -1,0 +1,48 @@
+--- work/libogg-1.3.5/libogg-1.3.5/configure
++++ work/libogg-1.3.5/libogg-1.3.5/configure
+@@ -12822,8 +12822,8 @@ else
+         case $host in
+         *-*-linux*)
+                 DEBUG="-g -Wall -fsigned-char"
+-                CFLAGS="-O2 -Wall -ffast-math -fsigned-char"
+-                PROFILE="-Wall -W -pg -g -O2 -ffast-math -fsigned-char"
++                CFLAGS="-Wall -ffast-math -fsigned-char"
++                PROFILE="-Wall -W -ffast-math -fsigned-char"
+ 		;;
+         sparc-sun-*)
+                 DEBUG="-g -Wall -fsigned-char"
+@@ -12837,8 +12837,8 @@ else
+ 		;;
+         *)
+                 DEBUG="-g -Wall -fsigned-char"
+-                CFLAGS="-O2 -fsigned-char"
+-                PROFILE="-O2 -g -pg -fsigned-char"
++                CFLAGS="-fsigned-char"
++                PROFILE="-fsigned-char"
+ 		;;
+         esac
+ fi
+--- work/libogg-1.3.5/libogg-1.3.5/configure.ac
++++ work/libogg-1.3.5/libogg-1.3.5/configure.ac
+@@ -46,8 +46,8 @@ else
+         case $host in
+         *-*-linux*)
+                 DEBUG="-g -Wall -fsigned-char"
+-                CFLAGS="-O2 -Wall -ffast-math -fsigned-char"
+-                PROFILE="-Wall -W -pg -g -O2 -ffast-math -fsigned-char"
++                CFLAGS="-Wall -ffast-math -fsigned-char"
++                PROFILE="-Wall -W -ffast-math -fsigned-char"
+ 		;;
+         sparc-sun-*)
+                 DEBUG="-g -Wall -fsigned-char"
+@@ -61,8 +61,8 @@ else
+ 		;;
+         *)
+                 DEBUG="-g -Wall -fsigned-char"
+-                CFLAGS="-O2 -fsigned-char"
+-                PROFILE="-O2 -g -pg -fsigned-char"
++                CFLAGS="-fsigned-char"
++                PROFILE="-fsigned-char"
+ 		;;
+         esac
+ fi

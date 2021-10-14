@@ -1,0 +1,24 @@
+diff -urN work/libogg-1.3.5/libogg-1.3.5/Makefile.in work/libogg-1.3.5/libogg-1.3.5/Makefile.in
+--- work/libogg-1.3.5/libogg-1.3.5/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/libogg-1.3.5/libogg-1.3.5/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -375,7 +375,7 @@
+ #AUTOMAKE_OPTIONS = foreign 1.6 dist-zip
+ AUTOMAKE_OPTIONS = foreign 1.11 dist-zip dist-xz
+ ACLOCAL_AMFLAGS = -I m4
+-SUBDIRS = src include doc
++SUBDIRS = src
+ m4datadir = $(datadir)/aclocal
+ m4data_DATA = ogg.m4
+ pkgconfigdir = $(libdir)/pkgconfig
+diff -urN work/libogg-1.3.5/libogg-1.3.5/src/Makefile.in work/libogg-1.3.5/libogg-1.3.5/src/Makefile.in
+--- work/libogg-1.3.5/libogg-1.3.5/src/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/libogg-1.3.5/libogg-1.3.5/src/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+@@ -103,7 +103,7 @@
+ CONFIG_HEADER = $(top_builddir)/config.h
+ CONFIG_CLEAN_FILES =
+ CONFIG_CLEAN_VPATH_FILES =
+-PROGRAMS = $(noinst_PROGRAMS)
++PROGRAMS = 
+ am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+ am__vpath_adj = case $$p in \
+     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \

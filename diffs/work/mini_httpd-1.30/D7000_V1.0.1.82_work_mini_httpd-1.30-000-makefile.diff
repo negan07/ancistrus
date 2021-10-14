@@ -1,0 +1,212 @@
+diff -urN work/mini_httpd-1.30/Makefile work/mini_httpd-1.30/Makefile
+--- work/mini_httpd-1.30/Makefile
++++ work/mini_httpd-1.30/Makefile
+@@ -1,37 +1,81 @@
+-# Makefile for mini_httpd
++include ../Rules.mak
+ 
+-# CONFIGURE: If you are using a SystemV-based operating system, such as
+-# Solaris, you will need to uncomment this definition.
+-#SYSV_LIBS =    -lnsl -lsocket
+-
+-# CONFIGURE: Some systems don't need -lcrypt, and indeed they get an
+-# error if you try to link with it.  If you get an error about libcrypt
+-# not found, try commenting out this definition.
+-CRYPT_LIB =    -lcrypt
+-
+-# CONFIGURE: If you want to compile in support for https, uncomment these
+-# definitions.  You will need to have already built OpenSSL, available at
+-# http://www.openssl.org/  Make sure the SSL_TREE definition points to the
+-# tree with your OpenSSL installation - depending on how you installed it,
+-# it may be in /usr/local instead of /usr/local/ssl.
+-#SSL_TREE =	/usr/local/ssl
+-#SSL_DEFS =	-DUSE_SSL
+-#SSL_INC =	-I$(SSL_TREE)/include
+-#SSL_LIBS =	-L$(SSL_TREE)/lib -lssl -lcrypto
+-
+-
+-BINDIR =	/usr/local/sbin
+-MANDIR =	/usr/local/man
+-CC =		cc
+-CDEFS =		$(SSL_DEFS) $(SSL_INC)
+-CFLAGS =	-O $(CDEFS) -ansi -pedantic -U__STRICT_ANSI__ -Wall -Wpointer-arith -Wshadow -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wno-long-long
+-LDFLAGS =	-s
+-LDLIBS =	$(CRYPT_LIB) $(SSL_LIBS) $(SYSV_LIBS)
++BINS	:= mini_httpd
++CERTS	:= $(BINS).pem
++STARTUP	:= httpd
++CUR_SET	:= currentsetting.htm
++HTMDIR	:= ../www
++
++HTTPS=1
++IP_ASSIGN_CHK=1
++USB=1
++SETUPWIZARD=1
++PNPX=1
++ACCESSCNTL=1
++HTTPD_IPV6_SUPPORT=1
++
++ifeq ($(HTTPS),1)
++SSL_TREE =      $(WORK_DIR)/$(OPENSSL)/$(OPENSSL)
++SSL_INC =       -I$(SSL_TREE)/include -I$(SSL_TREE)
++SSL_DEFS =      -DUSE_SSL
++SSL_LIBS =      -L$(SSL_TREE) -lssl -lcrypto
++CRYPT_LIB =     -lcrypt
++endif
+ 
+-all:		mini_httpd htpasswd
++CDEFS =		$(SSL_DEFS) $(SSL_INC)
++CFLAGS +=	-Os $(CDEFS) -Wall -Wpointer-arith -Wshadow -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wno-long-long -Wno-unused-but-set-variable -Werror
++CFLAGS +=	-I$(WORK_DIR)/$(NVRAM) -I$(GIT_ROOT_DIR)/$(SRC_SHARED_DIR) -I$(GIT_ROOT_DIR)/$(SRC_APPS_DIR)/rc/include
+ 
+-mini_httpd:	mini_httpd.o match.o tdate_parse.o
+-	$(CC) $(LDFLAGS) mini_httpd.o match.o tdate_parse.o $(LDLIBS) -o mini_httpd
++ifeq ($(IP_ASSIGN_CHK),1)
++CFLAGS += -DIP_ASSIGN_CHK
++endif
++
++LDFLAGS =	-s -L$(WORK_DIR)/$(NVRAM) -lscnvram
++LDLIBS =	$(SSL_LIBS) -L$(WORK_DIR)/$(NVRAM) -lscnvram
++
++ifeq ($(USB),1)
++CFLAGS += -DUSB
++CFLAGS += -D_FILE_OFFSET_BITS=64
++endif
++
++ifeq ($(SETUPWIZARD), 1)
++CFLAGS += -DSUPPORT_SETUPWIZARD
++endif
++
++ifeq ($(PNPX),1)
++CFLAGS += -DPNPX
++endif
++
++ifeq ($(ACCESSCNTL),1)
++CFLAGS += -DACCESSCNTL
++endif
++
++ifeq ($(HTTPD_IPV6_SUPPORT),1)
++CFLAGS += -DHTTPD_IPV6_SUPPORT
++endif
++# support netgear new login method
++CFLAGS += -DSMART_LOGOUT
++
++ifdef DEBUG
++CFLAGS += -DDEBUG
++endif
++
++all: 
++	@[ -e .recompiled ] || rm -f mini_httpd *.o
++	@$(MAKE) $(BINS) || exit 1
++
++$(BINS): mini_httpd.o match.o tdate_parse.o sc_sessionid.o
++	$(CC) $(LDFLAGS) mini_httpd.o match.o tdate_parse.o sc_sessionid.o $(LDLIBS) -o mini_httpd
++	@touch .recompiled
++
++install: control
++	$(SSTRIP) $(BINS)
++	install -m 0755 -d $(TMPINSTDIR)
++ifeq ($(HTTPS),1)
++	install -m 0600 $(CERTS) $(TMPINSTDIR)
++endif
++	install -m 0755 $(BINS) $(TMPINSTDIR)
++	install -m 0755 $(HTMDIR)/$(CUR_SET) $(TMPINSTDIR)
+ 
+ mini_httpd.o:	mini_httpd.c version.h port.h match.h tdate_parse.h mime_encodings.h mime_types.h
+ 	$(CC) $(CFLAGS) -c mini_httpd.c
+@@ -42,46 +86,42 @@ match.o:	match.c match.h
+ tdate_parse.o:	tdate_parse.c tdate_parse.h
+ 	$(CC) $(CFLAGS) -c tdate_parse.c
+ 
++sc_sessionid.o: sc_sessionid.c
++	$(CC) $(CFLAGS) -c sc_sessionid.c
++
+ mime_encodings.h: mime_encodings.txt
+-	rm -f mime_encodings.h
+-	sed < mime_encodings.txt > mime_encodings.h \
++	@rm -f mime_encodings.h
++	@sed < mime_encodings.txt > mime_encodings.h \
+ 	  -e 's/#.*//' -e 's/[ 	]*$$//' -e '/^$$/d' \
+ 	  -e 's/[ 	][ 	]*/", 0, "/' -e 's/^/{ "/' -e 's/$$/", 0 },/'
+ 
+ mime_types.h: mime_types.txt
+-	rm -f mime_types.h
+-	sed < mime_types.txt > mime_types.h \
++	@rm -f mime_types.h
++	@sed < mime_types.txt > mime_types.h \
+ 	  -e 's/#.*//' -e 's/[ 	]*$$//' -e '/^$$/d' \
+ 	  -e 's/[ 	][ 	]*/", 0, "/' -e 's/^/{ "/' -e 's/$$/", 0 },/'
+ 
+ 
+ htpasswd:	htpasswd.o
+-	$(CC) $(LDFLAGS) htpasswd.o $(CRYPT_LIB) -o htpasswd
++	$(CC) $(CFLAGS) $(LDFLAGS) htpasswd.o $(CRYPT_LIB) -o htpasswd
+ 
+ htpasswd.o:	htpasswd.c
+ 	$(CC) $(CFLAGS) -c htpasswd.c
+ 
++cert: $(CERTS)
+ 
+-cert:		mini_httpd.pem
+-mini_httpd.pem:	mini_httpd.cnf
+-	openssl req -new -x509 -days 3650 -nodes -config mini_httpd.cnf -out mini_httpd.pem -keyout mini_httpd.pem
+-	openssl x509 -subject -dates -fingerprint -noout -in mini_httpd.pem
+-	chmod 600 mini_httpd.pem
+-
+-
+-install:	all
+-	rm -f $(BINDIR)/mini_httpd $(BINDIR)/htpasswd
+-	-mkdir -p $(BINDIR)
+-	cp mini_httpd htpasswd $(BINDIR)
+-	rm -f $(MANDIR)/man8/mini_httpd.8 $(MANDIR)/man1/htpasswd.1
+-	-mkdir -p $(MANDIR)/man8
+-	cp mini_httpd.8 $(MANDIR)/man8
+-	-mkdir -p $(MANDIR)/man1
+-	cp htpasswd.1 $(MANDIR)/man1
++$(CERTS):	$(SSL_TREE)/apps/openssl.cnf
++	@[ -f $(SSL_TREE)/apps/openssl.cnf ] || exit 3
++	@openssl genpkey -algorithm RSA -outform PEM -out $(CERTS) -pkeyopt rsa_keygen_bits:2048 || exit 2
++	@openssl req -new -sha256 -days 3650 -key $(CERTS) -batch -x509 -newkey rsa:2048 -subj "/C=US/ST=California/L=San Jose/O=NETGEAR/OU=Home Consumer Products/CN=www.routerlogin.net/subjectAltName=www.routerlogin.net,www.routerlogin.com,routerlogin.net,routerlogin.com,D7000" -out $(BINS).crt || exit 1
++	@cat $(BINS).crt >> $(CERTS)
++	@chmod 600 $(CERTS)
+ 
+ clean:
+ 	rm -f mini_httpd mime_encodings.h mime_types.h htpasswd mini_httpd.rnd *.o core core.* *.core
+ 
++distclean: clean
++
+ tar:
+ 	@name=`sed -n -e '/#define SERVER_SOFTWARE /!d' -e 's,.*mini_httpd/,mini_httpd-,' -e 's, .*,,p' version.h` ; \
+ 	  rm -rf $$name ; \
+@@ -92,3 +132,31 @@ tar:
+ 	  tar cf $$name.tar $$name ; \
+ 	  rm -rf $$name ; \
+ 	  gzip $$name.tar
++
++ifndef BUILD
++control:
++else
++PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
++
++control: preinst postinst
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "for F in $(BINS) $(CERTS) $(CUR_SET); do [ -e $(TMPDIR)/\$$F ] && rm -f $(TMPDIR)/\$$F; done" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "[ ! -x $(TMPDIR)/$(BINS) ] && exit 0" >> $(POSTINST)
++	@echo "echo \"Updating $(BINS) ...\"" >> $(POSTINST)
++	@echo "[ -f $(TMPDIR)/$(CERTS) ] && cp -f $(TMPDIR)/$(CERTS) $(USRETC)/ && mv -f $(TMPDIR)/$(CERTS) $(TMPETC)/" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(BINS) $(USRSBIN)/" >> $(POSTINST)
++	@echo "for F in $(CUR_SET); do [ -f $(TMPDIR)/\$$F ] && mv -f $(TMPDIR)/\$$F $(WWW)/; done" >> $(POSTINST)
++	@echo "sync" >> $(POSTINST)
++	@echo "echo \"Restarting web daemon service...\"" >> $(POSTINST)
++	@echo "$(RC) $(STARTUP) restart" >> $(POSTINST)
++	@echo "sleep 3" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++endif
++

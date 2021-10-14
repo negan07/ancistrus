@@ -1,0 +1,12 @@
+diff -urN D7000_V1.0.1.82_WW_src/Source/apps/spi_firewall_modules/Makefile D7000_V1.0.1.82_WW_src/Source/apps/spi_firewall_modules/Makefile
+--- D7000_V1.0.1.82_WW_src/Source/apps/spi_firewall_modules/Makefile	2016-10-11 17:56:23.000000000 +0200
++++ D7000_V1.0.1.82_WW_src/Source/apps/spi_firewall_modules/Makefile	2017-05-02 14:38:57.632665482 +0200
+@@ -11,7 +11,7 @@
+ KERNELDIR=$(KERNEL_DIR)
+ SUBDIR = $(shell pwd)
+ 
+-
++CFLAGS:=
+ OBJS = tcp_syn_dos.ko xt_ct_dir.ko
+ 
+ obj-m:= tcp_syn_dos.o xt_ct_dir.o
