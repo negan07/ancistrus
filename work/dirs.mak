@@ -295,10 +295,10 @@ DIRLIST				+= $(OPKG_UTILS)
 TARLIST				+= $(TAR_$(OPKG_UTILS))
 # OPKG
 OPKG_NAME			:= opkg
-VER_$(OPKG_NAME)		:= 0.4.4
+VER_$(OPKG_NAME)		:= 0.4.5
 OPKG				:= $(OPKG_NAME)-$(VER_$(OPKG_NAME))
 NAME_$(OPKG)			:= $(OPKG_NAME)$(DBG)
-SUBVER_$(OPKG)			:= -010
+SUBVER_$(OPKG)			:= 
 VER_$(OPKG)			:= $(VER_$(OPKG_NAME))$(SUBVER_$(OPKG))
 DL_$(OPKG)			:= https://git.yoctoproject.org/cgit/cgit.cgi/opkg/snapshot
 TAR_$(OPKG)			:= $(OPKG).tar.gz
