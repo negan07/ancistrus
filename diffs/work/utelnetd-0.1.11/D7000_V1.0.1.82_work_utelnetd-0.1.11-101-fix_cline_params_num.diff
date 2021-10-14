@@ -1,0 +1,15 @@
+--- work/utelnetd-0.1.11/utelnetd.c
++++ work/utelnetd-0.1.11/utelnetd.c
+@@ -395,6 +395,12 @@
+ 	struct ifreq interface;
+ 
+ 	/* check if user supplied a port number */
++
++	if(argc != 4) {
++		perror("Missing required parameters\n");
++		exit(1);
++	}
++
+ 	for (;;) {
+ 		c = getopt( argc, argv, "i:p:l:hd");
+ 		if (c == EOF) break;
