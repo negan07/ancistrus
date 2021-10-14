@@ -1,6 +1,6 @@
-diff -urN work/opkg-utils-0.4.3/opkg-build work/opkg-utils-0.4.3/opkg-build
---- work/opkg-utils-0.4.3/opkg-build	2017-04-04 23:21:46.566819127 +0200
-+++ work/opkg-utils-0.4.3/opkg-build	2017-04-05 21:21:17.549018779 +0200
+diff -urN work/opkg-utils-0.4.5/opkg-build work/opkg-utils-0.4.5/opkg-build
+--- work/opkg-utils-0.4.5/opkg-build	2017-04-04 23:21:46.566819127 +0200
++++ work/opkg-utils-0.4.5/opkg-build	2017-04-05 21:21:17.549018779 +0200
 @@ -194,20 +194,20 @@
  : <<=cut
  =head1 SYNOPSIS
@@ -36,7 +36,7 @@ diff -urN work/opkg-utils-0.4.3/opkg-build work/opkg-utils-0.4.3/opkg-build
  	a ) compressorargs=$OPTARG
  	    ;;
  	v ) echo $version
-@@ -323,11 +323,17 @@
+@@ -325,11 +325,17 @@
  fi
  
  rm -f $pkg_file
@@ -59,7 +59,7 @@ diff -urN work/opkg-utils-0.4.3/opkg-build work/opkg-utils-0.4.3/opkg-build
  
  rm $tmp_dir/debian-binary $tmp_dir/data.tar.$cext $tmp_dir/control.tar.gz
  rmdir $tmp_dir
-@@ -364,6 +364,10 @@
+@@ -366,6 +366,10 @@
  
  Specify which compression type to use when building a package. Allowed values are B<gzip>, B<pigz>, B<bzip2>, B<lz4> and B<xz> (default is B<gzip>).
  

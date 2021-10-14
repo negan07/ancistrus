@@ -1,6 +1,6 @@
-diff -urN work/opkg-utils-0.4.3/opkg-build work/opkg-utils-0.4.3/opkg-build
---- work/opkg-utils-0.4.3/opkg-build	2017-04-04 23:21:46.566819127 +0200
-+++ work/opkg-utils-0.4.3/opkg-build	2017-04-05 21:21:17.549018779 +0200
+diff -urN work/opkg-utils-0.4.5/opkg-build work/opkg-utils-0.4.5/opkg-build
+--- work/opkg-utils-0.4.5/opkg-build	2017-04-04 23:21:46.566819127 +0200
++++ work/opkg-utils-0.4.5/opkg-build	2017-04-05 21:21:17.549018779 +0200
 @@ -108,8 +108,8 @@
  	disallowed_filename=`disallowed_field Filename`
  	[ "$?" -ne 0 ] && PKG_ERROR=1
@@ -12,9 +12,9 @@ diff -urN work/opkg-utils-0.4.3/opkg-build work/opkg-utils-0.4.3/opkg-build
  		PKG_ERROR=1;
  	fi
  
-diff -urN work/opkg-utils-0.4.3/opkg-buildpackage work/opkg-utils-0.4.3/opkg-buildpackage
---- work/opkg-utils-0.4.3/opkg-buildpackage	2017-04-04 23:21:46.566819127 +0200
-+++ work/opkg-utils-0.4.3/opkg-buildpackage	2017-04-05 21:21:17.549018779 +0200
+diff -urN work/opkg-utils-0.4.5/opkg-buildpackage work/opkg-utils-0.4.5/opkg-buildpackage
+--- work/opkg-utils-0.4.5/opkg-buildpackage	2017-04-04 23:21:46.566819127 +0200
++++ work/opkg-utils-0.4.5/opkg-buildpackage	2017-04-05 21:21:17.549018779 +0200
 @@ -66,8 +66,8 @@
  	required_field Maintainer >/dev/null
  	required_field Description >/dev/null
