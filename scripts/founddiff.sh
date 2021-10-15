@@ -51,7 +51,7 @@ do
 	esac
 done
 
-TAG=`sudo echo ${1##*/} | cut -d '_' -f 1`_`echo ${1##*/} | cut -d '_' -f 2`
+TAG=`sudo echo ${2##*/} | cut -d '_' -f 1`_`echo ${2##*/} | cut -d '_' -f 2`
 
 DESTDIR="diff-${1##*/}-${2##*/}"
 
