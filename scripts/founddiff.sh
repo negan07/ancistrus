@@ -62,11 +62,11 @@ do
 	case $D in
 	Kernel/bcm963xx/kernel/linux-3.4rt)
 	mkdir -p -m 0755 "$DESTDIR/$D"
-	run_diff ur "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
+	run_diff pur "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
 	rm_void_dir "$DESTDIR/$D"
 	;;
 	Kernel/bcm963xx/kernel)
-	run_diff u "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
+	run_diff pu "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
 	rm_void_dir "$DESTDIR/$D"
 	;;
 	Source/apps)
@@ -78,7 +78,7 @@ do
 			mkdir -p -m 0755 "$DESTDIR/$D/$I"
 				for A in `ls "$1/$D/$I"`
 				do
-				run_diff ur "$1/$D/$I/$A" "$2/$D/$I/$A" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-${A}.diff"
+				run_diff pur "$1/$D/$I/$A" "$2/$D/$I/$A" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-${A}.diff"
 				done
 			rm_void_dir "$DESTDIR/$D/$I"
 			;;
@@ -90,22 +90,22 @@ do
 					library)
 						for L in `ls "$1/$D/$I/$M"`
 						do
-						run_diff ur "$1/$D/$I/$M/$L" "$2/$D/$I/$M/$L" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-${M}_${L}.diff"
+						run_diff pur "$1/$D/$I/$M/$L" "$2/$D/$I/$M/$L" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-${M}_${L}.diff"
 						done
 					;;
 					*)
-					run_diff ur "$1/$D/$I/$M" "$2/$D/$I/$M" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-${M}.diff"
+					run_diff pur "$1/$D/$I/$M" "$2/$D/$I/$M" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-${M}.diff"
 					;;
 					esac
 				done
 			rm_void_dir "$DESTDIR/$D/$I"
 			;;
 			Makefile)
-			run_diff u "$1/$D/$I" "$2/$D/$I" "$DESTDIR/$D/${TAG}_misc-004-source_apps_makefile_cleanups_adaptations.diff"
+			run_diff pu "$1/$D/$I" "$2/$D/$I" "$DESTDIR/$D/${TAG}_misc-004-source_apps_makefile_cleanups_adaptations.diff"
 			;;
 			*)
 			mkdir -p -m 0755 "$DESTDIR/$D/$I"
-			run_diff ur "$1/$D/$I" "$2/$D/$I" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-all.diff"
+			run_diff pur "$1/$D/$I" "$2/$D/$I" "$DESTDIR/$D/$I/${TAG}_apps_${I}-000-all.diff"
 			rm_void_dir "$DESTDIR/$D/$I"
 			;;
 			esac
@@ -114,17 +114,17 @@ do
 	;;
 	Source/target)
 	for T in $*; do sudo tar xjf "$T/$D.tar.bz2" -C $T/Source; done
-	run_diff ur "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
+	run_diff pur "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
 	;;
 	Source)
 	rm -f "$1/$D/crosstools-*.tar.bz2" "$2/$D/crosstools-*.tar.bz2"
-	run_diff u "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
+	run_diff pu "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
 	;;
 	Makefile|Kernel/bcm963xx)	
-	run_diff u "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
+	run_diff pu "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
 	;;
 	*)
-	run_diff ur "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
+	run_diff pur "$1/$D" "$2/$D" "$DESTDIR/$D.diff"
 	;;
 	esac
 done
