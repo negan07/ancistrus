@@ -1,0 +1,340 @@
+--- work/mini_httpd-1.30/mini_httpd.c
++++ work/mini_httpd-1.30/mini_httpd.c
+@@ -487,13 +487,10 @@ static char *no_check_passwd_paths[]={"c
+     "important_update.htm","MNU_top.htm",  "warning_pg.htm",
+     "multi_login.html", "401_recovery.htm", "401_access_denied.htm", "BRS_top.html",
+     "BRS_Windows_app_download.html","BRS_applySettings_app.html",
+-    "BRS_swisscom_access.html",
+     "BRS_Mac_app_download.html",
+     "BRS_genie_and_ReadyShare_downloading.html",
+     "BRS_ver_fw_found.html", "BRS_ver_fw_not_found.html",
+     "BRS_netgear_success.html",
+-    "BRS_success.html",
+-    "NETGEAR_Genie.png",
+     "todo=wizard_upg_detfw",
+     "todo=get_next_page",
+     NULL};
+@@ -1549,6 +1546,23 @@ initialize_listen_socket( usockaddr* usa
+     return listen_fd;
+     }
+ 
++static int _path_exist_filename(char *sub_path, char *paths[])
++{
++	int i;
++	if (sub_path)
++	{
++		for (i = 0; paths[i]; i++)
++		{
++			if (strstr(sub_path, paths[i]))
++			{
++				SC_CFPRINTF("not need auth since %s is part of %s\n", paths[i], sub_path);
++				return 1;
++			}
++		}
++	}
++	return 0;	
++}
++
+ /*
+  * Check if @path exist in @paths[].
+  * Return 1 ==> Yes, path exist in paths
+@@ -1558,15 +1572,131 @@ initialize_listen_socket( usockaddr* usa
+  */
+ static int path_exist(char *paths[], char *method_str)
+ {
+-	int i;
+-
+-	for (i = 0; paths[i]; i++)
++	if ((strcasestr(path, "%2") !=NULL) || (strcasestr(path, "%3") != NULL))
++	{	
++		SC_CFPRINTF("path:%s\n", path);
++		strdecode(path, path);		
++		SC_CFPRINTF("path after decode: %s\n", path);
++	}
++	if (method_str && *method_str == 'G')
+ 	{
+-		if (strstr(path, paths[i]))
++		SC_CFPRINTF("path:%s\n", path);
++		
++		// if not auth in http, does this an attack?
+ 		{
+-			SC_CFPRINTF("not need auth since %s is part of %s\n", paths[i], path);
+-			return 1;
++			char path_tmp[1024];
++			memset(path_tmp, 0, sizeof(path_tmp));
++			strncpy(path_tmp, path, sizeof(path_tmp)-1);
++			SC_CFPRINTF("path_tmp = %s\n",path_tmp);
++		
++			if (strncmp(path_tmp, "/setup.cgi?", strlen("/setup.cgi?")) == 0)
++			{
++				char *p = strstr(path_tmp, "next_file=");
++				if (p)
++				{
++					char *p1 = strchr(p, '&');
++					if (p1)
++					{
++						*p1 = 0;
++						
++						SC_CFPRINTF("want get %s\n", p+strlen("next_file="));
++						if (_path_exist_filename(p+strlen("next_file="), paths))
++						{
++							SC_CFPRINTF("this file no need auth, pass auth_check\n");
++							return 1;
++						} else
++						{
++							SC_CFPRINTF("real want get file need auth, may still need auth\n");
++						}
++					} else
++					{
++						SC_CFPRINTF("want get %s\n", p+strlen("next_file="));
++                                                if (_path_exist_filename(p+strlen("next_file="), paths))
++                                                {
++                                                        char *p2 = strchr(path_tmp, '&');
++                                                        if(p2)
++                                                        {
++                                                                *p2 = 0;
++                                                                if(strstr(path_tmp,"this_file="))
++                                                                {
++                                                                        SC_CFPRINTF("want get %s\n", (path_tmp[0]=='/')?(&path_tmp[1]):(&path_tmp[0]));
++
++                                                                        if (_path_exist_filename((path_tmp[0]=='/')?(&path_tmp[1]):(&path_tmp[0]), paths))
++                                                                        {
++                                                                                SC_CFPRINTF("this file no need auth, pass auth_check\n");
++                                                                                return 1;
++                                                                        }
++                                                                        else
++                                                                        {
++                                                                                SC_CFPRINTF("real want get file need auth, may still need auth\n");
++                                                                        }
++                                                                }
++								else
++                                                                {
++                                                                        SC_CFPRINTF("real want get file need auth, may still need auth\n");
++                                                                }									  }					
++							else
++							{
++	                                                	SC_CFPRINTF("this file no need auth, pass auth_check\n");
++                                                                return 1;						
++							}
++	                                                        
++						} else
++						{
++							SC_CFPRINTF("real want get file need auth, may still need auth\n");
++						}
++					}
++				}
++			} else
++			{
++				char *p = strchr(path_tmp, '&');
++				if (p)
++				{
++					*p = 0;
++					SC_CFPRINTF("want get %s\n", (path_tmp[0]=='/')?(&path_tmp[1]):(&path_tmp[0]));
++
++					if (_path_exist_filename((path_tmp[0]=='/')?(&path_tmp[1]):(&path_tmp[0]), paths))
++					{
++						strncpy(path_tmp, path, sizeof(path_tmp)-1);
++						p = strstr(path_tmp, "next_file=");
++						if (*nvram_safe_get("config_state") != 'b')
++						{	
++							if (p && _path_exist_filename(p, paths))
++							{	
++								SC_CFPRINTF("this file no need auth, pass auth_check\n");
++								return 1;
++							}
++							else
++							{
++								SC_CFPRINTF("real want get file need auth, may still need auth\n");			
++							}	
++						}
++						else
++						{
++							SC_CFPRINTF("real want get file need auth, may still need auth\n");			
++						}	
++					
++					} else
++					{
++						SC_CFPRINTF("real want get file need auth, may still need auth\n");
++					}
++				} else
++				{
++					SC_CFPRINTF("want get %s\n", (path_tmp[0]=='/')?(&path_tmp[1]):(&path_tmp[0]));
++					if (_path_exist_filename((path_tmp[0]=='/')?(&path_tmp[1]):(&path_tmp[0]), paths))
++					{
++						SC_CFPRINTF("this file no need auth, pass auth_check\n");
++						return 1;	
++					} else
++					{
++						SC_CFPRINTF("real want get file need auth, may still need auth\n");
++					}						
++				}
++			}
+ 		}
++	} else
++	{
++		SC_CFPRINTF("not check on post\n");
+ 	}
+ 	
+ 	SC_CFPRINTF("method_str: %s\n", method_str);
+@@ -1607,12 +1736,32 @@ static int path_exist(char *paths[], cha
+ 							SC_CFPRINTF("want get %s\n", p);
+ 							if ((strstr(p, ".gif") != NULL) || (strstr(p, ".css") != NULL) || (strstr(p, ".js") != NULL) || (strstr(p, ".xml") != NULL) || (strstr(p, ".png") != NULL) || (strstr(p, ".jpg") != NULL))
+ 							{
+-								SC_CFPRINTF("gif/css/js/xml/png/jpg, pass auth_check\n");
++								if (strstr(p, "../") != NULL)
++								{	
++									SC_CFPRINTF("real want get not gif/css/js/xml/png/jpg, still need auth\n");
++									send_error(403, "Forbidden", "", "The path is invalid.");
++									return 0;
++								}else
++								{	
++									SC_CFPRINTF("gif/css/js/xml/png/jpg, pass auth_check\n");
++								}							
+ 							} else
+ 							{
+ 								SC_CFPRINTF("real want get not gif/css/js/xml/png/jpg, still need auth\n");
+ 								return 0;
+ 							}
++						} else
++						{
++							SC_CFPRINTF("want get %s\n", p);
++							if ((strstr(p, ".gif") != NULL) || (strstr(p, ".css") != NULL) || (strstr(p, ".js") != NULL) || (strstr(p, ".xml") != NULL) || (strstr(p, ".png") != NULL) || (strstr(p, ".jpg") != NULL))
++							{
++								if (strstr(p, "../") != NULL)
++								{	
++									SC_CFPRINTF("real want get not gif/css/js/xml/png/jpg, still need auth\n");
++									send_error(403, "Forbidden", "", "The path is invalid.");
++									return 0;
++								}
++							}
+ 						}
+ 					}
+ 				} else
+@@ -1646,8 +1794,16 @@ static int path_exist(char *paths[], cha
+ 					return 0;
+ 				}
+ 			}
+-
+ 			return 1;
++		} 
++		else if ((strstr(path, "/setup.cgi?") != NULL) 
++			&&(strstr(path, "../") != NULL)	     
++			&& ((strstr(path, ".gif") != NULL) || (strstr(path, ".css") != NULL) || (strstr(path, ".js") != NULL) || (strstr(path, ".xml") != NULL) || (strstr(path, ".png") != NULL) || (strstr(path, ".jpg") != NULL)) 
++			&& ((strstr(path, ".htm") != NULL) || (strstr(path, ".html") != NULL)))
++		{	
++			SC_CFPRINTF("real want get not gif/css/js/xml/png/jpg, still need auth\n");
++			send_error(403, "Forbidden", "", "The path is invalid.");				
++			return 0;
+ 		}
+ 	} else
+ 	{
+@@ -1855,12 +2011,12 @@ handle_request( void )
+             if(pTemp != NULL){
+ 		pTemp += strlen("urn:NETGEAR-ROUTER:service:");	
+ 	    	while(*pTemp !=':'){
+-			soapServiceName[i++]=*pTemp;
+-			pTemp++;
+ 			if(i >= 128)
+ 			{
+ 				send_error(404, "Not Found", "", "No such file.");
+ 			}
++			soapServiceName[i++]=*pTemp;
++			pTemp++;
+ 		}
+ 		soapServiceName[i]='\0';
+ 		for_setupwizard = 1;
+@@ -1914,7 +2070,7 @@ handle_request( void )
+ 			if( (p1 = strstr(cookie,"=")) != NULL)
+ 			{
+ 				SC_CFPRINTF("p1 %s\n",p1);
+-				strncpy(soap_token,p1 + 1, sizeof(soap_token)-1);
++				strlcpy(soap_token,p1 + 1, sizeof(soap_token));
+ 				SC_CFPRINTF("soap_token %s\n",soap_token);
+ 			}
+ 		}
+@@ -2153,7 +2308,7 @@ handle_request( void )
+     SC_CFPRINTF("path is <%s>\n", path);
+     if(path_exist(no_check_passwd_paths,method_str) || \
+ 		    /* for "htpwd_recovery.cgi", POST should not auth, GET need auth */
+-		    (strstr(path, "htpwd_recovery.cgi") && strcasecmp(method_str, get_method_str(METHOD_POST)) == 0) 
++		    (!strncmp(path, "/htpwd_recovery.cgi?", strlen("/htpwd_recovery.cgi?")) && !strcasecmp(method_str, get_method_str(METHOD_POST)))
+		    ) {
+         need_auth = 0;
+         /* for hi-jack page, should allow 2 user access at same time. */
+@@ -3479,7 +3635,6 @@ auth_check( char* dirname )
+     char* authpass;
+     static char line[10000];
+     int l;
+-    char *authname;
+ 
+     SC_CFPRINTF("dirname is <%s>\n", dirname);
+ 
+@@ -3546,7 +3703,6 @@ auth_check( char* dirname )
+     /* Split into user and password. */
+     authpass = strchr( authinfo, ':' );
+ 
+-    authname = authinfo;
+ 
+     if ( authpass == (char*) 0 )
+ 	{
+@@ -5405,16 +5560,13 @@ static void usb_auth_check( char* dirnam
+ {
+ 	struct usb_user_t *username;
+ 	struct sysinfo info;
+-	char* authpath = AUTH_FILE;
+ 	FILE *fp;
+ 	char buf[1024];
+ 	char *pt, *savep;
+ 	char authinfo[500];
+ 	char *authpass;
+-	static char line[10000];
+ 	int auth_flag = 0;
+-	char* cryp;
+-	char *authname,*name;
++	char *authname;
+ 	int l, auth_res;
+ 	struct stat stat_mine;
+ 	char real_dir[2056];
+@@ -5521,39 +5673,14 @@ static void usb_auth_check( char* dirnam
+ 		goto _auth;
+ 	}
+ 	*authpass++ = '\0';
+-
+-	/* Open the password file. */
+-	fp = fopen( authpath, "r" );
+-	if ( fp == (FILE*) 0 )
+-	{
+-	/* The file exists but we can't open it?  Disallow access. */
+-#ifdef SYSLOG
+-    	syslog( LOG_ERR, "%.80s auth file %.80s could not be opened - %m", ntoa( &client_addr ), authpath );
+-#endif
+-		send_error( 403, "Forbidden", "", "File is protected." );
+-	}
+-
+-	/* Read it. */
+-	while ( fgets( line, sizeof(line), fp ) != (char*) 0 )
+-	{
+-		/* Nuke newline. */
+-		l = strlen( line );
+-		if ( line[l - 1] == '\n' )
+-			line[l - 1] = '\0';
+-		/* Split into user and encrypted password. */
+-		cryp = strchr( line, ':' );
+-		if ( cryp == (char*) 0 )
+-			continue;
+-		*cryp++ = '\0';
+-		name = line;
++	{
+ 		/* Is this the right user? */
+-		if ( strcmp( line, authinfo ) == 0 )
++		if (!strcmp(authinfo, nvram_safe_get("http_username")))
+ 		{
+ 	    	/* Yes. */
+-	    	(void) fclose( fp );
+ 	    	/* So is the password right? */
+ 			/* OK !*/
+-			if ( strcmp(authpass, cryp ) == 0) {
++			if (!strcmp(authpass, nvram_safe_get("http_password"))) {
+ 				if (username->auth == USB_AUTH_NONE || username->auth == USB_NO_AUTH || (username->auth == USB_AUTH_PASS 
+ 				       && (info.uptime - username->timestamp) > web_timeout))
+ 			    {

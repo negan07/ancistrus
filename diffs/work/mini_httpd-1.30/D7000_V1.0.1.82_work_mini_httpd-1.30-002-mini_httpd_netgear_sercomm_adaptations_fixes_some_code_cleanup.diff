@@ -1066,17 +1066,10 @@
  	return -1;
  	}
  
-@@ -1135,6 +1540,143 @@ initialize_listen_socket( usockaddr* usa
+@@ -1135,6 +1540,136 @@ initialize_listen_socket( usockaddr* usa
      return listen_fd;
      }
  
-+/*
-+ * Check if @path exist in @paths[].
-+ * Return 1 ==> Yes, path exist in paths
-+ *        0 ==> No. Can not find path in paths
-+ *
-+ * NOTE: paths[] end with NULL
-+ */
 +/*
 + * Check if @path exist in @paths[].
 + * Return 1 ==> Yes, path exist in paths

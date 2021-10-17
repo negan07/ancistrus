@@ -9,7 +9,7 @@
  static void de_dotdot( char* f );
  static int get_pathinfo( void );
  static void do_file( void );
-@@ -1753,7 +1753,7 @@ handle_request( void )
+@@ -1746,7 +1746,7 @@ handle_request( void )
  	if ( SSL_accept( ssl ) == 0 )
  	    {
  	    ERR_print_errors_fp( stderr );
@@ -18,7 +18,7 @@
  	    }
  	}
  #endif /* USE_SSL */
-@@ -2362,29 +2362,30 @@ handle_request( void )
+@@ -2355,29 +2355,30 @@ handle_request( void )
      }
  #endif
  
@@ -56,7 +56,7 @@
  #ifdef LINGER_READ
      /* The "non-blocking read until error/eof/timeout" version of
      ** lingering close.
-@@ -2401,7 +2402,7 @@ finish_request( int exitstatus )
+@@ -2394,7 +2395,7 @@ finish_request( int exitstatus )
  	flags |= (int) O_NDELAY;
  	(void) fcntl( conn_fd, F_SETFL, flags );
  	}
@@ -65,7 +65,7 @@
      for (;;)
  	{
  	FD_ZERO( &rfds );
-@@ -2416,6 +2417,7 @@ finish_request( int exitstatus )
+@@ -2409,6 +2410,7 @@ finish_request( int exitstatus )
  	    break;
  	}
  #endif /* LINGER_READ */
@@ -73,7 +73,7 @@
  
      exit( exitstatus );
      }
-@@ -2939,7 +2941,7 @@ do_cgi( void )
+@@ -2932,7 +2934,7 @@ do_cgi( void )
  	    /* Interposer process. */
  	    (void) close( p[0] );
  	    cgi_interpose_input( p[1] );
@@ -82,7 +82,7 @@
  	    }
  	(void) close( p[1] );
  	if ( p[0] != STDIN_FILENO )
-@@ -2981,7 +2983,7 @@ do_cgi( void )
+@@ -2974,7 +2975,7 @@ do_cgi( void )
  	    /* Interposer process. */
  	    (void) close( p[1] );
  	    cgi_interpose_output( p[0], parse_headers );
@@ -91,7 +91,7 @@
  	    }
  	(void) close( p[0] );
  	if ( p[1] != STDOUT_FILENO )
-@@ -3750,7 +3752,7 @@ send_error( int s, char* title, char* ex
+@@ -3743,7 +3745,7 @@ send_error( int s, char* title, char* ex
  #ifdef USE_SSL
      SSL_free( ssl );
  #endif /* USE_SSL */
@@ -100,7 +100,7 @@
      }
  
  
-@@ -4660,7 +4662,7 @@ handle_write_timeout( int sig )
+@@ -4653,7 +4655,7 @@ handle_write_timeout( int sig )
      syslog( LOG_INFO, "%.80s connection timed out writing", ntoa( &client_addr ) );
  #endif
      SC_CFPRINTF("%.80s connection timed out writing\n", ntoa(&client_addr));

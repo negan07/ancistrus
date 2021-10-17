@@ -16,7 +16,7 @@
  #ifdef HTTPD_IPV6_SUPPORT
  #define USE_IPV6
  #endif
-@@ -3152,7 +3161,7 @@ cgi_interpose_output( int rfd, int parse
+@@ -3145,7 +3154,7 @@ cgi_interpose_output( int rfd, int parse
  			if (sessionid_new_sessionid[0])
  			{
  				SC_CFPRINTF_SESSIONID("!!!update client session id:%s\n", sessionid_new_sessionid);
@@ -25,7 +25,7 @@
  				(void) my_write( buf, strlen(buf) );
  			}
  		}		
-@@ -3245,7 +3254,7 @@ cgi_interpose_output( int rfd, int parse
+@@ -3238,7 +3247,7 @@ cgi_interpose_output( int rfd, int parse
  			if (sessionid_new_sessionid[0])
  			{
  				SC_CFPRINTF_SESSIONID("!!!update client session id:%s\n", sessionid_new_sessionid);
@@ -34,7 +34,7 @@
  				(void) my_write( buf, strlen(buf) );
  			}
  		}
-@@ -3881,7 +3890,7 @@ add_headers( int s, char* title, char* e
+@@ -3874,7 +3883,7 @@ add_headers( int s, char* title, char* e
  		if (sessionid_new_sessionid[0])
  		{
  			SC_CFPRINTF_SESSIONID("!!!update client session id:%s\n", sessionid_new_sessionid);

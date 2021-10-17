@@ -1,6 +1,6 @@
 --- work/mini_httpd-1.30/mini_httpd.c
 +++ work/mini_httpd-1.30/mini_httpd.c
-@@ -2596,7 +2596,7 @@ do_file( void )
+@@ -2589,7 +2589,7 @@ do_file( void )
      check_referrer();
  
      /* Is it CGI? */
@@ -9,7 +9,7 @@
  #ifdef USB
  	&& is_usb_session == 0 /* never do cgi for usb session, */
  #endif
-@@ -3516,7 +3516,7 @@ auth_check( char* dirname )
+@@ -3509,7 +3509,7 @@ auth_check( char* dirname )
      /* Does this request contain authorization info? */
      if ( authorization == (char*) 0 ){
  	/* when browser send login information not contain authorization info auth_fail_times +1 */
@@ -18,7 +18,7 @@
  		nvram_bcm_set("auth_fail_times","1");
  	}
          not_auth=NO_AUTH;
-@@ -3624,7 +3624,7 @@ auth_check( char* dirname )
+@@ -3617,7 +3617,7 @@ auth_check( char* dirname )
          remoteuser = line;
          SAVETIME;
  	/* when browser login success to router auth_fail_times will be empty */
@@ -27,7 +27,7 @@
  		nvram_bcm_set("auth_fail_times", "0");
  	}
          goto _out;
-@@ -3634,7 +3634,7 @@ auth_check( char* dirname )
+@@ -3627,7 +3627,7 @@ auth_check( char* dirname )
          /* No. */
          SC_CFPRINTF("Login Failed - IP: %s\n", remote_ip);
          not_auth=AUTH_FAIL;
@@ -36,7 +36,7 @@
  		agent_check = (nvram_bcm_get("user_agent") != NULL) ? nvram_bcm_get("user_agent") : "0";
  		if(strcmp(agent_check, useragent) != 0){
  			nvram_bcm_set("auth_fail_times", "1");
-@@ -3660,7 +3660,7 @@ auth_check( char* dirname )
+@@ -3653,7 +3653,7 @@ auth_check( char* dirname )
  #endif
  	SC_CFPRINTF("Login Failed - IP:%s\n", remote_ip);
      not_auth=AUTH_FAIL;
@@ -45,7 +45,7 @@
  		agent_check = (nvram_bcm_get("user_agent") != NULL) ? nvram_bcm_get("user_agent") : "0";
  		if(strcmp(agent_check, useragent) != 0){
  			nvram_bcm_set("auth_fail_times", "1");
-@@ -3852,7 +3852,7 @@ send_error_tail( void )
+@@ -3845,7 +3845,7 @@ send_error_tail( void )
      {
      char buf[500];
  
@@ -54,7 +54,7 @@
  	{
  	int n;
  	(void) snprintf( buf, sizeof(buf), "<!--\n" );
-@@ -4335,7 +4335,7 @@ really_check_referrer( void )
+@@ -4328,7 +4328,7 @@ really_check_referrer( void )
  	 ( cp1 = strstr( referrer, "//" ) ) == (char*) 0 )
  	{
  	/* Disallow if we require a referrer and the url matches. */
@@ -63,7 +63,7 @@
  	    return 0;
  	/* Otherwise ok. */
  	return 1;
-@@ -4384,7 +4384,7 @@ really_check_referrer( void )
+@@ -4377,7 +4377,7 @@ really_check_referrer( void )
      /* If the referrer host doesn't match the local host pattern, and
      ** the URL does match the url pattern, it's an illegal reference.
      */
