@@ -214,7 +214,6 @@ OPENSSL				:= $(OPENSSL_NAME)-$(VER_$(OPENSSL_NAME))
 NAME_$(OPENSSL)			:= $(OPENSSL_NAME)$(DBG)
 SUBVER_$(OPENSSL)		:= 
 VER_$(OPENSSL)			:= $(VER_$(OPENSSL_NAME))$(SUBVER_$(OPENSSL))
-DL_$(OPENSSL)			:= http://artfiles.org/openssl.org/source
 DL_$(OPENSSL)			:= http://artfiles.org/openssl.org/source/old/1.0.2
 TAR_$(OPENSSL)			:= $(OPENSSL).tar.gz
 HOME_$(OPENSSL)			:= https://www.openssl.org/
