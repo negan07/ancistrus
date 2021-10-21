@@ -75,6 +75,8 @@ function createCron() {
 <input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
 &nbsp;
 <input type="button" class="common_bt" value="Show Crontab" onClick="this.form.pipe_cmd.value='/bin/cat /etc/crontab';AncstdAction(this.form,'anc_run.htm','anc_sched.htm','pipe','');">
+&nbsp;
+<input type="button" class="common_bt" value="Reload Crontab" onClick="AncstdAction(this.form,'anc_sched.htm','anc_sched.htm','home','/usr/sbin/rc schedule start');">
 </td></tr></table></div>
 <div id="main" class="main_top_button">
 <table border="0" cellpadding="0" cellspacing="3" width="100%">
