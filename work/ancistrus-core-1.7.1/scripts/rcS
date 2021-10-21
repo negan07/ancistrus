@@ -154,11 +154,6 @@ echo 1025 65535 >/proc/sys/net/ipv4/ip_local_port_range
 # Ignore_all not yet used: this should be satisfactory
 echo 1 >/proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
 
-# Set to 1 for lan static route, when wan is not up and ip_forward is 0.
-echo 1 >/proc/sys/net/ipv4/conf/br0/forwarding
-echo 1 >/proc/sys/net/ipv4/conf/wlan0/forwarding
-echo 1 >/proc/sys/net/ipv4/conf/wlan0-va0/forwarding
-
 # Drop spoofed addr
 echo 1 >/proc/sys/net/ipv4/conf/eth1/rp_filter
 
