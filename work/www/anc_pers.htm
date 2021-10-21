@@ -45,11 +45,13 @@ function varInit() {
 <form name="pers" method="POST" action="anc.cgi" onSubmit="buttonToDisabled(document.forms[0])">
 <div><a class="page_title" href="javascript:gotoWiki('Personal-instructions/');">Personal Instructions</a></div>
 <div class="fix_button"><table border="0" cellpadding="0" cellspacing="2" width="100%"><tr><td nowrap colspan="2" align="center">
-<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)"></td></tr></table></div>
+<input class="cancel_bt" type="RESET" name="cancel" value="Cancel" onClick="setTimeout('varInit()',250)">
+&nbsp;
+<input class="common_bt" type="button" value="Restart Wifi" onClick="if(confirm('Warning! Now restarting wifi connection: proceed ?')) AncstdAction(this.form,'anc_pers.htm','','','/usr/sbin/rc wlan start');">
+</td></tr></table></div>
 <div id="main" class="main_top_button">
 <table border="0" cellpadding="0" cellspacing="3" width="100%">
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Personal-instructions#personal-post-wifi-commands')" tabindex="-1"><b>Personal Wifi Commands</b></a></td></tr>
-<tr><td colspan="2" align="center"><input class="common_bt" type="button" value="Restart Wifi" onClick="if(confirm('Warning! Now restarting wifi connection: proceed ?')) AncstdAction(this.form,'anc_pers.htm','','','/usr/sbin/rc wlan start');"></td></tr>
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 <tr><td colspan="2" align="center"><a href="javascript:gotoWiki('Personal-instructions#personal-post-wifi-commands')" tabindex="-1"><b>Type Personal Post Wifi Command here</b></a></td></tr>
 <tr><td colspan="2" align="center"><input type="text" name="anc_wlan_opt" size="40" maxlength="80" value=""></td></tr>
