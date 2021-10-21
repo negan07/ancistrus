@@ -20,11 +20,11 @@ var admin_open=0;
 var net_open=0;
 var storage_open=0;
 var misc_open=0;
-var guiinfo_cmd="/usr/sbin/scripts/guiinfo.sh >/dev/null";
-var upd_fail="Warning ! Repository update not available !\\n\\n";
+var guiinfo_cmd="/usr/sbin/scripts/guiinfo.sh+>/dev/null";
+var upd_fail="Warning+!+Repository+update+not+available+!\n\n";
 
 function loadvalue() {
-	//document.getElementById('topframe').contentDocument.location.reload(true);
+	document.getElementById('topframe').contentDocument.location.reload(true);
 	change_size();
 	region_class=initClass(gui_region);
 	menu_color_change('home');
