@@ -1,0 +1,11 @@
+--- work/c-ares-1.18.0/c-ares-1.18.0/configure
++++ work/c-ares-1.18.0/c-ares-1.18.0/configure
+@@ -24539,7 +24539,7 @@ fi
+ 
+ 
+ 
+-STDC_HEADERS
++#STDC_HEADERS
+ 
+ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for egrep" >&5
+ printf %s "checking for egrep... " >&6; }

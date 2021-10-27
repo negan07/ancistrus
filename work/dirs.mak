@@ -226,7 +226,7 @@ DIRLIST				+= $(OPENSSL)
 TARLIST				+= $(TAR_$(OPENSSL))
 # ARES
 ARES_NAME			:= c-ares
-VER_$(ARES_NAME)		:= 1.17.2
+VER_$(ARES_NAME)		:= 1.18.0
 ARES				:= $(ARES_NAME)-$(VER_$(ARES_NAME))
 NAME_$(ARES)			:= $(ARES_NAME)$(DBG)
 SUBVER_$(ARES)			:= 
@@ -246,7 +246,7 @@ CURL_NAME			:= curl
 VER_$(CURL_NAME)		:= 7.79.1
 CURL				:= $(CURL_NAME)-$(VER_$(CURL_NAME))
 NAME_$(CURL)			:= $(CURL_NAME)$(DBG)
-SUBVER_$(CURL)			:= 
+SUBVER_$(CURL)			:= -118
 VER_$(CURL)			:= $(VER_$(CURL_NAME))$(SUBVER_$(CURL))
 DL_$(CURL)			:= https://curl.haxx.se/download
 TAR_$(CURL)			:= $(CURL).tar.gz
