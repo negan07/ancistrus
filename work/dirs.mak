@@ -583,7 +583,7 @@ DIRLIST				+= $(BFTPD)
 TARLIST				+= $(TAR_$(BFTPD))
 # FFMPEG
 FFMPEG_NAME			:= ffmpeg
-VER_$(FFMPEG_NAME)		:= 4.4
+VER_$(FFMPEG_NAME)		:= 4.4.1
 FFMPEG				:= $(FFMPEG_NAME)-$(VER_$(FFMPEG_NAME))
 NAME_$(FFMPEG)			:= $(FFMPEG_NAME)$(DBG)
 SUBVER_$(FFMPEG)		:= 
@@ -722,7 +722,7 @@ MINIDLNA_NAME			:= minidlna
 VER_$(MINIDLNA_NAME)		:= 1.3.0
 MINIDLNA			:= $(MINIDLNA_NAME)-$(VER_$(MINIDLNA_NAME))
 NAME_$(MINIDLNA)		:= $(MINIDLNA_NAME)$(DBG)
-SUBVER_$(MINIDLNA)		:= -017
+SUBVER_$(MINIDLNA)		:= -025
 VER_$(MINIDLNA)			:= $(VER_$(MINIDLNA_NAME))$(SUBVER_$(MINIDLNA))
 DL_$(MINIDLNA)			:= https://downloads.sourceforge.net/project/minidlna/minidlna/$(VER_$(MINIDLNA_NAME))
 TAR_$(MINIDLNA)			:= $(MINIDLNA).tar.gz

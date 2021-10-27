@@ -65,7 +65,7 @@
  static void Process_upnphttp(struct event *ev);
  
  struct upnphttp * 
-@@ -1123,6 +1124,10 @@ ProcessHttpQuery_upnphttp(struct upnphttp * h)
+@@ -1051,6 +1052,10 @@ ProcessHttpQuery_upnphttp(struct upnphttp * h)
  			SendResp_presentation(h);
  			#endif
  		}
@@ -76,7 +76,7 @@
  		else
  		{
  			DPRINTF(E_WARN, L_HTTP, "%s not found, responding ERROR 404\n", HttpUrl);
-@@ -1492,6 +1497,37 @@ start_dlna_header(struct string_s *str, int respcode, const char *tmode, const c
+@@ -1420,6 +1425,37 @@ start_dlna_header(struct string_s *str, int respcode, const char *tmode, const c
  }
  
  static void

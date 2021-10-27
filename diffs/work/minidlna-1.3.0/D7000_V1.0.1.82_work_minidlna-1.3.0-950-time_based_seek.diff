@@ -22,7 +22,7 @@
  			}
  			else if(strncasecmp(line, "PlaySpeed.dlna.org", 18)==0)
  			{
-@@ -995,11 +1010,9 @@ ProcessHttpQuery_upnphttp(struct upnphttp * h)
+@@ -923,11 +938,9 @@ ProcessHttpQuery_upnphttp(struct upnphttp * h)
  			return;
  		}
  		/* 7.3.33.4 */
@@ -36,7 +36,7 @@
  			Send406(h);
  			return;
  		}
-@@ -1947,6 +1960,9 @@ SendResp_dlnafile(struct upnphttp *h, char *object)
+@@ -1875,6 +1888,9 @@ SendResp_dlnafile(struct upnphttp *h, char *object)
  	off_t total, offset, size;
  	int64_t id;
  	int sendfh;
@@ -46,7 +46,7 @@
  	uint32_t dlna_flags = DLNA_FLAG_DLNA_V1_5|DLNA_FLAG_HTTP_STALLING|DLNA_FLAG_TM_B;
  	uint32_t cflags = h->req_client ? h->req_client->type->flags : 0;
  	const char *tmode;
-@@ -2121,6 +2137,26 @@ SendResp_dlnafile(struct upnphttp *h, char *object)
+@@ -2049,6 +2065,26 @@ SendResp_dlnafile(struct upnphttp *h, char *object)
  		              (intmax_t)total, (intmax_t)h->req_RangeStart,
  		              (intmax_t)h->req_RangeEnd, (intmax_t)size);
  	}
