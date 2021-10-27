@@ -1,5 +1,5 @@
---- work/ffmpeg-4.4/ffmpeg-4.4/libavutil/common.h
-+++ work/ffmpeg-4.4/ffmpeg-4.4/libavutil/common.h
+--- work/ffmpeg-4.4.1/ffmpeg-4.4.1/libavutil/common.h
++++ work/ffmpeg-4.4.1/ffmpeg-4.4.1/libavutil/common.h
 @@ -377,7 +377,7 @@ static av_always_inline int64_t av_sat_a
      return !__builtin_add_overflow(a, b, &tmp) ? tmp : (tmp < 0 ? INT64_MAX : INT64_MIN);
  #else
