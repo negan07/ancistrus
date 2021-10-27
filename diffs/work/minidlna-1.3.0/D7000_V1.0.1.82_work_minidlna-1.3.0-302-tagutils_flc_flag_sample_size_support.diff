@@ -1,0 +1,10 @@
+--- work/minidlna-1.3.0/minidlna-1.3.0/tagutils/tagutils-flc.c
++++ work/minidlna-1.3.0/minidlna-1.3.0/tagutils/tagutils-flc.c
+@@ -65,6 +65,7 @@
+ 			psong->song_length = (sec * 1000) + ms;
+ 			psong->bitrate = (((uint64_t)(psong->file_size) * 1000) / (psong->song_length / 8));
+ 			psong->samplerate = block->data.stream_info.sample_rate;
++			psong->samplesize = block->data.stream_info.bits_per_sample;
+ 			psong->channels = block->data.stream_info.channels;
+ 			break;
+ 

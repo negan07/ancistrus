@@ -1,0 +1,13 @@
+--- work/minidlna-1.3.0/minidlna-1.3.0/scanner.c
++++ work/minidlna-1.3.0/minidlna-1.3.0/scanner.c
+@@ -98,9 +98,8 @@ insert_container(const char *item, const char *rootParent, const char *refID, co
+ 					"left join DETAILS d on (o.DETAIL_ID = d.ID)"
+ 					" where o.PARENT_ID = '%s'"
+ 					" and o.NAME like '%q'"
+-					" and d.ARTIST %s %Q"
+ 					" and o.CLASS = 'container.%s' limit 1",
+-					rootParent, item, artist?"like":"is", artist, class);
++					rootParent, item, class);
+ 	if( result )
+ 	{
+ 		base = strrchr(result, '$');

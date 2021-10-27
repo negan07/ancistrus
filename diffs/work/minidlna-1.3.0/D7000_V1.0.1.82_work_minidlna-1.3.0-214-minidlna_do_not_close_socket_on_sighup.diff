@@ -1,0 +1,11 @@
+--- work/minidlna-1.3.0/minidlna-1.3.0/minidlna.c
++++ work/minidlna-1.3.0/minidlna-1.3.0/minidlna.c
+@@ -216,8 +216,6 @@
+ {
+ 	signal(sig, sighup);
+ 	DPRINTF(E_WARN, L_GENERAL, "received signal %d, reloading\n", sig);
+-
+-	reload_ifaces(1);
+ 	log_reopen();
+ }
+ 
