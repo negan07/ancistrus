@@ -1,5 +1,5 @@
---- work/c-ares-1.18.0/c-ares-1.18.0/configure
-+++ work/c-ares-1.18.0/c-ares-1.18.0/configure
+--- work/c-ares-1.18.1/c-ares-1.18.1/configure
++++ work/c-ares-1.18.1/c-ares-1.18.1/configure
 @@ -1101,7 +1101,7 @@ CXXFLAGS
  CCC
  LT_SYS_LIBRARY_PATH
@@ -9,7 +9,7 @@
  
  # Initialize some variables set by options.
  ac_init_help=
-@@ -34082,16 +34082,7 @@ fi
+@@ -34086,16 +34086,7 @@ fi
  printf "%s\n" "$build_tests" >&6; }
  
  
@@ -27,8 +27,8 @@
  
  ac_config_files="$ac_config_files Makefile include/Makefile src/Makefile src/lib/Makefile src/tools/Makefile docs/Makefile libcares.pc"
  
---- work/c-ares-1.18.0/c-ares-1.18.0/Makefile.in
-+++ work/c-ares-1.18.0/c-ares-1.18.0/Makefile.in
+--- work/c-ares-1.18.1/c-ares-1.18.1/Makefile.in
++++ work/c-ares-1.18.1/c-ares-1.18.1/Makefile.in
 @@ -411,7 +411,7 @@ EXTRA_DIST = AUTHORS CHANGES README.care
  
  CLEANFILES = $(PDFPAGES) $(HTMLPAGES)
@@ -38,8 +38,8 @@
  SUBDIRS = @BUILD_SUBDIRS@
  pkgconfigdir = $(libdir)/pkgconfig
  pkgconfig_DATA = libcares.pc
---- work/c-ares-1.18.0/c-ares-1.18.0/src/Makefile.in
-+++ work/c-ares-1.18.0/c-ares-1.18.0/src/Makefile.in
+--- work/c-ares-1.18.1/c-ares-1.18.1/src/Makefile.in
++++ work/c-ares-1.18.1/c-ares-1.18.1/src/Makefile.in
 @@ -346,7 +346,7 @@ top_build_prefix = @top_build_prefix@
  top_builddir = @top_builddir@
  top_srcdir = @top_srcdir@

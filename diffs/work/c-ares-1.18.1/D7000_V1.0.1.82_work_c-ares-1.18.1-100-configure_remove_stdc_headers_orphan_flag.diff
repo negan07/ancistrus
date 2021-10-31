@@ -1,6 +1,6 @@
---- work/c-ares-1.18.0/c-ares-1.18.0/configure
-+++ work/c-ares-1.18.0/c-ares-1.18.0/configure
-@@ -24539,7 +24539,7 @@ fi
+--- work/c-ares-1.18.1/c-ares-1.18.1/configure
++++ work/c-ares-1.18.1/c-ares-1.18.1/configure
+@@ -24543,7 +24543,7 @@ fi
  
  
  

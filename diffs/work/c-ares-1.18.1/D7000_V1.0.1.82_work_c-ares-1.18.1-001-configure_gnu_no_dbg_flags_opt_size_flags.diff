@@ -1,5 +1,5 @@
---- work/c-ares-1.18.0/c-ares-1.18.0/configure
-+++ work/c-ares-1.18.0/c-ares-1.18.0/configure
+--- work/c-ares-1.18.1/c-ares-1.18.1/configure
++++ work/c-ares-1.18.1/c-ares-1.18.1/configure
 @@ -21038,9 +21038,9 @@ $as_echo "yes" >&6; }
      flags_dbg_all="$flags_dbg_all -gdwarf-2"
      flags_dbg_all="$flags_dbg_all -gvms"
