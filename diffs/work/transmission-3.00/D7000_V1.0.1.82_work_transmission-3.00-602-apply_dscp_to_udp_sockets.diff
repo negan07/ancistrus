@@ -1,0 +1,56 @@
+--- work/transmission-3.00/transmission-3.00/libtransmission/session.c
++++ work/transmission-3.00/transmission-3.00/libtransmission/session.c
+@@ -2274,6 +2274,8 @@ static void toggle_utp(void* data)
+ 
+     tr_udpSetSocketBuffers(session);
+ 
++    tr_udpSetSocketTOS(session);
++
+     /* But don't call tr_utpClose -- see reset_timer in tr-utp.c for an
+        explanation. */
+ }
+--- work/transmission-3.00/transmission-3.00/libtransmission/tr-udp.c
++++ work/transmission-3.00/transmission-3.00/libtransmission/tr-udp.c
+@@ -125,6 +125,24 @@ void tr_udpSetSocketBuffers(tr_session*
+     }
+ }
+ 
++void tr_udpSetSocketTOS(tr_session* session)
++{
++    if (session->peerSocketTOS == 0)
++    {
++        return;
++    }
++
++    if (session->udp_socket != TR_BAD_SOCKET)
++    {
++        tr_netSetTOS(session->udp_socket, session->peerSocketTOS, TR_AF_INET);
++    }
++
++    if (session->udp6_socket != TR_BAD_SOCKET)
++    {
++        tr_netSetTOS(session->udp6_socket, session->peerSocketTOS, TR_AF_INET6);
++    }
++}
++
+ /* BEP-32 has a rather nice explanation of why we need to bind to one
+    IPv6 address, if I may say so myself. */
+ 
+@@ -363,6 +381,8 @@ ipv6:
+ 
+     tr_udpSetSocketBuffers(ss);
+ 
++    tr_udpSetSocketTOS(ss);
++
+     if (ss->isDHTEnabled)
+     {
+         tr_dhtInit(ss);
+--- work/transmission-3.00/transmission-3.00/libtransmission/tr-udp.h
++++ work/transmission-3.00/transmission-3.00/libtransmission/tr-udp.h
+@@ -30,5 +30,6 @@ THE SOFTWARE.
+ void tr_udpInit(tr_session*);
+ void tr_udpUninit(tr_session*);
+ void tr_udpSetSocketBuffers(tr_session*);
++void tr_udpSetSocketTOS(tr_session*);
+ 
+ bool tau_handle_message(tr_session* session, uint8_t const* msg, size_t msglen);
