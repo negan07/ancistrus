@@ -1,0 +1,384 @@
+--- work/minidlna-1.3.0/minidlna-1.3.0/albumart.c
++++ work/minidlna-1.3.0/minidlna-1.3.0/albumart.c
+@@ -51,31 +51,23 @@ art_cache_exists(const char *orig_path, char **cache_file)
+ }
+ 
+ static char *
+-save_resized_album_art(image_s *imsrc, const char *path)
++save_resized_album_art(image_s *imsrc, char *cache_file, int twidth, int theight)
+ {
+ 	int dstw, dsth;
+ 	image_s *imdst;
+-	char *cache_file;
+-	char cache_dir[MAXPATHLEN];
+ 
+ 	if( !imsrc )
+ 		return NULL;
+ 
+-	if( art_cache_exists(path, &cache_file) )
+-		return cache_file;
+-
+-	strncpyt(cache_dir, cache_file, sizeof(cache_dir));
+-	make_dir(dirname(cache_dir), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+-
+-	if( imsrc->width > imsrc->height )
++	if( imsrc->width * theight > imsrc->height * twidth )
+ 	{
+-		dstw = 160;
+-		dsth = (imsrc->height<<8) / ((imsrc->width<<8)/160);
++		dstw = twidth;
++		dsth = (imsrc->height<<8) / ((imsrc->width<<8)/twidth);
+ 	}
+ 	else
+ 	{
+-		dstw = (imsrc->width<<8) / ((imsrc->height<<8)/160);
+-		dsth = 160;
++		dstw = (imsrc->width<<8) / ((imsrc->height<<8)/theight);
++		dsth = theight;
+ 	}
+ 	imdst = image_resize(imsrc, dstw, dsth);
+ 	if( !imdst )
+@@ -90,6 +82,113 @@ save_resized_album_art(image_s *imsrc, const char *path)
+ 	return cache_file;
+ }
+ 
++static const char *sizepostfix[] = { "LRG", "MED", "SM", "" };
++static const int twidth[]  = { 4096, 1024, 640, 160 };
++static const int theight[] = { 4096,  768, 480, 160 };
++
++static char *
++album_art_path_size(const char *basename, const int index)
++{
++	char *ret = NULL;
++	int postfixlen = strlen(sizepostfix[index]);
++	xasprintf(&ret, "%s%s", basename, sizepostfix[index]);
++	snprintf(strchr(ret, '\0') - 4 - postfixlen, 5 + postfixlen, "%s.jpg", sizepostfix[index]);
++	return ret;
++}
++
++static char *
++save_album_art(image_s *imsrc, const char *path, uint8_t *image_data, int image_size)
++{
++	int width, height;
++	char *art_path = NULL;
++	char *art_path_pf = NULL;
++	char *link_from = NULL;
++	uint8_t *image_buf = image_data;
++	size_t nwritten;
++	char *cache_dir;
++	FILE *dstfile;
++
++	int sizeidx;
++
++	width = imsrc->width;
++	height = imsrc->height;
++	if ( width <= 0 || height <= 0) {
++		return NULL;
++	}
++
++	if( art_cache_exists(path, &art_path) )
++		return art_path;
++	cache_dir = strdup(art_path);
++	make_dir(dirname(cache_dir), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
++	free(cache_dir);
++
++	if (image_data == NULL) {
++		link_from = strdup(path);
++	}
++
++	for(sizeidx = 0; sizeidx < 4; sizeidx++) {
++		art_path_pf = album_art_path_size(art_path, sizeidx);
++
++		if( width > twidth[sizeidx] || height > theight[sizeidx] ) {
++			if (save_resized_album_art(imsrc, art_path_pf, twidth[sizeidx], theight[sizeidx]) == NULL)
++				return NULL;
++			continue;
++		}
++
++		if (link_from != NULL) {
++			if (link(link_from, art_path_pf) == 0) {
++				free(art_path_pf);
++				continue;
++			}
++			struct stat statbuf;
++			FILE *srcfile;
++			int nread;
++
++			if (stat(path, &statbuf) != 0)
++				goto fail;
++			image_size = statbuf.st_size;
++
++			srcfile = fopen(path, "r");
++			if (!srcfile)
++				goto fail;
++			image_buf = malloc(image_size);
++			if (image_buf == NULL)
++				goto fail;
++			nread = fread((void *)image_data, 1, image_size, srcfile);
++			fclose(srcfile);
++			if ( nread != image_size )
++			{
++				DPRINTF(E_WARN, L_METADATA, "Embedded art error: read %lu/%d bytes\n",
++						(unsigned long)nread, image_size);
++				free(image_buf);
++				goto fail;
++			}
++		}
++
++		dstfile = fopen(art_path_pf, "w");
++		if( !dstfile )
++			goto fail;
++		nwritten = fwrite((void *)image_buf, 1, image_size, dstfile);
++		fclose(dstfile);
++		if( nwritten != image_size )
++		{
++			DPRINTF(E_WARN, L_METADATA, "Embedded art error: wrote %lu/%d bytes\n",
++					(unsigned long)nwritten, image_size);
++			remove(art_path_pf);
++			goto fail;
++		}
++		free(link_from);
++		link_from = art_path_pf;
++	}
++	free(link_from);
++	return art_path;
++fail:
++	free(art_path);
++	free(art_path_pf);
++	free(link_from);
++	return NULL;
++}
++
+ /* And our main album art functions */
+ void
+ update_if_album_art(const char *path)
+@@ -164,15 +263,14 @@ update_if_album_art(const char *path)
+ char *
+ check_embedded_art(const char *path, uint8_t *image_data, int image_size)
+ {
+-	int width = 0, height = 0;
+ 	char *art_path = NULL;
+ 	char *cache_dir;
+-	FILE *dstfile;
+ 	image_s *imsrc;
+ 	static char last_path[PATH_MAX];
+ 	static unsigned int last_hash = 0;
+ 	static int last_success = 0;
+ 	unsigned int hash;
++       int sizeidx;
+ 
+ 	if( !image_data || !image_size || !path )
+ 	{
+@@ -185,24 +283,38 @@ check_embedded_art(const char *path, uint8_t *image_data, int image_size)
+ 	{
+ 		if( !last_success )
+ 			return NULL;
+-		if( art_cache_exists(path, &art_path) || link(last_path, art_path) == 0 )
+-		{
+-			return(art_path);
+-		}
+-		else
+-		{
+-			if( errno == ENOENT )
++		for (sizeidx = 0; sizeidx < 4; sizeidx++) {
++			char *art_path_pf = album_art_path_size(art_path, sizeidx);
++			char *last_path_pf = album_art_path_size(last_path, sizeidx);
++			if( art_cache_exists(path, &art_path) || link(last_path_pf, art_path_pf) == 0 )
++			{
++				free(art_path_pf);;
++				free(last_path_pf);;
++				continue;
++			}
++			else
+ 			{
+-				cache_dir = strdup(art_path);
+-				make_dir(dirname(cache_dir), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+-				free(cache_dir);
+-				if( link(last_path, art_path) == 0 )
+-					return(art_path);
++				if( errno == ENOENT )
++				{
++					cache_dir = strdup(art_path);
++					make_dir(dirname(cache_dir), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
++					free(cache_dir);
++					if( link(last_path_pf, art_path_pf) == 0 ) {
++						free(art_path_pf);
++						free(last_path_pf);
++						continue;
++					}
++				}
++				DPRINTF(E_WARN, L_METADATA, "Linking %s to %s failed [%s]\n", art_path_pf, last_path_pf, strerror(errno));
++				free(art_path_pf);
++				free(art_path);
++				free(last_path_pf);
++				art_path = NULL;
++				break;
+ 			}
+-			DPRINTF(E_WARN, L_METADATA, "Linking %s to %s failed [%s]\n", art_path, last_path, strerror(errno));
+-			free(art_path);
+-			art_path = NULL;
+ 		}
++		if (art_path)
++			return art_path;
+ 	}
+ 	last_hash = hash;
+ 
+@@ -212,41 +324,7 @@ check_embedded_art(const char *path, uint8_t *image_data, int image_size)
+ 		last_success = 0;
+ 		return NULL;
+ 	}
+-	width = imsrc->width;
+-	height = imsrc->height;
+-
+-	if( width > 160 || height > 160 )
+-	{
+-		art_path = save_resized_album_art(imsrc, path);
+-	}
+-	else if( width > 0 && height > 0 )
+-	{
+-		size_t nwritten;
+-		if( art_cache_exists(path, &art_path) )
+-			goto end_art;
+-		cache_dir = strdup(art_path);
+-		make_dir(dirname(cache_dir), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+-		free(cache_dir);
+-		dstfile = fopen(art_path, "w");
+-		if( !dstfile )
+-		{
+-			free(art_path);
+-			art_path = NULL;
+-			goto end_art;
+-		}
+-		nwritten = fwrite((void *)image_data, 1, image_size, dstfile);
+-		fclose(dstfile);
+-		if( nwritten != image_size )
+-		{
+-			DPRINTF(E_WARN, L_METADATA, "Embedded art error: wrote %lu/%d bytes\n",
+-				(unsigned long)nwritten, image_size);
+-			remove(art_path);
+-			free(art_path);
+-			art_path = NULL;
+-			goto end_art;
+-		}
+-	}
+-end_art:
++        art_path = save_album_art(imsrc, path, image_data, image_size);
+ 	image_free(imsrc);
+ 	if( !art_path )
+ 	{
+@@ -268,7 +346,6 @@ check_for_album_file(const char *path)
+ 	char mypath[MAXPATHLEN];
+ 	struct album_art_name_s *album_art_name;
+ 	image_s *imsrc = NULL;
+-	int width=0, height=0;
+ 	char *art_file, *p;
+ 	const char *dir;
+ 	struct stat st;
+@@ -334,12 +411,7 @@ existing_file:
+ 			if( !imsrc )
+ 				continue;
+ found_file:
+-			width = imsrc->width;
+-			height = imsrc->height;
+-			if( width > 160 || height > 160 )
+-				art_file = save_resized_album_art(imsrc, file);
+-			else
+-				art_file = strdup(file);
++                        art_file = save_album_art(imsrc, file, NULL, 0);
+ 			image_free(imsrc);
+ 			return(art_file);
+ 		}
+--- work/minidlna-1.3.0/minidlna-1.3.0/upnphttp.c
++++ work/minidlna-1.3.0/minidlna-1.3.0/upnphttp.c
+@@ -1473,6 +1473,10 @@ SendResp_albumArt(struct upnphttp * h, char * object)
+ 	int fd;
+ 	struct string_s str;
+ 
++        const char *sizepostfix[] = { "LRG", "MED", "SM", "TN" };
++        char *path_pf = NULL;
++        int sizeidx;
++
+ 	if( h->reqflags & (FLAG_XFERSTREAMING|FLAG_RANGE) )
+ 	{
+ 		DPRINTF(E_WARN, L_HTTP, "Client tried to specify transferMode as Streaming with an image!\n");
+@@ -1489,18 +1493,29 @@ SendResp_albumArt(struct upnphttp * h, char * object)
+ 		Send404(h);
+ 		return;
+ 	}
+-	DPRINTF(E_INFO, L_HTTP, "Serving album art ID: %lld [%s]\n", id, path);
++	for (sizeidx = 0; sizeidx < 3; sizeidx++) {
++		if (strstr(object, sizepostfix[sizeidx]) != NULL) {
++			int postfixlen = strlen(sizepostfix[sizeidx]);
++			xasprintf(&path_pf, "%s%s", path, sizepostfix[sizeidx]);
++			snprintf(strchr(path_pf, '\0') - 4 - postfixlen, 5 + postfixlen, "%s.jpg", sizepostfix[sizeidx]);
++			break;
++		}
++	}
++	if (path_pf == NULL)
++		path_pf = strdup(path);
++	sqlite3_free(path);
++	DPRINTF(E_INFO, L_HTTP, "Serving album art ID: %lld [%s]\n", id, path_pf);
+ 
+-	fd = _open_file(path);
++	fd = _open_file(path_pf);
+ 	if( fd < 0 ) {
+-		sqlite3_free(path);
++		free(path_pf);
+ 		if (fd == -403)
+ 			Send403(h);
+ 		else
+ 			Send404(h);
+ 		return;
+ 	}
+-	sqlite3_free(path);
++	free(path_pf);
+ 	size = lseek(fd, 0, SEEK_END);
+ 	lseek(fd, 0, SEEK_SET);
+ 
+@@ -1508,8 +1523,8 @@ SendResp_albumArt(struct upnphttp * h, char * object)
+ 
+ 	start_dlna_header(&str, 200, "Interactive", "image/jpeg");
+ 	strcatf(&str, "Content-Length: %jd\r\n"
+-	              "contentFeatures.dlna.org: DLNA.ORG_PN=JPEG_TN\r\n\r\n",
+-	              (intmax_t)size);
++		      "contentFeatures.dlna.org: DLNA.ORG_PN=JPEG_%s\r\n\r\n",
++		      (intmax_t)size, sizepostfix[sizeidx]);
+ 
+ 	if( send_data(h, str.data, str.off, MSG_MORE) == 0 )
+ 	{
+--- work/minidlna-1.3.0/minidlna-1.3.0/upnpsoap.c
++++ work/minidlna-1.3.0/minidlna-1.3.0/upnpsoap.c
+@@ -1210,12 +1210,30 @@ callback(void *args, int argc, char **argv, char **azColName)
+ 							   lan_addr[passed_args->iface].str, runtime_vars.port, album_art, detailID);
+ 				}
+ 			} else if( passed_args->filter & FILTER_UPNP_ALBUMARTURI ) {
+-				ret = strcatf(str, "&lt;upnp:albumArtURI");
+ 				if( passed_args->filter & FILTER_UPNP_ALBUMARTURI_DLNA_PROFILEID ) {
++					ret = strcatf(str, "&lt;upnp:albumArtURI");
++					ret = strcatf(str, " dlna:profileID=\"JPEG_LRG\" xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0/\"");
++					ret = strcatf(str, "&gt;http://%s:%d/AlbumArt/%s-%s_LRG.jpg&lt;/upnp:albumArtURI&gt;",
++							lan_addr[passed_args->iface].str, runtime_vars.port, album_art, detailID);
++					ret = strcatf(str, "&lt;upnp:albumArtURI");
++					ret = strcatf(str, " dlna:profileID=\"JPEG_MED\" xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0/\"");
++					ret = strcatf(str, "&gt;http://%s:%d/AlbumArt/%s-%s_MED.jpg&lt;/upnp:albumArtURI&gt;",
++							lan_addr[passed_args->iface].str, runtime_vars.port, album_art, detailID);
++					ret = strcatf(str, "&lt;upnp:albumArtURI");
++					ret = strcatf(str, " dlna:profileID=\"JPEG_SM\" xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0/\"");
++					ret = strcatf(str, "&gt;http://%s:%d/AlbumArt/%s-%s_SM.jpg&lt;/upnp:albumArtURI&gt;",
++							lan_addr[passed_args->iface].str, runtime_vars.port, album_art, detailID);
++					ret = strcatf(str, "&lt;upnp:albumArtURI");
+ 					ret = strcatf(str, " dlna:profileID=\"JPEG_TN\" xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0/\"");
++					ret = strcatf(str, "&gt;http://%s:%d/AlbumArt/%s-%s.jpg&lt;/upnp:albumArtURI&gt;",
++							lan_addr[passed_args->iface].str, runtime_vars.port, album_art, detailID);
++				}
++				else {
++					ret = strcatf(str, "&lt;upnp:albumArtURI");
++					ret = strcatf(str, "&lt;upnp:albumArtURI");
++					ret = strcatf(str, "&gt;http://%s:%d/AlbumArt/%s-%s.jpg&lt;/upnp:albumArtURI&gt;",
++							lan_addr[passed_args->iface].str, runtime_vars.port, album_art, detailID);
+ 				}
+-				ret = strcatf(str, "&gt;http://%s:%d/AlbumArt/%s-%s.jpg&lt;/upnp:albumArtURI&gt;",
+-				                   lan_addr[passed_args->iface].str, runtime_vars.port, album_art, detailID);
+ 			}
+ 		}
+ 		if( (passed_args->flags & FLAG_MS_PFS) && *mime == 'i' ) {

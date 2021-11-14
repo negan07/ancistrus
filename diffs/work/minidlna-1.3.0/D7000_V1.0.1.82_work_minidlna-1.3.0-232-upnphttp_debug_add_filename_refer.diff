@@ -1,6 +1,6 @@
 --- work/minidlna-1.3.0/minidlna-1.3.0/upnphttp.c
 +++ work/minidlna-1.3.0/minidlna-1.3.0/upnphttp.c
-@@ -1970,7 +1970,7 @@ SendResp_dlnafile(struct upnphttp *h, ch
+@@ -1985,7 +1985,7 @@ SendResp_dlnafile(struct upnphttp *h, ch
  	{
  		if( strncmp(last_file.mime, "image", 5) == 0 )
  		{
@@ -9,7 +9,7 @@
  			Send406(h);
  			goto error;
  		}
-@@ -1979,13 +1979,13 @@ SendResp_dlnafile(struct upnphttp *h, ch
+@@ -1994,13 +1994,13 @@ SendResp_dlnafile(struct upnphttp *h, ch
  	{
  		if( h->reqflags & FLAG_REALTIMEINFO )
  		{
@@ -25,7 +25,7 @@
  			/* Samsung TVs (well, at least the A950) do this for some reason,
  			 * and I don't see them fixing this bug any time soon. */
  			if( !(cflags & FLAG_SAMSUNG) || GETFLAG(DLNA_STRICT_MASK) )
-@@ -2030,14 +2030,14 @@ SendResp_dlnafile(struct upnphttp *h, ch
+@@ -2045,14 +2045,14 @@ SendResp_dlnafile(struct upnphttp *h, ch
  		}
  		if( (h->req_RangeStart > h->req_RangeEnd) || (h->req_RangeStart < 0) )
  		{

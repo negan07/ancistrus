@@ -262,7 +262,7 @@
  
  	/* Make sure we have at least 8KB left of allocated memory to finish the response. */
  	if( str->off > (str->size - 8192) )
-@@ -1323,6 +1338,7 @@
+@@ -1341,6 +1355,7 @@
  	char *sql, *ptr;
  	struct Response args;
  	struct string_s str;
@@ -270,7 +270,7 @@
  	int totalMatches = 0;
  	int ret;
  	const char *ObjectID, *BrowseFlag;
-@@ -1338,6 +1354,7 @@
+@@ -1356,6 +1371,7 @@
  
  	memset(&args, 0, sizeof(args));
  	memset(&str, 0, sizeof(str));
@@ -278,7 +278,7 @@
  
  	ParseNameValue(h->req_buf + h->req_contentoff, h->req_contentlen, &data, 0);
  
-@@ -1387,11 +1404,22 @@
+@@ -1405,11 +1421,22 @@
  		ret = strcatf(&str, SEC_NAMESPACE);
  	strcatf(&str, "&gt;\n");
  
@@ -301,7 +301,7 @@
  	DPRINTF(E_DEBUG, L_HTTP, "Browsing ContentDirectory:\n"
  	                         " * ObjectID: %s\n"
  	                         " * Count: %d\n"
-@@ -1417,7 +1445,7 @@
+@@ -1435,7 +1462,7 @@
  				refid_sql = magic->refid_sql;
  		}
  		sql = sqlite3_mprintf("SELECT %s, %s, %s, " COLUMNS
@@ -310,7 +310,7 @@
  				      " where OBJECT_ID = '%q';",
  				      objectid_sql, parentid_sql, refid_sql, id);
  		ret = sqlite3_exec(db, sql, callback, (void *) &args, &zErrMsg);
-@@ -1533,8 +1561,14 @@
+@@ -1551,8 +1578,14 @@
  	                    args.returned, totalMatches, updateID);
  	BuildSendAndCloseSoapResp(h, str.data, str.off);
  browse_error:
