@@ -1,0 +1,68 @@
+diff -urN D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/lib/Makefile D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/lib/Makefile
+--- D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/lib/Makefile	2016-10-11 17:57:16.000000000 +0200
++++ D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/lib/Makefile	2017-04-29 21:38:14.291245056 +0200
+@@ -5,7 +5,7 @@
+ #STRIP=$(CROSS_PREFIX)strip
+ #-----------------------------------------------------
+ localedir=
+-CFLAGS += -fPIC -I. -I../include -DLOCALEDIR=\"$(localedir)\" -DHAVE_CONFIG_H -DLIBDIR=\"\" -DUSE_DOS
++CFLAGS += -Os -s -fPIC -I. -I../include -DLOCALEDIR=\"$(localedir)\" -DHAVE_CONFIG_H -DLIBDIR=\"\" -DUSE_DOS
+ ARFLAGS=rc
+ OBJS=iconv.o
+ LIBCHARSET_OBJECTS = ../libcharset/lib/localcharset.o
+diff -urN D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/libcharset/lib/Makefile D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/libcharset/lib/Makefile
+--- D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/libcharset/lib/Makefile	2016-10-11 17:57:14.000000000 +0200
++++ D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/libcharset/lib/Makefile	2017-05-01 21:49:32.145800083 +0200
+@@ -13,7 +13,7 @@
+ 
+ # Programs used by "make":
+ CC = gcc
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPPFLAGS = 
+ LDFLAGS = 
+ INCLUDES = -I. -I$(srcdir) -I.. -I$(srcdir)/..
+diff -urN D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/src/Makefile D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/src/Makefile
+--- D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/src/Makefile	2016-10-11 17:57:14.000000000 +0200
++++ D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/src/Makefile	2017-05-01 21:49:32.149799960 +0200
+@@ -16,7 +16,7 @@
+ 
+ # Programs used by "make":
+ CC = gcc
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPPFLAGS = 
+ LDFLAGS = 
+ INCLUDES = -I. -I$(srcdir) -I../include -I$(srcdir)/../include
+diff -urN D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/tests/Makefile D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/tests/Makefile
+--- D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/tests/Makefile	2016-10-11 17:57:15.000000000 +0200
++++ D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/tests/Makefile	2017-05-01 21:49:32.149799960 +0200
+@@ -7,7 +7,7 @@
+ 
+ # Programs used by "make":
+ CC = gcc
+-CFLAGS = -g -O2
++CFLAGS +=  -Os
+ CPPFLAGS = 
+ LDFLAGS = 
+ INCLUDES = -I. -I$(srcdir) -I../include -I$(srcdir)/../include -I../lib
+diff -urN D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/tools/Makefile D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/tools/Makefile
+--- D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/tools/Makefile	2016-10-11 17:57:14.000000000 +0200
++++ D7000_V1.0.1.84_WW_src/Source/apps/libiconv.1.8/tools/Makefile	2017-04-30 21:34:15.882121411 +0200
+@@ -493,13 +493,13 @@
+ 
+ 
+ 8bit_tab_to_h : 8bit_tab_to_h.c
+-	gcc -O -Wall -g $< -o $@
++	gcc -Os -Wall $< -o $@
+ 
+ cjk_tab_to_h : cjk_tab_to_h.c
+-	gcc -O -Wall -g $< -o $@
++	gcc -Os -Wall $< -o $@
+ 
+ cjk_variants : cjk_variants.c
+-	gcc -O -Wall -g $< -o $@
++	gcc -Os -Wall $< -o $@
+ 
+ 
+ clean : force

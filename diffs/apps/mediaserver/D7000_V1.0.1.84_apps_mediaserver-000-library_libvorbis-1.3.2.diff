@@ -1,0 +1,16 @@
+diff -urN D7000_V1.0.1.84_WW_src/Source/apps/mediaserver/library/libvorbis-1.3.2/Makefile D7000_V1.0.1.84_WW_src/Source/apps/mediaserver/library/libvorbis-1.3.2/Makefile
+--- D7000_V1.0.1.84_WW_src/Source/apps/mediaserver/library/libvorbis-1.3.2/Makefile	2016-10-13 17:51:19.000000000 +0200
++++ D7000_V1.0.1.84_WW_src/Source/apps/mediaserver/library/libvorbis-1.3.2/Makefile	2017-05-05 14:57:20.115087727 +0200
+@@ -752,10 +752,10 @@
+ 	done
+ 
+ debug:
+-	$(MAKE) all CFLAGS="-g -Wall -Wextra -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
++	$(MAKE) all CFLAGS="$(CFLAGS) -g -Wall -Wextra -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
+ 
+ profile:
+-	$(MAKE) all CFLAGS="-Wall -Wextra -pg -g -O20 -ffast-math -mno-ieee-fp -D_REENTRANT -fsigned-char -fno-inline"
++	$(MAKE) all CFLAGS="$(CFLAGS) -Wall -Wextra -Os -ffast-math -mno-ieee-fp -D_REENTRANT -fsigned-char -fno-inline"
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+ .NOEXPORT:

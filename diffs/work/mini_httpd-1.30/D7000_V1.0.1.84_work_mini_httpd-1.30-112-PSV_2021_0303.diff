@@ -1,0 +1,185 @@
+--- work/mini_httpd-1.30/mini_httpd.c
++++ work/mini_httpd-1.30/mini_httpd.c
+@@ -423,7 +423,7 @@ static void handle_logout( int sig )
+     last_access_time=0;
+ 	strcpy(login_ip, "");
+ 	/* record last remote user. */
+-	strcpy(last_remote_ip, remote_ip);
++	strlcpy(last_remote_ip, remote_ip, sizeof(last_remote_ip));
+ 	__save_manager();
+ 	/* remove config file cache when timeout */
+ 	system("rm -rf /tmp/NETGEAR*.cfg ");
+@@ -444,7 +444,7 @@ static void handle_web_time( int sig )
+     sysinfo(&info);
+     usleep(1);
+     last_access_time=info.uptime;
+-	strcpy(login_ip, remote_ip);
++	strlcpy(login_ip, remote_ip, sizeof(login_ip));
+ 	__save_manager();
+ }
+ static int check_timeout(void)
+@@ -1538,7 +1538,7 @@ initialize_listen_socket( usockaddr* usa
+     {
+     struct accept_filter_arg af;
+     (void) bzero( &af, sizeof(af) );
+-    (void) strcpy( af.af_name, ACCEPT_FILTER_NAME );
++    (void) strlcpy(af.af_name, ACCEPT_FILTER_NAME, sizeof(af.af_name));
+     (void) setsockopt( listen_fd, SOL_SOCKET, SO_ACCEPTFILTER, (char*) &af, sizeof(af) );
+     }
+ #endif /* HAVE_ACCEPT_FILTERS */
+@@ -1555,6 +1555,8 @@ static int _path_exist_filename(char *su
+ 		{
+ 			if (strstr(sub_path, paths[i]))
+ 			{
++				if (strstr(sub_path, "../"))
++					send_error(403, "Forbidden", "", "The path is invalid.");
+ 				SC_CFPRINTF("not need auth since %s is part of %s\n", paths[i], sub_path);
+ 				return 1;
+ 			}
+@@ -1572,12 +1574,10 @@ static int _path_exist_filename(char *su
+  */
+ static int path_exist(char *paths[], char *method_str)
+ {
+-	if ((strcasestr(path, "%2") !=NULL) || (strcasestr(path, "%3") != NULL))
+-	{	
+-		SC_CFPRINTF("path:%s\n", path);
+-		strdecode(path, path);		
+-		SC_CFPRINTF("path after decode: %s\n", path);
+-	}
++	SC_CFPRINTF("path:%s\n", path);
++	strdecode(path, path);		
++	SC_CFPRINTF("path after decode: %s\n", path);
++
+ 	if (method_str && *method_str == 'G')
+ 	{
+ 		SC_CFPRINTF("path:%s\n", path);
+@@ -1586,7 +1586,7 @@ static int path_exist(char *paths[], cha
+ 		{
+ 			char path_tmp[1024];
+ 			memset(path_tmp, 0, sizeof(path_tmp));
+-			strncpy(path_tmp, path, sizeof(path_tmp)-1);
++			strlcpy(path_tmp, path, sizeof(path_tmp));
+ 			SC_CFPRINTF("path_tmp = %s\n",path_tmp);
+ 		
+ 			if (strncmp(path_tmp, "/setup.cgi?", strlen("/setup.cgi?")) == 0)
+@@ -1657,7 +1657,7 @@ static int path_exist(char *paths[], cha
+ 
+ 					if (_path_exist_filename((path_tmp[0]=='/')?(&path_tmp[1]):(&path_tmp[0]), paths))
+ 					{
+-						strncpy(path_tmp, path, sizeof(path_tmp)-1);
++						strlcpy(path_tmp, path, sizeof(path_tmp));
+ 						p = strstr(path_tmp, "next_file=");
+ 						if (*nvram_safe_get("config_state") != 'b')
+ 						{	
+@@ -1722,7 +1722,10 @@ static int path_exist(char *paths[], cha
+ 			{
+ 				char path_tmp[1024];
+ 				memset(path_tmp, 0, sizeof(path_tmp));
+-				strncpy(path_tmp, path, sizeof(path_tmp)-1);
++				strlcpy(path_tmp, path, sizeof(path_tmp));
++
++				if(strstr(path_tmp, ".zip"))
++					return 0;
+ 				
+ 				if (!strncmp(path_tmp, "/setup.cgi?", strlen("/setup.cgi?")))
+ 				{
+@@ -2131,7 +2134,7 @@ handle_request( void )
+                 if (fp) {
+                     if (fgets(fbuf, 99, fp) && (fptr = strstr(fbuf, "htm"))) {
+                         *(fptr + 3) = '\0';
+-                        sprintf(fakepath, "/setup.cgi?next_file=%s HTTP/1.1\r\n", fbuf);
++                        snprintf(fakepath, sizeof(fakepath), "/setup.cgi?next_file=%s HTTP/1.1\r\n", fbuf);
+                         /*if internet is block by TM,dnshj should always work
+                           first time,block all
+                           next time, not block dut UI
+@@ -2336,13 +2339,13 @@ handle_request( void )
+ 			send_error(404, "Not Found", "", "No such file.");
+ 		} else
+ 		{
+-			strncpy(fakepath, path, strlen(path) - 8);
++			strlcpy(fakepath, path, strlen(path) - 8);
+ 		}
+         pt=strrchr(fakepath,'/' );
+-        strncpy(firstdir,fakepath,pt-fakepath);
++        strlcpy(firstdir, fakepath, pt - fakepath);
+ 
+         if(*path=='/') path += strlen(firstdir)+1;
+-        sprintf(fakepath,"%s/setup.cgi?next_file=%s",firstdir,path);
++        snprintf(fakepath, sizeof(fakepath),"%s/setup.cgi?next_file=%s", firstdir, path);
+         path=fakepath;
+     }
+ 
+@@ -2687,7 +2690,7 @@ do_file( void )
+ 
+     SC_CFPRINTF("need_auth is <%d> for_setupwizard is <%d>, file:%s\n", need_auth, for_setupwizard, file);
+     /* Check authorization for this directory. */
+-    (void) strncpy( buf, file, sizeof(buf) );
++    (void) strlcpy(buf, file, sizeof(buf));
+     cp = strrchr( buf, '/' );
+     if ( cp == (char*) 0 )
+ 	(void) strcpy( buf, "." );
+@@ -5374,7 +5377,7 @@ static int is_readable(const char *dirfi
+ 	{
+         /* If it is link, we will think it is  not read*/
+         if(strlen(dirfile) > sizeof(buf))
+-            strncpy(buf, dirfile, sizeof(buf)-1);
++            strlcpy(buf, dirfile, sizeof(buf));
+         else
+             strcpy(buf, dirfile);
+         if(buf[strlen(buf)-1] == '/')
+@@ -5547,7 +5550,7 @@ static struct usb_user_t * usb_user_add(
+ 		}
+ 	}
+ 	if (username != NULL) {
+-		strcpy(username->remote_ip, ip);
++		strlcpy(username->remote_ip, ip, sizeof(username->remote_ip));
+ 		username->timestamp = info.uptime;
+ 		username->auth = USB_AUTH_NONE;
+ 		if (i == usb_user_count)
+--- work/mini_httpd-1.30/sc_sessionid.c
++++ work/mini_httpd-1.30/sc_sessionid.c
+@@ -59,7 +59,7 @@ static int try_lock(void)
+ 		appname = appname+1;
+ 	}
+ 
+-	sprintf(lock_path, "/var/lock/%s.lock", appname);
++	snprintf(lock_path, sizeof(lock_path), "/var/lock/%s.lock", appname);
+ 	p = lock_path + sizeof("/var/lock/");
+ 	while (*p) {
+ 		if (*p == '/') *p = '_';
+@@ -111,7 +111,7 @@ int sessionid_verify_sessionid_ok(char *
+ 						snprintf(remoteip_with_equal, sizeof(remoteip_with_equal), "%s=", remoteip);
+ 						if (remoteip && remoteip[0] && (p=strstr(local_sessionid_buf, remoteip_with_equal))!=NULL)
+ 						{
+-							strncpy(sessionid_in_local, p+strlen(remoteip_with_equal), SESSIONID_LEN);
++							strlcpy(sessionid_in_local, p+strlen(remoteip_with_equal), SESSIONID_LEN+1);
+ 						}
+ 					}
+ 					fclose(fp);
+@@ -157,7 +157,7 @@ int sessionid_valid_local_sessionid(void
+ 					snprintf(remoteip_with_equal, sizeof(remoteip_with_equal), "%s=", remoteip);
+ 					if (remoteip && remoteip[0] && (p=strstr(local_sessionid_buf, remoteip_with_equal))!=NULL)
+ 					{
+-						strncpy(sessionid_in_local, p+strlen(remoteip_with_equal), SESSIONID_LEN);
++						strlcpy(sessionid_in_local, p+strlen(remoteip_with_equal), SESSIONID_LEN+1);
+ 					}
+ 				}
+ 				fclose(fp);
+@@ -216,7 +216,7 @@ int sessionid_update_device_sessionid(ch
+ 	
+ 	if (new_sessionid)
+ 	{
+-		strcpy(new_sessionid, generated_sessionid);
++		strlcpy(new_sessionid, generated_sessionid, sizeof(generated_sessionid)+1);
+ 	}
+ 	
+ 	try_lock();
+@@ -243,7 +243,7 @@ int sessionid_update_device_sessionid(ch
+ 				snprintf(remoteip_with_equal, sizeof(remoteip_with_equal), "%s=", remoteip);
+ 				if (remoteip && remoteip[0]&& (p=strstr(local_sessionid_buf, remoteip_with_equal))!=NULL)
+ 				{
+-					strncpy(p+strlen(remoteip_with_equal), generated_sessionid, SESSIONID_LEN);
++					strlcpy(p+strlen(remoteip_with_equal), generated_sessionid, SESSIONID_LEN+1);
+ 					fwrite(local_sessionid_buf, strlen(local_sessionid_buf), 1, fp);
+ 				} else
+ 				{

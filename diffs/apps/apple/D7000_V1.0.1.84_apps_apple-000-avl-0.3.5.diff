@@ -1,0 +1,23 @@
+diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/avl-0.3.5/GNUmakefile D7000_V1.0.1.84_WW_src/Source/apps/apple/avl-0.3.5/GNUmakefile
+--- D7000_V1.0.1.84_WW_src/Source/apps/apple/avl-0.3.5/GNUmakefile	2016-10-11 17:53:52.000000000 +0200
++++ D7000_V1.0.1.84_WW_src/Source/apps/apple/avl-0.3.5/GNUmakefile	2017-05-04 14:43:03.976976116 +0200
+@@ -7,8 +7,9 @@
+ LDCONFIG ?= /sbin/ldconfig
+ 
+ # Some suggestions: (-mcpu= generates i386 compatible code)
+-CFLAGS ?= -O2 -pipe -Wall -Werror
+-CFLAGS += -fPIC
++CFLAGS += -Os -s -fPIC -pipe -Wall -Werror
++#CFLAGS ?= -O2 -pipe -Wall -Werror
++#CFLAGS += -fPIC
+ #CFLAGS = -O2 -fomit-frame-pointer -pipe -march=i586 -Wall -g
+ #CFLAGS = -O6 -fomit-frame-pointer -pipe -march=i586 -Wall -ansi -pedantic
+ #CFLAGS = -O6 -fomit-frame-pointer -pipe -march=i686 -Wall -ansi -pedantic
+@@ -37,6 +38,7 @@
+ 
+ $(LIBRARY): avl.o
+ 	$(CC) -shared -Wl,-soname,libavl.so.1 $^ -o $@ -lc
++	$(STRIP) $@
+ 	$(LN) -s $@ libavl.so
+ 
+ clean:
