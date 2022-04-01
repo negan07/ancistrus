@@ -1,5 +1,5 @@
---- work/zlib-develop/zlib-develop/Makefile.in
-+++ work/zlib-develop/zlib-develop/Makefile.in
+--- work/zlib-1.2.12/zlib-1.2.12/Makefile.in
++++ work/zlib-1.2.12/zlib-1.2.12/Makefile.in
 @@ -122,10 +122,17 @@ infcover.o: $(SRCDIR)test/infcover.c $(SRCDIR)zlib.h zconf.h
  infcover: infcover.o libz.a
  	$(CC) $(CFLAGS) -o $@ infcover.o libz.a
@@ -20,8 +20,8 @@
  
  libz.a: $(OBJS)
  	$(AR) $(ARFLAGS) $@ $(OBJS)
---- work/zlib-develop/zlib-develop/test/defcover.c
-+++ work/zlib-develop/zlib-develop/test/defcover.c
+--- work/zlib-1.2.12/zlib-1.2.12/test/defcover.c
++++ work/zlib-1.2.12/zlib-1.2.12/test/defcover.c
 @@ -0,0 +1,238 @@
 +#include <stdio.h>
 +#include <stdlib.h>

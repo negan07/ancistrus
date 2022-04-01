@@ -1,9 +1,9 @@
---- work/zlib-develop/zlib-develop/contrib/minizip/zip.c
-+++ work/zlib-develop/zlib-develop/contrib/minizip/zip.c
+--- work/zlib-1.2.12/zlib-1.2.12/contrib/minizip/zip.c
++++ work/zlib-1.2.12/zlib-1.2.12/contrib/minizip/zip.c
 @@ -1963,6 +1963,9 @@ extern int ZEXPORT zipRemoveExtraInfoBlock (char* pData, int* dataLen, short sHe
      return ZIP_PARAMERROR;
  
-   pNewHeader = (char*)ALLOC(*dataLen);
+   pNewHeader = (char*)ALLOC((unsigned)*dataLen);
 +  if (pNewHeader == NULL)
 +    return ZIP_INTERNALERROR;
 +

@@ -1,6 +1,6 @@
-diff -urN work/zlib-develop/zlib-develop/deflate.c work/zlib-develop/zlib-develop/deflate.c
---- work/zlib-develop/zlib-develop/deflate.c	2017-04-06 18:00:46.662292000 +0200
-+++ work/zlib-develop/zlib-develop/deflate.c	2017-04-06 18:01:08.566300143 +0200
+diff -urN work/zlib-1.2.12/zlib-1.2.12/deflate.c work/zlib-1.2.12/zlib-1.2.12/deflate.c
+--- work/zlib-1.2.12/zlib-1.2.12/deflate.c	2017-04-06 18:00:46.662292000 +0200
++++ work/zlib-1.2.12/zlib-1.2.12/deflate.c	2017-04-06 18:01:08.566300143 +0200
 @@ -1111,7 +1111,7 @@ int ZEXPORT deflate (strm, flush)
      /* If avail_out is zero, the application will call deflate again
       * to flush the rest.

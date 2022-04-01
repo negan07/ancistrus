@@ -1,5 +1,5 @@
---- work/zlib-develop/zlib-develop/CMakeLists.txt
-+++ work/zlib-develop/zlib-develop/CMakeLists.txt
+--- work/zlib-1.2.12/zlib-1.2.12/CMakeLists.txt
++++ work/zlib-1.2.12/zlib-1.2.12/CMakeLists.txt
 @@ -1,4 +1,4 @@
 -cmake_minimum_required(VERSION 2.4.4)
 +cmake_minimum_required(VERSION 2.4.4...3.0)

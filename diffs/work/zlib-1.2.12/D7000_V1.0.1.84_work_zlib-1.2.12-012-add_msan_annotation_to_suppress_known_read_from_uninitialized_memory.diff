@@ -1,5 +1,5 @@
---- work/zlib-develop/zlib-develop/deflate.c
-+++ work/zlib-develop/zlib-develop/deflate.c
+--- work/zlib-1.2.12/zlib-1.2.12/deflate.c
++++ work/zlib-1.2.12/zlib-1.2.12/deflate.c
 @@ -201,6 +201,11 @@
   * bit values at the expense of memory usage). We slide even when level == 0 to
   * keep the hash table consistent if we switch back to level > 0 later.
