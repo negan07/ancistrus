@@ -1,6 +1,5 @@
-diff -urN work/sqlite-src-3360000/Makefile work/sqlite-src-3360000/Makefile
---- work/sqlite-src-3360000/Makefile	2018-10-23 23:00:46.662292000 +0200
-+++ work/sqlite-src-3360000/Makefile	2018-10-23 23:01:08.566300143 +0200
+--- work/sqlite-src-3380200/Makefile
++++ work/sqlite-src-3380200/Makefile
 @@ -0,0 +1,49 @@
 +include ../Rules.mak
 +
@@ -21,7 +20,7 @@ diff -urN work/sqlite-src-3360000/Makefile work/sqlite-src-3360000/Makefile
 +	fi
 +
 +configure:
-+	cd $(SQLITE) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s -DSQLITE_DEFAULT_MEMSTATUS=0 -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_LIKE_DOESNT_MATCH_BLOBS -DSQLITE_MAX_EXPR_DEPTH=0 -DSQLITE_OMIT_DECLTYPE -DSQLITE_OMIT_DEPRECATED -DSQLITE_OMIT_PROGRESS_CALLBACK -DSQLITE_OMIT_SHARED_CACHE -DSQLITE_USE_ALLOCA" CPPFLAGS="-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)" LDFLAGS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB)" LIBS="-lz" --disable-debug --enable-shared --disable-static --enable-threadsafe --disable-tcl --disable-load-extension --disable-editline --disable-readline --disable-all
++	cd $(SQLITE) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s -DSQLITE_DEFAULT_MEMSTATUS=0 -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_LIKE_DOESNT_MATCH_BLOBS -DSQLITE_MAX_EXPR_DEPTH=0 -DSQLITE_OMIT_DECLTYPE -DSQLITE_OMIT_DEPRECATED -DSQLITE_OMIT_PROGRESS_CALLBACK -DSQLITE_OMIT_SHARED_CACHE -DSQLITE_USE_ALLOCA" CPPFLAGS="-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)" LDFLAGS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB)" LIBS="-lz" --disable-debug --enable-shared --disable-static --enable-threadsafe --disable-tcl --disable-load-extension --disable-editline --disable-readline --disable-json --disable-all
 +
 +install: control
 +	$(STRIP) $(LIBSDIRNAME)/$(LIBS)
