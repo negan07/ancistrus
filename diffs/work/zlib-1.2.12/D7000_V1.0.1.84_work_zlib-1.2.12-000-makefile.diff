@@ -33,7 +33,7 @@ diff -urN work/zlib-1.2.12/Makefile work/zlib-1.2.12/Makefile
 +	@echo "Nothing to install..."
 +else
 +configure:
-+	cd $(ZLIB) && CHOST=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" ./configure
++	cd $(ZLIB) && CHOST=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" ./configure --shared
 +
 +install: control
 +	$(STRIP) $(ZLIB)/$(LIBS)
