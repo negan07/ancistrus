@@ -1524,7 +1524,7 @@
  #include "main.h"
  #include "cwd.h"
  #include "mystring.h"
-@@ -76,6 +77,11 @@ struct bftpd_list_element *child_list;
+@@ -81,6 +82,11 @@ struct bftpd_list_element *child_list;
  /* Command line parameters */
  char *configpath = PATH_BFTPD_CONF;
  int daemonmode = 0;
@@ -1536,7 +1536,7 @@
  
  void print_file(int number, char *filename)
  {
-@@ -93,7 +99,6 @@ void print_file(int number, char *filena
+@@ -98,7 +104,6 @@ void print_file(int number, char *filena
  
  void end_child()
  {
@@ -1544,7 +1544,7 @@
  	if (passwdfile)
  		fclose(passwdfile);
  	if (groupfile)
-@@ -129,31 +134,25 @@ void handler_sighup(int sig)
+@@ -134,31 +139,25 @@ void handler_sighup(int sig)
  }
  
  
@@ -1582,7 +1582,7 @@
  }
  
  void handler_sigterm(int signum)
-@@ -166,7 +165,6 @@ void handler_sigalrm(int signum)
+@@ -171,7 +170,6 @@ void handler_sigalrm(int signum)
  {
      /* Log user out. -- Jesse <slicer69@hotmail.com> */
      bftpdutmp_end();
@@ -1590,7 +1590,7 @@
  
      if (alarm_type) {
          close(alarm_type);
-@@ -190,9 +188,35 @@ void init_everything()
+@@ -195,9 +193,35 @@ void init_everything()
  	log_init();
          bftpdutmp_init();
  	login_init();
@@ -1627,7 +1627,7 @@
  int main(int argc, char **argv)
  {
  	char str[MAX_STRING_LENGTH + 1];
-@@ -202,6 +226,11 @@ int main(int argc, char **argv)
+@@ -207,6 +231,11 @@ int main(int argc, char **argv)
          unsigned long get_value;
          socklen_t my_length;
          char *temp_string = NULL;
@@ -1639,7 +1639,7 @@
  
          my_argv_list = argv;
          signal(SIGHUP, handler_sighup);
-@@ -209,28 +238,32 @@ int main(int argc, char **argv)
+@@ -214,28 +243,32 @@ int main(int argc, char **argv)
          /* try both default locations for configuration file */
          configpath = Find_Config_File();
  
@@ -1686,7 +1686,7 @@
  	if (daemonmode) {
  		struct sockaddr_in myaddr, new;
  		if (daemonmode == 1) {
-@@ -289,6 +322,19 @@ int main(int argc, char **argv)
+@@ -294,6 +327,19 @@ int main(int argc, char **argv)
  			 * So in order not to create a child process when that happens,
  			 * we have to check if accept() returned an error.
  			 */
@@ -1703,7 +1703,7 @@
 +                            }
 +			}
 +#endif
- 			if (sock > 0) {
+ 			if (main_sock > 0) {
  				pid = fork();
  				if (!pid) {       /* child */
 --- work/bftpd/bftpd/options.c	2020-01-07 19:37:12.000000000 +0100

@@ -2,7 +2,7 @@
 +++ work/bftpd/bftpd/Makefile.in	2021-05-24 23:01:19.928890880 +0200
 @@ -1,3 +1,4 @@
 +include ../../Rules.mak
- VERSION=6.0
+ VERSION=6.1
  CC?=@CC@
  INSTALL=@INSTALL@
 @@ -17,6 +18,16 @@ SRCS=bftpdutmp.c commands.c commands_adm

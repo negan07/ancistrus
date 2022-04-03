@@ -566,7 +566,7 @@ DIRLIST				+= $(SAMBA)
 TARLIST				+= $(TAR_$(SAMBA))
 # BFTPD
 BFTPD_NAME			:= bftpd
-VER_$(BFTPD_NAME)		:= 6.0
+VER_$(BFTPD_NAME)		:= 6.1
 BFTPD				:= $(BFTPD_NAME)
 NAME_$(BFTPD)			:= $(BFTPD_NAME)$(DBG)
 SUBVER_$(BFTPD)			:=
