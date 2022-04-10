@@ -1,5 +1,5 @@
---- work/busybox-1.34.1/networking/udhcp/dhcpc.c
-+++ work/busybox-1.34.1/networking/udhcp/dhcpc.c
+--- work/busybox-1.35.0/networking/udhcp/dhcpc.c
++++ work/busybox-1.35.0/networking/udhcp/dhcpc.c
 @@ -1384,6 +1384,12 @@ int udhcpc_main(int argc UNUSED_PARAM, c
  		struct pollfd pfds[2];
  		struct dhcp_packet packet;

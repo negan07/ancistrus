@@ -1,0 +1,12 @@
+diff -purN work/busybox-1.35.0/shell/ash.c work/busybox-1.35.0/shell/ash.c
+--- work/busybox-1.35.0/shell/ash.c
++++ work/busybox-1.35.0/shell/ash.c
+@@ -6400,7 +6400,7 @@ memtodest(const char *p, size_t len, int
+ 					USTPUTC(CTLESC, q);
+ 				}
+ 			}
+-		} else if (!(flags & EXP_KEEPNUL))
++		} else if (!(flags | EXP_KEEPNUL))
+ 			continue;
+ 		USTPUTC(c, q);
+ 	} while (--len);

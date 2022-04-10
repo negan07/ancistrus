@@ -1,6 +1,6 @@
-diff -urN work/busybox-1.34.1/libbb/printable_string.c
---- work/busybox-1.34.1/libbb/printable_string.c
-+++ work/busybox-1.34.1/libbb/printable_string.c
+diff -urN work/busybox-1.35.0/libbb/printable_string.c
+--- work/busybox-1.35.0/libbb/printable_string.c
++++ work/busybox-1.35.0/libbb/printable_string.c
 @@ -28,8 +28,6 @@
  		}
  		if (c < ' ')
