@@ -496,6 +496,57 @@ DEP_$(DNRD)			:=
 DESC_$(DNRD)			:= Caching, forwarding DNS proxy server
 DIRLIST				+= $(DNRD)
 TARLIST				+= $(TAR_$(DNRD))
+# ATM
+ATM_NAME			:= linux-atm
+VER_$(ATM_NAME)			:= 2.5.2
+ATM				:= $(ATM_NAME)-$(VER_$(ATM_NAME))
+NAME_$(ATM)			:= $(ATM_NAME)$(DBG)
+SUBVER_$(ATM)			:= 
+VER_$(ATM)			:= $(VER_$(ATM_NAME))$(SUBVER_$(ATM))
+DL_$(ATM)			:= https://sourceforge.net/projects/linux-atm/files/$(ATM_NAME)/$(VER_$(ATM_NAME))
+TAR_$(ATM)			:= $(ATM).tar.gz
+HOME_$(ATM)			:= https://sourceforge.net/projects/linux-atm
+LIC_$(ATM)			:= BSD, GPLv2
+SEC_$(ATM)			:= base
+PRIO_$(ATM)			:= required
+DEP_$(ATM)			:= 
+DESC_$(ATM)			:= ATM on Linux
+DIRLIST				+= $(ATM)
+TARLIST				+= $(TAR_$(ATM))
+# PPP
+PPP_NAME			:= ppp
+VER_$(PPP_NAME)			:= 2.4.9
+PPP				:= $(PPP_NAME)-$(VER_$(PPP_NAME))
+NAME_$(PPP)			:= $(PPP_NAME)$(DBG)
+SUBVER_$(PPP)			:= 
+VER_$(PPP)			:= $(VER_$(PPP_NAME))$(SUBVER_$(PPP))
+DL_$(PPP)			:= https://download.samba.org/pub/ppp
+TAR_$(PPP)			:= $(PPP).tar.gz
+HOME_$(PPP)			:= https://ppp.samba.org/
+LIC_$(PPP)			:= BSD-4-Clause
+SEC_$(PPP)			:= base
+PRIO_$(PPP)			:= required
+DEP_$(PPP)			:= $(NAME_$(ATM))
+DESC_$(PPP)			:= Point-to-Point Protocol implementation
+DIRLIST				+= $(PPP)
+TARLIST				+= $(TAR_$(PPP))
+# RPPPPOE
+RPPPPOE_NAME			:= rp-pppoe
+VER_$(RPPPPOE_NAME)		:= 3.15
+RPPPPOE				:= $(RPPPPOE_NAME)-$(VER_$(RPPPPOE_NAME))
+NAME_$(RPPPPOE)			:= $(RPPPPOE_NAME)$(DBG)
+SUBVER_$(RPPPPOE)		:= 
+VER_$(RPPPPOE)			:= $(VER_$(RPPPPOE_NAME))$(SUBVER_$(RPPPPOE))
+DL_$(RPPPPOE)			:= https://dianne.skoll.ca/projects/rp-pppoe/download
+TAR_$(RPPPPOE)			:= $(RPPPPOE).tar.gz
+HOME_$(RPPPPOE)			:= https://dianne.skoll.ca/projects/rp-pppoe/
+LIC_$(RPPPPOE)			:= GPLv2
+SEC_$(RPPPPOE)			:= base
+PRIO_$(RPPPPOE)			:= required
+DEP_$(RPPPPOE)			:= 
+DESC_$(RPPPPOE)			:= Free PPPoE client, relay and server
+DIRLIST				+= $(RPPPPOE)
+TARLIST				+= $(TAR_$(RPPPPOE))
 # DNSMASQ
 DNSMASQ_NAME			:= dnsmasq
 VER_$(DNSMASQ_NAME)		:= 2.80
@@ -774,6 +825,7 @@ BUILTIN				:=
 THIRDPARTYLIB			:=
 THIRDPARTY			:=
 # SUBGROUPS
+PPPCONNECTION			:= $(ATM) $(PPP) $(RPPPPOE)
 USBSTORAGE			:= $(SAMBA) $(BFTPD) $(E2FSPROGS) $(HDPARM) $(HDIDLE) $(SMONTOOLS) $(NTFSPROGS) $(TRANSM)
 MEDIASERVER			:= $(FFMPEG) $(ID3TAG) $(EXIF) $(JPEG) $(OGG) $(VORBIS) $(FLAC)
 SPEEDTESTS			:= $(NETPERF) $(NETWORKTEST) $(SPEEDTESTNET)
@@ -829,6 +881,12 @@ THIRDPARTY			+= $(SPEEDTESTNET)
 endif
 # EXCLUDED FROM MONOLITHIC
 ifndef MONOLITHIC
+# PPPCONNECTION
+ifdef PPPCONNECTION
+BUILTINLIB			+= $(ATM)
+#BUILTIN				+= $(PPP)
+#BUILTIN				+= $(RPPPPOE)
+endif
 BUILTIN				+= $(E2FSPROGS)
 BUILTIN				+= $(XDSL_042N_D26B)
 BUILTIN				+= $(XDSL_042U_D26O)

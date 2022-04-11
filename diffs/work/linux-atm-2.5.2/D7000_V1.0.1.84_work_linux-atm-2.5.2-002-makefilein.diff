@@ -1,0 +1,23 @@
+--- work/linux-atm-2.5.2/linux-atm-2.5.2/Makefile.in
++++ work/linux-atm-2.5.2/linux-atm-2.5.2/Makefile.in
+@@ -231,7 +231,7 @@ target_vendor = @target_vendor@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-SUBDIRS = src doc
++SUBDIRS = src
+ EXTRA_DIST = COPYING.GPL COPYING.LGPL BUGS
+ all: config.h
+ 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+--- work/linux-atm-2.5.2/linux-atm-2.5.2/src/Makefile.in
++++ work/linux-atm-2.5.2/linux-atm-2.5.2/src/Makefile.in
+@@ -215,8 +215,7 @@ target_vendor = @target_vendor@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-SUBDIRS = include lib test debug qgen q2931 saal sigd maint arpd ilmid man led lane \
+-		mpoad oamd switch config extra br2684
++SUBDIRS = lib arpd
+ 
+ all: all-recursive
+ 

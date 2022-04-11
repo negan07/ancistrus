@@ -1,0 +1,58 @@
+--- work/linux-atm-2.5.2/linux-atm-2.5.2/src/arpd/io.c
++++ work/linux-atm-2.5.2/linux-atm-2.5.2/src/arpd/io.c
+@@ -277,7 +277,8 @@ static void accept_new(void)
+     struct atm_qos qos;
+     ENTRY *entry;
+     VCC *vcc;
+-    int fd,len,size,error;
++    int fd,error;
++    socklen_t len,size;
+ 
+     len = sizeof(addr);
+     if ((fd = accept(incoming,(struct sockaddr *) &addr,&len)) < 0) {
+@@ -614,7 +615,8 @@ int ip_itf_info(int number,uint32_t *ip,
+ 
+ int get_local(int fd,struct sockaddr_atmsvc *addr)
+ {
+-    int length,result;
++    int result;
++    size_t length;
+ 
+     length = sizeof(struct sockaddr_atmsvc);
+     result = getsockname(fd,(struct sockaddr *) addr,&length);
+--- work/linux-atm-2.5.2/linux-atm-2.5.2/src/arpd/table.c
++++ work/linux-atm-2.5.2/linux-atm-2.5.2/src/arpd/table.c
+@@ -101,7 +101,8 @@ static void dump_vcc(VCC *vcc)
+     char addr_buf[MAX_ATM_ADDR_LEN+1];
+     char qos_buf[MAX_ATM_QOS_LEN+1];
+     struct atm_qos qos;
+-    int size,sndbuf;
++    int sndbuf;
++    socklen_t size;
+ 
+     size = sizeof(addr);
+     if (getpeername(vcc->fd,(struct sockaddr *) &addr,&size) < 0) {
+--- work/linux-atm-2.5.2/linux-atm-2.5.2/src/lib/sdu2cell.c
++++ work/linux-atm-2.5.2/linux-atm-2.5.2/src/lib/sdu2cell.c
+@@ -15,7 +15,8 @@ int sdu2cell(int s,int sizes,const int *
+ {
+     struct atm_qos qos;
+     int trailer,total,cells;
+-    int size,i;
++    int i;
++    socklen_t size;
+ 
+     size = sizeof(qos);
+     if (getsockopt(s,SOL_AAL,SO_ATMQOS,&qos,&size) < 0) return -1;
+--- work/linux-atm-2.5.2/linux-atm-2.5.2/src/lib/unix.c
++++ work/linux-atm-2.5.2/linux-atm-2.5.2/src/lib/unix.c
+@@ -63,8 +63,8 @@ int un_attach(const char *path)
+ int un_recv_connect(int s,void *buf,int size)
+ {
+     struct sockaddr_un addr;
+-    int addr_size;
+     int len;
++    socklen_t addr_size;
+ 
+     addr_size = sizeof(addr);
+     len = recvfrom(s,buf,size,0,(struct sockaddr *) &addr,&addr_size);

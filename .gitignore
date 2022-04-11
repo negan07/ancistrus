@@ -156,4 +156,7 @@ work/libevent-*/
 work/transmission-*/
 work/c-ares-*/
 work/bftpd*/
+work/linux-atm-*/
+work/ppp-*/
+work/rp-pppoe-*/
 
