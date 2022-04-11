@@ -1,0 +1,301 @@
+--- work/ppp-2.4.9/pppd/sys-linux.c
++++ work/ppp-2.4.9/pppd/sys-linux.c
+@@ -75,7 +75,6 @@
+ #include <sys/time.h>
+ #include <sys/file.h>
+ #include <sys/stat.h>
+-#include <sys/utsname.h>
+ #include <sys/sysmacros.h>
+ 
+ #include <errno.h>
+@@ -206,7 +205,7 @@ static int driver_is_old       = 0;
+ static int restore_term        = 0;	/* 1 => we've munged the terminal */
+ static struct termios inittermios;	/* Initial TTY termios */
+ 
+-int new_style_driver = 0;
++const int new_style_driver = 1;
+ 
+ static char loop_name[20];
+ static unsigned char inbuf[512]; /* buffer for chars read from loopback */
+@@ -224,9 +223,8 @@ static int	dynaddr_set;		/* 1 if ip_dyna
+ static int	looped;			/* 1 if using loop */
+ static int	link_mtu;		/* mtu for the link (not bundle) */
+ 
+-static struct utsname utsname;	/* for the kernel version */
+-static int kernel_version;
+ #define KVERSION(j,n,p)	((j)*1000000 + (n)*1000 + (p))
++static const int kernel_version = KVERSION(2,6,37);
+ 
+ #define MAX_IFS		100
+ 
+@@ -247,9 +245,7 @@ static int open_route_table (void);
+ static int read_route_table (struct rtentry *rt);
+ static int get_ether_addr (u_int32_t ipaddr, struct sockaddr *hwaddr,
+ 			   char *name, int namelen);
+-static void decode_version (char *buf, int *version, int *mod, int *patch);
+ static int set_kdebugflag(int level);
+-static int ppp_registered(void);
+ static int make_ppp_unit(void);
+ static int setifstate (int u, int state);
+ 
+@@ -1472,33 +1468,11 @@ int ccp_fatal_error (int unit)
+  *
+  * path_to_procfs - find the path to the proc file system mount point
+  */
+-static char proc_path[MAXPATHLEN];
+-static int proc_path_len;
++static char proc_path[MAXPATHLEN] = "/proc";
++static int proc_path_len = 5;
+ 
+ static char *path_to_procfs(const char *tail)
+ {
+-    struct mntent *mntent;
+-    FILE *fp;
+-
+-    if (proc_path_len == 0) {
+-	/* Default the mount location of /proc */
+-	strlcpy (proc_path, "/proc", sizeof(proc_path));
+-	proc_path_len = 5;
+-	fp = fopen(MOUNTED, "r");
+-	if (fp != NULL) {
+-	    while ((mntent = getmntent(fp)) != NULL) {
+-		if (strcmp(mntent->mnt_type, MNTTYPE_IGNORE) == 0)
+-		    continue;
+-		if (strcmp(mntent->mnt_type, "proc") == 0) {
+-		    strlcpy(proc_path, mntent->mnt_dir, sizeof(proc_path));
+-		    proc_path_len = strlen(proc_path);
+-		    break;
+-		}
+-	    }
+-	    fclose (fp);
+-	}
+-    }
+-
+     strlcpy(proc_path + proc_path_len, tail,
+ 	    sizeof(proc_path) - proc_path_len);
+     return proc_path;
+@@ -2243,90 +2217,16 @@ u_int32_t GetMask (u_int32_t addr)
+ 
+ /********************************************************************
+  *
+- * Internal routine to decode the version.modification.patch level
+- */
+-
+-static void decode_version (char *buf, int *version,
+-			    int *modification, int *patch)
+-{
+-    char *endp;
+-
+-    *version      = (int) strtoul (buf, &endp, 10);
+-    *modification = 0;
+-    *patch        = 0;
+-
+-    if (endp != buf && *endp == '.') {
+-	buf = endp + 1;
+-	*modification = (int) strtoul (buf, &endp, 10);
+-	if (endp != buf && *endp == '.') {
+-	    buf = endp + 1;
+-	    *patch = (int) strtoul (buf, &buf, 10);
+-	}
+-    }
+-}
+-
+-/********************************************************************
+- *
+- * Procedure to determine if the PPP line discipline is registered.
+- */
+-
+-static int
+-ppp_registered(void)
+-{
+-    int local_fd;
+-    int mfd = -1;
+-    int ret = 0;
+-    char slave[16];
+-
+-    /*
+-     * We used to open the serial device and set it to the ppp line
+-     * discipline here, in order to create a ppp unit.  But that is
+-     * not a good idea - the user might have specified a device that
+-     * they can't open (permission, or maybe it doesn't really exist).
+-     * So we grab a pty master/slave pair and use that.
+-     */
+-    if (!get_pty(&mfd, &local_fd, slave, 0)) {
+-	no_ppp_msg = "Couldn't determine if PPP is supported (no free ptys)";
+-	return 0;
+-    }
+-
+-    /*
+-     * Try to put the device into the PPP discipline.
+-     */
+-    if (ioctl(local_fd, TIOCSETD, &ppp_disc) < 0) {
+-	error("ioctl(TIOCSETD(PPP)): %m (line %d)", __LINE__);
+-    } else
+-	ret = 1;
+-
+-    close(local_fd);
+-    close(mfd);
+-    return ret;
+-}
+-
+-/********************************************************************
+- *
+  * ppp_available - check whether the system has any ppp interfaces
+  * (in fact we check whether we can do an ioctl on ppp0).
+  */
+ 
+ int ppp_available(void)
+ {
+-    int s, ok, fd;
+-    struct ifreq ifr;
+-    int    size;
+-    int    my_version, my_modification, my_patch;
+-    int osmaj, osmin, ospatch;
+-
+-    /* get the kernel version now, since we are called before sys_init */
+-    uname(&utsname);
+-    osmaj = osmin = ospatch = 0;
+-    sscanf(utsname.release, "%d.%d.%d", &osmaj, &osmin, &ospatch);
+-    kernel_version = KVERSION(osmaj, osmin, ospatch);
++    int fd;
+ 
+     fd = open("/dev/ppp", O_RDWR);
+     if (fd >= 0) {
+-	new_style_driver = 1;
+-
+ 	/* XXX should get from driver */
+ 	driver_version = 2;
+ 	driver_modification = 4;
+@@ -2347,97 +2247,6 @@ int ppp_available(void)
+ 		"Please load the ppp_generic kernel module.\n";
+ 	return 0;
+     }
+-
+-    /* we are running on a really really old kernel */
+-    no_ppp_msg =
+-	"This system lacks kernel support for PPP.  This could be because\n"
+-	"the PPP kernel module could not be loaded, or because PPP was not\n"
+-	"included in the kernel configuration.  If PPP was included as a\n"
+-	"module, try `/sbin/modprobe -v ppp'.  If that fails, check that\n"
+-	"ppp.o exists in /lib/modules/`uname -r`/net.\n"
+-	"See README.linux file in the ppp distribution for more details.\n";
+-
+-/*
+- * Open a socket for doing the ioctl operations.
+- */
+-    s = socket(AF_INET, SOCK_DGRAM, 0);
+-    if (s < 0)
+-	return 0;
+-
+-    strlcpy (ifr.ifr_name, "ppp0", sizeof (ifr.ifr_name));
+-    ok = ioctl(s, SIOCGIFFLAGS, (caddr_t) &ifr) >= 0;
+-/*
+- * If the device did not exist then attempt to create one by putting the
+- * current tty into the PPP discipline. If this works then obtain the
+- * flags for the device again.
+- */
+-    if (!ok) {
+-	if (ppp_registered()) {
+-	    strlcpy (ifr.ifr_name, "ppp0", sizeof (ifr.ifr_name));
+-	    ok = ioctl(s, SIOCGIFFLAGS, (caddr_t) &ifr) >= 0;
+-	}
+-    }
+-/*
+- * Ensure that the hardware address is for PPP and not something else
+- */
+-    if (ok)
+-	ok = ioctl (s, SIOCGIFHWADDR, (caddr_t) &ifr) >= 0;
+-
+-    if (ok && ((ifr.ifr_hwaddr.sa_family & ~0xFF) != ARPHRD_PPP))
+-	ok = 0;
+-
+-/*
+- *  This is the PPP device. Validate the version of the driver at this
+- *  point to ensure that this program will work with the driver.
+- */
+-    if (ok) {
+-	char   abBuffer [1024];
+-
+-	ifr.ifr_data = abBuffer;
+-	size = ioctl (s, SIOCGPPPVER, (caddr_t) &ifr);
+-	if (size < 0) {
+-	    error("Couldn't read driver version: %m");
+-	    ok = 0;
+-	    no_ppp_msg = "Sorry, couldn't verify kernel driver version\n";
+-
+-	} else {
+-	    decode_version(abBuffer,
+-			   &driver_version,
+-			   &driver_modification,
+-			   &driver_patch);
+-/*
+- * Validate the version of the driver against the version that we used.
+- */
+-	    decode_version(VERSION,
+-			   &my_version,
+-			   &my_modification,
+-			   &my_patch);
+-
+-	    /* The version numbers must match */
+-	    if (driver_version != my_version)
+-		ok = 0;
+-
+-	    /* The modification levels must be legal */
+-	    if (driver_modification < 3) {
+-		if (driver_modification >= 2) {
+-		    /* we can cope with 2.2.0 and above */
+-		    driver_is_old = 1;
+-		} else {
+-		    ok = 0;
+-		}
+-	    }
+-
+-	    if (!ok) {
+-		slprintf(route_buffer, sizeof(route_buffer),
+-			 "Sorry - PPP driver version %d.%d.%d is out of date\n",
+-			 driver_version, driver_modification, driver_patch);
+-
+-		no_ppp_msg = route_buffer;
+-	    }
+-	}
+-    }
+-    close(s);
+-    return ok;
+ }
+ 
+ #ifndef HAVE_LOGWTMP
+@@ -3031,7 +2840,7 @@ int cif6addr (int unit, eui64_t our_eui6
+ int
+ get_pty(int *master_fdp, int *slave_fdp, char *slave_name, int uid)
+ {
+-    int i, mfd, sfd = -1;
++    int mfd, sfd = -1;
+     char pty_name[16];
+     struct termios tios;
+ 
+@@ -3059,25 +2868,6 @@ get_pty(int *master_fdp, int *slave_fdp,
+     }
+ #endif /* TIOCGPTN */
+ 
+-    if (sfd < 0) {
+-	/* the old way - scan through the pty name space */
+-	for (i = 0; i < 64; ++i) {
+-	    slprintf(pty_name, sizeof(pty_name), "/dev/pty%c%x",
+-		     'p' + i / 16, i % 16);
+-	    mfd = open(pty_name, O_RDWR, 0);
+-	    if (mfd >= 0) {
+-		pty_name[5] = 't';
+-		sfd = open(pty_name, O_RDWR | O_NOCTTY, 0);
+-		if (sfd >= 0) {
+-		    fchown(sfd, uid, -1);
+-		    fchmod(sfd, S_IRUSR | S_IWUSR);
+-		    break;
+-		}
+-		close(mfd);
+-	    }
+-	}
+-    }
+-
+     if (sfd < 0)
+ 	return 0;
+ 
