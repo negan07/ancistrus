@@ -1,6 +1,6 @@
---- work/curl-7.79.1/curl-7.79.1/acinclude.m4
-+++ work/curl-7.79.1/curl-7.79.1/acinclude.m4
-@@ -1694,6 +1694,53 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_
+--- work/curl-7.82.0/curl-7.82.0/acinclude.m4
++++ work/curl-7.82.0/curl-7.82.0/acinclude.m4
+@@ -1622,6 +1622,53 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_
  ])
  
  
@@ -54,7 +54,7 @@
  dnl CURL_CHECK_LIBS_CONNECT
  dnl -------------------------------------------------
  dnl Verify if network connect function is already available
-@@ -1761,6 +1808,31 @@ cat >>confdefs.h <<_EOF
+@@ -1689,6 +1736,31 @@ cat >>confdefs.h <<_EOF
  _EOF
  ])
  

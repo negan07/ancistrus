@@ -243,10 +243,10 @@ DIRLIST				+= $(ARES)
 TARLIST				+= $(TAR_$(ARES))
 # CURL
 CURL_NAME			:= curl
-VER_$(CURL_NAME)		:= 7.79.1
+VER_$(CURL_NAME)		:= 7.82.0
 CURL				:= $(CURL_NAME)-$(VER_$(CURL_NAME))
 NAME_$(CURL)			:= $(CURL_NAME)$(DBG)
-SUBVER_$(CURL)			:= -119
+SUBVER_$(CURL)			:= 
 VER_$(CURL)			:= $(VER_$(CURL_NAME))$(SUBVER_$(CURL))
 DL_$(CURL)			:= https://curl.haxx.se/download
 TAR_$(CURL)			:= $(CURL).tar.gz
