@@ -294,7 +294,7 @@ DIRLIST				+= $(OPKG_UTILS)
 TARLIST				+= $(TAR_$(OPKG_UTILS))
 # OPKG
 OPKG_NAME			:= opkg
-VER_$(OPKG_NAME)		:= 0.4.5
+VER_$(OPKG_NAME)		:= 0.5.0
 OPKG				:= $(OPKG_NAME)-$(VER_$(OPKG_NAME))
 NAME_$(OPKG)			:= $(OPKG_NAME)$(DBG)
 SUBVER_$(OPKG)			:= 

@@ -1,6 +1,6 @@
-diff -urN work/opkg-0.4.5/opkg-0.4.5/libopkg/pkg.c work/opkg-0.4.5/opkg-0.4.5/libopkg/pkg.c
---- work/opkg-0.4.5/opkg-0.4.5/libopkg/pkg.c	2016-12-22 18:38:14.000000000 +0100
-+++ work/opkg-0.4.5/opkg-0.4.5/libopkg/pkg.c	2017-03-22 00:12:25.566249000 +0100
+diff -urN work/opkg-0.5.0/opkg-0.5.0/libopkg/pkg.c work/opkg-0.5.0/opkg-0.5.0/libopkg/pkg.c
+--- work/opkg-0.5.0/opkg-0.5.0/libopkg/pkg.c	2016-12-22 18:38:14.000000000 +0100
++++ work/opkg-0.5.0/opkg-0.5.0/libopkg/pkg.c	2017-03-22 00:12:25.566249000 +0100
 @@ -902,9 +902,7 @@
      pkg_formatted_field(file, pkg, "Replaces", NULL);
      pkg_formatted_field(file, pkg, "Conflicts", NULL);

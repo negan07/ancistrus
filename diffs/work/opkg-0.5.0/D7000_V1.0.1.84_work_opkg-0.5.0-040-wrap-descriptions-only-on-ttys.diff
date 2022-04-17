@@ -1,6 +1,6 @@
-diff -urN work/opkg-0.4.5/opkg-0.4.5/libopkg/pkg_parse.c work/opkg-0.4.5/opkg-0.4.5/libopkg/pkg_parse.c
---- work/opkg-0.4.5/opkg-0.4.5/libopkg/pkg_parse.c	2016-12-22 18:38:14.000000000 +0100
-+++ work/opkg-0.4.5/opkg-0.4.5/libopkg/pkg_parse.c	2017-03-24 22:30:50.254489817 +0100
+diff -urN work/opkg-0.5.0/opkg-0.5.0/libopkg/pkg_parse.c work/opkg-0.5.0/opkg-0.5.0/libopkg/pkg_parse.c
+--- work/opkg-0.5.0/opkg-0.5.0/libopkg/pkg_parse.c	2016-12-22 18:38:14.000000000 +0100
++++ work/opkg-0.5.0/opkg-0.5.0/libopkg/pkg_parse.c	2017-03-24 22:30:50.254489817 +0100
 @@ -23,6 +23,7 @@
  
  #include <stdio.h>
