@@ -1,6 +1,6 @@
-diff -urN work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/lib/et/compile_et.sh.in work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/lib/et/compile_et.sh.in
---- work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/lib/et/compile_et.sh.in
-+++ work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/lib/et/compile_et.sh.in
+diff -urN work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/lib/et/compile_et.sh.in work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/lib/et/compile_et.sh.in
+--- work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/lib/et/compile_et.sh.in
++++ work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/lib/et/compile_et.sh.in
 @@ -2,8 +2,14 @@
  #
  #
@@ -18,9 +18,9 @@ diff -urN work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/lib/et/compile_et.sh.in work/e2
  
  if test "$1" = "--build-tree" ; then
      shift;
-diff -urN work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/lib/ss/mk_cmds.sh.in work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/lib/ss/mk_cmds.sh.in
---- work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/lib/ss/mk_cmds.sh.in
-+++ work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/lib/ss/mk_cmds.sh.in
+diff -urN work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/lib/ss/mk_cmds.sh.in work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/lib/ss/mk_cmds.sh.in
+--- work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/lib/ss/mk_cmds.sh.in
++++ work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/lib/ss/mk_cmds.sh.in
 @@ -2,10 +2,16 @@
  #
  #

@@ -1,6 +1,6 @@
-diff -urN work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/Makefile.in work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/Makefile.in
---- work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/Makefile.in	2018-10-23 23:00:46.662292000 +0200
-+++ work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/Makefile.in work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/Makefile.in
+--- work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/Makefile.in	2018-10-23 23:01:08.566300143 +0200
 @@ -22,20 +22,18 @@
  LIB_SUBDIRS=lib/et lib/ss $(E2P_LIB_SUBDIR) $(UUID_LIB_SUBDIR) \
  	$(BLKID_LIB_SUBDIR) $(SUPPORT_LIB_SUBDIR) $(EXT2FS_LIB_SUBDIR)
@@ -25,9 +25,9 @@ diff -urN work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/Makefile.in work/e2fsprogs-1.46
  
  all-static::
  	$(MAKE) libs
-diff -urN work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/misc/Makefile.in work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/misc/Makefile.in
---- work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/misc/Makefile.in	2018-10-23 23:00:46.662292000 +0200
-+++ work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/misc/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/misc/Makefile.in work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/misc/Makefile.in
+--- work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/misc/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/misc/Makefile.in	2018-10-23 23:01:08.566300143 +0200
 @@ -12,7 +12,7 @@
  
  @MCONFIG@
@@ -47,9 +47,9 @@ diff -urN work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/misc/Makefile.in work/e2fsprogs
  
  all-static:: $(E2IMAGE_STATIC) $(UUIDD_STATIC) $(BLKID_STATIC) \
  	dumpe2fs.static mke2fs.static tune2fs.static lsattr.static chattr.static
-diff -urN work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/resize/Makefile.in work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/resize/Makefile.in
---- work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/resize/Makefile.in	2018-10-23 23:00:46.662292000 +0200
-+++ work/e2fsprogs-1.46.4/e2fsprogs-1.46.4/resize/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/resize/Makefile.in work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/resize/Makefile.in
+--- work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/resize/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/e2fsprogs-1.46.5/e2fsprogs-1.46.5/resize/Makefile.in	2018-10-23 23:01:08.566300143 +0200
 @@ -41,7 +41,7 @@
  	$(Q) $(CHECK_CMD) $(ALL_CFLAGS) $<
  	$(Q) $(CPPCHECK_CMD) $(CPPFLAGS) $<
