@@ -311,10 +311,10 @@ DIRLIST				+= $(OPKG)
 TARLIST				+= $(TAR_$(OPKG))
 # HDPARM
 HDPARM_NAME			:= hdparm
-VER_$(HDPARM_NAME)		:= 9.62
+VER_$(HDPARM_NAME)		:= 9.63
 HDPARM				:= $(HDPARM_NAME)-$(VER_$(HDPARM_NAME))
 NAME_$(HDPARM)			:= $(HDPARM_NAME)$(DBG)
-SUBVER_$(HDPARM)		:= -001
+SUBVER_$(HDPARM)		:= 
 VER_$(HDPARM)			:= $(VER_$(HDPARM_NAME))$(SUBVER_$(HDPARM))
 DL_$(HDPARM)			:= https://sourceforge.net/projects/hdparm/files/hdparm
 TAR_$(HDPARM)			:= $(HDPARM).tar.gz
