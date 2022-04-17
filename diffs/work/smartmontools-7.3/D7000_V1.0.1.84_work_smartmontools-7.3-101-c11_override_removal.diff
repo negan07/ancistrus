@@ -71,7 +71,7 @@
    unsigned m_phydrive;
 --- work/smartmontools-7.3/smartmontools-7.3/dev_jmb39x_raid.cpp	2021-02-01 21:36:02.000000000 +0100
 +++ work/smartmontools-7.3/smartmontools-7.3/dev_jmb39x_raid.cpp	2021-03-02 21:32:36.820182895 +0100
-@@ -319,11 +319,11 @@ public:
+@@ -321,11 +321,11 @@ public:
  
    virtual ~jmb39x_device();
  
@@ -237,7 +237,7 @@
  darwin_nvme_device::darwin_nvme_device(smart_interface * intf, const char * dev_name,
 --- work/smartmontools-7.3/smartmontools-7.3/os_freebsd.cpp	2021-02-01 21:36:02.000000000 +0100
 +++ work/smartmontools-7.3/smartmontools-7.3/os_freebsd.cpp	2021-03-02 21:32:36.824182867 +0100
-@@ -240,7 +240,7 @@ class freebsd_ata_device
+@@ -244,7 +244,7 @@ class freebsd_ata_device
  {
  public:
    freebsd_ata_device(smart_interface * intf, const char * dev_name, const char * req_type);
@@ -246,7 +246,7 @@
  
  protected:
    virtual int do_cmd(struct ata_ioc_request* request, bool is_48bit_cmd);
-@@ -446,9 +446,9 @@ public:
+@@ -450,9 +450,9 @@ public:
    freebsd_nvme_device(smart_interface * intf, const char * dev_name,
      const char * req_type, unsigned nsid);
  
@@ -258,7 +258,7 @@
  };
  
  freebsd_nvme_device::freebsd_nvme_device(smart_interface * intf, const char * dev_name,
-@@ -562,8 +562,8 @@ public:
+@@ -566,8 +566,8 @@ public:
      int escalade_type, int disknum);
  
  protected:
@@ -269,7 +269,7 @@
  
  private:
    int m_escalade_type; ///< Type string for escalade_command_interface().
-@@ -774,8 +774,8 @@ public:
+@@ -1011,8 +1011,8 @@ public:
      unsigned char controller, unsigned char channel, unsigned char port);
  
  protected:
@@ -280,7 +280,7 @@
  
  private:
    unsigned char m_hpt_data[3]; ///< controller/channel/port
-@@ -969,13 +969,13 @@ class freebsd_scsi_device
+@@ -1206,13 +1206,13 @@ class freebsd_scsi_device
  public:
    freebsd_scsi_device(smart_interface * intf, const char * dev_name, const char * req_type);
  
@@ -298,7 +298,7 @@
    
  private:
    struct cam_device *m_camdev;
-@@ -1172,10 +1172,10 @@ class freebsd_areca_ata_device
+@@ -1409,10 +1409,10 @@ class freebsd_areca_ata_device
  {
  public:
    freebsd_areca_ata_device(smart_interface * intf, const char * dev_name, int disknum, int encnum = 1);
@@ -313,7 +313,7 @@
  };
  
  ///////////////////////////////////////////////////////////////////
-@@ -1186,10 +1186,10 @@ class freebsd_areca_scsi_device
+@@ -1423,10 +1423,10 @@ class freebsd_areca_scsi_device
  {
  public:
    freebsd_areca_scsi_device(smart_interface * intf, const char * dev_name, int disknum, int encnum = 1);
@@ -328,7 +328,7 @@
  };
  
  
-@@ -1314,8 +1314,8 @@ class freebsd_cciss_device
+@@ -1551,8 +1551,8 @@ class freebsd_cciss_device
  public:
    freebsd_cciss_device(smart_interface * intf, const char * name, unsigned char disknum);
  
@@ -339,7 +339,7 @@
  
  private:
    unsigned char m_disknum; ///< Disk number.
-@@ -1425,30 +1425,30 @@ class freebsd_smart_interface
+@@ -1671,30 +1671,30 @@ class freebsd_smart_interface
  : public /*implements*/ smart_interface
  {
  public:
@@ -378,7 +378,7 @@
 +  virtual std::string get_valid_custom_dev_types_str();
  private:
    bool get_nvme_devlist(smart_device_list & devlist, const char * type);
- };
+   bool get_dev_megaraid(smart_device_list & devlist);
 --- work/smartmontools-7.3/smartmontools-7.3/os_linux.cpp	2021-02-01 21:36:02.000000000 +0100
 +++ work/smartmontools-7.3/smartmontools-7.3/os_linux.cpp	2021-03-02 21:32:36.824182867 +0100
 @@ -110,11 +110,11 @@ public:
@@ -544,7 +544,7 @@
 +  virtual std::string get_valid_custom_dev_types_str();
  
  private:
-   static const int devxy_to_n_max = 103; // Max value of devxy_to_n() below
+   static constexpr int devxy_to_n_max = 701; // "/dev/sdzz"
 --- work/smartmontools-7.3/smartmontools-7.3/os_netbsd.cpp	2021-02-01 21:36:02.000000000 +0100
 +++ work/smartmontools-7.3/smartmontools-7.3/os_netbsd.cpp	2021-03-02 21:32:36.828182841 +0100
 @@ -131,7 +131,7 @@ class netbsd_ata_device
@@ -874,7 +874,7 @@
  
  private:
    int m_passthrulen;
-@@ -615,7 +615,7 @@ public:
+@@ -611,7 +611,7 @@ public:
    virtual ~usbcypress_device();
  
  protected:
@@ -883,7 +883,7 @@
  
    unsigned char m_signature;
  };
-@@ -887,9 +887,9 @@ public:
+@@ -879,9 +879,9 @@ public:
  
    virtual ~usbjmicron_device();
  
@@ -895,7 +895,7 @@
  
  private:
    bool get_registers(unsigned short addr, unsigned char * buf, unsigned short size);
-@@ -1115,7 +1115,7 @@ public:
+@@ -1105,7 +1105,7 @@ public:
  
    virtual ~usbprolific_device();
  
@@ -904,7 +904,7 @@
  };
  
  
-@@ -1254,7 +1254,7 @@ public:
+@@ -1243,7 +1243,7 @@ public:
  
    virtual ~usbsunplus_device();
  
@@ -936,7 +936,7 @@
  
  private:
    enum {
-@@ -325,7 +325,7 @@ public:
+@@ -322,7 +322,7 @@ public:
  
    virtual ~sntrealtek_device();
  

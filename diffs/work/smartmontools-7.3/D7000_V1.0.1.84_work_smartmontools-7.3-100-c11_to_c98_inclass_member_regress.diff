@@ -232,7 +232,7 @@
  int nvmePrintMain(nvme_device * device, const nvme_print_options & options);
 --- work/smartmontools-7.3/smartmontools-7.3/scsiprint.h
 +++ work/smartmontools-7.3/smartmontools-7.3/scsiprint.h
-@@ -21,34 +21,58 @@
+@@ -21,44 +21,72 @@
  // Options for scsiPrintMain
  struct scsi_print_options
  {
@@ -252,6 +252,7 @@
 -  bool smart_extend_selftest = false, smart_extend_cap_selftest = false;
 -  bool smart_selftest_abort = false;
 -  bool smart_selftest_force = false; // Ignore already running test
+-  bool scsi_pending_defects = false;
 +  bool drive_info;
 +  bool smart_check_status;
 +  bool smart_vendor_attrib;
@@ -268,9 +269,21 @@
 +  bool smart_extend_selftest, smart_extend_cap_selftest;
 +  bool smart_selftest_abort;
 +  bool smart_selftest_force; // Ignore already running test
++  bool scsi_pending_defects;
+ 
+-  bool smart_env_rep = false;
++  bool smart_env_rep;
  
 -  bool sasphy = false, sasphy_reset = false;
 +  bool sasphy, sasphy_reset;
+ 
+-  bool tape_device_stats = false;
+-  bool tape_alert = false;
++  bool tape_device_stats;
++  bool tape_alert;
+ 
+-  bool zoned_device_stats = false;
++  bool zoned_device_stats;
    
 -  bool get_wce = false, get_rcd = false;
 -  short int set_wce = 0, set_rcd = 0;  // disable(-1), enable(1) cache
@@ -279,17 +292,19 @@
  
 -  unsigned char powermode = 0;  // Enhancement Skip check, if disk in idle or standby mode
 -  unsigned char powerexit = 0;  // exit() code for low power mode
-+  unsigned char powermode; // Enhancement Skip check, if disk in idle or standby mode
-+  unsigned char powerexit; // exit() code for low power mode
-+  int powerexit_unsup; // exit() code for unsupported power mode or -1 to ignore
++  unsigned char powermode;  // Enhancement Skip check, if disk in idle or standby mode
++  unsigned char powerexit;  // exit() code for low power mode
  
 -  int set_standby = 0;          // set(1..255->0..254) standby timer
 -  bool set_standby_now = false; // set drive to standby
 -  bool set_active = false;      // set drive to active
-+  int set_standby;         // set(1..255->0..254) standby timer
-+  bool set_standby_now;    // set drive to standby
-+  bool set_active;         // set drive to active
+-
+-  int health_opt_count = 0;     // TapeAlert log page only read if this value > 1
++  int set_standby;          // set(1..255->0..254) standby timer
++  bool set_standby_now; // set drive to standby
++  bool set_active;      // set drive to active
 +
++  int health_opt_count;     // TapeAlert log page only read if this value > 1
 +  scsi_print_options()
 +    : drive_info(false),
 +      smart_check_status(false),
@@ -305,12 +320,18 @@
 +      smart_extend_selftest(false), smart_extend_cap_selftest(false),
 +      smart_selftest_abort(false),
 +      smart_selftest_force(false),
++      scsi_pending_defects(false),
++      smart_env_rep(false),
 +      sasphy(false), sasphy_reset(false),
++      tape_device_stats(false),
++      tape_alert(false),
++      zoned_device_stats(false),
 +      get_wce(false), get_rcd(false),
 +      set_wce(0), set_rcd(0),
-+      powermode(0), powerexit(0), powerexit_unsup(-1), // Power Check -n enhancement option
++      powermode(0), powerexit(0), // Power Check -n enhancement option
 +      set_standby(0), set_standby_now(false), // enable Standby options for -s
-+      set_active(false)
++      set_active(false),
++      health_opt_count(0)
 +    { }
  };
  

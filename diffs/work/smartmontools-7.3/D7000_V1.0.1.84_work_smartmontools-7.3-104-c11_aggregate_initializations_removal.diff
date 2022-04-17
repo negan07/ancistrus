@@ -1,0 +1,616 @@
+--- work/smartmontools-7.3/smartmontools-7.3/dev_areca.cpp
++++ work/smartmontools-7.3/smartmontools-7.3/dev_areca.cpp
+@@ -120,11 +120,11 @@ int generic_areca_device::arcmsr_command
+ 
+   int ioctlreturn = 0;
+   sSRB_BUFFER sBuf;
+-  struct scsi_cmnd_io iop = {};
++  struct scsi_cmnd_io iop;
+   int dir = DXFER_TO_DEVICE;
+ 
+-  uint8_t cdb[10]={};
+-  uint8_t sense[32]={};
++  uint8_t cdb[10]={0};
++  uint8_t sense[32]={0};
+ 
+   unsigned char *areca_return_packet;
+   int total = 0;
+@@ -133,6 +133,7 @@ int generic_areca_device::arcmsr_command
+   unsigned char *ptr = &return_buff[0];
+ 
+   memset((unsigned char *)&sBuf, 0, sizeof(sBuf));
++  memset(&iop, 0, sizeof(iop));
+ 
+   sBuf.srbioctl.HeaderLength = sizeof(sARCMSR_IO_HDR);
+   memcpy(sBuf.srbioctl.Signature, ARECA_SIG_STR, strlen(ARECA_SIG_STR));
+--- work/smartmontools-7.3/smartmontools-7.3/dev_jmb39x_raid.cpp
++++ work/smartmontools-7.3/smartmontools-7.3/dev_jmb39x_raid.cpp
+@@ -271,7 +271,8 @@ static int scsi_get_lba_size(scsi_device
+ 
+ static bool scsi_read_lba8(scsi_device * scsidev, uint8_t lba8, uint8_t (& data)[512])
+ {
+-  struct scsi_cmnd_io io_hdr = {};
++  struct scsi_cmnd_io io_hdr;
++  memset(&io_hdr, 0, sizeof(io_hdr));
+ 
+   io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+   io_hdr.dxfer_len = 512;
+@@ -289,7 +290,8 @@ static bool scsi_read_lba8(scsi_device *
+ 
+ static bool scsi_write_lba8(scsi_device * scsidev,  uint8_t lba8, const uint8_t (& data)[512])
+ {
+-  struct scsi_cmnd_io io_hdr = {};
++  struct scsi_cmnd_io io_hdr;
++  memset(&io_hdr, 0, sizeof(io_hdr));
+ 
+   io_hdr.dxfer_dir = DXFER_TO_DEVICE;
+   io_hdr.dxfer_len = 512;
+@@ -697,7 +699,7 @@ ata_device * smart_interface::get_jmb39x
+   int n1 = -1;
+   char prefix[15+1] = "";
+   sscanf(type, "%15[^,],%n", prefix, &n1);
+-  uint8_t version;
++  uint8_t version = 0;
+   if (!strcmp(prefix, "jmb39x"))
+     version = 0;
+   else if (!strcmp(prefix, "jmb39x-q"))
+--- work/smartmontools-7.3/smartmontools-7.3/scsiata.cpp
++++ work/smartmontools-7.3/smartmontools-7.3/scsiata.cpp
+@@ -256,11 +256,11 @@ bool sat_device::ata_pass_through(const
+     )
+       return false;
+ 
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+     struct sg_scsi_sense_hdr ssh;
+-    unsigned char cdb[SAT_ATA_PASSTHROUGH_16LEN] = {};
+-    unsigned char sense[32] = {};
++    unsigned char cdb[SAT_ATA_PASSTHROUGH_16LEN];
++    unsigned char sense[32];
+     const unsigned char * ardp;
+     int ard_len, have_sense;
+     int extend = 0;
+@@ -272,6 +272,9 @@ bool sat_device::ata_pass_through(const
+     int passthru_size = DEF_SAT_ATA_PASSTHRU_SIZE;
+     bool sense_descriptor = true;
+ 
++    memset(cdb, 0, sizeof(cdb));
++    memset(sense, 0, sizeof(sense));
++
+     // Set data direction
+     // TODO: This works only for commands where sector_count holds count!
+     switch (in.direction) {
+@@ -343,6 +346,7 @@ bool sat_device::ata_pass_through(const
+         cdb[14] = lo.command;
+     }
+ 
++    memset(&io_hdr, 0, sizeof(io_hdr));
+     if (0 == t_length) {
+         io_hdr.dxfer_dir = DXFER_NONE;
+         io_hdr.dxfer_len = 0;
+@@ -635,9 +639,9 @@ usbcypress_device::~usbcypress_device()
+ #define USBCYPRESS_PASSTHROUGH_LEN 16
+ int usbcypress_device::ata_command_interface(smart_command_set command, int select, char *data)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
+-    unsigned char cdb[USBCYPRESS_PASSTHROUGH_LEN] = {};
+-    unsigned char sense[32] = {};
++    struct scsi_cmnd_io io_hdr;
++    unsigned char cdb[USBCYPRESS_PASSTHROUGH_LEN];
++    unsigned char sense[32];
+     int copydata = 0;
+     int outlen = 0;
+     int ck_cond = 0;    /* set to 1 to read register(s) back */
+@@ -652,6 +656,9 @@ int usbcypress_device::ata_command_inter
+     int lba_high = 0;
+     int passthru_size = USBCYPRESS_PASSTHROUGH_LEN;
+ 
++    memset(cdb, 0, sizeof(cdb));
++    memset(sense, 0, sizeof(sense));
++
+     ata_command = ATA_SMART_CMD;
+     switch (command) {
+     case CHECK_POWER_MODE:
+@@ -759,6 +766,7 @@ int usbcypress_device::ata_command_inter
+     cdb[10] = lba_high;
+     cdb[12] = ata_command;
+ 
++    memset(&io_hdr, 0, sizeof(io_hdr));
+     if (0 == t_length) {
+         io_hdr.dxfer_dir = DXFER_NONE;
+         io_hdr.dxfer_len = 0;
+@@ -953,7 +961,8 @@ bool usbjmicron_device::ata_pass_through
+   if (m_port < 0)
+     return set_err(EIO, "Unknown JMicron port");
+ 
+-  scsi_cmnd_io io_hdr = {};
++  scsi_cmnd_io io_hdr;
++  memset(&io_hdr, 0, sizeof(io_hdr));
+ 
+   bool rwbit = true;
+   unsigned char smart_status = 0xff;
+@@ -1073,7 +1082,9 @@ bool usbjmicron_device::get_registers(un
+   cdb[12] = 0x06;
+   cdb[13] = 0x7b;
+ 
+-  scsi_cmnd_io io_hdr = {};
++  scsi_cmnd_io io_hdr;
++  memset(&io_hdr, 0, sizeof(io_hdr));
++
+   io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+   io_hdr.dxfer_len = size;
+   io_hdr.dxferp = buf;
+@@ -1132,7 +1143,7 @@ bool usbprolific_device::ata_pass_throug
+   )
+     return false;
+ 
+-  scsi_cmnd_io io_hdr = {};
++  scsi_cmnd_io io_hdr;
+   unsigned char cmd_rw = 0x10;  // Read
+ 
+   switch (in.direction) {
+@@ -1269,11 +1280,12 @@ bool usbsunplus_device::ata_pass_through
+   )
+     return false;
+ 
+-  scsi_cmnd_io io_hdr = {};
++  scsi_cmnd_io io_hdr;
+   unsigned char cdb[12];
+ 
+   if (in.in_regs.is_48bit_cmd()) {
+     // Set "previous" registers
++    memset(&io_hdr, 0, sizeof(io_hdr));
+     io_hdr.dxfer_dir = DXFER_NONE;
+ 
+     cdb[ 0] = 0xf8;
+--- work/smartmontools-7.3/smartmontools-7.3/scsicmds.cpp
++++ work/smartmontools-7.3/smartmontools-7.3/scsicmds.cpp
+@@ -49,7 +49,8 @@ supported_vpd_pages * supported_vpd_page
+ 
+ supported_vpd_pages::supported_vpd_pages(scsi_device * device) : num_valid(0)
+ {
+-    unsigned char b[0xfc] = {};   /* pre SPC-3 INQUIRY max response size */
++    unsigned char b[0xfc];   /* pre SPC-3 INQUIRY max response size */
++    memset(b, 0, sizeof(b));
+ 
+     if (device && (0 == scsiInquiryVpd(device, SCSI_VPD_SUPPORTED_VPD_PAGES,
+                    b, sizeof(b)))) {
+@@ -560,9 +561,9 @@ scsiLogSense(scsi_device * device, int p
+              int bufLen, int known_resp_len)
+ {
+     int pageLen;
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[10] = {};
++    uint8_t cdb[10];
+     uint8_t sense[32];
+ 
+     if (known_resp_len > bufLen)
+@@ -579,6 +580,8 @@ scsiLogSense(scsi_device * device, int p
+         else
+             memset(pBuf, 0, pageLen);
+ 
++        memset(&io_hdr, 0, sizeof(io_hdr));
++        memset(cdb, 0, sizeof(cdb));
+         io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+         io_hdr.dxfer_len = pageLen;
+         io_hdr.dxferp = pBuf;
+@@ -648,11 +651,14 @@ int
+ scsiLogSelect(scsi_device * device, int pcr, int sp, int pc, int pagenum,
+               int subpagenum, uint8_t *pBuf, int bufLen)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[10] = {};
++    uint8_t cdb[10];
+     uint8_t sense[32];
+ 
++
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_TO_DEVICE;
+     io_hdr.dxfer_len = bufLen;
+     io_hdr.dxferp = pBuf;
+@@ -680,13 +686,15 @@ int
+ scsiModeSense(scsi_device * device, int pagenum, int subpagenum, int pc,
+               uint8_t *pBuf, int bufLen)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[6] = {};
++    uint8_t cdb[6];
+     uint8_t sense[32];
+ 
+     if ((bufLen < 0) || (bufLen > 255))
+         return -EINVAL;
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+     io_hdr.dxfer_len = bufLen;
+     io_hdr.dxferp = pBuf;
+@@ -725,9 +733,9 @@ scsiModeSense(scsi_device * device, int
+ int
+ scsiModeSelect(scsi_device * device, int sp, uint8_t *pBuf, int bufLen)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[6] = {};
++    uint8_t cdb[6];
+     uint8_t sense[32];
+     int pg_offset, pg_len, hdr_plus_1_pg;
+ 
+@@ -740,6 +748,8 @@ scsiModeSelect(scsi_device * device, int
+         return -EINVAL;
+     pBuf[0] = 0;  /* Length of returned mode sense data reserved for SELECT */
+     pBuf[pg_offset] &= 0x7f;    /* Mask out PS bit from byte 0 of page data */
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_TO_DEVICE;
+     io_hdr.dxfer_len = hdr_plus_1_pg;
+     io_hdr.dxferp = pBuf;
+@@ -765,11 +775,13 @@ int
+ scsiModeSense10(scsi_device * device, int pagenum, int subpagenum, int pc,
+                 uint8_t *pBuf, int bufLen)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[10] = {};
++    uint8_t cdb[10];
+     uint8_t sense[32];
+ 
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+     io_hdr.dxfer_len = bufLen;
+     io_hdr.dxferp = pBuf;
+@@ -808,9 +820,9 @@ scsiModeSense10(scsi_device * device, in
+ int
+ scsiModeSelect10(scsi_device * device, int sp, uint8_t *pBuf, int bufLen)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[10] = {};
++    uint8_t cdb[10];
+     uint8_t sense[32];
+     int pg_offset, pg_len, hdr_plus_1_pg;
+ 
+@@ -824,6 +836,8 @@ scsiModeSelect10(scsi_device * device, i
+     pBuf[0] = 0;
+     pBuf[1] = 0; /* Length of returned mode sense data reserved for SELECT */
+     pBuf[pg_offset] &= 0x7f;    /* Mask out PS bit from byte 0 of page data */
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_TO_DEVICE;
+     io_hdr.dxfer_len = hdr_plus_1_pg;
+     io_hdr.dxferp = pBuf;
+@@ -849,12 +863,14 @@ int
+ scsiStdInquiry(scsi_device * device, uint8_t *pBuf, int bufLen)
+ {
+     struct scsi_sense_disect sinfo;
+-    struct scsi_cmnd_io io_hdr = {};
+-    uint8_t cdb[6] = {};
++    struct scsi_cmnd_io io_hdr;
++    uint8_t cdb[6];
+     uint8_t sense[32];
+ 
+     if ((bufLen < 0) || (bufLen > 1023))
+         return -EINVAL;
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+     io_hdr.dxfer_len = bufLen;
+     io_hdr.dxferp = pBuf;
+@@ -878,9 +894,9 @@ scsiStdInquiry(scsi_device * device, uin
+ int
+ scsiInquiryVpd(scsi_device * device, int vpd_page, uint8_t *pBuf, int bufLen)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[6] = {};
++    uint8_t cdb[6];
+     uint8_t sense[32];
+     int res;
+ 
+@@ -893,6 +909,8 @@ scsiInquiryVpd(scsi_device * device, int
+     if ((bufLen < 0) || (bufLen > 1023))
+         return -EINVAL;
+ try_again:
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     if (bufLen > 1)
+         pBuf[1] = 0x0;
+     io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+@@ -936,13 +954,15 @@ try_again:
+ int
+ scsiRequestSense(scsi_device * device, struct scsi_sense_disect * sense_info)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
+-    uint8_t cdb[6] = {};
++    struct scsi_cmnd_io io_hdr;
++    uint8_t cdb[6];
+     uint8_t sense[32];
+-    uint8_t buff[18] = {};
++    uint8_t buff[18];
+     bool ok;
+     static const int sz_buff = sizeof(buff);
+ 
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+     io_hdr.dxfer_len = sz_buff;
+     io_hdr.dxferp = buff;
+@@ -1029,11 +1049,13 @@ scsiRequestSense(scsi_device * device, s
+ int
+ scsiSetPowerCondition(scsi_device * device, int power_cond, int pcond_modifier)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[6] = {};
++    uint8_t cdb[6];
+     uint8_t sense[32];
+ 
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_NONE;
+     cdb[0] = START_STOP_UNIT;
+     /* IMMED bit (cdb[1] = 0x1) not set, therefore will wait */
+@@ -1061,11 +1083,13 @@ int
+ scsiSendDiagnostic(scsi_device * device, int functioncode, uint8_t *pBuf,
+                    int bufLen)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[6] = {};
++    uint8_t cdb[6];
+     uint8_t sense[32];
+ 
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = bufLen ? DXFER_TO_DEVICE: DXFER_NONE;
+     io_hdr.dxfer_len = bufLen;
+     io_hdr.dxferp = pBuf;
+@@ -1093,11 +1117,13 @@ scsiSendDiagnostic(scsi_device * device,
+ static int
+ _testunitready(scsi_device * device, struct scsi_sense_disect * sinfop)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     bool ok;
+-    uint8_t cdb[6] = {};
++    uint8_t cdb[6];
+     uint8_t sense[32];
+ 
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_NONE;
+     io_hdr.dxfer_len = 0;
+     io_hdr.dxferp = NULL;
+@@ -1141,11 +1167,13 @@ int
+ scsiReadDefect10(scsi_device * device, int req_plist, int req_glist,
+                  int dl_format, uint8_t *pBuf, int bufLen)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[10] = {};
++    uint8_t cdb[10];
+     uint8_t sense[32];
+ 
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+     io_hdr.dxfer_len = bufLen;
+     io_hdr.dxferp = pBuf;
+@@ -1175,11 +1203,13 @@ int
+ scsiReadDefect12(scsi_device * device, int req_plist, int req_glist,
+                  int dl_format, int addrDescIndex, uint8_t *pBuf, int bufLen)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[12] = {};
++    uint8_t cdb[12];
+     uint8_t sense[32];
+ 
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+     io_hdr.dxfer_len = bufLen;
+     io_hdr.dxferp = pBuf;
+@@ -1252,12 +1282,15 @@ scsiReadCapacity10(scsi_device * device,
+                    unsigned int * lb_sizep)
+ {
+     int res;
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[10] = {};
++    uint8_t cdb[10];
+     uint8_t sense[32];
+-    uint8_t resp[8] = {};
++    uint8_t resp[8];
+ 
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
++    memset(resp, 0, sizeof(resp));
+     io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+     io_hdr.dxfer_len = sizeof(resp);
+     io_hdr.dxferp = resp;
+@@ -1286,11 +1319,13 @@ scsiReadCapacity10(scsi_device * device,
+ int
+ scsiReadCapacity16(scsi_device * device, uint8_t *pBuf, int bufLen)
+ {
+-    struct scsi_cmnd_io io_hdr = {};
++    struct scsi_cmnd_io io_hdr;
+     struct scsi_sense_disect sinfo;
+-    uint8_t cdb[16] = {};
++    uint8_t cdb[16];
+     uint8_t sense[32];
+ 
++    memset(&io_hdr, 0, sizeof(io_hdr));
++    memset(cdb, 0, sizeof(cdb));
+     io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+     io_hdr.dxfer_len = bufLen;
+     io_hdr.dxferp = pBuf;
+@@ -1597,9 +1632,10 @@ scsiSetExceptionControlAndWarning(scsi_d
+ int
+ scsiGetTemp(scsi_device * device, uint8_t *currenttemp, uint8_t *triptemp)
+ {
+-    uint8_t tBuf[252] = {};
++    uint8_t tBuf[252];
+     int err;
+ 
++    memset(tBuf, 0, sizeof(tBuf));
+     if ((err = scsiLogSense(device, TEMPERATURE_LPAGE, 0, tBuf,
+                             sizeof(tBuf), 0))) {
+         *currenttemp = 0;
+@@ -1622,7 +1658,7 @@ scsiCheckIE(scsi_device * device, int ha
+             uint8_t *asc, uint8_t *ascq, uint8_t *currenttemp,
+             uint8_t *triptemp)
+ {
+-    uint8_t tBuf[252] = {};
++    uint8_t tBuf[252];
+     struct scsi_sense_disect sense_info;
+     int err;
+     uint8_t currTemp, trTemp;
+@@ -1632,6 +1668,8 @@ scsiCheckIE(scsi_device * device, int ha
+     *ascq = 0;
+     *currenttemp = 0;
+     *triptemp = 0;
++    memset(tBuf,0,sizeof(tBuf)); // need to clear stack space of junk
++    memset(&sense_info, 0, sizeof(sense_info));
+     if (hasIELogPage) {
+         if ((err = scsiLogSense(device, IE_LPAGE, 0, tBuf,
+                                 sizeof(tBuf), 0))) {
+@@ -2307,8 +2345,9 @@ scsiFetchExtendedSelfTestTime(scsi_devic
+                               int modese_len)
+ {
+     int err, offset;
+-    uint8_t buff[64] = {};
++    uint8_t buff[64];
+ 
++    memset(buff, 0, sizeof(buff));
+     if (modese_len <= 6) {
+         if ((err = scsiModeSense(device, CONTROL_MODE_PAGE, 0,
+                                  MPAGE_CONTROL_CURRENT,
+@@ -2536,9 +2575,10 @@ int
+ scsiFetchControlGLTSD(scsi_device * device, int modese_len, int current)
+ {
+     int err, offset;
+-    uint8_t buff[64] = {};
++    uint8_t buff[64];
+     int pc = current ? MPAGE_CONTROL_CURRENT : MPAGE_CONTROL_DEFAULT;
+ 
++    memset(buff, 0, sizeof(buff));
+     if (modese_len <= 6) {
+         if ((err = scsiModeSense(device, CONTROL_MODE_PAGE, 0, pc,
+                                  buff, sizeof(buff)))) {
+@@ -2574,9 +2614,10 @@ scsiGetRPM(scsi_device * device, int mod
+            int * haw_zbcp)
+ {
+     int err, offset;
+-    uint8_t buff[64] = {};
++    uint8_t buff[64];
+     int pc = MPAGE_CONTROL_DEFAULT;
+ 
++    memset(buff, 0, sizeof(buff));
+     if ((0 == scsiInquiryVpd(device, SCSI_VPD_BLOCK_DEVICE_CHARACTERISTICS,
+                              buff, sizeof(buff))) &&
+         ((sg_get_unaligned_be16(buff + 2)) > 2)) {
+@@ -2619,11 +2660,12 @@ scsiGetSetCache(scsi_device * device,  i
+                 short int * rcdp)
+ {
+     int err, offset, resp_len, sp;
+-    uint8_t buff[64] = {};
++    uint8_t buff[64];
+     uint8_t ch_buff[64];
+     short set_wce = *wcep;
+     short set_rcd = *rcdp;
+ 
++    memset(buff, 0, sizeof(buff));
+     if (modese_len <= 6) {
+         err = scsiModeSense(device, CACHING_PAGE, 0, MPAGE_CONTROL_CURRENT,
+                             buff, sizeof(buff));
+@@ -2722,9 +2764,10 @@ int
+ scsiSetControlGLTSD(scsi_device * device, int enabled, int modese_len)
+ {
+     int err, offset, resp_len, sp;
+-    uint8_t buff[64] = {};
++    uint8_t buff[64];
+     uint8_t ch_buff[64];
+ 
++    memset(buff, 0, sizeof(buff));
+     if (modese_len <= 6) {
+         if ((err = scsiModeSense(device, CONTROL_MODE_PAGE, 0,
+                                  MPAGE_CONTROL_CURRENT,
+@@ -2794,6 +2837,7 @@ scsiFetchTransportProtocol(scsi_device *
+     int err, offset;
+     uint8_t buff[64] {};
+ 
++    memset(buff, 0, sizeof(buff));
+     if (modese_len <= 6) {
+         if ((err = scsiModeSense(device, PROTOCOL_SPECIFIC_PORT_PAGE, 0,
+                                  MPAGE_CONTROL_CURRENT,
+--- work/smartmontools-7.3/smartmontools-7.3/scsinvme.cpp
++++ work/smartmontools-7.3/smartmontools-7.3/scsinvme.cpp
+@@ -95,7 +95,8 @@ bool sntasmedia_device::nvme_pass_throug
+   cdb[7] = (uint8_t)cdw10_hi;
+   //cdb[8..15] = ?
+ 
+-  scsi_cmnd_io io_hdr = {};
++  scsi_cmnd_io io_hdr;
++  memset(&io_hdr, 0, sizeof(io_hdr));
+   io_hdr.cmnd = cdb;
+   io_hdr.cmnd_len = sizeof(cdb);
+   io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
+@@ -213,8 +214,8 @@ bool sntjmicron_device::nvme_pass_throug
+       for (unsigned i = 0; i < (SNT_JMICRON_NVM_CMD_LEN / sizeof(uint32_t)); i++)
+         swapx(&nvm_cmd[i]);
+ 
+-    scsi_cmnd_io io_nvm = {};
+-
++    scsi_cmnd_io io_nvm;
++    memset(&io_nvm, 0, sizeof(io_nvm));
+     io_nvm.cmnd = cdb;
+     io_nvm.cmnd_len = SNT_JMICRON_CDB_LEN;
+     io_nvm.dxfer_dir = DXFER_TO_DEVICE;
+@@ -232,7 +233,8 @@ bool sntjmicron_device::nvme_pass_throug
+     unsigned char cdb[SNT_JMICRON_CDB_LEN] = { 0 };
+     cdb[0] = SAT_ATA_PASSTHROUGH_12;
+ 
+-    scsi_cmnd_io io_data = {};
++    scsi_cmnd_io io_data;
++    memset(&io_data, 0, sizeof(io_data));
+     io_data.cmnd = cdb;
+     io_data.cmnd_len = SNT_JMICRON_CDB_LEN;
+ 
+@@ -276,7 +278,8 @@ bool sntjmicron_device::nvme_pass_throug
+ 
+     unsigned nvm_reply[SNT_JMICRON_NVM_CMD_LEN / sizeof(unsigned)] = { 0 };
+ 
+-    scsi_cmnd_io io_reply = {};
++    scsi_cmnd_io io_reply;
++    memset(&io_reply, 0, sizeof(io_reply));
+ 
+     io_reply.cmnd = cdb;
+     io_reply.cmnd_len = SNT_JMICRON_CDB_LEN;
+@@ -372,7 +375,8 @@ bool sntrealtek_device::nvme_pass_throug
+   cdb[3] = in.opcode;
+   cdb[4] = (uint8_t)in.cdw10;
+ 
+-  scsi_cmnd_io io_hdr = {};
++  scsi_cmnd_io io_hdr;
++  memset(&io_hdr, 0, sizeof(io_hdr));
+   io_hdr.cmnd = cdb;
+   io_hdr.cmnd_len = sizeof(cdb);
+   io_hdr.dxfer_dir = DXFER_FROM_DEVICE;
