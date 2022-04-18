@@ -21,7 +21,7 @@ diff -urN work/libarchive-3.6.1/Makefile work/libarchive-3.6.1/Makefile
 +endif
 +
 +configure-local:
-+	cd $(ARCHIVE) && ./configure --build=$(BUILD_HOST) --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-shared LDFLAGS=-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) LIBS=-lz CPPFLAGS=-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)
++	cd $(ARCHIVE) && ./configure --build=$(BUILD_HOST) --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-shared --without-openssl LDFLAGS=-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) LIBS=-lz CPPFLAGS=-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)
 +
 +configure-cross:
 +	cd $(ARCHIVE) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --disable-bsdtar --disable-bsdcat --disable-bsdcpio --disable-shared LDFLAGS=-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) LIBS=-lz CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS=-I$(WORK_DIR)/$(ZLIB)/$(ZLIB)
