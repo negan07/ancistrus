@@ -116,13 +116,13 @@ opkg_inst:
 
 post_inst:
 	@echo -e "\\e[35m$(CUR_REL_PATH): making FS post install modifications on \\e[36m$(BUILD_TARGET) \\e[0m"
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep zlib`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: zlib'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mzlib \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/libz.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
 	else \
 	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mzlib package is mandatory\\e[0m" && exit 1; \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep openssl`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: openssl'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mopenssl \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/libcrypto.so* $(BUILD_TARGET)$(RCTMPDIR)/libssl.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/openssl $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
@@ -130,7 +130,7 @@ post_inst:
 	else \
 	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mopenssl package is mandatory\\e[0m" && exit 1; \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep curl`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: curl'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mcurl \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/libcurl.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/curl $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
@@ -139,7 +139,7 @@ post_inst:
 	else \
 	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mcurl package is mandatory\\e[0m" && exit 1; \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep ancistrus-core`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: ancistrus-core'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mcore \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCBOOT_NAME) $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/$(RCNVRAMSO) $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
@@ -152,43 +152,58 @@ post_inst:
 	else \
 	echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mcore package is mandatory\\e[0m" && exit 1; \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep busybox`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: busybox'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mbusybox \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/busybox $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
 	for F in `cat $(BUSYBOX)/busybox.links`; do mv $(BUILD_TARGET)$(RCTMPDIR)/`basename $$F` $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; done; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/profile $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep qos-sqm`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: qos-sqm'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36miproute2@qos-sqm \\e[0m"; \
 	rm -r $(BUILD_TARGET)$(RCBOOTDIR)/iproute2 || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/iproute2 $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/ip $(BUILD_TARGET)$(RCTMPDIR)/tc $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep mini_httpd`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: mini_httpd'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mmini_httpd \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/mini_httpd.pem $(BUILD_TARGET)$(RCBOOTDIR)/ || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/mini_httpd $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
 	$(foreach F, $(RCHTTPDWEB), mv $(BUILD_TARGET)$(RCTMPDIR)/$(F) $(BUILD_TARGET)$(RCWWWDIR)/$(F) || exit 1;) \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep utelnetd`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: utelnetd'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mutelnetd \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/rc_debug_mode $(BUILD_TARGET)$(RCAPPDIR)/ || exit 1; \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep samba`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: samba'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36msamba \\e[0m"; \
 	rm $(BUILD_TARGET)$(RCLDLIB)/libntpass.so* || exit 1; \
 	[ -f $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 ] || ln -sf libiconv.so.0.0 $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 || exit 1; \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep speedtest-net`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: speedtest-net'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mspeedtest-net \\e[0m"; \
 	if [ ! -x $(BUILD_TARGET)$(RCBINDIR)/tar ]; then echo -e "\\e[35m$(CUR_REL_PATH): Error: \\e[36mtar cmd missed, busybox package required\\e[0m"; exit 1; fi \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep minidlna`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: minidlna'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mminidlna \\e[0m"; \
 	for L in id3tag exif jpeg ogg vorbis FLAC; do rm $(BUILD_TARGET)$(RCLDLIB)/lib$$L.so* || exit 1; done; \
 	[ -f $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 ] || ln -sf libiconv.so.0.0 $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 || exit 1; \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep xdsl-driver`" ]; then \
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: linux-atm'`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mlinux-atm \\e[0m"; \
+	rm $(BUILD_TARGET)$(RCLDLIB)/libatm.so* || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/libatm.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/atmarp $(BUILD_TARGET)$(RCTMPDIR)/atmarpd $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: ppp'`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mppp \\e[0m"; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/libpppoatm.so $(BUILD_TARGET)$(RCTMPDIR)/libpppoe.so $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/pppd $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: rp-pppoe'`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mrp-pppoe \\e[0m"; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/pppoe* $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
+	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: xdsl-driver'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
 	for F in $(RCDSLKO); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCLDLIBMOD)/ || exit 1; done; \
 	for F in $(RCDSLDRV); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCADSLDIR)/ || exit 1; done; \
