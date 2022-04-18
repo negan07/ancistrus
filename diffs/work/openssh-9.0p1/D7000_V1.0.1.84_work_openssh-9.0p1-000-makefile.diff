@@ -1,6 +1,6 @@
-diff -urN work/openssh-8.8p1/Makefile work/openssh-8.8p1/Makefile
---- work/openssh-8.8p1/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ work/openssh-8.8p1/Makefile	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/openssh-9.0p1/Makefile work/openssh-9.0p1/Makefile
+--- work/openssh-9.0p1/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-9.0p1/Makefile	2018-01-05 12:00:11.000000000 +0100
 @@ -0,0 +1,197 @@
 +include ../Rules.mak
 +
@@ -26,7 +26,7 @@ diff -urN work/openssh-8.8p1/Makefile work/openssh-8.8p1/Makefile
 +	cd $(OPEN_SSH) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --prefix=$(USRDIR) --sysconfdir=$(TMPETC) --libdir=$(LDLIB) --sharedstatedir=$(LDLIB) --bindir=$(USRSBIN) --sbindir=$(USRSBIN) --libexecdir=$(USRSBIN) --localstatedir=$(VARLIB) --disable-pkcs11 --disable-security-key --disable-etc-default-login --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-pututline --disable-pututxline --without-hardening --without-maildir --without-bsd-auth --without-xauth --without-kerberos5 --without-shadow --with-privsep-user=root --with-privsep-path=$(VARLIB)/ssh --with-cflags --with-cflags-after --with-cppflags --with-ldflags --with-ldflags-after --with-libs --with-zlib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-ssl-dir=$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) --with-ssl-engine --with-default-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-superuser-path=/bin:/sbin:$(USRDIR)/bin:$(USRSBIN):$(USRSBINSCR):$(USRSBINRCAPP) --with-pid-dir=$(VARLIB)/run CFLAGS="$(CFLAGS) -Os -s -fcommon" LD=$(CC)
 +
 +sshd_conf:
-+	@echo "#	\$$OpenBSD: sshd_config,v 1.104 2021/07/02 05:11:21 djm Exp \$$" > $(SSHD_CONF)
++	@echo "#	\$$OpenBSD: sshd_config,v 1.104 2021/07/02 05:11:21 dtucker Exp \$$" > $(SSHD_CONF)
 +	@echo "" >> $(SSHD_CONF)
 +	@echo "# This is the sshd server system-wide configuration file.  See" >> $(SSHD_CONF)
 +	@echo "# sshd_config(5) for more information." >> $(SSHD_CONF)
@@ -84,7 +84,7 @@ diff -urN work/openssh-8.8p1/Makefile work/openssh-8.8p1/Makefile
 +	@echo "#PermitEmptyPasswords no" >> $(SSHD_CONF)
 +	@echo "" >> $(SSHD_CONF)
 +	@echo "# Change to no to disable s/key passwords" >> $(SSHD_CONF)
-+	@echo "#ChallengeResponseAuthentication yes" >> $(SSHD_CONF)
++	@echo "#KbdInteractiveAuthentication yes" >> $(SSHD_CONF)
 +	@echo "" >> $(SSHD_CONF)
 +	@echo "# Kerberos options" >> $(SSHD_CONF)
 +	@echo "#KerberosAuthentication no" >> $(SSHD_CONF)
@@ -98,13 +98,13 @@ diff -urN work/openssh-8.8p1/Makefile work/openssh-8.8p1/Makefile
 +	@echo "" >> $(SSHD_CONF)
 +	@echo "# Set this to 'yes' to enable PAM authentication, account processing," >> $(SSHD_CONF)
 +	@echo "# and session processing. If this is enabled, PAM authentication will" >> $(SSHD_CONF)
-+	@echo "# be allowed through the ChallengeResponseAuthentication and" >> $(SSHD_CONF)
++	@echo "# be allowed through the KbdInteractiveAuthentication and" >> $(SSHD_CONF)
 +	@echo "# PasswordAuthentication.  Depending on your PAM configuration," >> $(SSHD_CONF)
-+	@echo "# PAM authentication via ChallengeResponseAuthentication may bypass" >> $(SSHD_CONF)
++	@echo "# PAM authentication via KbdInteractiveAuthentication may bypass" >> $(SSHD_CONF)
 +	@echo "# the setting of \"PermitRootLogin without-password\"." >> $(SSHD_CONF)
 +	@echo "# If you just want the PAM account and session checks to run without" >> $(SSHD_CONF)
 +	@echo "# PAM authentication, then enable this but set PasswordAuthentication" >> $(SSHD_CONF)
-+	@echo "# and ChallengeResponseAuthentication to 'no'." >> $(SSHD_CONF)
++	@echo "# and KbdInteractiveAuthentication to 'no'." >> $(SSHD_CONF)
 +	@echo "#UsePAM no" >> $(SSHD_CONF)
 +	@echo "" >> $(SSHD_CONF)
 +	@echo "#AllowAgentForwarding yes" >> $(SSHD_CONF)
@@ -143,10 +143,10 @@ diff -urN work/openssh-8.8p1/Makefile work/openssh-8.8p1/Makefile
 +	@echo "#	PermitTTY no" >> $(SSHD_CONF)
 +	@echo "#	ForceCommand cvs server" >> $(SSHD_CONF)
 +	@echo "# Some additions..." >> $(SSHD_CONF)
-+	@echo "Ciphers chacha20-poly1305@openssh.com,aes128-gcm@openssh.com,aes256-gcm@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr" >> $(SSHD_CONF)
++	@echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes256-ctr" >> $(SSHD_CONF)
 +	@echo "HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256" >> $(SSHD_CONF)
 +	@echo "CASignatureAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256" >> $(SSHD_CONF)
-+	@echo "KexAlgorithms diffie-hellman-group16-sha512,curve25519-sha256,curve25519-sha256@libssh.org" >> $(SSHD_CONF)
++	@echo "KexAlgorithms sntrup761x25519-sha512@openssh.com,diffie-hellman-group16-sha512,curve25519-sha256,curve25519-sha256@libssh.org" >> $(SSHD_CONF)
 +	@echo "MACs hmac-sha2-256,hmac-sha2-512,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com" >> $(SSHD_CONF)
 +
 +install: control sshd_conf

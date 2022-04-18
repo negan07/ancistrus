@@ -1,7 +1,7 @@
-diff -urN work/openssh-8.8p1/openssh-8.8p1/Makefile.in work/openssh-8.8p1/openssh-8.8p1/Makefile.in
---- work/openssh-8.8p1/openssh-8.8p1/Makefile.in	1970-01-01 01:00:00.000000000 +0100
-+++ work/openssh-8.8p1/openssh-8.8p1/Makefile.in	2018-01-05 12:00:11.000000000 +0100
-@@ -67,7 +67,7 @@
+diff -urN work/openssh-9.0p1/openssh-9.0p1/Makefile.in work/openssh-9.0p1/openssh-9.0p1/Makefile.in
+--- work/openssh-9.0p1/openssh-9.0p1/Makefile.in	1970-01-01 01:00:00.000000000 +0100
++++ work/openssh-9.0p1/openssh-9.0p1/Makefile.in	2018-01-05 12:00:11.000000000 +0100
+@@ -68,7 +68,7 @@
  
  .SUFFIXES: .lo
  
