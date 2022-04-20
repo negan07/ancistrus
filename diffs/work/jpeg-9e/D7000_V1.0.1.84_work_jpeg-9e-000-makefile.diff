@@ -1,12 +1,12 @@
-diff -urN work/jpeg-9d/Makefile work/jpeg-9d/Makefile
---- work/jpeg-9d/Makefile	2018-10-23 23:00:46.662292000 +0200
-+++ work/jpeg-9d/Makefile	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/jpeg-9e/Makefile work/jpeg-9e/Makefile
+--- work/jpeg-9e/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/jpeg-9e/Makefile	2018-10-23 23:01:08.566300143 +0200
 @@ -0,0 +1,49 @@
 +include ../Rules.mak
 +
 +LIBSNAME		:= libjpeg.so
 +LIBSMAINVER		:= 9
-+LIBSVER			:= $(LIBSMAINVER).4.0
++LIBSVER			:= $(LIBSMAINVER).5.0
 +LIBSDIRNAME		:= $(JPEG)/.libs
 +LIBS			:= $(LIBSNAME).$(LIBSVER)
 +

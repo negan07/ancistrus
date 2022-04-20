@@ -702,7 +702,7 @@ DIRLIST				+= $(EXIF)
 TARLIST				+= $(TAR_$(EXIF))
 # JPEG
 JPEG_NAME			:= jpeg
-VER_$(JPEG_NAME)		:= 9d
+VER_$(JPEG_NAME)		:= 9e
 JPEG				:= $(JPEG_NAME)-$(VER_$(JPEG_NAME))
 NAME_$(JPEG)			:= $(JPEG_NAME)$(DBG)
 SUBVER_$(JPEG)			:= 
