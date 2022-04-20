@@ -1,6 +1,6 @@
---- work/ffmpeg-4.4.1/ffmpeg-4.4.1/configure
-+++ work/ffmpeg-4.4.1/ffmpeg-4.4.1/configure
-@@ -4366,8 +4366,12 @@
+--- work/ffmpeg-5.0.1/ffmpeg-5.0.1/configure
++++ work/ffmpeg-5.0.1/ffmpeg-5.0.1/configure
+@@ -4459,8 +4459,12 @@
  
  pkg_config_fail_message=""
  if ! $pkg_config --version >/dev/null 2>&1; then
