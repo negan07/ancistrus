@@ -1,6 +1,6 @@
-diff -urN work/flac-1.3.3/flac-1.3.3/include/share/alloc.h work/flac-1.3.3/flac-1.3.3/include/share/alloc.h
---- work/flac-1.3.3/flac-1.3.3/include/share/alloc.h	2018-10-23 23:00:46.662292000 +0200
-+++ work/flac-1.3.3/flac-1.3.3/include/share/alloc.h	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/flac-1.3.4/flac-1.3.4/include/share/alloc.h work/flac-1.3.4/flac-1.3.4/include/share/alloc.h
+--- work/flac-1.3.4/flac-1.3.4/include/share/alloc.h	2018-10-23 23:00:46.662292000 +0200
++++ work/flac-1.3.4/flac-1.3.4/include/share/alloc.h	2018-10-23 23:01:08.566300143 +0200
 @@ -66,7 +66,7 @@
  /* avoid malloc()ing 0 bytes, see:
   * https://www.securecoding.cert.org/confluence/display/seccode/MEM04-A.+Do+not+make+assumptions+about+the+result+of+allocating+0+bytes?focusedCommentId=5407003
@@ -127,10 +127,10 @@ diff -urN work/flac-1.3.3/flac-1.3.3/include/share/alloc.h work/flac-1.3.3/flac-
  {
  	if(!size1 || (!size2 && !size3))
  		return realloc(ptr, 0); /* preserve POSIX realloc(ptr, 0) semantics */
-diff -urN work/flac-1.3.3/flac-1.3.3/src/libFLAC/bitreader.c work/flac-1.3.3/flac-1.3.3/src/libFLAC/bitreader.c
---- work/flac-1.3.3/flac-1.3.3/src/libFLAC/bitreader.c	2018-05-23 23:19:51.851217000 +0200
-+++ work/flac-1.3.3/flac-1.3.3/src/libFLAC/bitreader.c	2021-01-07 18:18:12.164258178 +0100
-@@ -126,7 +126,7 @@
+diff -urN work/flac-1.3.4/flac-1.3.4/src/libFLAC/bitreader.c work/flac-1.3.4/flac-1.3.4/src/libFLAC/bitreader.c
+--- work/flac-1.3.4/flac-1.3.4/src/libFLAC/bitreader.c	2018-05-23 23:19:51.851217000 +0200
++++ work/flac-1.3.4/flac-1.3.4/src/libFLAC/bitreader.c	2021-01-07 18:18:12.164258178 +0100
+@@ -128,7 +128,7 @@
  	br->crc16_align = 0;
  }
  
@@ -139,9 +139,9 @@ diff -urN work/flac-1.3.3/flac-1.3.3/src/libFLAC/bitreader.c work/flac-1.3.3/fla
  {
  	if(br->consumed_words > br->crc16_offset && br->crc16_align)
  		crc16_update_word_(br, br->buffer[br->crc16_offset++]);
-diff -urN work/flac-1.3.3/flac-1.3.3/src/libFLAC/bitwriter.c work/flac-1.3.3/flac-1.3.3/src/libFLAC/bitwriter.c
---- work/flac-1.3.3/flac-1.3.3/src/libFLAC/bitwriter.c	2019-03-07 21:00:12.258084000 +0100
-+++ work/flac-1.3.3/flac-1.3.3/src/libFLAC/bitwriter.c	2021-01-07 18:18:12.164258178 +0100
+diff -urN work/flac-1.3.4/flac-1.3.4/src/libFLAC/bitwriter.c work/flac-1.3.4/flac-1.3.4/src/libFLAC/bitwriter.c
+--- work/flac-1.3.4/flac-1.3.4/src/libFLAC/bitwriter.c	2019-03-07 21:00:12.258084000 +0100
++++ work/flac-1.3.4/flac-1.3.4/src/libFLAC/bitwriter.c	2021-01-07 18:18:12.164258178 +0100
 @@ -281,7 +281,7 @@
  	(void)bw;
  }

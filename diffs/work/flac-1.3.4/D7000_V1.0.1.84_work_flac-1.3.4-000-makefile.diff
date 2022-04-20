@@ -1,6 +1,6 @@
-diff -urN work/flac-1.3.3/Makefile work/flac-1.3.3/Makefile
---- work/flac-1.3.3/Makefile	2018-10-23 23:00:46.662292000 +0200
-+++ work/flac-1.3.3/Makefile	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/flac-1.3.4/Makefile work/flac-1.3.4/Makefile
+--- work/flac-1.3.4/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/flac-1.3.4/Makefile	2018-10-23 23:01:08.566300143 +0200
 @@ -0,0 +1,49 @@
 +include ../Rules.mak
 +
@@ -21,7 +21,7 @@ diff -urN work/flac-1.3.3/Makefile work/flac-1.3.3/Makefile
 +	fi
 +
 +configure:
-+	cd $(FLAC) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(ICONV)/$(ICONV)/include" LDFLAGS="-L$(WORK_DIR)/$(ICONV)/$(ICONV)/lib/.libs" LIBS="-liconv" --enable-static --disable-shared --disable-dependency-tracking --disable-cpplibs --disable-sse --disable-altivec --disable-local-xmms-plugin --disable-xmms-plugin --disable-ogg --disable-oggtest --disable-thorough-tests --disable-examples --disable-rpath --disable-debug
++	cd $(FLAC) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) CFLAGS="$(CFLAGS) -Os -s" CPPFLAGS="-I$(WORK_DIR)/$(ICONV)/$(ICONV)/include" LDFLAGS="-L$(WORK_DIR)/$(ICONV)/$(ICONV)/lib/.libs" LIBS="-liconv" --enable-static --disable-shared --disable-stack-smash-protection --disable-dependency-tracking --disable-cpplibs --disable-sse --disable-altivec --disable-local-xmms-plugin --disable-xmms-plugin --disable-ogg --disable-oggtest --disable-thorough-tests --disable-examples --disable-rpath --disable-debug
 +
 +install: control
 +	#$(STRIP) $(LIBSDIRNAME)/$(LIBS)

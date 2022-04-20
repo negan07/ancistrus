@@ -753,7 +753,7 @@ DIRLIST				+= $(VORBIS)
 TARLIST				+= $(TAR_$(VORBIS))
 # FLAC
 FLAC_NAME			:= flac
-VER_$(FLAC_NAME)		:= 1.3.3
+VER_$(FLAC_NAME)		:= 1.3.4
 FLAC				:= $(FLAC_NAME)-$(VER_$(FLAC_NAME))
 NAME_$(FLAC)			:= $(FLAC_NAME)$(DBG)
 SUBVER_$(FLAC)			:= 
