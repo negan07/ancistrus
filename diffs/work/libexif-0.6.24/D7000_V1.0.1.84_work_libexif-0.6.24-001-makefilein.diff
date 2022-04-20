@@ -1,6 +1,5 @@
-diff -urN work/libexif-0.6.23/libexif-0.6.23/Makefile.in work/libexif-0.6.23/libexif-0.6.23/Makefile.in
---- work/libexif-0.6.23/libexif-0.6.23/Makefile.in	2018-10-23 23:00:46.662292000 +0200
-+++ work/libexif-0.6.23/libexif-0.6.23/Makefile.in	2018-10-23 23:01:08.566300143 +0200
+--- work/libexif-0.6.24/libexif-0.6.24/Makefile.in	2018-10-23 23:00:46.662292000 +0200
++++ work/libexif-0.6.24/libexif-0.6.24/Makefile.in	2018-10-23 23:01:08.566300143 +0200
 @@ -406,7 +406,7 @@
  top_build_prefix = @top_build_prefix@
  top_builddir = @top_builddir@

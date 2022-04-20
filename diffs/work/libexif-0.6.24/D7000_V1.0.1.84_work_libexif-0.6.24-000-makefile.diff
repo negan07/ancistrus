@@ -1,6 +1,6 @@
-diff -urN work/libexif-0.6.23/Makefile work/libexif-0.6.23/Makefile
---- work/libexif-0.6.23/Makefile	2018-10-23 23:00:46.662292000 +0200
-+++ work/libexif-0.6.23/Makefile	2018-10-23 23:01:08.566300143 +0200
+diff -urN work/libexif-0.6.24/Makefile work/libexif-0.6.24/Makefile
+--- work/libexif-0.6.24/Makefile	2018-10-23 23:00:46.662292000 +0200
++++ work/libexif-0.6.24/Makefile	2018-10-23 23:01:08.566300143 +0200
 @@ -0,0 +1,49 @@
 +include ../Rules.mak
 +
