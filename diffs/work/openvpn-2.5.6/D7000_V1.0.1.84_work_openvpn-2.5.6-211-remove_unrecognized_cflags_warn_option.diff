@@ -1,0 +1,45 @@
+--- work/openvpn-2.5.6/openvpn-2.5.6/configure.ac
++++ work/openvpn-2.5.6/openvpn-2.5.6/configure.ac
+@@ -1242,7 +1242,7 @@ AC_DEFUN([ACL_CHECK_ADD_COMPILE_FLAGS],
+         [AC_MSG_RESULT([no]); CFLAGS="$old_cflags"])]
+ )
+ 
+-ACL_CHECK_ADD_COMPILE_FLAGS([-Wno-stringop-truncation])
++# ACL_CHECK_ADD_COMPILE_FLAGS([-Wno-stringop-truncation])
+ ACL_CHECK_ADD_COMPILE_FLAGS([-Wall])
+ 
+ if test "${enable_pedantic}" = "yes"; then
+--- work/openvpn-2.5.6/openvpn-2.5.6/configure
++++ work/openvpn-2.5.6/openvpn-2.5.6/configure
+@@ -17907,31 +17907,6 @@ fi
+ 
+ 
+     old_cflags="$CFLAGS"
+-    CFLAGS="-Wno-stringop-truncation -Werror $CFLAGS"
+-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler accepts -Wno-stringop-truncation" >&5
+-$as_echo_n "checking whether the compiler accepts -Wno-stringop-truncation... " >&6; }
+-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-
+-int
+-main ()
+-{
+-
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-if ac_fn_c_try_compile "$LINENO"; then :
+-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+-$as_echo "yes" >&6; }; CFLAGS="-Wno-stringop-truncation $old_cflags"
+-else
+-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+-$as_echo "no" >&6; }; CFLAGS="$old_cflags"
+-fi
+-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+-
+-
+-    old_cflags="$CFLAGS"
+     CFLAGS="-Wall -Werror $CFLAGS"
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler accepts -Wall" >&5
+ $as_echo_n "checking whether the compiler accepts -Wall... " >&6; }

@@ -1,6 +1,6 @@
-diff -urN work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/crypto_mbedtls.c work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/crypto_mbedtls.c
---- work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/crypto_mbedtls.c
-+++ work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/crypto_mbedtls.c
+diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c
+--- work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c
++++ work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c
 @@ -383,6 +383,7 @@
  key_des_num_cblocks(const mbedtls_cipher_info_t *kt)
  {

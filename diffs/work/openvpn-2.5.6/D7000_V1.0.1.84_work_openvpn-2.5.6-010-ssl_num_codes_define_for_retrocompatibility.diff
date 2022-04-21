@@ -1,6 +1,6 @@
-diff -urN work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/openssl_compat.h work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/openssl_compat.h
---- work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/openssl_compat.h	1970-01-01 01:00:00.000000000 +0100
-+++ work/openvpn-2.5.4/openvpn-2.5.4/src/openvpn/openssl_compat.h	2018-01-05 12:00:11.000000000 +0100
+diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/openssl_compat.h work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/openssl_compat.h
+--- work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/openssl_compat.h	1970-01-01 01:00:00.000000000 +0100
++++ work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/openssl_compat.h	2018-01-05 12:00:11.000000000 +0100
 @@ -695,6 +695,18 @@
  #define RSA_F_RSA_OSSL_PRIVATE_ENCRYPT       RSA_F_RSA_EAY_PRIVATE_ENCRYPT
  #endif
