@@ -1,0 +1,10 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/select.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/select.c
+@@ -83,6 +83,7 @@ select_fini(void)
+ 
+ 	free(events);
+ 	events = NULL;
++	nevents = 0;
+ }
+ 
+ static int

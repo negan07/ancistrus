@@ -1,0 +1,10 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/tagutils/tagutils-flc.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/tagutils/tagutils-flc.c
+@@ -65,6 +65,7 @@
+ 			psong->song_length = (sec * 1000) + ms;
+ 			psong->bitrate = (((uint64_t)(psong->file_size) * 1000) / (psong->song_length / 8));
+ 			psong->samplerate = block->data.stream_info.sample_rate;
++			psong->samplesize = block->data.stream_info.bits_per_sample;
+ 			psong->channels = block->data.stream_info.channels;
+ 			break;
+ 

@@ -1,0 +1,18 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.c
+@@ -417,6 +417,7 @@ rescan:
+ 		open_db(&db);
+ 		if (*scanner_pid == 0) /* child (scanner) process */
+ 		{
++			open_db(&db);
+ 			start_scanner();
+ 			sqlite3_close(db);
+ 			log_close();
+@@ -432,6 +433,7 @@ rescan:
+ 			SETFLAG(SCANNING_MASK);
+ #else
+ 		start_scanner();
++		sqlite3_close(db);
+ #endif
+ 	}
+ }

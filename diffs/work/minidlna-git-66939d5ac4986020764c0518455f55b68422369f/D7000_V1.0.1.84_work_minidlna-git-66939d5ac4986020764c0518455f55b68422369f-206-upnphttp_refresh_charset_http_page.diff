@@ -1,0 +1,11 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnphttp.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnphttp.c
+@@ -628,7 +628,7 @@ SendResp_presentation(struct upnphttp *
+ 	v = sql_get_int_field(db, "SELECT count(*) from DETAILS where MIME glob 'v*'");
+ 	p = sql_get_int_field(db, "SELECT count(*) from DETAILS where MIME glob 'i*'");
+ 	strcatf(&str,
+-		"<HTML><HEAD><TITLE>" SERVER_NAME " " MINIDLNA_VERSION "</TITLE><meta http-equiv=\"refresh\" content=\"20\"></HEAD>"
++		"<HTML><HEAD><TITLE>" SERVER_NAME " " MINIDLNA_VERSION "</TITLE><meta http-equiv=\"refresh\" content=\"30\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"></HEAD>"
+ 		"<BODY><div style=\"text-align: center\">"
+ 		"<h2>" SERVER_NAME " status</h2></div>");
+ 

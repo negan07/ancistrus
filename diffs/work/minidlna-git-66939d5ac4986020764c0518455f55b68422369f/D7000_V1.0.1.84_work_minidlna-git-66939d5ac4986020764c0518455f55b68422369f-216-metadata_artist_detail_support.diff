@@ -1,0 +1,11 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/metadata.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/metadata.c
+@@ -484,7 +484,7 @@
+ 	                   "VALUES"
+ 	                   " (%Q, %lld, %lld, '%s', %d, %d, %d, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %d, %d, %Q, '%s', %lld);",
+ 	                   path, (long long)file.st_size, (long long)file.st_mtime, m.duration, song.channels, song.bitrate,
+-	                   song.samplerate, m.date, m.title, m.creator, m.artist, m.album, m.genre, m.comment, song.disc,
++	                   song.samplerate, m.date, m.title, m.creator, m.creator, m.album, m.genre, m.comment, song.disc,
+ 	                   song.track, m.dlna_pn, song.mime?song.mime:m.mime, album_art);
+ 	if( ret != SQLITE_OK )
+ 	{

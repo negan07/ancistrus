@@ -1,0 +1,11 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.c
+@@ -215,8 +215,6 @@
+ {
+ 	signal(sig, sighup);
+ 	DPRINTF(E_WARN, L_GENERAL, "received signal %d, reloading\n", sig);
+-
+-	reload_ifaces(1);
+ 	log_reopen();
+ }
+ 

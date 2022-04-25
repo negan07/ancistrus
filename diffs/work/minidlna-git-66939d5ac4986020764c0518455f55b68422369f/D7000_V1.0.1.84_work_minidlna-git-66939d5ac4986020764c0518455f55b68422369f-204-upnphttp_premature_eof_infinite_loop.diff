@@ -1,0 +1,24 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnphttp.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnphttp.c
+@@ -1323,6 +1323,10 @@
+ 				else if( errno != EAGAIN )
+ 					break;
+ 			}
++			else if( ret == 0 )
++			{
++				break;  /* Premature end of file */
++			}
+ 			else
+ 			{
+ 				//DPRINTF(E_DEBUG, L_HTTP, "sent %lld bytes to %d. offset is now %lld.\n", ret, h->socket, offset);
+@@ -1342,6 +1346,10 @@
+ 				continue;
+ 			else
+ 				break;
++		}
++		else if( ret == 0 )
++		{
++			break;  /* premature end of file */
+ 		}
+ 		ret = write(h->ev.fd, buf, ret);
+ 		if( ret == -1 ) {

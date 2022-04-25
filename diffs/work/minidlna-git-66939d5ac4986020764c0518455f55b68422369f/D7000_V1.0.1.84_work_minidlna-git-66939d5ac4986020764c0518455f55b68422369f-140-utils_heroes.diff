@@ -1,0 +1,16 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/utils.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/utils.c
+@@ -87,13 +87,6 @@ trim(char *str)
+ 		len--;
+ 	}
+ 
+-	if (str[0] == '"' && str[len-1] == '"')
+-	{
+-		str[0] = '\0';
+-		str[len-1] = '\0';
+-		str++;
+-	}
+-
+ 	return str;
+ }
+ 

@@ -1,0 +1,320 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/Makefile.am	2017-07-30 09:31:48.988990000 +0200
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/Makefile.am	2017-07-30 09:33:54.958990000 +0200
+@@ -15,7 +15,7 @@
+ # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ # USA.
+ 
+-AM_CFLAGS = -Wall -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
++AM_CFLAGS = -Wall -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 @opus_CFLAGS@
+ 
+ SUBDIRS=po
+ 
+@@ -62,7 +62,8 @@
+ 	@LIBEXIF_LIBS@ \
+ 	@LIBINTL@ \
+ 	@LIBICONV@ \
+-	-lFLAC -logg -lvorbis $(avahilibs)
++	-lFLAC -logg -lvorbis $(avahilibs) \
++	-lopus -lopusfile
+ 
+ testupnpdescgen_SOURCES = testupnpdescgen.c upnpdescgen.c
+ testupnpdescgen_LDADD = \
+@@ -71,7 +71,8 @@
+ 	@LIBSQLITE3_LIBS@ \
+ 	@LIBAVFORMAT_LIBS@ \
+ 	@LIBEXIF_LIBS@ \
+-	-lFLAC -logg -lvorbis $(avahilibs)
++	-lFLAC -logg -lvorbis $(avahilibs) \
++	-lopus -lopusfile
+ 
+ SUFFIXES = .tmpl .
+ 
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/configure.ac	2017-07-30 09:31:48.998990000 +0200
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/configure.ac	2017-07-30 09:31:58.288990000 +0200
+@@ -488,6 +488,11 @@
+          AM_CONDITIONAL(HAVE_AVAHI, false),
+         -lavahi-client -lavahi-common)
+ 
++PKG_CHECK_MODULES([opus], [opus opusfile],
++	AM_CONDITIONAL(HAVE_OPUS, true)
++	AC_DEFINE(HAVE_OPUS,1,[Define to 1 if you have opus/opusfile]),
++	AM_CONDITIONAL(HAVE_OPUS, false))
++
+ ################################################################################################################
+ ### Header checks
+ 
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/metadata.c	2017-07-30 09:31:49.008990000 +0200
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/metadata.c	2017-07-30 09:31:58.298990000 +0200
+@@ -345,9 +345,53 @@
+ 	}
+	else if( ends_with(path, ".ogg") || ends_with(path, ".oga") )
+ 	{
++		/* The .ogg/.oga file extensions present something of a problem.
++		 * ".ogg" has been deprecated in favor of ".oga" for some time, but
++		 * many applications still only recognize ".ogg".
++		 *
++		 * This examines the file and causes .ogg to be presented for any naked
++		 * Vorbis file (MIME type audio/ogg; codecs=vorbis) and .oga
++		 * (audio/ogg) to be used for everything else.  This is in line with
++		 * the official ogg naming conventions and, hopefully, makes for a
++		 * resonable compromise.
++		 */
++		uint8_t oggtestbuf[35];
++		FILE *oggfile = fopen (path, "rb");
++
++		if (oggfile == (FILE *)NULL)
++		{
++			DPRINTF(E_ERROR, L_METADATA, "Error opening %s\n", path);
++			return 0;
++		}
++
++		if (fread (oggtestbuf, 1, 35, oggfile) != 35)
++		{
++			DPRINTF(E_WARN, L_METADATA, "Premature EOF on %s\n", path);
++			fclose (oggfile);
++			return 0;
++		}
++		fclose (oggfile);
++
++		if (memcmp (&oggtestbuf[28], "\x01vorbis", 7))
++			m.mime = strdup ("audio/ogg");
++		else
++			m.mime = strdup ("audio/ogg; codecs=vorbis");
++
+ 		strcpy(type, "ogg");
+-		m.mime = strdup("audio/ogg");
+ 	}
++	else if ( ends_with(path, ".opus") )
++	{
++		strcpy(type,"ops");
++		m.mime = strdup("audio/ogg; codecs=opus");
++	}
++#if 0
++	/* Not supported yet, and probably won't be. */
++	else if( ends_with(path, ".ogx") )
++	{
++		strcpy(type, "ogx");
++		m.mime = strdup("application/ogg");
++	}
++#endif
+ 	else if( ends_with(path, ".pcm") )
+ 	{
+ 		strcpy(type, "pcm");
+@@ -870,6 +914,8 @@
+ 			xasprintf(&m.mime, "video/x-matroska");
+ 		else if( strcmp(ctx->iformat->name, "flv") == 0 )
+ 			xasprintf(&m.mime, "video/x-flv");
++		else if( strcmp(ctx->iformat->name, "ogg") == 0 )
++			xasprintf(&m.mime, "video/ogg");
+ 		else if( strcmp(ctx->iformat->name, "rm") == 0 )
+ 			xasprintf(&m.mime, "application/vnd.rn-realmedia");
+ 		else if( strcmp(ctx->iformat->name, "rmvb") == 0 )
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/tagutils/tagutils-ogg.c	2017-07-30 09:31:49.028990000 +0200
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/tagutils/tagutils-ogg.c	2017-07-30 09:31:58.298990000 +0200
+@@ -429,7 +429,9 @@
+ 
+ 	if(!file)
+ 	{
+-		DPRINTF(E_FATAL, L_SCANNER,
++		/* E_FATAL causes an exit(). */
++		/* DPRINTF(E_FATAL, L_SCANNER, */
++		DPRINTF(E_WARN, L_SCANNER,
+ 			"Error opening input file \"%s\": %s\n", filename,  strerror(errno));
+ 		_ogg_free_stream_set(processors);
+ 		return -1;
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/tagutils/tagutils-opus.c	1970-01-01 01:00:00.000000000 +0100
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/tagutils/tagutils-opus.c	2017-07-30 09:31:58.298990000 +0200
+@@ -0,0 +1,93 @@
++//=========================================================================
++// FILENAME	: tagutils-opus.c
++// DESCRIPTION	: Opus metadata reader
++//=========================================================================
++
++static int
++_get_opusfileinfo(char *filename, struct song_metadata *psong)
++{
++	OggOpusFile *opusfile;
++	const OpusTags *tags;
++	char **comment;
++	int *commentlen;
++	int j, e, count;
++
++	opusfile = op_open_file (filename, &e);
++	if(!opusfile)
++	{
++		DPRINTF(E_WARN, L_SCANNER,
++			"Error opening input file \"%s\": %s\n", filename, opus_strerror(e));
++		return -1;
++	}
++
++	DPRINTF(E_MAXDEBUG, L_SCANNER, "Processing file \"%s\"...\n", filename);
++
++	psong->song_length = op_pcm_total (opusfile, -1);
++	if (psong->song_length < 0)
++	{
++		DPRINTF(E_WARN, L_SCANNER,
++				"Unable to obtain length of %s\n", filename);
++		psong->song_length = 0;
++	} else
++		/* Sample rate is always 48k, so length in ms is just samples/48 */
++		psong->song_length /= 48;
++
++	/* Note that this gives only the first link's channel count. */
++	psong->channels = op_channel_count (opusfile, -1);
++
++	psong->samplerate = 48000;
++	psong->bitrate = op_bitrate (opusfile, -1);
++
++	tags = op_tags (opusfile, -1);
++
++	if (!tags)
++	{
++		DPRINTF(E_WARN, L_SCANNER, "Unable to obtain tags from %s\n",
++				filename);
++		return -1;
++	}
++
++	comment = tags->user_comments;
++	commentlen = tags->comment_lengths; 
++
++	for (j = 0; j < tags->comments; j++)
++		vc_scan (psong, *(comment++), *(commentlen++));
++
++
++	DPRINTF(E_MAXDEBUG, L_SCANNER, "Amount of pictures in %s is %d ...\n", filename, opus_tags_query_count(tags, "METADATA_BLOCK_PICTURE"));
++	for (count = 0; count < opus_tags_query_count(tags, "METADATA_BLOCK_PICTURE"); count++)
++	{
++		OpusPictureTag image_tag;
++		const char *raw_tag;
++		int err;
++
++		raw_tag = opus_tags_query(tags, "METADATA_BLOCK_PICTURE", count);
++		if (raw_tag)
++			err = opus_picture_tag_parse(&image_tag, raw_tag);
++		else
++		{
++			DPRINTF(E_WARN, L_SCANNER, "Tag query error in %s \n", filename);
++			continue;
++		}
++		if (err)
++		{
++			DPRINTF(E_WARN, L_SCANNER, "Parse picture tag error in %s \n", filename);
++			continue;
++		}
++		else
++			DPRINTF(E_MAXDEBUG, L_SCANNER, "Found some image data in %s with type=%d and mime_type %s \n", filename, image_tag.type, image_tag.mime_type);
++		
++		if ( image_tag.type == 3 && !strcmp(image_tag.mime_type,"image/jpeg") )
++		{
++			DPRINTF(E_MAXDEBUG, L_SCANNER, "Found front cover image data in JPG format in %s...\n", filename);
++			psong->image = malloc(image_tag.data_length);
++			memcpy(psong->image, image_tag.data, image_tag.data_length);
++			psong->image_size = image_tag.data_length;
++			break;
++		}
++	}
++			
++
++	op_free (opusfile);
++	return 0;
++}
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/tagutils/tagutils-opus.h	1970-01-01 01:00:00.000000000 +0100
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/tagutils/tagutils-opus.h	2017-07-30 09:31:58.298990000 +0200
+@@ -0,0 +1,6 @@
++//=========================================================================
++// FILENAME	: tagutils-opus.h
++// DESCRIPTION	: Opus metadata reader
++//=========================================================================
++
++static int _get_opusfileinfo(char *filename, struct song_metadata *psong);
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/tagutils/tagutils.c	2017-07-30 09:31:49.028990000 +0200
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/tagutils/tagutils.c	2017-07-30 09:38:10.438990000 +0200
+@@ -39,6 +39,10 @@
+ #endif
+ #include <FLAC/metadata.h>
+ 
++#ifdef HAVE_OPUS
++#include <opusfile.h>
++#endif
++
+ #ifdef HAVE_ICONV
+ #include <iconv.h>
+ #endif
+@@ -107,6 +111,9 @@
+ #ifdef HAVE_VORBISFILE
+ #include "tagutils-ogg.h"
+ #endif
++#ifdef HAVE_OPUS
++#include "tagutils-opus.h"
++#endif
+ #include "tagutils-flc.h"
+ #include "tagutils-asf.h"
+ #include "tagutils-wav.h"
+@@ -135,6 +142,9 @@
+ #ifdef HAVE_VORBISFILE
+ 	{ "ogg", NULL,		_get_oggfileinfo },
+ #endif
++#ifdef HAVE_OPUS
++	{ "ops", NULL,		_get_opusfileinfo },
++#endif
+ 	{ "asf", NULL,		_get_asffileinfo },
+ 	{ "wav", _get_wavtags,	_get_wavfileinfo },
+ 	{ "pcm", NULL,		_get_pcmfileinfo },
+@@ -152,6 +162,9 @@
+ #ifdef HAVE_VORBISFILE
+ #include "tagutils-ogg.c"
+ #endif
++#ifdef HAVE_OPUS
++#include "tagutils-opus.c"
++#endif
+ #include "tagutils-flc.c"
+ #include "tagutils-asf.c"
+ #include "tagutils-wav.c"
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/utils.c	2017-07-30 09:31:49.048990000 +0200
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/utils.c	2017-07-30 09:31:58.318990000 +0200
+@@ -338,8 +338,15 @@
+ 				return "pcm";
+ 			else if( strcmp(mime+6, "3gpp") == 0 )
+ 				return "3gp";
+-			else if( strcmp(mime, "application/ogg") == 0 )
+-				return "ogg";
++			else if( strncmp(mime+6, "ogg", 3) == 0 )
++			{
++				if( strstr(mime+9, "opus" ) != (char *)NULL )
++					return "opus";
++				else if( strstr (mime+9, "vorbis" ) != (char *)NULL )
++					return "ogg";
++
++				return "oga";
++			}
+ 			else if( strcmp(mime+6, "x-dsd") == 0 )
+ 				return "dsd";
+ 			break;
+@@ -370,6 +377,8 @@
+ 				return "3gp";
+ 			else if( strncmp(mime+6, "x-tivo-mpeg", 11) == 0 )
+ 				return "TiVo";
++			else if ( strcmp(mime+6, "ogg") == 0 )
++			    	return "ogv";
+ 			break;
+ 		case 'i':
+ 			if( strcmp(mime+6, "jpeg") == 0 )
+@@ -419,6 +428,7 @@
+ 		ends_with(file, ".m2t") || ends_with(file, ".mkv")   ||
+ 		ends_with(file, ".vob") || ends_with(file, ".ts")    ||
+ 		ends_with(file, ".flv") || ends_with(file, ".xvid")  ||
++		ends_with(file, ".ogv") ||
+ #ifdef TIVO_SUPPORT
+ 		ends_with(file, ".TiVo") ||
+ #endif
+@@ -442,6 +452,10 @@
+ 		ends_with(file, ".m4a") || ends_with(file, ".aac")  ||
+ 		ends_with(file, ".mp4") || ends_with(file, ".m4p")  ||
+ 		ends_with(file, ".wav") || ends_with(file, ".ogg")  ||
++		ends_with(file, ".oga") || 
++#ifdef HAVE_OPUS
++		ends_with(file, ".opus") ||
++#endif
+ 		ends_with(file, ".m2ts") || ends_with(file, ".pcm") ||
+		ends_with(file, ".3gp") || ends_with(file, ".dsf")  ||
+		ends_with(file, ".dff"));

@@ -1,0 +1,20 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnpevents.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnpevents.c
+@@ -290,7 +290,7 @@ upnp_event_create_notify(struct subscrib
+ 	addr.sin_family = AF_INET;
+ 	inet_aton(obj->addrstr, &addr.sin_addr);
+ 	addr.sin_port = htons(port);
+-	DPRINTF(E_DEBUG, L_HTTP, "'%s' %hu '%s'\n",
++	DPRINTF(E_DEBUG, L_HTTP, "%s: '%s' %hu '%s'\n", "upnp_event_create_notify",
+ 	       obj->addrstr, port, obj->path);
+ 	obj->state = EConnecting;
+ 	obj->ev = (struct event ){ .fd = s, .rdwr = EVENT_WRITE,
+@@ -298,7 +298,7 @@ upnp_event_create_notify(struct subscrib
+ 	event_module.add(&obj->ev);
+ 	if(connect(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+ 		if(errno != EINPROGRESS && errno != EWOULDBLOCK) {
+-			DPRINTF(E_ERROR, L_HTTP, "connect(): %s\n", strerror(errno));
++			DPRINTF(E_ERROR, L_HTTP, "%s: connect(): %s\n", "upnp_event_create_notify", strerror(errno));
+ 			obj->state = EError;
+ 			event_module.del(&obj->ev, 0);
+ 		}

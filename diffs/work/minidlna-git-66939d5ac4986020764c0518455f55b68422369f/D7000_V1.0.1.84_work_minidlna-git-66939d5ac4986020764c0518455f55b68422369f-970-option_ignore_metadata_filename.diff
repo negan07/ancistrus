@@ -1,0 +1,79 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/metadata.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/metadata.c
+@@ -1613,7 +1613,7 @@
+ 		strftime(m.date, 20, "%FT%T", modtime);
+ 	}
+ 
+-	if( !m.title )
++	if( !m.title || GETFLAG(NO_EXTRACT_NAMES_MASK) )
+ 	{
+ 		m.title = strdup(name);
+ 		strip_ext(m.title);
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.c
+@@ -737,6 +737,10 @@
+ 			if (strtobool(ary_options[i].value))
+ 				SETFLAG(DLNA_STRICT_MASK);
+ 			break;
++		case FILE_NAMES:
++			if (strtobool(ary_options[i].value))
++				SETFLAG(NO_EXTRACT_NAMES_MASK);
++			break;
+ 		case ROOT_CONTAINER:
+ 			switch (ary_options[i].value[0]) {
+ 			case '.':
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.conf
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.conf
+@@ -54,6 +54,9 @@
+ #   which may hurt JPEG serving performance on (at least) Sony DLNA products.
+ strict_dlna=no
+ 
++# extract video filenames only from file's metadata
++#only_file_names=no
++
+ # default presentation url is http address on port 80
+ #presentation_url=http://www.mylan/index.php
+ 
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.conf.5
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.conf.5
+@@ -35,6 +35,10 @@
+ which may hurt JPEG serving performance on (at least) Sony DLNA products.
+ .fi
+ 
++.IP "\fBonly_file_names\fP"
++Set to 'yes' to only consider file's filename when naming it in database.
++By default, if file has a name in metadata, it's used instead of filename.
++
+ .IP "\fBnotify_interval\fP" 
+ Notify interval in seconds. The default is 895 seconds.
+ 
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/options.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/options.c
+@@ -60,6 +60,7 @@
+ 	{ UPNPMINISSDPDSOCKET, "minissdpdsocket"},
+ 	{ ENABLE_TIVO, "enable_tivo" },
+ 	{ ENABLE_DLNA_STRICT, "strict_dlna" },
++	{ FILE_NAMES, "only_filenames" },
+ 	{ ROOT_CONTAINER, "root_container" },
+ 	{ USER_ACCOUNT, "user" },
+ 	{ FORCE_SORT_CRITERIA, "force_sort_criteria" },
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/options.h
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/options.h
+@@ -53,6 +53,7 @@
+ 	UPNPMINISSDPDSOCKET,		/* minissdpdsocket */
+ 	ENABLE_TIVO,			/* enable support for streaming images and music to TiVo */
+ 	ENABLE_DLNA_STRICT,		/* strictly adhere to DLNA specs */
++	FILE_NAMES,			/* don't extract title from file's metadata */
+ 	ROOT_CONTAINER,			/* root ObjectID (instead of "0") */
+ 	USER_ACCOUNT,			/* user account to run as */
+ 	FORCE_SORT_CRITERIA,		/* force sorting by a given sort criteria */
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnpglobalvars.h
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnpglobalvars.h
+@@ -208,6 +208,7 @@
+ #define RESCAN_MASK           0x0200
+ #define SUBTITLES_MASK        0x0400
+ #define FORCE_ALPHASORT_MASK  0x0800
++#define NO_EXTRACT_NAMES_MASK 0x1000
+ 
+ #define SETFLAG(mask)	runtime_flags |= mask
+ #define GETFLAG(mask)	(runtime_flags & mask)

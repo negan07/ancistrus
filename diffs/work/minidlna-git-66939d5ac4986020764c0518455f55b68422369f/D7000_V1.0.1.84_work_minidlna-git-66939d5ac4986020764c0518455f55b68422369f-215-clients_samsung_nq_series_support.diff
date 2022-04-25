@@ -1,0 +1,25 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/clients.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/clients.c
+@@ -81,12 +81,21 @@
+ 	  EUserAgent
+ 	},
+ 
+-	/* Samsung Series [Q] TVs work wit milliseconds for bookmarks */
++	/* Samsung Series [Q] TVs work with milliseconds for bookmarks */
+ 	/* User-Agent: DLNADOC/1.50 SEC_HHP_[TV] Samsung Q7 Series (49)/1.0 */
+ 	{ ESamsungSeriesQ,
+ 	  FLAG_SAMSUNG | FLAG_DLNA | FLAG_NO_RESIZE | FLAG_SAMSUNG_DCM10 | FLAG_CAPTION_RES | FLAG_CONVERT_MS,
+ 	  "Samsung Series [Q]",
+ 	  "SEC_HHP_[TV] Samsung Q",
++	  EUserAgent
++	},
++
++	/* Samsung Series [QN] TVs work with milliseconds for bookmarks */
++	/* User-Agent: DLNADOC/1.50 SEC_HHP_Samsung QN90AA 50 TV/1.0 */
++	{ ESamsungSeriesQ,
++	  FLAG_SAMSUNG | FLAG_DLNA | FLAG_NO_RESIZE | FLAG_SAMSUNG_DCM10 | FLAG_CAPTION_RES | FLAG_CONVERT_MS,
++	  "Samsung Series [QN]",
++	  "SEC_HHP_Samsung QN",
+ 	  EUserAgent
+ 	},
+ 

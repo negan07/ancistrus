@@ -1,0 +1,11 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnphttp.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnphttp.c
+@@ -659,7 +659,7 @@
+ 	}
+ 	strcatf(&str, "</table>");
+ 
+-	strcatf(&str, "<br>%d connection%s currently open<br>", number_of_children, (number_of_children == 1 ? "" : "s"));
++	strcatf(&str, "<br><b>Currently open connections</b>: %d<br>", number_of_children);
+ 	strcatf(&str, "</BODY></HTML>\r\n");
+ 
+ 	BuildResp_upnphttp(h, str.data, str.off);

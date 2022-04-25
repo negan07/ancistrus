@@ -1,0 +1,10 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnpdescgen.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnpdescgen.c
+@@ -525,6 +525,7 @@ genXML(char * str, int * len, int * tmpl
+ 			pile[top].eltname = eltname;
+ 		}
+ 	}
++	return str;
+ }
+ 
+ /* genRootDesc() :
