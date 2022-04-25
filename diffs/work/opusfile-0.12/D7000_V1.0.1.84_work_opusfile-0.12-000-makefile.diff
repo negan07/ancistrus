@@ -1,0 +1,31 @@
+--- work/opusfile-0.12/Makefile
++++ work/opusfile-0.12/Makefile
+@@ -0,0 +1,28 @@
++include ../Rules.mak
++
++all: config
++	$(MAKE) -C $(OPUSFILE)
++	$(STRIP) $(STRIPFLAGS) $(OPUSFILE)/.libs/*.a
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(OPUSFILE) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --enable-static --disable-shared --disable-dependency-tracking --disable-doc --disable-examples --disable-http CFLAGS="$(CFLAGS) -Os -s" DEPS_CFLAGS="-I$(WORK_DIR)/$(OGG)/$(OGG)/include -I$(WORK_DIR)/$(OPUS)/$(OPUS)/include" DEPS_LIBS="-L$(WORK_DIR)/$(OGG)/$(OGG)/src/.libs -L$(WORK_DIR)/$(OPUS)/$(OPUS)/.libs -logg -lopus"
++
++install:
++	@echo "Nothing to install..."
++#	$(STRIP) $(OPUSFILE)/.libs/*.so.*
++#	for D in $(LIBDIR) $(BINDIR); do install -m 0755 -d $$D; done
++#	cp -rf $(OPUSFILE)/.libs/*.so.* $(LIBDIR)
++
++clean:
++	$(MAKE) -C $(OPUSFILE) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(OPUSFILE) distclean
++

@@ -1,0 +1,218 @@
+--- work/opusfile-0.12/opusfile-0.12/Makefile.am
++++ work/opusfile-0.12/opusfile-0.12/Makefile.am
+@@ -7,7 +7,7 @@ dist_doc_DATA = COPYING AUTHORS README.m
+ opusincludedir = ${includedir}/opus
+ opusinclude_HEADERS = include/opusfile.h
+ 
+-lib_LTLIBRARIES = libopusfile.la libopusurl.la
++lib_LTLIBRARIES = libopusfile.la
+ libopusfile_la_SOURCES = \
+ 	src/info.c \
+ 	src/internal.c src/internal.h \
+@@ -16,26 +16,16 @@ libopusfile_la_LIBADD = $(DEPS_LIBS) $(l
+ libopusfile_la_LDFLAGS = -no-undefined \
+  -version-info @OP_LT_CURRENT@:@OP_LT_REVISION@:@OP_LT_AGE@
+ 
+-libopusurl_la_SOURCES = src/http.c src/internal.c src/internal.h
+-libopusurl_la_CFLAGS = $(AM_CFLAGS) $(URL_DEPS_CFLAGS)
+-libopusurl_la_LIBADD = libopusfile.la $(URL_DEPS_LIBS)
+-libopusurl_la_LDFLAGS = -no-undefined \
+- -version-info @OP_LT_CURRENT@:@OP_LT_REVISION@:@OP_LT_AGE@
+-
+ if OP_ENABLE_EXAMPLES
+ noinst_PROGRAMS = examples/opusfile_example examples/seeking_example
+ endif
+ 
+ examples_opusfile_example_SOURCES = examples/opusfile_example.c
+ examples_seeking_example_SOURCES = examples/seeking_example.c
+-examples_opusfile_example_LDADD = libopusurl.la libopusfile.la
+-examples_seeking_example_LDADD = libopusurl.la libopusfile.la
++examples_opusfile_example_LDADD = libopusfile.la
++examples_seeking_example_LDADD = libopusfile.la
+ 
+ if OP_WIN32
+-if OP_ENABLE_HTTP
+-libopusurl_la_SOURCES += src/wincerts.c src/winerrno.h
+-libopusurl_la_LIBADD += -lws2_32 -lcrypt32
+-endif
+ examples_opusfile_example_SOURCES += examples/win32utf8.c examples/win32utf8.h
+ examples_seeking_example_SOURCES += examples/win32utf8.c examples/win32utf8.h
+ endif
+--- work/opusfile-0.12/opusfile-0.12/Makefile.in
++++ work/opusfile-0.12/opusfile-0.12/Makefile.in
+@@ -162,17 +162,6 @@ libopusfile_la_LINK = $(LIBTOOL) $(AM_V_
+ 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+ 	$(AM_CFLAGS) $(CFLAGS) $(libopusfile_la_LDFLAGS) $(LDFLAGS) -o \
+ 	$@
+-libopusurl_la_DEPENDENCIES = libopusfile.la $(am__DEPENDENCIES_1) \
+-	$(am__DEPENDENCIES_1)
+-am__libopusurl_la_SOURCES_DIST = src/http.c src/internal.c \
+-	src/internal.h src/wincerts.c src/winerrno.h
+-@OP_ENABLE_HTTP_TRUE@@OP_WIN32_TRUE@am__objects_1 = src/libopusurl_la-wincerts.lo
+-am_libopusurl_la_OBJECTS = src/libopusurl_la-http.lo \
+-	src/libopusurl_la-internal.lo $(am__objects_1)
+-libopusurl_la_OBJECTS = $(am_libopusurl_la_OBJECTS)
+-libopusurl_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libopusurl_la_CFLAGS) \
+-	$(CFLAGS) $(libopusurl_la_LDFLAGS) $(LDFLAGS) -o $@
+ am__examples_opusfile_example_SOURCES_DIST =  \
+ 	examples/opusfile_example.c examples/win32utf8.c \
+ 	examples/win32utf8.h
+@@ -181,7 +170,7 @@ am_examples_opusfile_example_OBJECTS =
+ 	examples/opusfile_example.$(OBJEXT) $(am__objects_2)
+ examples_opusfile_example_OBJECTS =  \
+ 	$(am_examples_opusfile_example_OBJECTS)
+-examples_opusfile_example_DEPENDENCIES = libopusurl.la libopusfile.la
++examples_opusfile_example_DEPENDENCIES = libopusfile.la
+ am__examples_seeking_example_SOURCES_DIST =  \
+ 	examples/seeking_example.c examples/win32utf8.c \
+ 	examples/win32utf8.h
+@@ -189,7 +178,7 @@ am_examples_seeking_example_OBJECTS =  \
+ 	examples/seeking_example.$(OBJEXT) $(am__objects_2)
+ examples_seeking_example_OBJECTS =  \
+ 	$(am_examples_seeking_example_OBJECTS)
+-examples_seeking_example_DEPENDENCIES = libopusurl.la libopusfile.la
++examples_seeking_example_DEPENDENCIES = libopusfile.la
+ AM_V_P = $(am__v_P_@AM_V@)
+ am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
+ am__v_P_0 = false
+@@ -209,9 +198,6 @@ am__depfiles_remade = examples/$(DEPDIR)
+ 	examples/$(DEPDIR)/seeking_example.Po \
+ 	examples/$(DEPDIR)/win32utf8.Po src/$(DEPDIR)/info.Plo \
+ 	src/$(DEPDIR)/internal.Plo \
+-	src/$(DEPDIR)/libopusurl_la-http.Plo \
+-	src/$(DEPDIR)/libopusurl_la-internal.Plo \
+-	src/$(DEPDIR)/libopusurl_la-wincerts.Plo \
+ 	src/$(DEPDIR)/opusfile.Plo src/$(DEPDIR)/stream.Plo
+ am__mv = mv -f
+ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+@@ -232,11 +218,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
+ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
+ am__v_CCLD_0 = @echo "  CCLD    " $@;
+ am__v_CCLD_1 = 
+-SOURCES = $(libopusfile_la_SOURCES) $(libopusurl_la_SOURCES) \
++SOURCES = $(libopusfile_la_SOURCES) \
+ 	$(examples_opusfile_example_SOURCES) \
+ 	$(examples_seeking_example_SOURCES)
+ DIST_SOURCES = $(libopusfile_la_SOURCES) \
+-	$(am__libopusurl_la_SOURCES_DIST) \
+ 	$(am__examples_opusfile_example_SOURCES_DIST) \
+ 	$(am__examples_seeking_example_SOURCES_DIST)
+ am__can_run_installinfo = \
+@@ -426,7 +411,7 @@ AM_CFLAGS = -I$(top_srcdir)/include $(DE
+ dist_doc_DATA = COPYING AUTHORS README.md
+ opusincludedir = ${includedir}/opus
+ opusinclude_HEADERS = include/opusfile.h
+-lib_LTLIBRARIES = libopusfile.la libopusurl.la
++lib_LTLIBRARIES = libopusfile.la
+ libopusfile_la_SOURCES = \
+ 	src/info.c \
+ 	src/internal.c src/internal.h \
+@@ -436,19 +421,12 @@ libopusfile_la_LIBADD = $(DEPS_LIBS) $(l
+ libopusfile_la_LDFLAGS = -no-undefined \
+  -version-info @OP_LT_CURRENT@:@OP_LT_REVISION@:@OP_LT_AGE@
+ 
+-libopusurl_la_SOURCES = src/http.c src/internal.c src/internal.h \
+-	$(am__append_1)
+-libopusurl_la_CFLAGS = $(AM_CFLAGS) $(URL_DEPS_CFLAGS)
+-libopusurl_la_LIBADD = libopusfile.la $(URL_DEPS_LIBS) $(am__append_2)
+-libopusurl_la_LDFLAGS = -no-undefined \
+- -version-info @OP_LT_CURRENT@:@OP_LT_REVISION@:@OP_LT_AGE@
+-
+ examples_opusfile_example_SOURCES = examples/opusfile_example.c \
+ 	$(am__append_3)
+ examples_seeking_example_SOURCES = examples/seeking_example.c \
+ 	$(am__append_4)
+-examples_opusfile_example_LDADD = libopusurl.la libopusfile.la
+-examples_seeking_example_LDADD = libopusurl.la libopusfile.la
++examples_opusfile_example_LDADD = libopusfile.la
++examples_seeking_example_LDADD = libopusfile.la
+ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = opusfile.pc opusurl.pc
+ EXTRA_DIST = \
+@@ -588,15 +566,7 @@ src/stream.lo: src/$(am__dirstamp) src/$
+ 
+ libopusfile.la: $(libopusfile_la_OBJECTS) $(libopusfile_la_DEPENDENCIES) $(EXTRA_libopusfile_la_DEPENDENCIES) 
+ 	$(AM_V_CCLD)$(libopusfile_la_LINK) -rpath $(libdir) $(libopusfile_la_OBJECTS) $(libopusfile_la_LIBADD) $(LIBS)
+-src/libopusurl_la-http.lo: src/$(am__dirstamp) \
+-	src/$(DEPDIR)/$(am__dirstamp)
+-src/libopusurl_la-internal.lo: src/$(am__dirstamp) \
+-	src/$(DEPDIR)/$(am__dirstamp)
+-src/libopusurl_la-wincerts.lo: src/$(am__dirstamp) \
+-	src/$(DEPDIR)/$(am__dirstamp)
+ 
+-libopusurl.la: $(libopusurl_la_OBJECTS) $(libopusurl_la_DEPENDENCIES) $(EXTRA_libopusurl_la_DEPENDENCIES) 
+-	$(AM_V_CCLD)$(libopusurl_la_LINK) -rpath $(libdir) $(libopusurl_la_OBJECTS) $(libopusurl_la_LIBADD) $(LIBS)
+ examples/$(am__dirstamp):
+ 	@$(MKDIR_P) examples
+ 	@: > examples/$(am__dirstamp)
+@@ -632,9 +602,6 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@examples/$(DEPDIR)/win32utf8.Po@am__quote@ # am--include-marker
+ @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/info.Plo@am__quote@ # am--include-marker
+ @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/internal.Plo@am__quote@ # am--include-marker
+-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libopusurl_la-http.Plo@am__quote@ # am--include-marker
+-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libopusurl_la-internal.Plo@am__quote@ # am--include-marker
+-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libopusurl_la-wincerts.Plo@am__quote@ # am--include-marker
+ @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/opusfile.Plo@am__quote@ # am--include-marker
+ @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/stream.Plo@am__quote@ # am--include-marker
+ 
+@@ -668,27 +635,6 @@ am--depfiles: $(am__depfiles_remade)
+ @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+ @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+ 
+-src/libopusurl_la-http.lo: src/http.c
+-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopusurl_la_CFLAGS) $(CFLAGS) -MT src/libopusurl_la-http.lo -MD -MP -MF src/$(DEPDIR)/libopusurl_la-http.Tpo -c -o src/libopusurl_la-http.lo `test -f 'src/http.c' || echo '$(srcdir)/'`src/http.c
+-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libopusurl_la-http.Tpo src/$(DEPDIR)/libopusurl_la-http.Plo
+-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/http.c' object='src/libopusurl_la-http.lo' libtool=yes @AMDEPBACKSLASH@
+-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopusurl_la_CFLAGS) $(CFLAGS) -c -o src/libopusurl_la-http.lo `test -f 'src/http.c' || echo '$(srcdir)/'`src/http.c
+-
+-src/libopusurl_la-internal.lo: src/internal.c
+-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopusurl_la_CFLAGS) $(CFLAGS) -MT src/libopusurl_la-internal.lo -MD -MP -MF src/$(DEPDIR)/libopusurl_la-internal.Tpo -c -o src/libopusurl_la-internal.lo `test -f 'src/internal.c' || echo '$(srcdir)/'`src/internal.c
+-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libopusurl_la-internal.Tpo src/$(DEPDIR)/libopusurl_la-internal.Plo
+-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/internal.c' object='src/libopusurl_la-internal.lo' libtool=yes @AMDEPBACKSLASH@
+-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopusurl_la_CFLAGS) $(CFLAGS) -c -o src/libopusurl_la-internal.lo `test -f 'src/internal.c' || echo '$(srcdir)/'`src/internal.c
+-
+-src/libopusurl_la-wincerts.lo: src/wincerts.c
+-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopusurl_la_CFLAGS) $(CFLAGS) -MT src/libopusurl_la-wincerts.lo -MD -MP -MF src/$(DEPDIR)/libopusurl_la-wincerts.Tpo -c -o src/libopusurl_la-wincerts.lo `test -f 'src/wincerts.c' || echo '$(srcdir)/'`src/wincerts.c
+-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libopusurl_la-wincerts.Tpo src/$(DEPDIR)/libopusurl_la-wincerts.Plo
+-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/wincerts.c' object='src/libopusurl_la-wincerts.lo' libtool=yes @AMDEPBACKSLASH@
+-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libopusurl_la_CFLAGS) $(CFLAGS) -c -o src/libopusurl_la-wincerts.lo `test -f 'src/wincerts.c' || echo '$(srcdir)/'`src/wincerts.c
+-
+ mostlyclean-libtool:
+ 	-rm -f *.lo
+ 
+@@ -1049,14 +995,11 @@ clean-am: clean-generic clean-libLTLIBRA
+ 
+ distclean: distclean-am
+ 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
+-		-rm -f examples/$(DEPDIR)/opusfile_example.Po
++	-rm -f examples/$(DEPDIR)/opusfile_example.Po
+ 	-rm -f examples/$(DEPDIR)/seeking_example.Po
+ 	-rm -f examples/$(DEPDIR)/win32utf8.Po
+ 	-rm -f src/$(DEPDIR)/info.Plo
+ 	-rm -f src/$(DEPDIR)/internal.Plo
+-	-rm -f src/$(DEPDIR)/libopusurl_la-http.Plo
+-	-rm -f src/$(DEPDIR)/libopusurl_la-internal.Plo
+-	-rm -f src/$(DEPDIR)/libopusurl_la-wincerts.Plo
+ 	-rm -f src/$(DEPDIR)/opusfile.Plo
+ 	-rm -f src/$(DEPDIR)/stream.Plo
+ 	-rm -f Makefile
+@@ -1107,14 +1050,11 @@ installcheck-am:
+ maintainer-clean: maintainer-clean-am
+ 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
+ 	-rm -rf $(top_srcdir)/autom4te.cache
+-		-rm -f examples/$(DEPDIR)/opusfile_example.Po
++	-rm -f examples/$(DEPDIR)/opusfile_example.Po
+ 	-rm -f examples/$(DEPDIR)/seeking_example.Po
+ 	-rm -f examples/$(DEPDIR)/win32utf8.Po
+ 	-rm -f src/$(DEPDIR)/info.Plo
+ 	-rm -f src/$(DEPDIR)/internal.Plo
+-	-rm -f src/$(DEPDIR)/libopusurl_la-http.Plo
+-	-rm -f src/$(DEPDIR)/libopusurl_la-internal.Plo
+-	-rm -f src/$(DEPDIR)/libopusurl_la-wincerts.Plo
+ 	-rm -f src/$(DEPDIR)/opusfile.Plo
+ 	-rm -f src/$(DEPDIR)/stream.Plo
+ 	-rm -f Makefile
