@@ -38,6 +38,7 @@ sudo apt-get install make
 sudo apt-get install cmake
 sudo apt-get install automake
 sudo apt-get install autoconf
+sudo apt-get install autopoint
 sudo apt-get install binutils
 sudo apt-get install build-essential
 sudo apt-get install linux-headers-$(uname -r) 
