@@ -1,0 +1,31 @@
+--- work/opus-1.3.1/Makefile
++++ work/opus-1.3.1/Makefile
+@@ -0,0 +1,28 @@
++include ../Rules.mak
++
++all: config
++	$(MAKE) -C $(OPUS)
++	$(STRIP) $(STRIPFLAGS) $(OPUS)/.libs/*.a
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(OPUS) && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --enable-static --disable-shared --disable-dependency-tracking --disable-doc --disable-extra-programs --disable-asm --enable-fixed-point CFLAGS="$(CFLAGS) -Os -s"
++
++install:
++	@echo "Nothing to install..."
++#	$(STRIP) $(OPUS)/.libs/*.so.*
++#	for D in $(LIBDIR) $(BINDIR); do install -m 0755 -d $$D; done
++#	cp -rf $(OPUS)/.libs/*.so.* $(LIBDIR)
++
++clean:
++	$(MAKE) -C $(OPUS) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(OPUS) distclean
++

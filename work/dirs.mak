@@ -768,6 +768,23 @@ DEP_$(FLAC)			:= $(NAME_$(ICONV))
 DESC_$(FLAC)			:= Free lossless audio codec
 DIRLIST				+= $(FLAC)
 TARLIST				+= $(TAR_$(FLAC))
+# OPUS
+OPUS_NAME			:= opus
+VER_$(OPUS_NAME)		:= 1.3.1
+OPUS				:= $(OPUS_NAME)-$(VER_$(OPUS_NAME))
+NAME_$(OPUS)			:= $(OPUS_NAME)$(DBG)
+SUBVER_$(OPUS)			:= 
+VER_$(OPUS)			:= $(VER_$(OPUS_NAME))$(SUBVER_$(OPUS))
+DL_$(OPUS)			:= https://archive.mozilla.org/pub/opus
+TAR_$(OPUS)			:= $(OPUS).tar.gz
+HOME_$(OPUS)			:= https://opus-codec.org/
+LIC_$(OPUS)			:= BSD-3-Clause
+SEC_$(OPUS)			:= libs
+PRIO_$(OPUS)			:= required
+DEP_$(OPUS)			:= 
+DESC_$(OPUS)			:= OPUS Audio Codec
+DIRLIST				+= $(OPUS)
+TARLIST				+= $(TAR_$(OPUS))
 # MINIDLNA
 MINIDLNA_NAME			:= minidlna
 VER_$(MINIDLNA_NAME)		:= 1.3.0
@@ -822,7 +839,7 @@ TARLIST				+= $(TAR_$(TRANSM))
 # SUBGROUPS
 PPPCONNECTION			:= $(ATM) $(PPP) $(RPPPPOE)
 USBSTORAGE			:= $(SAMBA) $(BFTPD) $(E2FSPROGS) $(HDPARM) $(HDIDLE) $(SMONTOOLS) $(NTFSPROGS) $(TRANSM)
-MEDIASERVER			:= $(FFMPEG) $(ID3TAG) $(EXIF) $(JPEG) $(OGG) $(VORBIS) $(FLAC)
+MEDIASERVER			:= $(FFMPEG) $(ID3TAG) $(EXIF) $(JPEG) $(OGG) $(VORBIS) $(FLAC) $(OPUS)
 SPEEDTESTS			:= $(NETPERF) $(NETWORKTEST) $(SPEEDTESTNET)
 # ADDING IPK TO CATEGORIES
 BUILTINLIB 			:= $(NVRAM) $(ZLIB) $(OPENSSL) $(ARES) $(CURL) $(ICONV) $(SQLITE) $(EVENT) #$(LZO)
@@ -842,6 +859,7 @@ endif
 # MEDIASERVER
 ifdef MEDIASERVER
 BUILTINLIB			+= $(FFMPEG) $(ID3TAG) $(EXIF) $(JPEG) $(OGG) $(VORBIS) $(FLAC)
+THIRDPARTYLIB			+= $(OPUS)
 BUILTIN				+= $(MINIDLNA)
 endif
 # SPEEDTESTS
