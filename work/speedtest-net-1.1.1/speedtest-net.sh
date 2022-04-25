@@ -63,10 +63,10 @@ nice -n -20 ${BINCMD}												# execute boosted command
 }
 
 BINNAME=speedtest
-BINVER=1.0.0
-BINARCH=arm
+BINVER=1.1.1
+BINARCH=armel
 BINOS=linux
-BINARCNAME=ookla-${BINNAME}-${BINVER}-${BINARCH}-${BINOS}.tgz
+BINARCNAME=ookla-${BINNAME}-${BINVER}-${BINOS}-${BINARCH}.tgz
 CERTNAME=ca-bundle.crt
 PEMNAME=cacert.pem
 NVARS="speedtest_net_license speedtest_net_gdpr"
