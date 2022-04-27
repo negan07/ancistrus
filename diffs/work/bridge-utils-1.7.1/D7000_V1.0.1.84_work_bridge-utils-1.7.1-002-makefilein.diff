@@ -1,0 +1,69 @@
+--- work/bridge-utils-1.7.1/bridge-utils-1.7.1/Makefile.in
++++ work/bridge-utils-1.7.1/bridge-utils-1.7.1/Makefile.in
+@@ -1,17 +1,9 @@
+ 
+-DESTDIR=
+ KERNEL_HEADERS=-I@KERNEL_HEADERS@
+ 
+ INSTALL=@INSTALL@
+ 
+-prefix=@prefix@
+-exec_prefix=@exec_prefix@
+-bindir=@bindir@
+-sbindir=@sbindir@
+-mandir=@mandir@
+-distdir = $(PACKAGE)-$(VERSION)
+-
+-SUBDIRS=libbridge brctl doc
++SUBDIRS=libbridge brctl
+ 
+ all:
+ 	for x in $(SUBDIRS); do $(MAKE) $(MFLAGS) -C $$x || exit 1 ; done
+@@ -20,10 +12,7 @@ clean:
+ 	for x in $(SUBDIRS); do $(MAKE) $(MFLAGS) -C $$x clean ; done
+ 
+ distclean:	clean
+-	rm -f config.* 
+-
+-maintainer-clean: distclean
+-	rm -f configure Makefile bridge-utils.spec
++	rm -f config.* configure Makefile bridge-utils.spec
+ 	rm -fr autom4te.cache
+ 	rm -f brctl/Makefile libbridge/Makefile doc/Makefile
+ 
+--- work/bridge-utils-1.7.1/bridge-utils-1.7.1/libbridge/Makefile.in
++++ work/bridge-utils-1.7.1/bridge-utils-1.7.1/libbridge/Makefile.in
+@@ -1,7 +1,6 @@
+ 
+ KERNEL_HEADERS=-I@KERNEL_HEADERS@
+ 
+-AR=ar
+ RANLIB=@RANLIB@
+ 
+ CC=@CC@
+--- work/bridge-utils-1.7.1/bridge-utils-1.7.1/brctl/Makefile.in
++++ work/bridge-utils-1.7.1/bridge-utils-1.7.1/brctl/Makefile.in
+@@ -7,12 +7,6 @@ LDFLAGS=@LDFLAGS@
+ INCLUDE=-I../libbridge $(KERNEL_HEADERS) 
+ LIBS= -L ../libbridge -lbridge @LIBS@
+ 
+-prefix=@prefix@
+-exec_prefix=@exec_prefix@
+-bindir=@bindir@
+-sbindir=@sbindir@
+-mandir=@mandir@
+-
+ INSTALL=@INSTALL@
+ 
+ 
+@@ -29,9 +23,7 @@ PROGRAMS= brctl
+ 
+ all:	$(PROGRAMS)
+ 
+-install: $(PROGRAMS)
+-	mkdir -p $(DESTDIR)$(sbindir)
+-	$(INSTALL) -m 755 $(PROGRAMS) $(DESTDIR)$(sbindir)
++install: 
+ 
+ brctl:	$(brctl_OBJECTS) ../libbridge/libbridge.a
+ 	$(CC) $(LDFLAGS) $(brctl_OBJECTS) $(LIBS) -o brctl
