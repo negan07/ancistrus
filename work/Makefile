@@ -203,6 +203,10 @@ post_inst:
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mrp-pppoe \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/pppoe* $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
 	fi
+	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: bridge-utils'`" ]; then \
+	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mbridge-utils \\e[0m"; \
+	mv $(BUILD_TARGET)$(RCTMPDIR)/brctl $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
+	fi
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: xdsl-driver'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
 	for F in $(RCDSLKO); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCLDLIBMOD)/ || exit 1; done; \
