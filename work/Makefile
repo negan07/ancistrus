@@ -194,11 +194,6 @@ post_inst:
 	mv $(BUILD_TARGET)$(RCTMPDIR)/libatm.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/atmarp $(BUILD_TARGET)$(RCTMPDIR)/atmarpd $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: ppp'`" ]; then \
-	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mppp \\e[0m"; \
-	mv $(BUILD_TARGET)$(RCTMPDIR)/libpppoatm.so $(BUILD_TARGET)$(RCTMPDIR)/libpppoe.so $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
-	mv $(BUILD_TARGET)$(RCTMPDIR)/pppd $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
-	fi
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: rp-pppoe'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mrp-pppoe \\e[0m"; \
 	mv $(BUILD_TARGET)$(RCTMPDIR)/pppoe* $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \

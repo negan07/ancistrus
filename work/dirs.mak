@@ -513,23 +513,6 @@ DEP_$(ATM)			:=
 DESC_$(ATM)			:= ATM on Linux
 DIRLIST				+= $(ATM)
 TARLIST				+= $(TAR_$(ATM))
-# PPP
-PPP_NAME			:= ppp
-VER_$(PPP_NAME)			:= 2.4.9
-PPP				:= $(PPP_NAME)-$(VER_$(PPP_NAME))
-NAME_$(PPP)			:= $(PPP_NAME)$(DBG)
-SUBVER_$(PPP)			:= 
-VER_$(PPP)			:= $(VER_$(PPP_NAME))$(SUBVER_$(PPP))
-DL_$(PPP)			:= https://download.samba.org/pub/ppp
-TAR_$(PPP)			:= $(PPP).tar.gz
-HOME_$(PPP)			:= https://ppp.samba.org/
-LIC_$(PPP)			:= BSD-4-Clause
-SEC_$(PPP)			:= base
-PRIO_$(PPP)			:= required
-DEP_$(PPP)			:= $(NAME_$(ATM))
-DESC_$(PPP)			:= Point-to-Point Protocol implementation
-DIRLIST				+= $(PPP)
-TARLIST				+= $(TAR_$(PPP))
 # RPPPPOE
 RPPPPOE_NAME			:= rp-pppoe
 VER_$(RPPPPOE_NAME)		:= 3.15
@@ -871,7 +854,7 @@ DESC_$(TRANSM)			:= Simple BitTorrent client
 DIRLIST				+= $(TRANSM)
 TARLIST				+= $(TAR_$(TRANSM))
 # SUBGROUPS
-PPPCONNECTION			:= $(ATM) $(PPP) $(RPPPPOE) $(BRIDGEUTILS)
+PPPCONNECTION			:= $(ATM) $(RPPPPOE) $(BRIDGEUTILS)
 USBSTORAGE			:= $(SAMBA) $(BFTPD) $(E2FSPROGS) $(HDPARM) $(HDIDLE) $(SMONTOOLS) $(NTFSPROGS) $(TRANSM)
 MEDIASERVER			:= $(FFMPEG) $(ID3TAG) $(EXIF) $(JPEG) $(OGG) $(VORBIS) $(FLAC) $(OPUS) $(OPUSFILE)
 SPEEDTESTS			:= $(NETPERF) $(NETWORKTEST) $(SPEEDTESTNET)
@@ -883,7 +866,7 @@ THIRDPARTY			:= $(OPKG_UTILS) $(OPKG) $(OPEN_SSH) $(MINI_SNMPD) $(QOS_SQM)
 # PPPCONNECTION
 ifdef PPPCONNECTION
 BUILTINLIB			+= $(ATM)
-BUILTIN				+= $(PPP) $(RPPPPOE) $(BRIDGEUTILS)
+BUILTIN				+= $(RPPPPOE) $(BRIDGEUTILS)
 endif
 # USBSTORAGE
 ifdef USBSTORAGE
