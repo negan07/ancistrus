@@ -188,20 +188,6 @@ post_inst:
 	for L in id3tag exif jpeg ogg vorbis FLAC; do rm $(BUILD_TARGET)$(RCLDLIB)/lib$$L.so* || exit 1; done; \
 	[ -f $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 ] || ln -sf libiconv.so.0.0 $(BUILD_TARGET)$(RCLDLIB)/libiconv.so.2 || exit 1; \
 	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: linux-atm'`" ]; then \
-	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mlinux-atm \\e[0m"; \
-	rm $(BUILD_TARGET)$(RCLDLIB)/libatm.so* || exit 1; \
-	mv $(BUILD_TARGET)$(RCTMPDIR)/libatm.so* $(BUILD_TARGET)$(RCLDLIB)/ || exit 1; \
-	mv $(BUILD_TARGET)$(RCTMPDIR)/atmarp $(BUILD_TARGET)$(RCTMPDIR)/atmarpd $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
-	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: rp-pppoe'`" ]; then \
-	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mrp-pppoe \\e[0m"; \
-	mv $(BUILD_TARGET)$(RCTMPDIR)/pppoe* $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
-	fi
-	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: bridge-utils'`" ]; then \
-	echo -e "\\e[35m$(CUR_REL_PATH): finalizing installation of \\e[36mbridge-utils \\e[0m"; \
-	mv $(BUILD_TARGET)$(RCTMPDIR)/brctl $(BUILD_TARGET)$(RCBINDIR)/ || exit 1; \
-	fi
 	@if [ -n "`cat $(BUILD_TARGET)$(OPKG_INFO_STATUS_DIR)/status | grep 'Package: xdsl-driver'`" ]; then \
 	echo -e "\\e[35m$(CUR_REL_PATH): updating \\e[36mXDSL driverset \\e[0m"; \
 	for F in $(RCDSLKO); do [ ! -f $(BUILD_TARGET)$(RCTMPDIR)/$$F ] || mv $(BUILD_TARGET)$(RCTMPDIR)/$$F $(BUILD_TARGET)$(RCLDLIBMOD)/ || exit 1; done; \

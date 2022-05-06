@@ -496,57 +496,6 @@ DEP_$(DNRD)			:=
 DESC_$(DNRD)			:= Caching, forwarding DNS proxy server
 DIRLIST				+= $(DNRD)
 TARLIST				+= $(TAR_$(DNRD))
-# ATM
-ATM_NAME			:= linux-atm
-VER_$(ATM_NAME)			:= 2.5.2
-ATM				:= $(ATM_NAME)-$(VER_$(ATM_NAME))
-NAME_$(ATM)			:= $(ATM_NAME)$(DBG)
-SUBVER_$(ATM)			:= 
-VER_$(ATM)			:= $(VER_$(ATM_NAME))$(SUBVER_$(ATM))
-DL_$(ATM)			:= https://sourceforge.net/projects/linux-atm/files/$(ATM_NAME)/$(VER_$(ATM_NAME))
-TAR_$(ATM)			:= $(ATM).tar.gz
-HOME_$(ATM)			:= https://sourceforge.net/projects/linux-atm
-LIC_$(ATM)			:= BSD, GPLv2
-SEC_$(ATM)			:= base
-PRIO_$(ATM)			:= required
-DEP_$(ATM)			:= 
-DESC_$(ATM)			:= ATM on Linux
-DIRLIST				+= $(ATM)
-TARLIST				+= $(TAR_$(ATM))
-# RPPPPOE
-RPPPPOE_NAME			:= rp-pppoe
-VER_$(RPPPPOE_NAME)		:= 3.15
-RPPPPOE				:= $(RPPPPOE_NAME)-$(VER_$(RPPPPOE_NAME))
-NAME_$(RPPPPOE)			:= $(RPPPPOE_NAME)$(DBG)
-SUBVER_$(RPPPPOE)		:= 
-VER_$(RPPPPOE)			:= $(VER_$(RPPPPOE_NAME))$(SUBVER_$(RPPPPOE))
-DL_$(RPPPPOE)			:= https://dianne.skoll.ca/projects/rp-pppoe/download
-TAR_$(RPPPPOE)			:= $(RPPPPOE).tar.gz
-HOME_$(RPPPPOE)			:= https://dianne.skoll.ca/projects/rp-pppoe/
-LIC_$(RPPPPOE)			:= GPLv2
-SEC_$(RPPPPOE)			:= base
-PRIO_$(RPPPPOE)			:= required
-DEP_$(RPPPPOE)			:= 
-DESC_$(RPPPPOE)			:= Free PPPoE client, relay and server
-DIRLIST				+= $(RPPPPOE)
-TARLIST				+= $(TAR_$(RPPPPOE))
-# BRIDGEUTILS
-BRIDGEUTILS_NAME		:= bridge-utils
-VER_$(BRIDGEUTILS_NAME)		:= 1.7.1
-BRIDGEUTILS			:= $(BRIDGEUTILS_NAME)-$(VER_$(BRIDGEUTILS_NAME))
-NAME_$(BRIDGEUTILS)		:= $(BRIDGEUTILS_NAME)$(DBG)
-SUBVER_$(BRIDGEUTILS)		:= 
-VER_$(BRIDGEUTILS)		:= $(VER_$(BRIDGEUTILS_NAME))$(SUBVER_$(BRIDGEUTILS))
-DL_$(BRIDGEUTILS)		:= https://mirrors.edge.kernel.org/pub/linux/utils/net/$(BRIDGEUTILS_NAME)
-TAR_$(BRIDGEUTILS)		:= $(BRIDGEUTILS).tar.gz
-HOME_$(BRIDGEUTILS)		:= https://www.linuxfromscratch.org/blfs/view/cvs/basicnet/bridge-utils.html
-LIC_$(BRIDGEUTILS)		:= GPLv2
-SEC_$(BRIDGEUTILS)		:= base
-PRIO_$(BRIDGEUTILS)		:= required
-DEP_$(BRIDGEUTILS)		:= 
-DESC_$(BRIDGEUTILS)		:= Ethernet bridging configuration utility
-DIRLIST				+= $(BRIDGEUTILS)
-TARLIST				+= $(TAR_$(BRIDGEUTILS))
 # DNSMASQ
 DNSMASQ_NAME			:= dnsmasq
 VER_$(DNSMASQ_NAME)		:= 2.80
@@ -854,7 +803,6 @@ DESC_$(TRANSM)			:= Simple BitTorrent client
 DIRLIST				+= $(TRANSM)
 TARLIST				+= $(TAR_$(TRANSM))
 # SUBGROUPS
-PPPCONNECTION			:= $(ATM) $(RPPPPOE) $(BRIDGEUTILS)
 USBSTORAGE			:= $(SAMBA) $(BFTPD) $(E2FSPROGS) $(HDPARM) $(HDIDLE) $(SMONTOOLS) $(NTFSPROGS) $(TRANSM)
 MEDIASERVER			:= $(FFMPEG) $(ID3TAG) $(EXIF) $(JPEG) $(OGG) $(VORBIS) $(FLAC) $(OPUS) $(OPUSFILE)
 SPEEDTESTS			:= $(NETPERF) $(NETWORKTEST) $(SPEEDTESTNET)
@@ -863,11 +811,6 @@ BUILTINLIB 			:= $(NVRAM) $(ZLIB) $(OPENSSL) $(ARES) $(CURL) $(ICONV) $(SQLITE) 
 THIRDPARTYLIB			:= $(ARCHIVE)
 BUILTIN				:= $(CORE_WORK) $(UTELNETD) $(MINIHTTPD) $(BUSYBOX) $(DNRD) $(IPROUTE2) $(EASYRSA) $(OPEN_VPN)
 THIRDPARTY			:= $(OPKG_UTILS) $(OPKG) $(OPEN_SSH) $(MINI_SNMPD) $(QOS_SQM)
-# PPPCONNECTION
-ifdef PPPCONNECTION
-BUILTINLIB			+= $(ATM)
-BUILTIN				+= $(RPPPPOE) $(BRIDGEUTILS)
-endif
 # USBSTORAGE
 ifdef USBSTORAGE
 BUILTIN				+= $(SAMBA) $(BFTPD) $(HDPARM) $(HDIDLE)
