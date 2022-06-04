@@ -109,12 +109,11 @@ diff -urN D7000_V1.0.1.84_WW_src/Kernel/bcm963xx/Makefile D7000_V1.0.1.84_WW_src
  	$(MAKE) oldconfig;
  endef
  
-@@ -959,7 +959,8 @@
+@@ -959,7 +959,7 @@
  	rm -fr $(FSSRC_DIR)/etc/certs
  
  kernel_clean: sanity_check
 -	-$(MAKE) -C $(KERNEL_DIR) mrproper
-+#	-$(MAKE) -C $(KERNEL_DIR) mrproper
 +	-$(MAKE) -C $(KERNEL_DIR) clean
  	rm -f $(KERNEL_DIR)/arch/mips/defconfig
  	rm -f $(KERNEL_DIR)/arch/arm/defconfig

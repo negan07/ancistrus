@@ -1,59 +1,82 @@
-diff -urN D7000_V1.0.1.84_WW_src/Makefile diff -urN D7000_V1.0.1.84_WW_src/Makefile
---- D7000_V1.0.1.84_WW_src/Makefile	2016-10-11 17:57:55.000000000 +0200
-+++ D7000_V1.0.1.84_WW_src/Makefile	2017-01-12 20:27:44.184650622 +0100
-@@ -1,9 +1,12 @@
+--- D7000_V1.0.1.84_WW_src/Makefile
++++ D7000_V1.0.1.84_WW_src/Makefile
+@@ -1,44 +1,48 @@
  #
  #	<MODULE> serial product makefile 
 -#	Usage:  make kernel source bootcode
-+#	Usage:  make kernel/source
++#	Usage:  make kernel/source/source_orig
  #
- #NOTE: do "make all_clean" if need change ANNEX after compiled
+-#NOTE: do "make all_clean" if need change ANNEX after compiled
  
 +ARCH_NAME="arm"
 +PROFILE_NAME="963138GW"
-+
  ANNEX=A
- #ANNEX=B
+-#ANNEX=B
+-
+-ifeq "$(ANNEX)" "B"
+-PROJECT_NAME=D7000B
+-else
+ PROJECT_NAME=D7000
+-endif
  
-@@ -22,24 +25,30 @@
- prepare: creat_rules Kernel/bcm963xx 
+-CUR_PATH = $(shell pwd)
++CUR_PATH=$(shell pwd)
+ RULES=$(CUR_PATH)/Source/Rules.mak
++KDIR=Kernel/bcm963xx
+ 
+ all:
+-	@echo 'make <kernel/source>';
+-
+-prepare: creat_rules Kernel/bcm963xx 
++	@echo 'make <kernel/source/source_orig>';
  
  kernel:
 -	@echo "PROFILE=963138GW" > Kernel/bcm963xx/PROFILE.make
 -	@echo "963138GW" > Kernel/bcm963xx/.last_profile
 -	@cd Kernel/bcm963xx/; make sc_kernel;
-+	@echo -e "\\e[35mKERNEL: make \\e[36mvmlinux.lz \\e[0m"
-+	@echo "PROFILE=$(PROFILE_NAME)" > Kernel/bcm963xx/PROFILE.make
-+	@echo $(PROFILE_NAME) > Kernel/bcm963xx/.last_profile
-+	@if [ ! -f Kernel/bcm963xx/.compiled ]; then \
-+	cd Kernel/bcm963xx/; make sc_kernel; touch .compiled; \
-+	fi
-+
-+kernel_menuconfig:
-+	@cd Kernel/bcm963xx/kernel/linux-3.4rt; make ARCH=$(ARCH_NAME) menuconfig ;
-+
-+kernel_clean:
-+	@echo -e "\\e[35mKERNEL: make \\e[36mclean \\e[0m"
-+	@echo "PROFILE=$(PROFILE_NAME)" > Kernel/bcm963xx/PROFILE.make
-+	@cd Kernel/bcm963xx/; make sc_clean ; rm -f .compiled;
- 
- source: prepare
+-
+-source: prepare
 -#	if [ -h /opt/toolchains/uclibc-crosstools ]; then\
 -#		rm -rf /opt/toolchains/uclibc-crosstools;\
 -#	fi
 -#	ln -sf uclibc-crosstools-gcc-4.4.2-1/usr/ /opt/toolchains/uclibc-crosstools;
- 	make -C Source -s
+-	make -C Source -s
++	@echo -e "\\e[35mKERNEL: make \\e[36mvmlinux.lz \\e[0m"
++	@echo "PROFILE=$(PROFILE_NAME)" > $(KDIR)/PROFILE.make
++	@echo $(PROFILE_NAME) > $(KDIR)/.last_profile
++	@if [ ! -f $(KDIR)/.compiled ]; then \
++	$(MAKE) -C $(KDIR) sc_kernel -s || exit 1; \
++	touch $(KDIR)/.compiled; \
++	fi
  
-+source_orig: prepare
-+	make ORIG=1 -C Source orig -s
-+
- source_clean:
- 	make -C Source clean_all
+-source_clean:
+-	make -C Source clean_all
++kernel_menuconfig:
++	@$(MAKE) ARCH=$(ARCH_NAME) -C $(KDIR)/kernel/linux-3.4rt menuconfig
  
--kernel_clean:
+ kernel_clean:
 -	@echo "PROFILE=963138GW" > Kernel/bcm963xx/PROFILE.make
 -	@cd Kernel/bcm963xx/; make sc_clean ;
--
++	@echo -e "\\e[35mKERNEL: make \\e[36mclean \\e[0m"
++	@echo "PROFILE=$(PROFILE_NAME)" > $(KDIR)/PROFILE.make
++	@$(MAKE) -C $(KDIR) sc_clean
++	@rm -f $(KDIR)/.compiled
++
++source: creat_rules
++	@echo -e "\\e[35mSOURCE: make \\e[36msources \\e[0m"
++	@$(MAKE) -C Source -s
++
++source_orig: creat_rules
++	@$(MAKE) ORIG=1 -C Source orig -s
++
++source_clean:
++	@echo -e "\\e[35mSOURCE: make \\e[36mclean \\e[0m"
++	@$(MAKE) -C Source clean_all
+ 
  all_clean: kernel_clean source_clean
  
- creat_rules:
+@@ -47,3 +51,4 @@ creat_rules:
+ 	@echo "PROJECT=$(PROJECT_NAME)" > $(RULES)
+ 	@echo "export ROOT=$(CUR_PATH)/Source/" >> $(RULES)
+ 	@cat Source/rules.src >> $(RULES)
++
