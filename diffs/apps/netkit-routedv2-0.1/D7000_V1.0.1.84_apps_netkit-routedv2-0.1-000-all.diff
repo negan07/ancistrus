@@ -18,7 +18,7 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/netkit-routedv2-0.1/MCONFIG D7000_V
  INSTALLROOT=
  CC=mips-uclibc-gcc
 -CFLAGS=-Os -Wall -Werror -W -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline -O2 -Wall -W -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline 
-+CFLAGS+=-Os -Wall -Werror -W -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline -Wbad-function-cast -Wcast-qual 
++CFLAGS += -Os -Wall -Werror -W -Wpointer-arith -Wbad-function-cast -Wnested-externs -Wcast-qual
  CFLAGS+=-D_BIG_ENDDIAN_
  LDFLAGS=
  LIBS=
@@ -32,7 +32,7 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/netkit-routedv2-0.1/routed/Makefile
 -CFLAGS += -Wno-strict-aliasing -Wno-unused-but-set-variable
 -OBJS=	af.o if.o input.o main.o output.o startup.o \
 -	tables.o timer.o trace.o inet.o
-+CFLAGS += -Os -Wall -Werror -W -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline -Wbad-function-cast -Wcast-qual -Wno-strict-aliasing -Wno-unused-but-set-variable
++CFLAGS += -Os -Wall -Werror -W -Wpointer-arith -Wbad-function-cast -Wcast-qual -Winline -Wno-strict-aliasing -Wno-unused-but-set-variable
 +OBJS=	af.o if.o input.o main.o output.o startup.o tables.o timer.o trace.o inet.o
  
  routed: $(OBJS)

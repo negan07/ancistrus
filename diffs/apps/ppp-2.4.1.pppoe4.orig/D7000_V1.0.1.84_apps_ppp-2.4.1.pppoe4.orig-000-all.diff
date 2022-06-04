@@ -280,17 +280,17 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/ppp-2.4.1.pppoe4.orig/pppd/plugins/
 -pppoatm.so: pppoatm.c
 -	$(CC) -D_linux_=1 -o $@ $(LDFLAGS) $(CFLAGS) pppoatm.c
 -	cp pppoatm.so libpppoatm.so
-+	$(CC) -o $@ $(LDFLAGS) $(CFLAGS) $(MYFLAGS) $(CPPFLAGS) minconn.c
++	$(CC) -o $@ $(LDFLAGS) $(MYFLAGS) $(CFLAGS) $(CPPFLAGS) minconn.c
 +
 +pppoatm.d: pppoatm.c
-+	$(CC) -D_linux_=1 -o $@ $(LDFLAGS) $(CFLAGS) $(MYFLAGS) $(CPPFLAGS) -M pppoatm.c
++	$(CC) -D_linux_=1 -o $@ $(LDFLAGS) $(MYFLAGS) $(CFLAGS) $(CPPFLAGS) -M pppoatm.c
 +
 +libpppoatm.so: pppoatm.c
-+	$(CC) -D_linux_=1 -o $@ $(LDFLAGS) $(CFLAGS) $(MYFLAGS) $(CPPFLAGS) pppoatm.c
++	$(CC) -D_linux_=1 -o $@ $(LDFLAGS) $(MYFLAGS) $(CFLAGS) $(CPPFLAGS) pppoatm.c
  
  passprompt.so: passprompt.c
 -	$(CC) -o $@ $(LDFLAGS) $(CFLAGS) passprompt.c
-+	$(CC) -o $@ $(LDFLAGS) $(CFLAGS) $(MYFLAGS) $(CPPFLAGS) passprompt.c
++	$(CC) -o $@ $(LDFLAGS) $(MYFLAGS) $(CFLAGS) $(CPPFLAGS) passprompt.c
  
  LIBDIR	= /home/beaulieu/work/mips/userland/filesystem/tiny/usr/lib/pppd
  

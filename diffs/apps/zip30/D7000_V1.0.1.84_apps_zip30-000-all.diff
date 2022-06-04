@@ -1,6 +1,5 @@
-diff -urN D7000_V1.0.1.84_WW_src/Source/apps/zip30/unix/Makefile D7000_V1.0.1.84_WW_src/Source/apps/zip30/unix/Makefile
---- D7000_V1.0.1.84_WW_src/Source/apps/zip30/unix/Makefile	2016-10-11 17:56:23.000000000 +0200
-+++ D7000_V1.0.1.84_WW_src/Source/apps/zip30/unix/Makefile	2017-05-01 23:03:09.358383818 +0200
+--- D7000_V1.0.1.84_WW_src/Source/apps/zip30/unix/Makefile
++++ D7000_V1.0.1.84_WW_src/Source/apps/zip30/unix/Makefile
 @@ -59,7 +59,7 @@
  #   LFLAGS1   flags after output file spec, before obj file list
  #   LFLAGS2   flags after obj file list (libraries, etc)
@@ -28,3 +27,14 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/zip30/unix/Makefile D7000_V1.0.1.84
  
  # These symbols, when #defined using -D have these effects on compilation:
  # ZMEM                  - includes C language versions of memset(), memcpy(),
+--- D7000_V1.0.1.84_WW_src/Source/apps/zip30/unix/configure
++++ D7000_V1.0.1.84_WW_src/Source/apps/zip30/unix/configure
+@@ -98,7 +98,7 @@ int main()
+ _EOF_
+       $CC $CFLAGS -c conftest.c > /dev/null 2>/dev/null
+       if test $? -eq 0; then
+-        CFLAGS_OPT='-O3'
++        CFLAGS_OPT='-Os'
+         echo "  GNU C ($CFLAGS_OPT)"
+         # Special Mac OS X shared library "ld" option?
+         if test ` uname -s 2> /dev/null ` = 'Darwin'; then

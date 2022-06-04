@@ -6,7 +6,7 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/totd-1.4/Makefile D7000_V1.0.1.84_W
  
  
 -CFLAGS := -Os -Wall  -DHAVE_CONFIG_H  -Wall -DTOTCONF=\"/etc/totd.conf\" -DSCOPED_REWRITE -DSTF -DUSE_INET4 -DUSE_INET6
-+CFLAGS += -Os -Wall  -DHAVE_CONFIG_H  -Wall -DTOTCONF=\"/etc/totd.conf\" -DSCOPED_REWRITE -DSTF -DUSE_INET4 -DUSE_INET6
++CFLAGS += -Os -Wall -DHAVE_CONFIG_H -DTOTCONF=\"/etc/totd.conf\" -DSCOPED_REWRITE -DSTF -DUSE_INET4 -DUSE_INET6
  LDFLAGS = -lnsl
  
  CFLAGS += -DIP6_ONLY

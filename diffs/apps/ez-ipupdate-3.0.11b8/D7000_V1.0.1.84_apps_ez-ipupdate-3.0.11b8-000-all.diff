@@ -6,7 +6,15 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/ez-ipupdate-3.0.11b8/Makefile D7000
  ez_ipupdate_DEPENDENCIES = 
  ez_ipupdate_LDFLAGS = 
 -CFLAGS = -s -Os -DDYNDNS -Wall
-+CFLAGS +=  -s -Os -DDYNDNS -Wall
++CFLAGS += -s -Os -DDYNDNS -Wall
  CFLAGS += -I$(SHARED_DIR)
  COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
  LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
+@@ -294,6 +294,7 @@ install-data:
+ 	@$(NORMAL_INSTALL)
+ 
+ install: 
++	$(SSTRIP) ez-ipupdate
+ 	cp -f ez-ipupdate ../../target/usr/sbin 
+ 
+ uninstall: uninstall-binPROGRAMS
