@@ -1,0 +1,76 @@
+--- D7000_V1.0.1.84_WW_src/Source/uClibc-0.9.32/Rules.mak
++++ D7000_V1.0.1.84_WW_src/Source/uClibc-0.9.32/Rules.mak
+@@ -63,7 +63,7 @@ STRIP_FLAGS ?= -x -R .note -R .comment
+ 
+ # Select the compiler needed to build binaries for your development system
+ HOSTCC     = gcc
+-BUILD_CFLAGS = -Os -Wall
++BUILD_CFLAGS = -Os -Wall -Wno-array-bounds -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast 
+ 
+ #---------------------------------------------------------
+ # Nothing beyond this point should ever be touched by mere
+--- D7000_V1.0.1.84_WW_src/Source/uClibc-0.9.32/extra/locale/gen_collate.c
++++ D7000_V1.0.1.84_WW_src/Source/uClibc-0.9.32/extra/locale/gen_collate.c
+@@ -1931,7 +1931,6 @@ static void do_reorder_after(void)
+ {
+ 	char *t;
+ 	ll_item_t *lli;
+-	const weight_t *w;
+ 	int save_cur_num_weights;
+ 	char save_cur_rule[MAX_COLLATION_WEIGHTS];
+ 
+@@ -1965,9 +1964,6 @@ static void do_reorder_after(void)
+ 		error_msg("reorder_after for non-base item currently not supported: %s", t);
+ 	}
+ 
+-	w = ((weighted_item_t *)(lli->data))->weight;
+-
+-
+ 	save_cur_num_weights = cur_num_weights;
+ 	memcpy(save_cur_rule, cur_rule, MAX_COLLATION_WEIGHTS);
+ 
+@@ -2519,8 +2515,6 @@ static void dump_section(section_t *s, i
+ 	ll_item_t *lli;
+ 	ll_item_t *lli0;
+ 	weighted_item_t *w;
+-	weight_t *p;
+-	int i;
+ 
+ 	lli0 = lli = s->itm_list;
+ 
+@@ -2536,7 +2530,6 @@ static void dump_section(section_t *s, i
+ 		if (lli->data_type & DT_WEIGHTED) {
+ 			++dump_count;
+ 			w = (weighted_item_t *)(lli->data);
+-			p = w->weight;
+ #if 1
+ 			if (in_reorder_section) {
+ 				printf(" %p", w);
+@@ -2654,8 +2647,7 @@ static void finalize_base(void)
+ 	ll_item_t *cli;
+ 	ll_item_t *rli = NULL;
+ 	weighted_item_t *w;
+-	weight_t *p;
+-	int i, n, mr, r, mi;
++	int i, mr, r, mi;
+ 	col_locale_t *cl;
+ 	void *mm;
+ 
+--- D7000_V1.0.1.84_WW_src/Source/uClibc-0.9.32/extra/locale/gen_locale.c
++++ D7000_V1.0.1.84_WW_src/Source/uClibc-0.9.32/extra/locale/gen_locale.c
+@@ -431,7 +431,6 @@ static void read_locale_list(void)
+ 	char *ls;					/* locale name ll_CC */
+ 	char *as;					/* at string */
+ 	char *ds;					/* dot string */
+-	char *cs;					/* codeset */
+ 	int i;
+ 
+ /*	typedef struct {
+@@ -484,7 +483,6 @@ static void read_locale_list(void)
+ 		if (!(p = strtok(NULL, " \t\n"))) {
+ 			error_msg("missing codeset for locale %s", ln);
+ 		}
+-		cs = p;
+ 		i = find_codeset_num(p);
+ 		if ((i == 2) && !default_utf8) {
+ 			fprintf(stderr,"ignoring UTF-8 locale %s\n", ln);
