@@ -1,6 +1,5 @@
-diff -urN D7000_V1.0.1.84_WW_src/Source/Makefile D7000_V1.0.1.84_WW_src/Source/Makefile
---- D7000_V1.0.1.84_WW_src/Source/Makefile	2016-10-11 17:57:47.000000000 +0200
-+++ D7000_V1.0.1.84_WW_src/Source/Makefile	2017-01-14 00:22:33.678101901 +0100
+--- D7000_V1.0.1.84_WW_src/Source/Makefile
++++ D7000_V1.0.1.84_WW_src/Source/Makefile
 @@ -1,14 +1,6 @@
 -#
 -#	<MODULE> serial product makefile 
@@ -16,7 +15,7 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/Makefile D7000_V1.0.1.84_WW_src/Source/M
  FLASH_NAND_CFEROM_FS_IMAGE_NAME_16 = $(CHIP_VENDOR)$(PROFILE)_nand_cferom_fs_image_16
  FLASH_NAND_FS_IMAGE_NAME_16 = $(CHIP_VENDOR)$(PROFILE)_nand_fs_image_16
  FLASH_NAND_CFEROM_FS_IMAGE_NAME_128 = $(CHIP_VENDOR)$(PROFILE)_nand_cferom_fs_image_128
-@@ -19,30 +11,18 @@
+@@ -19,30 +11,18 @@ FLASH_NAND_BLOCK_SIZE=$(FLASH_NAND_BLOCK
  ifeq ($(FLASH),128M)
  FLASH_NAND_BLOCK_SIZE=$(FLASH_NAND_BLOCK_128KB)
  endif
@@ -48,7 +47,7 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/Makefile D7000_V1.0.1.84_WW_src/Source/M
  #need not add WW in version for WW release
  ifeq ($(REGION),WW)
  	VERSION=V$(VER)_$(SUB_VER)
-@@ -52,305 +32,210 @@
+@@ -52,305 +32,212 @@ else
  	ETCVERSION=$(ANNEX)$(VER)_$(SUB_VER)$(REGION)
  endif
  
@@ -68,42 +67,59 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/Makefile D7000_V1.0.1.84_WW_src/Source/M
 -ifeq ($(BRIDGE),1)
 -	FUNC = 01
 -endif
-+orig: clean_img clean_target pre_fs apps drivers prefs fs img
++orig: clean_img clean_target pre_fs uclibc apps drivers prefs fs img
  
 -ifeq ($(MULTI_PVC),1)
 -	FUNC = 03
 -endif
-+$(WORK_DIR_NAME): clean_img clean_target pre_fs apps drivers third-party prefs fs img
- 
+-
 -PID=$(FIRMWARE_DIR)/PID_$(VERSION)
-+clean_all: clean_uclibc clean_apps clean_third-party clean_target clean_img
- 
+-
 -all: build_test
-+clean: clean_target
++$(WORK_DIR_NAME): clean_img clean_target pre_fs uclibc apps drivers third-party prefs fs img
  
 -build_test: pre_fs apps drivers prefs fs img
--
++clean_all: clean_uclibc clean_apps clean_third-party clean_target clean_img
+ 
 -build_image: clean build_target pid build_dpf fs img bin
--
++clean: clean_target
+ 
 -.PHONY: prepare target apps drivers ui
 +.PHONY: apps drivers
  
  pre_fs:
  	rm -rf target
  	tar jxf target.tar.bz2
- 	cp -af $(CROSS_DIR_LIB)/*.so* target/lib
- 	cp -af $(CROSS_DIR_USR_LIB)/*.so* target/lib
+-	cp -af $(CROSS_DIR_LIB)/*.so* target/lib
+-	cp -af $(CROSS_DIR_USR_LIB)/*.so* target/lib
 -	rm -rf target/lib/libgcc_s.so
 -	rm -rf target/lib/libstdc++.so.6.0.16-gdb.py
 -	rm -rf target/lib/libconfig.so
 -	rm -rf target/lib/libcrypto.so
-+	rm -rf target/lib/libgcc_s.so target/lib/libstdc++.so.6.0.16-gdb.py target/lib/libconfig.so target/lib/libcrypto.so
++	cp -af $(CROSS_DIR_LIB)*.so* target/lib
++	cp -af $(CROSS_DIR_USR_LIB)*.so* target/lib
++	rm -rf target/lib/libgcc_s.so target/lib/libstdc++.so.*-gdb.py target/lib/libconfig.so target/lib/libcrypto.so
  	$(STRIP) target/lib/*.so*
- 	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
+-	cp -af $(CROSS_DIR_LIB)/libgcc_s.so target/lib
 -	cp -af $(CROSS_DIR_USR_LIB)/libstdc++.so.6.0.16-gdb.py target/lib
++	cp -af $(CROSS_DIR_LIB)libgcc_s.so target/lib
  	cd target/lib; ln -sf libscnvram.so libconfig.so
 -ifeq ($(ITUNES_SERVER),1)
 -	make -C uClibc-0.9.32/
+-	cp -af uClibc-0.9.32/lib/ld-uClibc-0.9.32.so target/lib/
+-endif
+-
+-prepare:
+-	# tools
+-	make -C $(HOSTTOOLS_DIR)
+-	make -C $(IMAGE_DIR)/tools
+-	# check fakeroot exist or not?
+-	@if [ $(firstword $(shell fakeroot -v) xxx) != "fakeroot" ]; then      \
+-	    echo "Need fakeroot support. Please install it" ; \
+-	    echo "You can get it from image/tools/src" ; \
+-	    exit 1;                     \
+-	else                            \
+-	    echo "fakeroot OK";         \
 +	$(foreach D, \
 +	target/opt/leafp2p target/opt/rcagent target/opt/rcagent/cgi target/opt/rcagent/scripts target/opt/remote target/opt/xagent \
 +	target/usr/sbin target/usr/sbin/rc_app target/www.eng/cgi-bin, \
@@ -138,42 +154,32 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/Makefile D7000_V1.0.1.84_WW_src/Source/M
 +	-@$(foreach D, "CHS" "ITA" "KOR" "ESP", find $(FS_DIR) -type d -name $(D) -exec rm -rf '{}' \; >/dev/null 2>&1;)
 +	-@$(foreach F, "Chinese.js" "Italian.js" "Korean.js" "Spanish.js", find $(FS_DIR) -type f -name $(F) -exec rm -f '{}' \;;)
 +endif
++
++uclibc:
 +	@echo -e "\\e[35mSOURCE: make \\e[36mUCLIBC \\e[0m"
 +	@if [ ! -f uClibc-0.9.32/.compiled ]; then \
-+	make UCLIBC_EXTRA_CFLAGS="$(UCLIBC_EXTRA_CFLAGS)" -C uClibc-0.9.32/ || exit 1; \
++	$(MAKE) UCLIBC_EXTRA_CFLAGS="$(UCLIBC_EXTRA_CFLAGS)" -C uClibc-0.9.32/ -s || exit 1; \
 +	touch uClibc-0.9.32/.compiled; \
-+	fi
- 	cp -af uClibc-0.9.32/lib/ld-uClibc-0.9.32.so target/lib/
--endif
- 
--prepare:
--	# tools
--	make -C $(HOSTTOOLS_DIR)
--	make -C $(IMAGE_DIR)/tools
--	# check fakeroot exist or not?
--	@if [ $(firstword $(shell fakeroot -v) xxx) != "fakeroot" ]; then      \
--	    echo "Need fakeroot support. Please install it" ; \
--	    echo "You can get it from image/tools/src" ; \
--	    exit 1;                     \
--	else                            \
--	    echo "fakeroot OK";         \
-+apps:
-+	@echo -e "\\e[35mSOURCE: make \\e[36mAPPS \\e[0m"
-+	@if [ ! -f $(APPS_DIR)/.compiled ]; then \
-+	$(MAKE) -C $(APPS_DIR) || exit 1; \
-+	touch $(APPS_DIR)/.compiled; \
  	fi
-+	$(MAKE) -C $(APPS_DIR) install || exit 1
++	@cp -af uClibc-0.9.32/lib/ld-uClibc-0.9.32.so target/lib/
  
--apps:
+ apps:
 -	@echo -e "\\e[35mSOURCE: make \\e[36mAPPS \\e[0m"		
 -	$(MAKE) -C $(APPS_DIR) 
 -	$(MAKE) -C $(APPS_DIR) install 
 -	
++	@echo -e "\\e[35mSOURCE: make \\e[36mAPPS \\e[0m"
++	@if [ ! -f $(APPS_DIR)/.compiled ]; then \
++	$(MAKE) -C $(APPS_DIR) || exit 1; \
++	touch $(APPS_DIR)/.compiled; \
++	fi
++	$(MAKE) -C $(APPS_DIR) install
++
  drivers:
 -	@echo -e "\\e[35mSOURCE: make \\e[36mdrivers \\e[0m"
+-	cd $(PROJ_DIR_KERNEL); make sc_driver SC_BUILD=1 SC_ROOT=$(ROOT)
 +	@echo -e "\\e[35mSOURCE: make \\e[36mDRIVERS \\e[0m"
- 	cd $(PROJ_DIR_KERNEL); make sc_driver SC_BUILD=1 SC_ROOT=$(ROOT)
++	$(MAKE) SC_BUILD=1 SC_ROOT=$(ROOT) -C $(PROJ_DIR_KERNEL) sc_driver -s
  
  third-party:
  	@echo -e "\\e[35mSOURCE: make \\e[36mTHIRD PARTY \\e[0m"
@@ -364,7 +370,11 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/Makefile D7000_V1.0.1.84_WW_src/Source/M
 -ifeq ($(ANNEX),B)	
 -	mkdir -p -m 777 $(FS_DIR)/config/language_CSY
 -	mkdir -p -m 777 $(FS_DIR)/config/language_TUR
--else
++	@echo -e "\\e[35mSOURCE: FS \\e[36mcreating CONFIG dirs\\e[0m"
++	@$(foreach D, "factory" "nvram" "xxx", mkdir -p -m 755 $(FS_DIR)/config/$(D);)
++ifeq ($(ANNEX),A)
++	@$(foreach D, "ENU" "DEU" "RUS" "FRA" "NLD" "SVE" "CHS" "ITA" "KOR" "ESP", mkdir -p -m 755 $(FS_DIR)/config/language_$(D);)
+ else
 -	mkdir -p -m 777 $(FS_DIR)/config/language_CHS
 -	mkdir -p -m 777 $(FS_DIR)/config/language_ITA
 -	mkdir -p -m 777 $(FS_DIR)/config/language_KOR
@@ -379,11 +389,7 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/Makefile D7000_V1.0.1.84_WW_src/Source/M
 -	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/EMPTY -o $(IMAGE_DIR)/empty.img -N $(TARGET_HOME)/nocomprlist
 -	$(HOSTTOOLS_DIR)/mkfs.jffs2 -l -p -n -e $(FLASH_NAND_BLOCK_SIZE) -r $(IMAGE_DIR)/languages -o $(IMAGE_DIR)/langpkg.img -N $(TARGET_HOME)/nocomprlist
 -	rm $(TARGET_HOME)/nocomprlist
-+	@echo -e "\\e[35mSOURCE: FS \\e[36mcreating CONFIG dirs\\e[0m"
-+	@$(foreach D, "factory" "nvram" "xxx", mkdir -p -m 755 $(FS_DIR)/config/$(D);)
-+ifeq ($(ANNEX),A)
-+	@$(foreach D, "ENU" "DEU" "RUS" "FRA" "NLD" "SVE" "CHS" "ITA" "KOR" "ESP", mkdir -p -m 755 $(FS_DIR)/config/language_$(D);)
- else
+-else
 -	-./makeDevs
 -	echo "$(HOSTTOOLS_DIR)/mksquashfs $(FS_DIR) $(FS_NAME) -noappend -be -all-root -b 65536" > $(FAKEROOT_SH)
 -	chmod +x $(FAKEROOT_SH)
