@@ -1,7 +1,6 @@
-diff -urN D7000_V1.0.1.84_WW_src/Source/env.mak D7000_V1.0.1.84_WW_src/Source/env.mak
---- D7000_V1.0.1.84_WW_src/Source/env.mak	2016-10-11 17:57:47.000000000 +0200
-+++ D7000_V1.0.1.84_WW_src/Source/env.mak	2017-01-13 14:24:56.249727068 +0100
-@@ -18,7 +18,7 @@
+--- D7000_V1.0.1.84_WW_src/Source/env.mak
++++ D7000_V1.0.1.84_WW_src/Source/env.mak
+@@ -18,7 +18,7 @@ export UI_DIR=$(ROOT)/UI
  export IMAGE_DIR=$(ROOT)/image
  export TARGET_DIR=$(ROOT)/target
  export SC_LIBS_DIR=$(APPS_DIR)/sc_libs
@@ -10,7 +9,7 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/env.mak D7000_V1.0.1.84_WW_src/Source/en
  export LOADER_DIR = $(TARGET_HOME)/cfe
  export CFERAM_DIR = $(TARGET_HOME)/cferam
  export DPF_DIR = $(TARGET_HOME)/dpf
-@@ -29,6 +29,7 @@
+@@ -29,6 +29,7 @@ export TOOLS_DIR  = $(TARGET_HOME)/tools
  export HOSTTOOLS_DIR = $(TARGET_HOME)/../Kernel/bcm963xx/hostTools
  export MAKE_BIN_DIR = $(TOOLS_DIR)/make_bin
  export FUNC = 00
@@ -18,7 +17,7 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/env.mak D7000_V1.0.1.84_WW_src/Source/en
  
  export ROOTFS = $(FS_DIR)
  
-@@ -45,12 +46,18 @@
+@@ -45,12 +46,20 @@ export AR=$(CROSS)ar
  export AS=$(CROSS)as
  export RANLIB=$(CROSS)ranlib
  export STRIP=$(CROSS)strip
@@ -31,11 +30,12 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/env.mak D7000_V1.0.1.84_WW_src/Source/en
  export PATH := $(CROSS_DIR):$(TOOLS_DIR):$(PATH)
  
 -#export CFLAGS += -Wno-strict-aliasing
--
 +# flags settings
 +export STRIPFLAGS := -x -R .note -R .comment -R .version --strip-unneeded
 +
 +export UCLIBC_EXTRA_CFLAGS := -mcpu=cortex-a9 -mtune=cortex-a9 -march=armv7-a -mabi=aapcs-linux -mfloat-abi=soft
-+
++export UCLIBC_EXTRA_CFLAGS := $(UCLIBC_EXTRA_CFLAGS) -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-prototypes -Wno-missing-declarations -Wno-implicit-function-declaration -Wno-suggest-attribute=noreturn -Wno-cpp -Wno-attributes -Wno-pointer-sign -Wno-shadow -Wno-nested-externs
+ 
 +export CFLAGS := -marm -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -pipe -funit-at-a-time -fomit-frame-pointer -ffixed-r8 -fno-common -mno-thumb-interwork -mabi=aapcs-linux -mfloat-abi=soft
++export CFLAGS := $(CFLAGS) -Wno-format -Wno-array-bounds -Wno-cpp -Wno-attributes -Wno-deprecated-declarations -Wno-main -Wno-parentheses -Wno-switch -Wno-enum-compare -Wno-pointer-sign -Wno-shadow -Wno-strict-aliasing -Wno-unused-function -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-but-set-parameter -Wno-unused-value -Wno-unused-label -Wno-implicit-function-declaration -Wno-return-type -Wno-cast-align
  
