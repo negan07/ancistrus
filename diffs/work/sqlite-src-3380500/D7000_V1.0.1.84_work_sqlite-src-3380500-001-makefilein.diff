@@ -1,5 +1,5 @@
---- work/sqlite-src-3380200/sqlite-src-3380200/Makefile.in
-+++ work/sqlite-src-3380200/sqlite-src-3380200/Makefile.in
+--- work/sqlite-src-3380500/sqlite-src-3380500/Makefile.in
++++ work/sqlite-src-3380500/sqlite-src-3380500/Makefile.in
 @@ -636,7 +636,7 @@
  # This is the default Makefile target.  The objects listed here
  # are what get build when you type just "make" with no arguments.

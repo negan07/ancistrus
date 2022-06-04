@@ -1,5 +1,5 @@
---- work/sqlite-src-3380200/Makefile
-+++ work/sqlite-src-3380200/Makefile
+--- work/sqlite-src-3380500/Makefile
++++ work/sqlite-src-3380500/Makefile
 @@ -0,0 +1,49 @@
 +include ../Rules.mak
 +
