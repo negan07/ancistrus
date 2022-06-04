@@ -413,10 +413,10 @@ DIRLIST				+= $(OPEN_VPN)
 TARLIST				+= $(TAR_$(OPEN_VPN))
 # ICONV
 ICONV_NAME			:= libiconv
-VER_$(ICONV_NAME)		:= 1.16
+VER_$(ICONV_NAME)		:= 1.17
 ICONV				:= $(ICONV_NAME)-$(VER_$(ICONV_NAME))
 NAME_$(ICONV)			:= $(ICONV_NAME)$(DBG)
-SUBVER_$(ICONV)			:= -002
+SUBVER_$(ICONV)			:= 
 VER_$(ICONV)			:= $(VER_$(ICONV_NAME))$(SUBVER_$(ICONV))
 DL_$(ICONV)			:= https://ftp.gnu.org/pub/gnu/libiconv
 TAR_$(ICONV)			:= $(ICONV).tar.gz
