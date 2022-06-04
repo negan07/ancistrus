@@ -35,7 +35,7 @@ mkdir -p -m 0755 $TCDIR
 cd $TCDIR
 echo "Extracting crosstools from tar.bz2 archive..."
 tar xjf ../${TARTC} || exit 3
-chmod -f 755 src/build
+chmod -f 755 Makefile src/build
 chmod -f 644 src/*.config
 # extract archives on dl dir
 cd $BRDLDIR
@@ -45,7 +45,7 @@ for P in ${PKGS}; do tar xjf ${P}.tar.bz2 || exit 3; done
 for P in ${PKGS}; do rm -f ${P}.tar.bz2; done
 cd ../../../../scripts
 # apply patches
-./apply_patch.sh $PROJECT $FWVER $DIFFDIR crosstools
+./apply_patch.sh $PROJECT $FWVER $DIFFDIR crosstools || exit 3
 # repack them all
 cd ../${TCDIR}/${BRDLDIR}
 echo "Repacking crosstools after patching..."

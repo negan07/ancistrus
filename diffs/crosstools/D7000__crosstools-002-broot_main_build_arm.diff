@@ -1,0 +1,49 @@
+--- crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build
++++ crosstools-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-sources/src/build
+@@ -56,23 +56,13 @@ build_toolchain() {
+     fi
+ }
+ 
+-TARGET_MIPS=$TOOLCHAIN_TOP/crosstools-mips-gcc-$GCC_VER-linux-$LINUX_VER-uclibc-$UCLIBC_VER-binutils-$BINUTILS_VER
+ TARGET_ARM=$TOOLCHAIN_TOP/crosstools-arm-gcc-$GCC_VER-linux-$LINUX_VER-uclibc-$UCLIBC_VER-binutils-$BINUTILS_VER-NPTL
+-TARGET_MIPSEL=$TOOLCHAIN_TOP/crosstools-mipsel-gcc-$GCC_VER-linux-$LINUX_VER-uclibc-$UCLIBC_VER-binutils-$BINUTILS_VER
+ 
+ #sanity check
+-if [ "$ARCH" = "mips" ] || [ "$ARCH" = "all" ]; then
+-    validate_target_dir "$TARGET_MIPS"
+-fi
+-
+ if [ "$ARCH" = "arm" ] || [ "$ARCH" = "all" ]; then
+     validate_target_dir "$TARGET_ARM"
+ fi
+ 
+-if [ "$ARCH" = "mipsel" ] || [ "$ARCH" = "all" ]; then
+-   validate_target_dir "$TARGET_MIPSEL"
+-fi
+-
+ if [ $CHECK_ERR ]; then
+    exit 1
+ fi
+@@ -80,20 +70,11 @@ fi
+ cd ./buildroot-$BR_VER
+ buildhome=`pwd`
+ 
+-# build the mips toolcahin first 
+-if [ "$ARCH" = "mips" ] || [ "$ARCH" = "all" ]; then
+-    build_toolchain "mips" "$TARGET_MIPS" "mips-unknown-linux-uclibc"
+-fi
+-
+-# build the arm toolcahin now
++# build the arm toolchain
+ if [ "$ARCH" = "arm" ] || [ "$ARCH" = "all" ]; then
+     build_toolchain "arm" "$TARGET_ARM" "arm-unknown-linux-uclibcgnueabi"
+ fi
+ 
+-if [ "$ARCH" = "mipsel" ] || [ "$ARCH" = "all" ]; then
+-    build_toolchain "mipsel" "$TARGET_MIPSEL" "mipsel-unknown-linux-uclibc"
+-fi
+-
+ cd $buildhome
+ cd ..
+-	
++
