@@ -1,7 +1,6 @@
-diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile
---- D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile	2016-10-11 17:54:20.000000000 +0200
-+++ D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile	2017-05-05 14:57:10.394917511 +0200
-@@ -7,13 +7,14 @@
+--- D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile
++++ D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile
+@@ -7,13 +7,14 @@ DIRS=
  DIRS_BASIC=
  FFMPEG_DIR=../mediaserver/library/ffmpeg-0.11.2/
  AVAHI_DIR=
@@ -9,16 +8,16 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile D7000_V1.0.1.84_WW_s
  ifeq ($(ITUNES_SERVER), 1)
  AVAHI_DIR=avahi-0.6.25
 -DIRS += sqlite-3.6.16 alsa-lib-1.0.26 libxml2-2.9.1 libplist-1.11 libantlr3c-3.2 confuse-2.6 libevent-2.0.22-stable libunistring-0.9.5 db-4.7.25.NC libgpg-error-1.10 libgcrypt-1.5.0 netatalk-2.2.5 expat-2.0.1 dbus-1.8.0 gdbm-1.8.3 libdaemon-0.14 $(AVAHI_DIR) forked-daapd-23.1
-+DIRS += sqlite-3.6.16 alsa-lib-1.0.26 libxml2-2.9.1 libplist-1.11 libantlr3c-3.2 confuse-2.6 libevent-2.0.22-stable libunistring-0.9.5 db-4.7.25.NC libgpg-error-1.10 libgcrypt-1.5.0 $(NETATALK_DIR) expat-2.0.1 dbus-1.8.0 gdbm-1.8.3 libdaemon-0.14 $(AVAHI_DIR) forked-daapd-23.1
++DIRS += sqlite-3.6.16 alsa-lib-1.0.26 libxml2-2.9.1 libplist-1.11 libantlr3c-3.2 confuse-2.6 libevent-2.0.22-stable libunistring-0.9.5 db-4.7.25.NC libgpg-error-1.10 libgcrypt-1.5.0 $(NETATALK_DIR) expat-2.0.1 dbus-1.8.0 libdaemon-0.14 $(AVAHI_DIR) forked-daapd-23.1
  DIRS_BASIC += mxml-2.8 avl-0.3.5 $(FFMPEG_DIR)
  else
  AVAHI_DIR=avahi-0.6.25
 -DIRS += db-4.7.25.NC libgpg-error-1.10 libgcrypt-1.5.0 netatalk-2.2.5 expat-2.0.1 gdbm-1.8.3 libdaemon-0.14 $(AVAHI_DIR)
-+DIRS += db-4.7.25.NC libgpg-error-1.10 libgcrypt-1.5.0 $(NETATALK_DIR) expat-2.0.1 gdbm-1.8.3 libdaemon-0.14 $(AVAHI_DIR)
++DIRS += db-4.7.25.NC libgpg-error-1.10 libgcrypt-1.5.0 $(NETATALK_DIR) expat-2.0.1 libdaemon-0.14 $(AVAHI_DIR)
  endif
  
  STAGING_DIR :=$(shell pwd)/target
-@@ -56,7 +57,7 @@
+@@ -56,7 +57,7 @@ define BUILD_PACKAGE
  $(1)/build_sc/config.status:
  	@echo "-----------sc-----"$1"-----------------------"
  	if [ ! -e $(1)/build_sc ]; then mkdir $(1)/build_sc;fi
@@ -27,10 +26,11 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile D7000_V1.0.1.84_WW_s
  
  $(1)/.build: $(1)/build_sc/config.status
  	@echo "-----------build-----"$1"-----------------------"
-@@ -73,38 +74,38 @@
+@@ -72,39 +73,37 @@ $(foreach DIR, $(DIRS), $(eval $(call BU
+ clean:
  	@for i in $(DIRS_BASIC) ; do echo -e "\\e[35mapps: clean \\e[36m$$i \\e[0m"; $(MAKE) -C $$i clean  || exit 1; done
  	rm -rf $(STAGING_DIR) $(BUILD_DIR) $(DIR_BUILD)
- 	#echo "dir=$(DIR_BUILD) $(BUILD_DIR) $(STAGING_DIR) itunes-server=$(ITUNES_SERVER)"
+-	#echo "dir=$(DIR_BUILD) $(BUILD_DIR) $(STAGING_DIR) itunes-server=$(ITUNES_SERVER)"
 -	-rm $(TARGET)/usr/sbin/afpd
 -	-rm $(TARGET)/usr/sbin/afppasswd 
 -	-rm $(TARGET)/usr/sbin/avahi-autoipd
@@ -70,7 +70,6 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile D7000_V1.0.1.84_WW_s
 +	-rm -f $(TARGET_LIBDIR)/libgpg-error.so.*
 +	-rm -f $(TARGET_LIBDIR)/libgcrypt.so.*
 +	-rm -f $(TARGET_LIBDIR)/libexpat.so*
-+	-rm -f $(TARGET_LIBDIR)/libgdbm.so.*
 +	-rm -f $(TARGET_LIBDIR)/libdaemon.so.*
 +	-rm -f $(TARGET_LIBDIR)/libavahi-{common,core}.so.*
 +	-rm -f $(TARGET)/usr/sbin/avahi-daemon 
@@ -98,7 +97,11 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile D7000_V1.0.1.84_WW_s
  
  .PHONY: clean install
  
-@@ -118,23 +119,17 @@
+@@ -114,27 +113,18 @@ install:
+ 	$(INSTALL_DIR) $(TARGET_LIBDIR)
+ 	$(INSTALL_DIR) $(TARGET)/usr/etc/avahi/
+ 	$(INSTALL_DIR) $(TARGET)/usr/etc/avahi/services
+-
  	$(STRIP) $(STAGING_DIR)/usr/lib/libdb*.so
  	$(STRIP) $(STAGING_DIR)/usr/lib/libgpg-error.so.*
  	$(STRIP) $(STAGING_DIR)/usr/lib/libgcrypt.so.*
@@ -113,43 +116,46 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile D7000_V1.0.1.84_WW_s
 +#	$(STRIP) $(STAGING_DIR)/etc/netatalk/uams/*.so
 +	$(STRIP) $(NETATALK_DIR)/build_sc/etc/uams/.libs/*.so
  	$(STRIP) $(STAGING_DIR)/usr/local/lib/libexpat.so*
- 	$(STRIP) $(STAGING_DIR)/usr/local/lib/libgdbm.so*
+-	$(STRIP) $(STAGING_DIR)/usr/local/lib/libgdbm.so*
  	$(STRIP) $(STAGING_DIR)/usr/local/lib/libdaemon.so*
  	$(STRIP) $(STAGING_DIR)/usr/lib/libavahi-{common,core}.so*
 -	$(STRIP) $(STAGING_DIR)/usr/sbin/avahi-autoipd \
 -		$(STAGING_DIR)/usr/sbin/avahi-daemon \
 -		$(STAGING_DIR)/usr/sbin/avahi-dnsconfd
+-
 +	$(SSTRIP) $(STAGING_DIR)/usr/sbin/avahi-autoipd $(STAGING_DIR)/usr/sbin/avahi-daemon $(STAGING_DIR)/usr/sbin/avahi-dnsconfd
- 
  ifeq ($(ITUNES_SERVER),1)
 -	@for i in $(DIRS_BASIC) ; do echo -e "\\e[35mapps: install\\e[36m$$i \\e[0m";  $(MAKE) -C $$i install  || exit 1; done
 +	@for i in $(DIRS_BASIC) ; do echo -e "\\e[35mapps: install \\e[36m$$i \\e[0m";  $(MAKE) -C $$i install  || exit 1; done
  	$(STRIP) $(STAGING_DIR)/lib/libantlr3c.so
  	$(STRIP) $(STAGING_DIR)/lib/libasound.so*
  	$(STRIP) $(STAGING_DIR)/lib/libconfuse.so*
-@@ -147,8 +142,9 @@
+@@ -147,9 +137,9 @@ ifeq ($(ITUNES_SERVER),1)
  	$(STRIP) $(STAGING_DIR)/usr/lib/libavahi-client.so*
  	$(STRIP) $(STAGING_DIR)/usr/lib/forked-daapd/forked-daapd-sqlext.so 
  	$(STRIP) $(FFMPEG_DIR)/libswscale/libswscale.so* $(FFMPEG_DIR)/libavutil/libavutil.so* $(FFMPEG_DIR)/libavformat/libavformat.so* $(FFMPEG_DIR)/libavcodec/libavcodec.so.*
 -	$(STRIP) $(STAGING_DIR)/usr/sbin/forked-daapd
 -	$(STRIP) $(STAGING_DIR)/bin/dbus-daemon
+-
 +	$(SSTRIP) $(STAGING_DIR)/usr/sbin/forked-daapd
 +	$(SSTRIP) $(STAGING_DIR)/bin/dbus-daemon
 +	$(SSTRIP) $(STAGING_DIR)/usr/sbin/arm-linux-afpd
- 
  	cp -a $(STAGING_DIR)/lib/libantlr3c.so	$(TARGET_LIBDIR)
  	cp -a $(STAGING_DIR)/lib/libasound.so*	$(TARGET_LIBDIR)
-@@ -168,7 +164,6 @@
+ 	cp -a $(STAGING_DIR)/lib/libconfuse.so*	$(TARGET_LIBDIR)
+@@ -168,38 +158,34 @@ ifeq ($(ITUNES_SERVER),1)
  	cp -a $(STAGING_DIR)/usr/sbin/forked-daapd $(TARGET)/usr/sbin/
  	cp -a $(STAGING_DIR)/bin/dbus-daemon $(TARGET)/usr/sbin/
  endif
 -
  	cp -a $(STAGING_DIR)/usr/local/lib/libexpat.so* $(TARGET_LIBDIR)
- 	cp -a $(STAGING_DIR)/usr/local/lib/libgdbm.so.* $(TARGET_LIBDIR)
+-	cp -a $(STAGING_DIR)/usr/local/lib/libgdbm.so.* $(TARGET_LIBDIR)
  	cp -a $(STAGING_DIR)/usr/local/lib/libdaemon.so.* $(TARGET_LIBDIR)
-@@ -178,15 +173,17 @@
+ 	cp -a $(STAGING_DIR)/usr/lib/libdb*.so $(TARGET_LIBDIR)
+ 	cp -a $(STAGING_DIR)/usr/lib/libgpg-error.so.* $(TARGET_LIBDIR)
+ 	cp -a $(STAGING_DIR)/usr/lib/libgcrypt.so.* $(TARGET_LIBDIR)
  	cp -a $(STAGING_DIR)/usr/lib/libavahi-{common,core}.so.* $(TARGET_LIBDIR)
- 
+-
  	cp -a $(STAGING_DIR)/usr/sbin/arm-linux-afpd $(TARGET)/usr/sbin/afpd
 -	cp -a netatalk-2.2.5/build_sc/bin/afppasswd/afppasswd  $(TARGET)/usr/sbin/afppasswd
 +	cp -a $(NETATALK_DIR)/build_sc/bin/afppasswd/afppasswd  $(TARGET)/usr/sbin/afppasswd
@@ -169,5 +175,18 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/Makefile D7000_V1.0.1.84_WW_s
 +	cp $(NETATALK_DIR)/afpd.conf $(TARGET)/usr/etc/netatalk/
 +	cp $(NETATALK_DIR)/afppasswd $(TARGET)/usr/etc/netatalk/
  	chmod 644 $(TARGET)/usr/etc/netatalk/AppleVolumes.default $(TARGET)/usr/etc/netatalk/AppleVolumes.system
- 
+-
  	cp -a $(STAGING_DIR)/etc/avahi/avahi-autoipd.action $(TARGET)/usr/etc/avahi/
+ 	cp -a $(STAGING_DIR)/usr/sbin/avahi-autoipd $(TARGET)/usr/sbin/
+ 	cp -a $(STAGING_DIR)/usr/sbin/avahi-daemon $(TARGET)/usr/sbin/
+-
+ 	cp $(AVAHI_DIR)/avahi-daemon.conf $(TARGET)/usr/etc/avahi/
+ 	cp $(AVAHI_DIR)/service-http $(TARGET)/usr/etc/avahi/
+ 	#cp $(AVAHI_DIR)/service-http $(TARGET)/usr/etc/avahi/services/http.service
+ 	cp $(AVAHI_DIR)/afpd.service $(TARGET)/usr/etc/avahi/services/afpd.service
+ 	cp $(AVAHI_DIR)/smbd.service $(TARGET)/usr/etc/avahi/services/smbd.service
+ 	cp $(AVAHI_DIR)/adisk.service $(TARGET)/usr/etc/avahi/services/adisk.service
+-
+ 	cp $(STAGING_DIR)/etc/avahi/avahi-dnsconfd.action $(TARGET)/usr/etc/avahi/
+ 	cp $(STAGING_DIR)/usr/sbin/avahi-dnsconfd $(TARGET)/usr/sbin/
+ 

@@ -6,7 +6,7 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/mxml-2.8/build.sh D7000_V1.0.
  cd $build_dir
  
 -CPPFLAGS="" CFLAGS="-I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --prefix=
-+CPPFLAGS="" CFLAGS="${1} -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --prefix=
++CPPFLAGS="" CFLAGS="${1} -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-unknown-linux-uclibcgnueabi --host=arm-unknown-linux-uclibcgnueabi --build=x86_64-unknown-linux-gnu --enable-shared --prefix=
 diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/mxml-2.8/Makefile D7000_V1.0.1.84_WW_src/Source/apps/apple/mxml-2.8/Makefile
 --- D7000_V1.0.1.84_WW_src/Source/apps/apple/mxml-2.8/Makefile	2016-10-11 17:53:52.000000000 +0200
 +++ D7000_V1.0.1.84_WW_src/Source/apps/apple/mxml-2.8/Makefile	2017-05-04 14:46:29.105544499 +0200

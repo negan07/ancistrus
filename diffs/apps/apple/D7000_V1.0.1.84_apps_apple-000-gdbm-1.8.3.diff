@@ -7,7 +7,7 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/gdbm-1.8.3/build.sh D7000_V1.
  cd $build_dir
 -CC=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-gcc ../configure --target=arm-linux --host=arm-linux --build=i686-pc-linux-gnu --enable-shared --enable-static
 +
-+CFLAGS="${1}" CC=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-gcc ../configure --target=arm-linux --host=arm-linux --build=i686-pc-linux-gnu --enable-shared --enable-static
++CFLAGS="${1}" CC=/opt/toolchains/crosstools-arm-gcc-4.6-linux-3.4-uclibc-0.9.32-binutils-2.21-NPTL/usr/bin/arm-linux-gcc ../configure --target=arm-linux --host=arm-linux --build=x86_64-unknown-linux-gnu --enable-shared --enable-static
  echo "INSTALL_ROOT := \$(DESTDIR)" >> Makefile
  echo "BINGRP := `id -u`" >> Makefile
  echo "BINOWN := `id -g`" >> Makefile

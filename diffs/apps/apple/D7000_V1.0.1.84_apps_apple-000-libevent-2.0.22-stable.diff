@@ -6,4 +6,4 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/libevent-2.0.22-stable/build.
  cd $build_dir
  
 -CPPFLAGS="" CFLAGS="-I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --enable-static --prefix=
-+CPPFLAGS="" CFLAGS="${1} -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --enable-static --prefix=
++CPPFLAGS="" CFLAGS="${1} -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-unknown-linux-uclibcgnueabi --host=arm-unknown-linux-uclibcgnueabi --build=x86_64-unknown-linux-gnu --enable-shared --enable-static --prefix=

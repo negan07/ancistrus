@@ -1,12 +1,173 @@
-diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/libxml2-2.9.1/build.sh D7000_V1.0.1.84_WW_src/Source/apps/apple/libxml2-2.9.1/build.sh
---- D7000_V1.0.1.84_WW_src/Source/apps/apple/libxml2-2.9.1/build.sh	2016-10-11 17:54:20.000000000 +0200
-+++ D7000_V1.0.1.84_WW_src/Source/apps/apple/libxml2-2.9.1/build.sh	2017-05-04 20:53:03.771753087 +0200
-@@ -2,7 +2,7 @@
- build_dir=build_sc
- cd $build_dir
+--- D7000_V1.0.1.84_WW_src/Source/apps/apple/libxml2-2.9.1/build.sh
++++ D7000_V1.0.1.84_WW_src/Source/apps/apple/libxml2-2.9.1/build.sh
+@@ -1,11 +1,11 @@
+ #!/bin/bash
+-build_dir=build_sc
+-cd $build_dir
++autoreconf -vfi
++cd build_sc
  
 -CPPFLAGS="-I`pwd`/../../../mediaserver/library/zlib-1.2.3/include/ " CFLAGS="-I`pwd`/../../../mediaserver/library/zlib-1.2.3/include/ -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS=" -L`pwd`/../../../mediaserver/library/zlib-1.2.3/ -lz -L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --enable-static --prefix= \
-+CPPFLAGS="-I`pwd`/../../../mediaserver/library/zlib-1.2.3/include/ " CFLAGS="${1} -I`pwd`/../../../mediaserver/library/zlib-1.2.3/include/ -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS=" -L`pwd`/../../../mediaserver/library/zlib-1.2.3/ -lz -L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --enable-static --prefix= \
++CPPFLAGS="-I`pwd`/../../../mediaserver/library/zlib-1.2.3/ -I`pwd`/../../../mediaserver/library/zlib-1.2.3/ -I`pwd`/../  -I`pwd`/../../expat-2.0.1/lib/" CFLAGS="${1}" LDFLAGS="-L`pwd`/../../../mediaserver/library/zlib-1.2.3/ -lz -L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-unknown-linux-uclibcgnueabi --host=arm-unknown-linux-uclibcgnueabi --build=x86_64-unknown-linux-gnu --enable-shared --enable-static --prefix= \
    --with-c14n=yes \
    --with-catalog=no \
-   --with-debug=yes \
+-  --with-debug=yes \
++  --with-debug=no \
+   --with-docbook=no \
+   --with-fexceptions=no \
+   --with-ftp=no \
+--- D7000_V1.0.1.84_WW_src/Source/apps/apple/libxml2-2.9.1/configure.in
++++ D7000_V1.0.1.84_WW_src/Source/apps/apple/libxml2-2.9.1/configure.in
+@@ -705,7 +705,7 @@ else
+     fi
+ 
+     # warnings we'd like to see
+-    CFLAGS="${CFLAGS} -pedantic -W -Wformat -Wunused -Wimplicit -Wreturn-type -Wswitch -Wcomment -Wtrigraphs -Wformat -Wchar-subscripts -Wuninitialized -Wparentheses -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls"
++    CFLAGS="-W -Wimplicit -Wreturn-type -Wswitch -Wcomment -Wtrigraphs -Wchar-subscripts -Wuninitialized -Wparentheses -Wshadow -Wpointer-arith -Wwrite-strings -Waggregate-return -Wnested-externs -Wno-sign-compare ${CFLAGS}"
+     # warnings we'd like to supress
+     CFLAGS="${CFLAGS} -Wno-long-long"
+     case "${host}" in
+@@ -1574,7 +1574,7 @@ rm -f COPYING.LIB COPYING
+ ln -s $srcdir/Copyright COPYING
+ 
+ # keep on one line for cygwin c.f. #130896
+-AC_CONFIG_FILES([libxml2.spec:libxml.spec.in Makefile include/Makefile include/libxml/Makefile doc/Makefile doc/examples/Makefile doc/devhelp/Makefile example/Makefile python/Makefile python/tests/Makefile xstc/Makefile include/libxml/xmlversion.h xml2-config libxml-2.0.pc libxml-2.0-uninstalled.pc python/setup.py])
++AC_CONFIG_FILES([libxml2.spec:libxml.spec.in Makefile include/Makefile include/libxml/Makefile xstc/Makefile include/libxml/xmlversion.h xml2-config libxml-2.0.pc libxml-2.0-uninstalled.pc])
+ AC_OUTPUT
+ 
+ chmod +x xml2-config python/setup.py
+--- D7000_V1.0.1.84_WW_src/Source/apps/apple/libxml2-2.9.1/Makefile.am
++++ D7000_V1.0.1.84_WW_src/Source/apps/apple/libxml2-2.9.1/Makefile.am
+@@ -66,110 +66,6 @@ man_MANS = xml2-config.1 libxml.3
+ m4datadir = $(datadir)/aclocal
+ m4data_DATA = libxml.m4
+ 
+-runtest_SOURCES=runtest.c
+-runtest_LDFLAGS = 
+-runtest_DEPENDENCIES = $(DEPS)
+-runtest_LDADD= $(BASE_THREAD_LIBS) $(RDL_LIBS) $(LDADDS)
+-
+-testrecurse_SOURCES=testrecurse.c
+-testrecurse_LDFLAGS = 
+-testrecurse_DEPENDENCIES = $(DEPS)
+-testrecurse_LDADD= $(BASE_THREAD_LIBS) $(RDL_LIBS) $(LDADDS)
+-
+-testlimits_SOURCES=testlimits.c
+-testlimits_LDFLAGS = 
+-testlimits_DEPENDENCIES = $(DEPS)
+-testlimits_LDADD= $(BASE_THREAD_LIBS) $(RDL_LIBS) $(LDADDS)
+-
+-testchar_SOURCES=testchar.c
+-testchar_LDFLAGS = 
+-testchar_DEPENDENCIES = $(DEPS)
+-testchar_LDADD= $(RDL_LIBS) $(LDADDS)
+-
+-testdict_SOURCES=testdict.c
+-testdict_LDFLAGS = 
+-testdict_DEPENDENCIES = $(DEPS)
+-testdict_LDADD= $(RDL_LIBS) $(LDADDS)
+-
+-runsuite_SOURCES=runsuite.c
+-runsuite_LDFLAGS = 
+-runsuite_DEPENDENCIES = $(DEPS)
+-runsuite_LDADD= $(RDL_LIBS) $(LDADDS)
+-
+-xmllint_SOURCES=xmllint.c
+-xmllint_LDFLAGS = 
+-xmllint_DEPENDENCIES = $(DEPS)
+-xmllint_LDADD=  $(RDL_LIBS) $(LDADDS)
+-
+-testSAX_SOURCES=testSAX.c
+-testSAX_LDFLAGS = 
+-testSAX_DEPENDENCIES = $(DEPS)
+-testSAX_LDADD= $(LDADDS)
+-
+-testHTML_SOURCES=testHTML.c
+-testHTML_LDFLAGS = 
+-testHTML_DEPENDENCIES = $(DEPS)
+-testHTML_LDADD= $(LDADDS)
+-
+-xmlcatalog_SOURCES=xmlcatalog.c
+-xmlcatalog_LDFLAGS = 
+-xmlcatalog_DEPENDENCIES = $(DEPS)
+-xmlcatalog_LDADD = $(RDL_LIBS) $(LDADDS)
+-
+-testXPath_SOURCES=testXPath.c
+-testXPath_LDFLAGS = 
+-testXPath_DEPENDENCIES = $(DEPS)
+-testXPath_LDADD= $(LDADDS)
+-
+-testC14N_SOURCES=testC14N.c
+-testC14N_LDFLAGS = 
+-testC14N_DEPENDENCIES = $(DEPS)
+-testC14N_LDADD= $(LDADDS)
+-
+-if THREADS_W32
+-testThreads_SOURCES = testThreadsWin32.c
+-else
+-testThreads_SOURCES = testThreads.c
+-endif
+-testThreads_LDFLAGS = 
+-testThreads_DEPENDENCIES = $(DEPS)
+-testThreads_LDADD= $(BASE_THREAD_LIBS) $(LDADDS)
+-
+-testURI_SOURCES=testURI.c
+-testURI_LDFLAGS = 
+-testURI_DEPENDENCIES = $(DEPS)
+-testURI_LDADD= $(LDADDS)
+-
+-testRegexp_SOURCES=testRegexp.c
+-testRegexp_LDFLAGS = 
+-testRegexp_DEPENDENCIES = $(DEPS)
+-testRegexp_LDADD= $(LDADDS)
+-
+-testAutomata_SOURCES=testAutomata.c
+-testAutomata_LDFLAGS = 
+-testAutomata_DEPENDENCIES = $(DEPS)
+-testAutomata_LDADD= $(LDADDS)
+-
+-testSchemas_SOURCES=testSchemas.c
+-testSchemas_LDFLAGS = 
+-testSchemas_DEPENDENCIES = $(DEPS)
+-testSchemas_LDADD= $(LDADDS)
+-
+-testRelax_SOURCES=testRelax.c
+-testRelax_LDFLAGS = 
+-testRelax_DEPENDENCIES = $(DEPS)
+-testRelax_LDADD= $(LDADDS)
+-
+-testReader_SOURCES=testReader.c
+-testReader_LDFLAGS = 
+-testReader_DEPENDENCIES = $(DEPS)
+-testReader_LDADD= $(LDADDS)
+-
+-testModule_SOURCES=testModule.c
+-testModule_LDFLAGS = 
+-testModule_DEPENDENCIES = $(DEPS)
+-testModule_LDADD= $(LDADDS)
+-
+ noinst_LTLIBRARIES = testdso.la
+ testdso_la_SOURCES = testdso.c
+ testdso_la_LDFLAGS = -module -no-undefined -avoid-version -rpath $(libdir)
+@@ -187,21 +83,6 @@ testapi.c: $(srcdir)/gentest.py
+ 
+ BUILT_SOURCES = testapi.c
+ 
+-testapi_SOURCES=testapi.c
+-testapi_LDFLAGS = 
+-testapi_DEPENDENCIES = $(DEPS)
+-testapi_LDADD= $(LDADDS)
+-
+-runxmlconf_SOURCES=runxmlconf.c
+-runxmlconf_LDFLAGS = 
+-runxmlconf_DEPENDENCIES = $(DEPS)
+-runxmlconf_LDADD= $(LDADDS)
+-
+-#testOOM_SOURCES=testOOM.c testOOMlib.h testOOMlib.c
+-#testOOM_LDFLAGS = 
+-#testOOM_DEPENDENCIES = $(DEPS)
+-#testOOM_LDADD= $(LDADDS)
+-
+ runtests:
+ 	[ -d test   ] || $(LN_S) $(srcdir)/test   .
+ 	[ -d result ] || $(LN_S) $(srcdir)/result .

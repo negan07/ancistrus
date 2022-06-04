@@ -7,4 +7,4 @@ diff -urN D7000_V1.0.1.84_WW_src/Source/apps/apple/alsa-lib-1.0.26/build.sh D700
  
 -CPPFLAGS="-I." CFLAGS="-I`pwd`/../ -I. -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --prefix= \
 -		  --disable-python
-+CPPFLAGS="-I." CFLAGS="${1} -I`pwd`/../ -I. -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-linux-uclibc --host=arm-linux-uclibc --build=i486-linux-gnu --enable-shared --prefix= --disable-python
++CPPFLAGS="-I." CFLAGS="${1} -I`pwd`/../ -I. -I`pwd`/../../expat-2.0.1/lib/" LDFLAGS="-L`pwd`/../../target/usr/local/lib/" ../configure --target=arm-unknown-linux-uclibcgnueabi --host=arm-unknown-linux-uclibcgnueabi --build=x86_64-unknown-linux-gnu --enable-shared --prefix= --disable-python
