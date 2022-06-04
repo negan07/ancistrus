@@ -1,0 +1,74 @@
+--- work/curl-7.83.1/Makefile
++++ work/curl-7.83.1/Makefile
+@@ -0,0 +1,71 @@
++include ../Rules.mak
++
++LIBSNAME		:= libcurl.so
++LIBSMAINVER		:= 4
++LIBSVER			:= $(LIBSMAINVER).8.0
++LIBS			:= $(LIBSNAME).$(LIBSVER)
++BINS			:= curl
++
++all: config
++	$(MAKE) -C $(CURL)
++
++config:
++	@if [ ! -f h_config ]; then \
++	$(MAKE) configure || exit 1; \
++	touch h_config; \
++	fi
++
++configure:
++	cd $(CURL) && aclocal && autoheader && automake -a && autoconf && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --prefix=$(USRDIR) --sysconfdir=$(TMPETC) --libdir=$(LDLIB) --sharedstatedir=$(LDLIB) --bindir=$(USRSBIN) --sbindir=$(USRSBIN) --libexecdir=$(USRSBIN) --localstatedir=$(VARLIB) --with-ca-path=$(TMPETC) --with-ca-bundle=$(TMPETC)/$(RCCRT) --with-zlib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-openssl=$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) --enable-ares=$(WORK_DIR)/$(ARES)/$(ARES) CFLAGS="$(CFLAGS) -Os -s -fPIC" CPPFLAGS="-I$(WORK_DIR)/$(ZLIB)/$(ZLIB) -I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include -I$(WORK_DIR)/$(ARES)/$(ARES)/include" LDFLAGS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) -L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -L$(WORK_DIR)/$(ARES)/$(ARES)/src/lib/.libs" LIBS="-lz -lssl -lcrypto -lcares" --enable-shared --disable-static --enable-ipv6 --enable-tls-srp --disable-debug --disable-curldebug --disable-manual --disable-verbose --disable-socketpair --disable-get-easy-options --disable-ldap --disable-ldaps --without-brotli --without-mbedtls --without-wolfssl --without-zsh-functions-dir --without-bearssl --without-libpsl --without-libidn2 --without-msh3
++
++static: distclean
++	cd $(CURL) && aclocal && autoheader && automake -a && autoconf && ./configure --build=$(BUILD_HOST) --host=$(TARGET_NAME) --prefix=$(USRDIR) --sysconfdir=$(TMPETC) --libdir=$(LDLIB) --sharedstatedir=$(LDLIB) --bindir=$(USRSBIN) --sbindir=$(USRSBIN) --libexecdir=$(USRSBIN) --localstatedir=$(VARLIB) --with-ca-path=$(TMPETC) --with-ca-bundle=$(TMPETC)/$(RCCRT) --with-zlib=$(WORK_DIR)/$(ZLIB)/$(ZLIB) --with-openssl=$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) --enable-ares=$(WORK_DIR)/$(ARES)/$(ARES) CFLAGS="$(CFLAGS) -Os -s -fPIC" CPPFLAGS="-I$(WORK_DIR)/$(ZLIB)/$(ZLIB) -I$(WORK_DIR)/$(OPENSSL)/$(OPENSSL)/include -I$(WORK_DIR)/$(ARES)/$(ARES)/include" LDFLAGS="-L$(WORK_DIR)/$(ZLIB)/$(ZLIB) -L$(WORK_DIR)/$(OPENSSL)/$(OPENSSL) -L$(WORK_DIR)/$(ARES)/$(ARES)/src/lib/.libs" LIBS="-lz -lssl -lcrypto -lcares" --disable-shared --enable-static --enable-ipv6 --enable-tls-srp --disable-debug --disable-curldebug --disable-manual --disable-verbose --disable-socketpair --disable-get-easy-options --disable-ldap --disable-ldaps --without-brotli --without-mbedtls --without-wolfssl --without-zsh-functions-dir --without-bearssl --without-libpsl --without-libidn2 --without-msh3 && cd .. && $(MAKE) -C $(CURL) && $(STRIP) $(STRIPFLAGS) $(CURL)/lib/.libs/*.a
++
++install: control
++	$(STRIP) $(CURL)/lib/.libs/$(LIBS)
++	$(SSTRIP) $(CURL)/src/.libs/$(BINS)
++	install -m 0755 -d $(TMPINSTDIR)
++	install -m 0755 $(CURL)/lib/.libs/$(LIBS) $(CURL)/src/.libs/$(BINS) $(TMPINSTDIR)
++	install -m 0600 $(CURL)/lib/$(RCCRT) $(TMPINSTDIR)
++	for L in $(LIBSNAME) $(LIBSNAME).$(LIBSMAINVER); do ln -sf $(LIBS) $(TMPINSTDIR)/$$L; done
++	ln -sf $(TMPETC)/$(RCCRT) $(TMPINSTDIR)/$(RCOPTCRT)
++
++ca-bundle:
++	[ -f $(CURL)/lib/$(RCCRT) ] || $(MAKE) -C $(CURL) ca-bundle
++
++clean:
++	$(MAKE) -C $(CURL) clean
++
++distclean:
++	@rm -f h_config
++	$(MAKE) -C $(CURL) distclean
++
++ifndef BUILD
++control:
++else
++PREINST			:= $(CTRL_DIR)/preinst
++POSTINST		:= $(CTRL_DIR)/postinst
++
++control: preinst postinst
++
++preinst:
++	@echo "#!/bin/sh" > $(PREINST)
++	@echo "echo \"Removing old $(BINS) lib ver & symlinks...\"" >> $(PREINST)
++	@echo "rm -f $(LDLIB)/$(LIBSNAME)*" >> $(PREINST)
++	@echo "sync" >> $(PREINST)
++	@echo "exit 0" >> $(PREINST)
++
++postinst:
++	@echo "#!/bin/sh" > $(POSTINST)
++	@echo "[ ! -f $(TMPDIR)/$(BINS) ] && exit 0" >> $(POSTINST)
++	@echo "echo \"Updating $(BINS) lib, bins and certs ...\"" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(LIBSNAME)* $(LDLIB)/" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(BINS) $(USRSBIN)/" >> $(POSTINST)
++	@echo "sync" >> $(POSTINST)
++	@echo "cp -f $(TMPDIR)/$(RCCRT) $(USRETC)/" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(RCCRT) $(TMPETC)/" >> $(POSTINST)
++	@echo "mv -f $(TMPDIR)/$(RCOPTCRT) $(RCOPTCRTDIR)/" >> $(POSTINST)
++	@echo "sync" >> $(POSTINST)
++	@echo "exit 0" >> $(POSTINST)
++endif
++

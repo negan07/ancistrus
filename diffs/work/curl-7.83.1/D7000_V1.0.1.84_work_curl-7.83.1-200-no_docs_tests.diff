@@ -1,6 +1,6 @@
---- work/curl-7.82.0/curl-7.82.0/Makefile.am
-+++ work/curl-7.82.0/curl-7.82.0/Makefile.am
-@@ -156,7 +156,7 @@ CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP)
+--- work/curl-7.83.1/curl-7.83.1/Makefile.am
++++ work/curl-7.83.1/curl-7.83.1/Makefile.am
+@@ -155,7 +155,7 @@ CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP)
  bin_SCRIPTS = curl-config
  
  SUBDIRS = lib src
@@ -9,7 +9,7 @@
  
  pkgconfigdir = $(libdir)/pkgconfig
  pkgconfig_DATA = libcurl.pc
-@@ -270,8 +270,6 @@ cygwinbin:
+@@ -269,8 +269,6 @@ cygwinbin:
  # We extend the standard install with a custom hook:
  install-data-hook:
  	(cd include && $(MAKE) install)
@@ -18,8 +18,8 @@
  
  # We extend the standard uninstall with a custom hook:
  uninstall-hook:
---- work/curl-7.82.0/curl-7.82.0/src/Makefile.am
-+++ work/curl-7.82.0/curl-7.82.0/src/Makefile.am
+--- work/curl-7.83.1/curl-7.83.1/src/Makefile.am
++++ work/curl-7.83.1/curl-7.83.1/src/Makefile.am
 @@ -43,7 +43,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
  
  bin_PROGRAMS = curl
