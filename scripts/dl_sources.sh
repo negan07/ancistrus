@@ -68,14 +68,14 @@ ERR=$?
 	URL="${2}"
 	SRCFILE="${3}"
 	;;
-	*)										#too many params: show usage
+	*)										#no params or too many params: show usage
 	DSTDIR=""
 	ERR=1
 	echo "Usage: $0 <destination_dir> <remote_www_url> <(arch)filename>"
 	;;
 	esac
-	if [ ! -d "${DSTDIR}" ]; then
-	echo "${DSTDIR} not present"
+	if [ $ERR -eq 0 -a ! -d "${DSTDIR}" ]; then
+	echo "\"${DSTDIR}\" not present"
 		if [ ! -f "${SRCFILE}" ]; then						#avoid dir overwritings
 		echo "\"${SRCFILE}\" not present"
 			case $URL in
