@@ -1,7 +1,7 @@
-diff -urN work/openvpn-2.5.6/openvpn-2.5.6/configure.ac work/openvpn-2.5.6/openvpn-2.5.6/configure.ac
---- work/openvpn-2.5.6/openvpn-2.5.6/configure.ac
-+++ work/openvpn-2.5.6/openvpn-2.5.6/configure.ac
-@@ -1071,68 +1071,15 @@
+diff -urN work/openvpn-2.5.7/openvpn-2.5.7/configure.ac work/openvpn-2.5.7/openvpn-2.5.7/configure.ac
+--- work/openvpn-2.5.7/openvpn-2.5.7/configure.ac
++++ work/openvpn-2.5.7/openvpn-2.5.7/configure.ac
+@@ -1105,68 +1105,15 @@
  AC_ARG_VAR([LZ4_CFLAGS], [C compiler flags for lz4])
  AC_ARG_VAR([LZ4_LIBS], [linker flags for lz4])
  if test "$enable_lz4" = "yes" && test "$enable_comp_stub" = "no"; then

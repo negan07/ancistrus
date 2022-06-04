@@ -1,6 +1,6 @@
-diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/options.c work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/options.c
---- work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/options.c
-+++ work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/options.c
+diff -urN work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/options.c work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/options.c
+--- work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/options.c
++++ work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/options.c
 @@ -61,7 +61,7 @@
  #include "ssl_verify.h"
  #include "platform.h"
@@ -10,7 +10,7 @@ diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/options.c work/openvpn-2.
  #include "memdbg.h"
  
  const char title_string[] =
-@@ -4798,6 +484,16 @@
+@@ -4799,6 +485,16 @@
          }
          else
          {
@@ -27,7 +27,7 @@ diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/options.c work/openvpn-2.
              fp = platform_fopen(file, "r");
          }
          if (fp)
-@@ -4808,6 +4818,11 @@
+@@ -4809,6 +4819,11 @@
                  int offset = 0;
                  CLEAR(p);
                  ++line_num;

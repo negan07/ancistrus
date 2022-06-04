@@ -1,6 +1,6 @@
---- work/openvpn-2.5.6/openvpn-2.5.6/configure.ac
-+++ work/openvpn-2.5.6/openvpn-2.5.6/configure.ac
-@@ -1242,7 +1242,7 @@ AC_DEFUN([ACL_CHECK_ADD_COMPILE_FLAGS],
+--- work/openvpn-2.5.7/openvpn-2.5.7/configure.ac
++++ work/openvpn-2.5.7/openvpn-2.5.7/configure.ac
+@@ -1276,7 +1276,7 @@ AC_DEFUN([ACL_CHECK_ADD_COMPILE_FLAGS],
          [AC_MSG_RESULT([no]); CFLAGS="$old_cflags"])]
  )
  
@@ -9,9 +9,9 @@
  ACL_CHECK_ADD_COMPILE_FLAGS([-Wall])
  
  if test "${enable_pedantic}" = "yes"; then
---- work/openvpn-2.5.6/openvpn-2.5.6/configure
-+++ work/openvpn-2.5.6/openvpn-2.5.6/configure
-@@ -17907,31 +17907,6 @@ fi
+--- work/openvpn-2.5.7/openvpn-2.5.7/configure
++++ work/openvpn-2.5.7/openvpn-2.5.7/configure
+@@ -17964,31 +17964,6 @@ fi
  
  
      old_cflags="$CFLAGS"

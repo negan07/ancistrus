@@ -1,7 +1,7 @@
-diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c
---- work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c
-+++ work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c
-@@ -383,6 +383,7 @@
+diff -urN work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/crypto_mbedtls.c work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/crypto_mbedtls.c
+--- work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/crypto_mbedtls.c
++++ work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/crypto_mbedtls.c
+@@ -396,6 +396,7 @@
  key_des_num_cblocks(const mbedtls_cipher_info_t *kt)
  {
      int ret = 0;
@@ -9,7 +9,7 @@ diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c work/ope
      if (kt->type == MBEDTLS_CIPHER_DES_CBC)
      {
          ret = 1;
-@@ -395,6 +395,7 @@
+@@ -408,6 +408,7 @@
      {
          ret = 3;
      }
@@ -17,7 +17,7 @@ diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c work/ope
  
      dmsg(D_CRYPTO_DEBUG, "CRYPTO INFO: n_DES_cblocks=%d", ret);
      return ret;
-@@ -403,6 +405,7 @@
+@@ -416,6 +418,7 @@
  bool
  key_des_check(uint8_t *key, int key_len, int ndc)
  {
@@ -25,7 +25,7 @@ diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c work/ope
      int i;
      struct buffer b;
  
-@@ -431,11 +434,15 @@
+@@ -444,11 +447,15 @@
  
  err:
      return false;
@@ -41,7 +41,7 @@ diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c work/ope
      int i;
      struct buffer b;
  
-@@ -450,6 +457,7 @@
+@@ -463,6 +470,7 @@
          }
          mbedtls_des_key_set_parity(key);
      }
@@ -49,7 +49,7 @@ diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/crypto_mbedtls.c work/ope
  }
  
  /*
-@@ -770,10 +778,12 @@
+@@ -783,10 +791,12 @@
                         unsigned char *src,
                         unsigned char *dst)
  {

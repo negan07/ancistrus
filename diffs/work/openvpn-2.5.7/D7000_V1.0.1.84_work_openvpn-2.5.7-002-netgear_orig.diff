@@ -1,6 +1,6 @@
-diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/forward.c work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/forward.c
---- work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/forward.c	2017-09-26 11:27:35.000000000 +0200
-+++ work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/forward.c	2017-11-28 17:45:53.442033301 +0100
+diff -urN work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/forward.c work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/forward.c
+--- work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/forward.c	2017-09-26 11:27:35.000000000 +0200
++++ work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/forward.c	2017-11-28 17:45:53.442033301 +0100
 @@ -46,10 +46,111 @@
  #include "memdbg.h"
  
@@ -155,9 +155,9 @@ diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/forward.c work/openvpn-2.
              return;
          }
          if (event_timeout_trigger(&c->c2.scheduled_exit, &c->c2.timeval, ETT_DEFAULT))
-diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/init.c work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/init.c
---- work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/init.c	2017-09-26 11:27:37.000000000 +0200
-+++ work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/init.c	2017-11-28 17:33:17.499217703 +0100
+diff -urN work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/init.c work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/init.c
+--- work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/init.c	2017-09-26 11:27:37.000000000 +0200
++++ work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/init.c	2017-11-28 17:33:17.499217703 +0100
 @@ -57,6 +57,8 @@ 
  #include "memdbg.h"
  
@@ -179,9 +179,9 @@ diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/init.c work/openvpn-2.5.6
      if (c->c2.link_socket && c->c2.link_socket_owned)
      {
          link_socket_close(c->c2.link_socket);
-diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/socket.c work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/socket.c
---- work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/socket.c	2017-09-26 11:27:35.000000000 +0200
-+++ work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/socket.c	2017-11-28 17:24:06.732229909 +0100
+diff -urN work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/socket.c work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/socket.c
+--- work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/socket.c	2017-09-26 11:27:35.000000000 +0200
++++ work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/socket.c	2017-11-28 17:24:06.732229909 +0100
 @@ -2926,6 +2926,39 @@
  #ifndef IF_NAMESIZE
  #define IF_NAMESIZE 16
@@ -222,9 +222,9 @@ diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/socket.c work/openvpn-2.5
  
  const char *
  print_link_socket_actual_ex(const struct link_socket_actual *act,
-diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/socket.h work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/socket.h
---- work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/socket.h	2017-09-26 11:27:35.000000000 +0200
-+++ work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/socket.h	2017-11-28 17:07:52.484306253 +0100
+diff -urN work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/socket.h work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/socket.h
+--- work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/socket.h	2017-09-26 11:27:35.000000000 +0200
++++ work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/socket.h	2017-11-28 17:07:52.484306253 +0100
 @@ -392,6 +392,8 @@
  
  const char *print_link_socket_actual(const struct link_socket_actual *act,
@@ -234,9 +234,9 @@ diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/socket.h work/openvpn-2.5
  
  
  #define IA_EMPTY_IF_UNDEF (1<<0)
-diff -urN work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/ssl.c work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/ssl.c
---- work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/ssl.c	2017-09-26 11:27:37.000000000 +0200
-+++ work/openvpn-2.5.6/openvpn-2.5.6/src/openvpn/ssl.c	2017-11-28 17:15:48.900273424 +0100
+diff -urN work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/ssl.c work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/ssl.c
+--- work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/ssl.c	2017-09-26 11:27:37.000000000 +0200
++++ work/openvpn-2.5.7/openvpn-2.5.7/src/openvpn/ssl.c	2017-11-28 17:15:48.900273424 +0100
 @@ -64,6 +64,8 @@
  
  #include "memdbg.h"
