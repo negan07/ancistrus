@@ -1,7 +1,7 @@
 diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontools
 --- work/smartmontools-7.3/rc_smontools	2017-11-03 21:54:56.000000000 +0100
 +++ work/smartmontools-7.3/rc_smontools	2018-04-19 22:48:31.600116512 +0200
-@@ -0,0 +1,154 @@
+@@ -0,0 +1,156 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -38,9 +38,10 @@ diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontool
 +
 +stop() {
 +	# Kill all clients
-+	for PID in `pidof smartd`
++	for PID in `pidof ${DAEMON}`
 +	do
-+	[ -e /proc/${PID}/stat ] && while kill -9 $PID >/dev/null 2>&1; do :; done
++	set -- 10 5 30 5
++	for SIGNAL in 15 9 0 9; do [ -e /proc/${PID}/stat ] && while kill -$SIGNAL $PID >/dev/null 2>&1; do sleep $1; done; shift; done
 +	done
 +}
 +
@@ -48,18 +49,18 @@ diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontool
 +	# Checking if service is enabled
 +	[ "`anc nvram drget smartd_enable 0`" = "1" ] || [ ! -z "$1" ] || return 1
 +
-+	# Checking if the service is already running
-+	[ ! -z "`pidof smartd`" ] && echo "smartd already running..." && return 2
-+
 +	# Checking for /dev/sdX storage presence
-+	[ ! -z "`mount | grep -o /dev/sd`" ] || [ ! -z "`cat /proc/partitions | awk '{print $4}' | grep sd | grep -v sd.[1-15]`" ] || return 3
++	[ ! -z "`cat /proc/mounts | grep /dev/sd`" ] || return 2
 +
-+	# Starting 'smartd'
-+	$SMARTD
++	# Checking if the service is already running
++	[ ! -z "`pidof ${DAEMON}`" ] && echo "$0: ${DAEMON} already running..." && return 3
++
++	# Starting daemon
++	$BIN
 +
 +	# Sanity check
-+	SMARTD_RC=$?
-+	[ $SMARTD_RC -ne 0 ] && echo "$0: Error ${SMARTD_RC} starting ${SMARTD}..." && return $SMARTD_RC
++	BIN_RC=$?
++	[ $BIN_RC -ne 0 ] && echo "$0: Error ${BIN_RC} starting ${BIN}..." && return $BIN_RC
 +}
 +
 +run_hd_idle() {
@@ -121,10 +122,11 @@ diff -urN work/smartmontools-7.3/rc_smontools work/smartmontools-7.3/rc_smontool
 +#BINDIR=/tmp/etc/ancdbg
 +
 +# Names
-+SMARTD=${BINDIR}/smartd
++DAEMON=smartd
++BIN=${BINDIR}/${DAEMON}
 +
 +# Debug running
-+[ "${2}" = "debug" ] && SMARTD="${SMARTD} -c ${BINDIR}/smartd.conf -n -d"
++[ "${2}" = "debug" ] && BIN="${BINDIR}/${DAEMON} -c ${BINDIR}/smartd.conf -n -d"
 +
 +locking
 +case $1 in
