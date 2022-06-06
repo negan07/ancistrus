@@ -124,7 +124,7 @@ function checkData() {
 &nbsp;
 <input class="short_common_bt" type="button" name="show_log" value="Show Log" onClick="AncstdAction(this.form,'anc_run.htm','minidlna.htm','pipe','');">
 &nbsp;
-<input class="short_common_bt" type="button" name="delete_log" value="Delete Log" onClick="AncstdAction(this.form,'minidlna.htm','minidlna.htm','home','/usr/sbin/rc mediaserver clearlog');">
+<input class="short_common_bt" type="button" name="delete_log" value="Delete Log" onClick="AncstdAction(this.form,'minidlna.htm','minidlna.htm','home','/usr/sbin/rc minidlna clearlog');">
 &nbsp;
 <input class="apply_bt" type="SUBMIT" name="apply" value="Apply/Regen" onClick="return checkData()">
 </td></tr></table>
@@ -209,10 +209,10 @@ function checkData() {
 <tr><td colspan="2" background="liteblue.gif" height="12"></td></tr>
 </table>
 <input type="hidden" name="job" value="save">
-<input type="hidden" name="todo" value="/usr/sbin/rc mediaserver start">
+<input type="hidden" name="todo" value="/usr/sbin/rc minidlna start">
 <input type="hidden" name="next_file" value="minidlna.htm">
 <input type="hidden" name="old_file" value="">
-<input type="hidden" name="pipe_cmd" value="/usr/sbin/rc_app/rc_mediaserver showlog">
+<input type="hidden" name="pipe_cmd" value="/usr/sbin/rc_app/rc_minidlna showlog">
 <input type="hidden" name="add" value="">
 <input type="hidden" name="del" value="reclist_media_server_paths">
 <input type="hidden" name="clear" value="reclist_media_server_paths">

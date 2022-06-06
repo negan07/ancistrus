@@ -1,7 +1,6 @@
-diff -urN work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/rc_snmp work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/rc_mediaserver
---- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/rc_mediaserver	1970-01-01 01:00:00.000000000 +0100
-+++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/rc_mediaserver	2018-01-05 12:00:11.000000000 +0100
-@@ -0,0 +1,170 @@
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/rc_minidlna
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/rc_minidlna
+@@ -0,0 +1,166 @@
 +#!/bin/sh
 +#
 +# ancistrus
@@ -13,13 +12,10 @@ diff -urN work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/rc_snmp wor
 +# License: GPLv2
 +#
 +#
-+# Rc script for mediaserver (minidlna daemon).
++# Rc script for minidlna daemon.
 +#
-+# Usage: $0 < start restart event startforced restartforced startorig stop dbregen dbclear dbpurge showlog clearlog * > (<debug>)
++# Usage: $0 < mount remount kmount init reconfig start restart dbregen startforced restartforced umount kumount stop info dbclear dbpurge showlog clearlog > (<debug>)
 +#
-+# 'startorig' startup service through orig 'rc_apps' cmd.
-+# 'event' is for hotplug storage devices mount/umount/reconfig events.
-+# '*' is for original 'rc_apps' service parameters usage if needed.
 +# <debug> runs daemon in foreground mode with pedantic debug messages.
 +#
 +
@@ -54,7 +50,7 @@ diff -urN work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/rc_snmp wor
 +
 +	# Checking for /dev/sdX storage presence
 +	[ ! -z "`cat /proc/mounts | grep /dev/sd`" ] || return 2
-+
++	
 +	# Checking if the service is already running
 +	[ ! -z "`pidof ${DAEMON}`" ] && echo "${DAEMON} already running..." && return 3
 +
@@ -139,7 +135,7 @@ diff -urN work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/rc_snmp wor
 +
 +locking
 +case $1 in
-+start|restart|dbregen|event)
++mount|remount|kmount|init|reconfig|start|restart|dbregen)
 +stop
 +start
 +;;
@@ -147,11 +143,10 @@ diff -urN work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/rc_snmp wor
 +stop
 +start $1
 +;;
-+startorig)
-+anc redir `basename $0` restart
-+;;
-+stop)
++umount|kumount|stop)
 +stop
++;;
++info)
 +;;
 +dbclear)
 +db_clear
@@ -166,9 +161,9 @@ diff -urN work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/rc_snmp wor
 +clear_log
 +;;
 +"")
-+echo "Usage: $0 < start restart event startforced restartforced startorig stop dbregen dbclear dbpurge showlog clearlog * > (<debug>)"
++echo "Usage: $0 < mount remount kmount init reconfig start restart dbregen startforced restartforced umount kumount stop info dbclear dbpurge showlog clearlog > (<debug>)"
 +;;
 +*)
-+anc redir `basename $0` "$@"
++stop
 +;;
 +esac
