@@ -1,6 +1,5 @@
-diff -urN work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_cmd.c work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_cmd.c
---- work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_cmd.c	2016-12-22 18:38:14.000000000 +0100
-+++ work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_cmd.c	2017-03-24 22:57:03.946704785 +0100
+--- work/opkg-0.6.0/opkg-0.6.0/libopkg/opkg_cmd.c
++++ work/opkg-0.6.0/opkg-0.6.0/libopkg/opkg_cmd.c
 @@ -369,7 +331,7 @@
      for (i = 0; i < ordered->len; i++) {
          pkg = ordered->pkgs[i];
@@ -76,9 +75,8 @@ diff -urN work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_cmd.c work/opkg-0.5.0/opkg-0.5
                  found_match = 1;
                  print_pkg(pkg);
              }
-diff -urN work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_conf.c work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_conf.c
---- work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_conf.c	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_conf.c	2018-03-19 23:02:24.135480676 +0100
+--- work/opkg-0.6.0/opkg-0.6.0/libopkg/opkg_conf.c
++++ work/opkg-0.6.0/opkg-0.6.0/libopkg/opkg_conf.c
 @@ -75,6 +75,7 @@
      {"download_only", OPKG_OPT_TYPE_BOOL, &_conf.download_only},
      {"download_first", OPKG_OPT_TYPE_BOOL, &_conf.download_first}, /* Not available on internal solver */
@@ -87,9 +85,8 @@ diff -urN work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_conf.c work/opkg-0.5.0/opkg-0.
      {"no_install_recommends", OPKG_OPT_TYPE_BOOL, &_conf.no_install_recommends},
      {"offline_root", OPKG_OPT_TYPE_STRING, &_conf.offline_root},
      {"overlay_root", OPKG_OPT_TYPE_STRING, &_conf.overlay_root},
-diff -urN work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_conf.h work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_conf.h
---- work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_conf.h	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_conf.h	2018-03-19 23:03:50.142966116 +0100
+--- work/opkg-0.6.0/opkg-0.6.0/libopkg/opkg_conf.h
++++ work/opkg-0.6.0/opkg-0.6.0/libopkg/opkg_conf.h
 @@ -22,6 +22,7 @@
  #define OPKG_CONF_H
  
@@ -106,9 +103,8 @@ diff -urN work/opkg-0.5.0/opkg-0.5.0/libopkg/opkg_conf.h work/opkg-0.5.0/opkg-0.
      int no_install_recommends;
      char *offline_root;
      char *overlay_root;
-diff -urN work/opkg-0.5.0/opkg-0.5.0/src/opkg.c work/opkg-0.5.0/opkg-0.5.0/src/opkg.c
---- work/opkg-0.5.0/opkg-0.5.0/src/opkg.c	2018-02-19 18:08:43.000000000 +0100
-+++ work/opkg-0.5.0/opkg-0.5.0/src/opkg.c	2018-03-19 23:07:10.981458627 +0100
+--- work/opkg-0.6.0/opkg-0.6.0/src/opkg.c
++++ work/opkg-0.6.0/opkg-0.6.0/src/opkg.c
 @@ -57,6 +57,7 @@
      ARGS_OPT_NOACTION,
      ARGS_OPT_DOWNLOAD_ONLY,
