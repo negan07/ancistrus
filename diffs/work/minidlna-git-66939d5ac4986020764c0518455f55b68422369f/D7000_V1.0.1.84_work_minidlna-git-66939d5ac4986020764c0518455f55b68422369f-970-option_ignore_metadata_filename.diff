@@ -29,7 +29,7 @@
  strict_dlna=no
  
 +# extract video filenames only from file's metadata
-+#only_file_names=no
++#only_filenames=yes
 +
  # default presentation url is http address on port 80
  #presentation_url=http://www.mylan/index.php
@@ -40,7 +40,7 @@
  which may hurt JPEG serving performance on (at least) Sony DLNA products.
  .fi
  
-+.IP "\fBonly_file_names\fP"
++.IP "\fBonly_filenames\fP"
 +Set to 'yes' to only consider file's filename when naming it in database.
 +By default, if file has a name in metadata, it's used instead of filename.
 +

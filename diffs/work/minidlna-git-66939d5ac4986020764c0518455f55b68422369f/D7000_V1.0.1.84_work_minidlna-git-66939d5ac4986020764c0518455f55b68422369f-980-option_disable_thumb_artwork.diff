@@ -108,3 +108,14 @@
  	sql_exec(db, "INSERT into OBJECTS"
  	             " (OBJECT_ID, PARENT_ID, DETAIL_ID, CLASS, NAME) "
  	             "VALUES"
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnpsoap.c
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/upnpsoap.c
+@@ -1203,6 +1203,8 @@
+ 				}
+ 			}
+ 		}
++		if( *mime == 'v' && GETFLAG(THUMBS_ART_MASK) )
++			album_art = 0;
+ 		if( NON_ZERO(album_art) )
+ 		{
+ 			/* Video and audio album art is handled differently */

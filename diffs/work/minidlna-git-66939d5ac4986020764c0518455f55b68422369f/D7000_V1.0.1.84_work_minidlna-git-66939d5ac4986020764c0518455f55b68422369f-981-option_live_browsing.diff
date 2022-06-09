@@ -11,6 +11,18 @@
  		case ENABLE_SUBTITLES:
  			if (!strtobool(ary_options[i].value))
  				CLEARFLAG(SUBTITLES_MASK);
+--- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.conf
++++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.conf
+@@ -45,6 +45,9 @@
+ # enable sending thumbnails
+ #thumbnails=yes
+ 
++# enable live browsing
++#live_browsing=yes
++
+ # set this to yes to enable support for streaming .jpg and .mp3 files to a TiVo supporting HMO
+ enable_tivo=no
+ 
 --- work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.conf.5
 +++ work/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna-git-66939d5ac4986020764c0518455f55b68422369f/minidlna.conf.5
 @@ -130,6 +130,12 @@
@@ -210,7 +222,7 @@
  #define FORCE_ALPHASORT_MASK  0x0800
  #define NO_EXTRACT_NAMES_MASK 0x1000
  #define THUMBS_ART_MASK       0x2000
-+#define LIVE_BROWSING_MASK    0x3000
++#define LIVE_BROWSING_MASK    0x4000
 
  #define SETFLAG(mask)	runtime_flags |= mask
  #define GETFLAG(mask)	(runtime_flags & mask)
@@ -259,7 +271,7 @@
  
  	/* Make sure we have at least 8KB left of allocated memory to finish the response. */
  	if( str->off > (str->size - 8192) )
-@@ -1341,6 +1355,7 @@
+@@ -1343,6 +1357,7 @@
  	char *sql, *ptr;
  	struct Response args;
  	struct string_s str;
@@ -267,7 +279,7 @@
  	int totalMatches = 0;
  	int ret;
  	const char *ObjectID, *BrowseFlag;
-@@ -1356,6 +1371,7 @@
+@@ -1358,6 +1373,7 @@
  
  	memset(&args, 0, sizeof(args));
  	memset(&str, 0, sizeof(str));
@@ -275,7 +287,7 @@
  
  	ParseNameValue(h->req_buf + h->req_contentoff, h->req_contentlen, &data, 0);
  
-@@ -1405,11 +1421,22 @@
+@@ -1407,11 +1423,22 @@
  		ret = strcatf(&str, SEC_NAMESPACE);
  	strcatf(&str, "&gt;\n");
  
@@ -298,7 +310,7 @@
  	DPRINTF(E_DEBUG, L_HTTP, "Browsing ContentDirectory:\n"
  	                         " * ObjectID: %s\n"
  	                         " * Count: %d\n"
-@@ -1435,7 +1462,7 @@
+@@ -1437,7 +1464,7 @@
  				refid_sql = magic->refid_sql;
  		}
  		sql = sqlite3_mprintf("SELECT %s, %s, %s, " COLUMNS
@@ -307,7 +319,7 @@
  				      " where OBJECT_ID = '%q';",
  				      objectid_sql, parentid_sql, refid_sql, id);
  		ret = sqlite3_exec(db, sql, callback, (void *) &args, &zErrMsg);
-@@ -1551,8 +1578,14 @@
+@@ -1553,8 +1580,14 @@
  	                    args.returned, totalMatches, updateID);
  	BuildSendAndCloseSoapResp(h, str.data, str.off);
  browse_error:
